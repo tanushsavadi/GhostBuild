@@ -1,0 +1,26 @@
+[project]
+name = "ghostbuild"
+version = "0.1.0"
+description = "GhostBuild — core, contracts, perception, knowledge and adapters (integrations/* are separate uv projects)"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    "pydantic>=2",
+    "fastapi",
+    "uvicorn[standard]",
+    "websockets",
+    "pyyaml",
+    "orjson",
+    "numpy",
+]
+
+[dependency-groups]
+dev = ["pytest"]
+perception = ["opencv-contrib-python==4.14.0.94", "mediapipe"]
+knowledge = ["pymupdf", "anthropic"]
+
+[tool.uv]
+package = false
+default-groups = ["dev"]
+
+[tool.pytest.ini_options]
+pythonpath = [".", "core", "perception"]
