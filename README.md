@@ -1,5 +1,7 @@
 # GhostBuild
 
+> **Pivot (Sat 2026-10-17):** GhostBuild is now a closed-loop repair copilot — the device tests itself, G2 shows one check only when a test fails, and the measured fix clears it. **[`docs/PIVOT_GHOSTBUILD.md`](docs/PIVOT_GHOSTBUILD.md) is the only execution authority**; everything below describes the previous plan and is being rewritten.
+
 An AI copilot for physical work: it reads the manual and the CAD, watches the real object, and shows one verified next action on Even G2 — going dark when the work matches the target.
 
 **Team:** read [`START_HERE.md`](START_HERE.md), then [`docs/20_FINAL_IMPLEMENTATION_BIBLE.md`](docs/20_FINAL_IMPLEMENTATION_BIBLE.md) and [`docs/21_HACKATHON_CHECKLIST.md`](docs/21_HACKATHON_CHECKLIST.md). Contracts: [`docs/05_CONTRACTS.md`](docs/05_CONTRACTS.md).

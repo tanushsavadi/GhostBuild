@@ -1,13 +1,13 @@
 # GhostBuild — project rules
-24 h hackathon. Live-demo reliability > features. Read docs/20_FINAL_IMPLEMENTATION_BIBLE.md, docs/15_SONNET_HANDOFF.md, docs/05_CONTRACTS.md, then only your vertical's doc.
-- Scope: only P0/P1 items in docs/03_MVP_SCOPE.md; P2 only after its gate; never build CUT items.
-- Physical state is committed only by the P0 grid path (rocket) or adapters/spatial_pose (rover). No AI model commits state. Unknown state never yields a confident physical instruction.
-- core/ and contracts/ are domain-agnostic: no LEGO terms (make lint-generic).
-- Contracts: one lock Sat 12:45; shared-schema changes need D + every consuming owner; none after Sun 00:45. Run `make contracts`.
-- One HUD writer: core/hud_arbiter.py. Answers are pure functions of an immutable snapshot. A G2 tap is a recheck, never a commit.
-- Spatial: separate process, flag-guarded core additions, rocket snapshots byte-identical; never .resetTracking/.removeExistingAnchors after the first run.
-- Sponsor code lives only in integrations/; never import it; never touch core/contracts/perception/g2/spatial from there.
-- Honesty: label sources (TRACKED, MEASURED LIVE, CAD, TARGET, DETERMINISTIC, AI-EXTRACTED, AUTHORED DEMO METADATA, MANUAL EVIDENCE + origin, LAST SEEN, MANUAL OVERRIDE).
+24 h hackathon. Live-demo reliability > features. **docs/PIVOT_GHOSTBUILD.md is the only execution authority**; docs/00–21 are historical (read them only for G2 platform notes, never for scope).
+- Product: closed-loop repair copilot. Device tests → deterministic engine → one G2 cue → the physical fix clears it.
+- Scope: only what PIVOT §5 builds; follow its cut order when behind; never build PIVOT §11 items (3D/CAD, spatial, LEGO, perception, voice, sponsor integrations, runtime LLM on the cue path).
+- Only core/ghostbuild_core/hud.py writes HUD frames. No model output reaches G2 except through the reviewed Repair Card. A G2 press is a recheck, never a commit.
+- Never show VERIFIED without the measured end-stop; never phrase a cue as a diagnosis (use CHECK …); unknown state never yields a confident physical instruction.
+- core/ and contracts/ are device-agnostic (make lint-generic); device facts live in knowledge/cards/ and firmware/.
+- Contracts: D owns; lock Sat 17:00; later shared-schema changes need D + every consuming owner. Run `make contracts`.
+- Label sources: MEASURED LIVE, COMMANDED, DETERMINISTIC, MANUFACTURER DOC, AUTHORED PROJECT SPEC, AI-EXTRACTED · HUMAN-REVIEWED, AUTHORED DEMO METADATA, REPLAY, SIMULATED. Never demo replay/simulated data as live.
+- Pins live in hardware/WIRING.md; a pin change updates WIRING.md, the card and web/assets/wiring.svg together.
 - Even G2: verify every SDK call via the everything-evenhub skills + hub.evenrealities.com/docs (SDK 0.0.16). No API keys in g2/.
-- Claude API: official `anthropic` SDK + the claude-api skill; claude-opus-5-5; structured outputs, not forced tool_choice.
-- `make test` before merging; every feature behind its flag. P0 freeze 02:00; product feature freeze 04:00.
+- Claude API: official `anthropic` SDK + the claude-api skill; claude-opus-5-5; structured outputs, not forced tool_choice; build time only (knowledge/).
+- `make test` before merging; every feature behind its flag. P0 freeze Sun 02:00; product feature freeze 04:00.

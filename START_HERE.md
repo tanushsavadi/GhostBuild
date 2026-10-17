@@ -1,5 +1,7 @@
 # GhostBuild — START HERE
 
+> **Pivot (Sat 2026-10-17): read [`docs/PIVOT_GHOSTBUILD.md`](docs/PIVOT_GHOSTBUILD.md) first — it supersedes everything below.** The docs listed here are historical.
+
 ## Read these first
 
 Do NOT read all of the historical planning docs.
