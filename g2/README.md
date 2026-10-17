@@ -14,33 +14,79 @@ Before writing any SDK call, check it with the `everything-evenhub` skills (`sdk
 
 `app.json` sets `min_app_version` to `2.2.10`, the floor the CLI stamps for SDK 0.0.16.
 
-## Setup (once)
+## How to run
 
-Needs Node ≥ 20.
+You need Node ≥ 20 and git. Real glasses also need a phone with the **Even Realities app**, paired to the G2.
+
+### 1. Install (once per clone)
 
 ```bash
+git clone https://github.com/tanushsavadi/GhostBuild.git
+cd GhostBuild
+git checkout template          # until this branch is merged into main
 cd g2
 npm install
 ```
 
-If `npm run simulate` says `evenhub-simulator` is not recognised (we saw this on Windows), run:
+If `npm run simulate` later says `evenhub-simulator` is not recognised (we saw this on Windows), run:
 
 ```bash
 npm rebuild @evenrealities/evenhub-simulator
 ```
 
-## Run
+### 2. Start the dev server (terminal 1)
 
-| Goal | Command (from `g2/`) |
+```bash
+npm run dev
+```
+
+Leave it running. It serves the plugin on port 5173 to `localhost` and to your LAN, and reloads on every save. On Windows, if a firewall prompt appears, allow Node.js on **private** networks. Otherwise the phone can't reach it.
+
+### 3a. Run in the simulator (terminal 2)
+
+```bash
+npm run simulate
+```
+
+A window opens showing the 576×288 glasses display with `Hello from G2!`. Click the touchpad area to send a tap ("Taps: 1"). Double-tap to exit. Edits to `src/` reload automatically.
+
+### 3b. Run on real glasses (terminal 2)
+
+1. Put the laptop and the phone on the **same Wi-Fi** (or put the laptop on the phone's hotspot).
+2. With the dev server still running:
+   ```bash
+   npx evenhub qr
+   ```
+   The CLI detects your IP and prints a QR code in the terminal. If it picks the wrong network adapter (VPN, WSL, Ethernet), pass the address yourself:
+   ```bash
+   npx evenhub qr --url http://<laptop-wifi-ip>:5173
+   ```
+   To find the Wi-Fi IP, run `ipconfig` on Windows (the "Wireless LAN adapter Wi-Fi" IPv4 address) or `ipconfig getifaddr en0` on macOS. Add `--clear` if it keeps reusing an old address.
+3. Scan the QR code with the Even Realities app. The plugin opens on the glasses with hot reload.
+4. Keep the phone's screen on while testing (turn auto-lock off).
+
+### 4. Stop
+
+`Ctrl+C` in each terminal. Double-tapping on the glasses only exits the plugin.
+
+### Troubleshooting
+
+| Symptom | Fix |
 |---|---|
-| Dev server on port 5173 (LAN-visible) | `npm run dev` |
-| Desktop simulator (dev server must be running) | `npm run simulate` |
+| Simulator window is blank | The dev server isn't running. Start step 2 first. |
+| Phone scans the QR, but nothing loads | Different networks, a firewall block, or the wrong IP. On the phone, open `http://<laptop-wifi-ip>:5173` in a browser; if that fails, the problem is the network, not the plugin. |
+| `evenhub-simulator` not recognised | `npm rebuild @evenrealities/evenhub-simulator` |
+| Port 5173 is busy | Stop the other Vite server. The QR and the simulator both expect 5173. |
+
+### Other commands (from `g2/`)
+
+| Goal | Command |
+|---|---|
 | Simulator with the automation API | `npx evenhub-simulator http://localhost:5173 --automation-port 9898` |
-| Real glasses via QR | `npx evenhub qr --url http://<laptop-wifi-ip>:5173`, then scan in the Even app |
 | Type-check | `npx tsc --noEmit` |
 | Build and package `.ehpk` | `npm run pack` (or `make g2-pack` from the repo root) |
 
-To get the laptop's Wi-Fi IP, use `ipconfig` on Windows or `ipconfig getifaddr en0` on macOS. The phone and laptop must be on the same network. `make g2-qr` currently works only on macOS because it uses `ipconfig getifaddr`.
+`make g2-qr` currently works only on macOS because it uses `ipconfig getifaddr`. Use `npx evenhub qr` instead.
 
 ### Simulator automation (handy for tests and screenshots)
 
