@@ -7,8 +7,8 @@ export PYTHONPATH := $(CURDIR):$(CURDIR)/core:$(CURDIR)/perception
 PY := uv run python
 need = @test -e $(1) || { echo "not yet: $(1) missing (owner $(2))"; exit 1; }
 
-.PHONY: help doctor setup contracts test lint-generic lint-arkit check-secrets health \
-        core core-mock perception spatial-adapter compile compile-proof twin \
+.PHONY: help doctor setup contracts test lint-generic check-secrets health \
+        core core-mock perception compile compile-proof twin \
         g2-dev g2-sim g2-qr g2-pack demo sentry-bridge fetch-agent
 
 help:
@@ -40,13 +40,8 @@ lint-generic:      ## no domain terms in core source or the contract source (05 
 	  || { echo "lint-generic: domain terms found above"; exit 1; }
 	@echo "lint-generic: ok"
 
-lint-arkit:        ## .resetTracking/.removeExistingAnchors only on lines marked `// first-run` (18 v3 §5)
-	@! grep -rnE '\.resetTracking|\.removeExistingAnchors' --include='*.swift' spatial 2>/dev/null | grep -v 'first-run' \
-	  || { echo "lint-arkit: reset outside the first-run path"; exit 1; }
-	@echo "lint-arkit: ok"
-
-test: contracts lint-generic lint-arkit check-secrets
-	@for t in contracts/tests core/tests perception/tests knowledge/tests adapters/lego_grid/tests adapters/spatial_pose/tests; do \
+test: contracts lint-generic check-secrets
+	@for t in contracts/tests core/tests perception/tests knowledge/tests adapters/lego_grid/tests; do \
 	  [ -d $$t ] && { echo "== pytest $$t"; $(PY) -m pytest -q $$t || exit 1; } || true; done
 	@for d in g2 twin; do [ -f $$d/package.json ] && { echo "== $$d"; (cd $$d && npx tsc --noEmit && npx vitest run --passWithNoTests) || exit 1; } || true; done
 
@@ -62,10 +57,6 @@ core-mock:         ## core :8787 on scripted observations
 perception:        ## webcam -> core (HANDS=--hands to enable hand veto)
 	$(call need,perception/ghostbuild_perception,C)
 	$(PY) -m ghostbuild_perception --camera 0 --core 'ws://localhost:8787/ws?role=vision' $(HANDS)
-
-spatial-adapter:   ## :8790/pose -> core (only with core --spatial)
-	$(call need,adapters/spatial_pose,C)
-	$(PY) -m adapters.spatial_pose --listen :8790 --core 'ws://localhost:8787/ws?role=vision'
 
 compile:           ## build-time manual/CAD compiler (TASK=rocket|rover); D wires ARGS to compile.py's real flags
 	$(call need,knowledge/compile.py,D)

@@ -8,7 +8,7 @@ An AI copilot for physical work: it reads the manual and the CAD, watches the re
 
 ## Developer quick start
 
-Prerequisites: `uv` (Python 3.11 is pinned in `pyproject.toml`), Node ≥ 20, git. Lane extras: A — Xcode 27 + iOS 27 device; B — `npm i -g @evenrealities/evenhub-cli @evenrealities/evenhub-simulator`; trainer Mac — `xcrun createml`.
+Prerequisites: `uv` (Python 3.11 is pinned in `pyproject.toml`), Node ≥ 20, git. Lane extras: B — `npm i -g @evenrealities/evenhub-cli @evenrealities/evenhub-simulator` and a phone with the Even app; C — Arduino IDE or `arduino-cli`. No iOS app or Xcode is part of this project.
 
 | Question | Command | Green means |
 |---|---|---|
@@ -26,9 +26,9 @@ Secrets: copy `.env.example` to `.env` (gitignored) only for the keys your lane 
 ### Contract lock (D, Sat 12:45)
 `make contracts` runs `contracts/tools/lock_check.py` (export JSON Schema from `contracts/models.py`, validate every `contracts/examples/*.json`) and then `contracts/ts` (generate `index.ts`, validate the same examples with ajv, typecheck). It is red until all of these exist:
 - `contracts/models.py` defining `SCHEMAS = {name: Model}` and `FIXTURES = {"<filename glob>": name}`;
-- `contracts/examples/`: `observation_*.json`, `plan_*.json`, `hud_*.json`, `twin_v1.json`, `pose_observation.json`, `twin_v2.json`, `control_goal.json`, `bundle_rover_excerpt.json`, `spatial_transforms.json`.
+- `contracts/examples/`: `observation_*.json`, `hud_*.json`, `g2_input_*.json`, `state_*.json`, `card_barrier.json` (docs/PIVOT_GHOSTBUILD.md §5.3).
 
-Commit the generated `contracts/schema/` and `contracts/ts/index.ts`: A (Swift), B (TS) and the integrations read them without running Python.
+Commit the generated `contracts/schema/` and `contracts/ts/index.ts`: B (G2 plugin) and A (phone page) read them without running Python.
 
 ## Service map
 
@@ -36,20 +36,18 @@ Commit the generated `contracts/schema/` and `contracts/ts/index.ts`: A (Swift),
 |---|---|---|---|---|---|---|
 | core | D | Mac 1 | `:8787` HTTP + `ws?role=vision\|g2\|twin`, `/control/*`, `/knowledge/*`, `/twin` | observation, g2_input → hud, twin, `logs/session-*.jsonl` | — | `curl http://<mac1>:8787/health` |
 | perception | C | Mac 1 | client of `ws://localhost:8787/ws?role=vision` | webcam → observation (`source: cv`) | — | `/health` `vision_fps` > 0 |
-| spatial adapter (P1, `--spatial`) | C | Mac 1 | `ws://<mac1>:8790/pose` | pose_observation → observation (`source: spatial`) | — | `nc -z <mac1> 8790`; `/health` `spatial_connected` |
-| spatial app (P1) | A | spatial iPhone (iOS 27) | client of `:8790/pose` and `ws?role=twin` | ARKit → pose_observation; twin v2 → RealityKit | — | adapter sees samples; `spatial_connected` |
-| G2 plugin | B | B's laptop (dev) → Even app on iPhone 1 → G2 | Vite `:5173`; client of `ws://<mac1>:8787/ws?role=g2` or Funnel `wss://<laptop>.<tailnet>.ts.net` | hud → display; menu/tap → g2_input | — | `/health` `g2_connected`; `make g2-sim` |
+| G2 plugin | B | B's laptop (dev) → Even app on the phone → G2 | Vite `:5173`; client of `ws://<mac1>:8787/ws?role=g2` or Funnel `wss://<laptop>.<tailnet>.ts.net` | hud → display; menu/tap → g2_input | — | `/health` `g2_connected`; `make g2-sim` |
 | 2D supervisor | B | served by core, shown on Mac 2 | `http://<mac1>:8787/twin?mode=2d` | twin → page | — | `/health` `twin_clients` |
 | knowledge compiler | D | any Mac, build time only | — | PDF + LDraw → committed `knowledge/<task>/bundle.json` | `ANTHROPIC_API_KEY` | `make compile` exits 0 |
 | Sentry bridge (optional) | Devin → B | Mac 1, `nice 19` | — (reads logs) | `logs/session-*.jsonl` → Sentry Tracing + Logs | `SENTRY_DSN` | `--dry-run` prints spans; trace visible in Sentry |
 | Fetch agent (optional) | Devin → B | B's laptop | — (Agentverse mailbox) | ASI:One ↔ core `GET /health`, `/knowledge`, one-shot `ws?role=twin`; ARMED-only `POST /control/task\|reset\|goal` | `GB_CORE_URL` (required), `GB_AGENT_ARMED=0`, `AGENT_SEED`, `SENTRY_DSN` (opt.) | starts without exiting; answers in ASI:One |
 
-`make health` probes core, `:8790` and `:5173` (set `CORE=http://<mac1>:8787 SPATIAL=<mac1> G2=<b-laptop>` from another machine).
+`make health` probes core and `:5173` (set `CORE=http://<mac1>:8787 G2=<b-laptop>` from another machine).
 
 ## Git workflow
 
 - `main` is the integration branch and must always run P0 (`make test` green before merging).
-- Short-lived branches per owner/task, merged within hours: `a/spatial`, `b/g2`, `c/perception`, `d/core`, `devin/sentry`, `devin/fetch`. Rebase on `main` before merging; small PRs.
+- Short-lived branches per owner/task, merged within hours: `a/web`, `b/g2`, `c/firmware`, `d/core`. Rebase on `main` before merging; small PRs.
 - **Ownership = merge rights:** `contracts/` — only D merges (after 12:45, a shared-schema change also needs every consuming owner's OK in team chat; none after Sun 00:45). `integrations/*` — B lands Devin PRs; the diff must touch only its own directory.
 - **Merge hotspots:** `contracts/` (D only) · `Makefile` (add your lane's target in its own small commit) · `pyproject.toml` / `uv.lock` (one dependency change at a time; after a rebase run `uv lock`, never hand-merge the lockfile) · `README.md`, `CLAUDE.md` (A or D) · `docs/` (frozen; B edits only `docs/sentry_findings.md`) · `scenarios/`, `knowledge/fixtures/` (D).
 - Freezes: P0 freeze Sun 02:00 (nothing merges into the P0 path), product feature freeze 04:00 (bugs and rehearsal only; the isolated Fetch exception is the only feature work).

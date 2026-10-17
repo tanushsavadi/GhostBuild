@@ -267,7 +267,7 @@ No CAD, no image understanding. A draws one SVG of the real wiring (`web/assets/
 
 **What exists:** docs only, plus reusable bootstrap: `Makefile` (targets `core`, `g2-dev/sim/qr/pack`, `test`, `contracts`, `check-secrets`), `scripts/doctor.sh|health.sh|check_secrets.sh`, the `contracts/` lock tooling (Python lock check plus TS generator/ajv checker), and `pyproject.toml` (fastapi, uvicorn, websockets, pydantic; groups `knowledge` = pymupdf + anthropic). **No product code exists yet**, so nothing has to be thrown away except plans.
 
-**Superseded:** docs 00–21 (historical), `integrations/*` (sponsors cut: delete), the perception dependency group (opencv, mediapipe: remove), Makefile targets `perception, spatial-adapter, compile-proof, twin, sentry-bridge, fetch-agent, lint-arkit`, `lock_check.py` REQUIRED lists, README and START_HERE content, and **CLAUDE.md rules about the rocket grid, spatial and sponsors**. Every teammate's agent obeys CLAUDE.md, so it was updated with this pivot (§12).
+**Superseded:** docs 00–21 (historical), `integrations/*` (sponsors cut: delete), the perception dependency group (opencv, mediapipe: remove), Makefile targets `perception, compile-proof, twin, sentry-bridge, fetch-agent` (the iOS/spatial targets and `lock_check.py` REQUIRED lists are already updated), README and START_HERE content, and **CLAUDE.md rules about the rocket grid, spatial and sponsors**. Every teammate's agent obeys CLAUDE.md, so it was updated with this pivot (§12).
 
 **Missing:** `pyserial` dependency, `core/ghostbuild_core/*`, `contracts/models.py` + examples, `g2/` plugin, `firmware/`, `hardware/WIRING.md`, `knowledge/`, `web/`.
 
@@ -335,7 +335,7 @@ Sat 16:45 stub · 17:00 contract lock + transport gate · 18:00 hardware streami
 - [ ] Content scope: general low-voltage maker repair (not medical, financial or emergency)
 
 ## 11. Things we will NOT build
-3D/CAD, RealityKit/ARKit/spatial, LEGO anything, webcam perception, MediaPipe, Create ML, digital twin, minimap/images on G2, voice/LISTEN/mic, always-on chatbot, runtime LLM on the cue path, phone camera checks, OCR of the breadboard, generic manual search/RAG, multi-device fleet UI, progress bars or step counters on G2, Sentry/Fetch/any sponsor integration, a second hardware demo before the first is rock-solid, user accounts.
+any iOS/Xcode/Swift app of our own (the phone side is only the Even app running our plugin, plus the `/phone` web page), 3D/CAD, RealityKit/ARKit/spatial, LEGO anything, webcam perception, MediaPipe, Create ML, digital twin, minimap/images on G2, voice/LISTEN/mic, always-on chatbot, runtime LLM on the cue path, phone camera checks, OCR of the breadboard, generic manual search/RAG, multi-device fleet UI, progress bars or step counters on G2, Sentry/Fetch/any sponsor integration, a second hardware demo before the first is rock-solid, user accounts.
 
 ## 12. CLAUDE.md
 Applied Sat 2026-10-17: `CLAUDE.md` now carries the pivot rules (single HUD writer, no VERIFIED without the end-stop, CHECK-phrasing, device-agnostic core, contract lock 17:00, source labels, pins in `hardware/WIRING.md`). README and START_HERE point here.

@@ -18,25 +18,23 @@ Open older docs only when your implementation task needs additional detail.
 Most useful references:
 
 - `docs/05_CONTRACTS.md` — shared schemas, messages, endpoints and fixtures
-- `docs/18_SPATIAL_TWIN_PASS_V3.md` — spatial implementation details
 - `docs/19_SPONSOR_AND_TRACK_STRATEGY.md` — Even / Sentry / Fetch implementation details
 
 ## Source-of-truth priority
 
 1. `20_FINAL_IMPLEMENTATION_BIBLE.md`
 2. `21_HACKATHON_CHECKLIST.md` for clocks and gates
-3. `18_SPATIAL_TWIN_PASS_V3.md` for Spatial
-4. `19_SPONSOR_AND_TRACK_STRATEGY.md` for sponsor work
-5. `05_CONTRACTS.md` for shared interfaces
-6. Older docs for supporting detail only
+3. `19_SPONSOR_AND_TRACK_STRATEGY.md` for sponsor work
+4. `05_CONTRACTS.md` for shared interfaces
+5. Older docs for supporting detail only
 
 ## Owners
 
-A — Spatial app, rover, motor tracking/training, captain/demo/video
+A — Phone web page, wiring diagram, captain/demo/video
 
-B — G2/plugin/network/Beta, 2D supervisor, landing Sentry + Fetch
+B — G2/plugin/network/Beta
 
-C — P0 perception + rocket testbed; Spatial adapter only after the 20:00 P0 gate
+C — Hardware rig, Arduino firmware, telemetry
 
 D — Contracts, core, world/diff/planner, knowledge/answers, integration authority, gate decisions
 

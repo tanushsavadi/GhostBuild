@@ -6,7 +6,7 @@ This file only checks; it defines no schema. contracts/models.py (D) must expose
     SCHEMAS:  dict[str, type[BaseModel]]   # schema name -> model, exported to contracts/schema/<name>.json
     FIXTURES: dict[str, str]               # fnmatch pattern over example filenames -> SCHEMAS key
 
-Exit 0 only if models.py imports, every lock fixture (05 §14, 18 v3 §4.1 item 8) exists,
+Exit 0 only if models.py imports, every lock fixture (docs/PIVOT_GHOSTBUILD.md §5.3) exists,
 every example maps to exactly one schema, and every example validates.
 """
 
@@ -22,23 +22,16 @@ CONTRACTS = ROOT / "contracts"
 EXAMPLES = CONTRACTS / "examples"
 SCHEMA_DIR = CONTRACTS / "schema"
 
-# 05 §14. Exact files, plus globs that must match at least one file.
-REQUIRED_FILES = [
-    "pose_observation.json",
-    "twin_v2.json",
-    "control_goal.json",
-    "bundle_rover_excerpt.json",
-    "spatial_transforms.json",
-    "twin_v1.json",
-]
-REQUIRED_GLOBS = ["observation_*.json", "plan_*.json", "hud_*.json"]
+# docs/PIVOT_GHOSTBUILD.md §5.3. Exact files, plus globs that must match at least one file.
+REQUIRED_FILES = ["card_barrier.json"]
+REQUIRED_GLOBS = ["observation_*.json", "hud_*.json", "g2_input_*.json", "state_*.json"]
 
 
 def main() -> int:
     problems: list[str] = []
 
     if not (CONTRACTS / "models.py").exists():
-        print("RED  contracts/models.py does not exist (D authors it 12:00-12:45 per docs/05_CONTRACTS.md)")
+        print("RED  contracts/models.py does not exist (D authors it by the Sat 17:00 lock per docs/PIVOT_GHOSTBUILD.md §5.3)")
         return 1
 
     sys.path.insert(0, str(ROOT))

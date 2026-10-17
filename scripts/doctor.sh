@@ -12,8 +12,6 @@ chk npm            "npm --version"                 all
 chk ".venv synced" "uv run --frozen python -c 'import pydantic, fastapi; print(\"pydantic\", pydantic.VERSION)'" all
 chk "contracts/ts deps" "test -d contracts/ts/node_modules && echo installed" all
 echo "== lane tools (only your lane needs its line)"
-chk "xcodebuild (A)"        "xcodebuild -version"                 "A: Xcode 27"
-chk "createml (trainer)"    "xcrun createml objecttracker -h"     "trainer Mac"
 chk "evenhub (B)"           "evenhub --version"                   "B: npm i -g @evenrealities/evenhub-cli"
 chk "evenhub-simulator (B)" "command -v evenhub-simulator"        "B: npm i -g @evenrealities/evenhub-simulator"
 chk "tailscale (B/D)"       "tailscale version"                   "Funnel rung of the G2 ladder"

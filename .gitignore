@@ -31,17 +31,6 @@ node_modules/
 .vite/
 *.tsbuildinfo
 
-# --- xcode / swift (spatial/) ---
-DerivedData/
-xcuserdata/
-*.xcuserstate
-*.xcscmblueprint
-.build/
-.swiftpm/
-*.ipa
-*.dSYM.zip
-*.dSYM/
-
 # --- runtime output ---
 logs/
 *.log
@@ -52,9 +41,7 @@ recordings/
 *.wav
 eval/runs/
 
-# --- training / large temporary outputs (Create ML job dirs, exports) ---
-# The final motor .referenceobject is NOT ignored: the spatial app bundles it.
-training/
+# --- large temporary outputs ---
 tmp/
 
 # --- local tooling / OS ---
