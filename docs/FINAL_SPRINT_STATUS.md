@@ -7,11 +7,11 @@ Updated October 18, 2026. Submission deadline: noon PDT; target Devpost completi
 - Integration: `codex/final-sprint`, `.worktrees/final-sprint`. Correction implementation: `e816740` plus subsequent release-label/documentation commits.
 - Existing sprint history and authorship are preserved. The unrelated Open Palm/ASL branch and voice PR #2 are not broadly merged.
 - Operator backend `:8787` reloaded at 06:57 and 07:09 PDT from the corrected checkout, preserving `logs/bench-0632` and a timestamped backup. Health returned HTTP 200. Its existing optional provider configuration was retained.
-- GitHub publication/CI/merge: in progress; verify the remote PR and `main` before treating this record as a completed merge.
+- GitHub publication: [PR #3](https://github.com/tanushsavadi/GhostBuild/pull/3) merged to `main` as merge commit `29316b7` (2026-10-18 07:49 PDT). CI passed on the PR head `d7c1f7f` ([run 39137515696](https://github.com/tanushsavadi/GhostBuild/actions/runs/39137515696)) and on `main` ([run 39137702045](https://github.com/tanushsavadi/GhostBuild/actions/runs/39137702045)); both uploaded the `ghostbuild-g2` package artifact (50,636 bytes zipped).
 
 ## Fresh verification
 
-`make test` on the combined integration checkout: **1,161 Python tests** (core 688, Pi 77, knowledge 267, assets 41, IKEA 88), **32 phone tests**, **208 G2 tests**. Nine schemas and 22 examples in each language validate; TypeScript, generic lint and secret-pattern checks pass. Knowledge emits six existing PyMuPDF/Pillow deprecation warnings. The final combined run includes the three review-label regressions and two ready-guide/discovery switch regressions.
+`make test` on the merged release (local macOS and GitHub Ubuntu): **1,169 Python tests** (core 695, Pi 77, knowledge 268, assets 41, IKEA 88), **32 phone tests**, **208 G2 tests**. Nine schemas and 22 examples in each language validate; TypeScript, generic lint and secret-pattern checks pass. Knowledge emits six existing PyMuPDF/Pillow deprecation warnings. The final combined run includes the three review-label regressions and two ready-guide/discovery switch regressions.
 
 | Scope | Result and evidence |
 |---|---|
@@ -21,6 +21,7 @@ Updated October 18, 2026. Submission deadline: noon PDT; target Devpost completi
 | Live IKEA retrieval | Correction to MALM removed MICKE; official listings/photos and manual links retrieved. Selecting a listing offers its manual, with no invented prepared guide. |
 | Live Prusa compilation | MK4-to-MK3S+ correction removed old guide and compiled 13 steps from two official Prusa pages. Wall time 111.63 s in one bounded run; not a latency guarantee. AI-compiled, not human-reviewed. [Live correction record](evidence/framework/release-live-corrections.json). |
 | Physical G2 | **Operator-reported PASS** for this voice-disabled build: readable cue/image, press/swipes, answer return, reconnect. Detailed record still pending; not an independent automated device test. Mic/head-shake/Pi telemetry not established by this report. |
+| Intake convergence fix | Operator voice session 07:19–07:24 PDT: "fix my car's flat tire" ran 13 turns and ended at "call roadside assistance" with model and location known. Fixed in `90dc43f` with regression tests (repeat detection, confirmation release, strict research handoff, identity-keyed prefetch, skipped unreadable sources, goal length). Bounded live check, isolated runtime, Anthropic only: the same conversation researched after 3 turns and compiled a guide from toyota.com in 38.5 s. That page is a manual index, so the guide points to the owner's manual rather than inventing jacking steps. The same operator log shows 17 ElevenLabs STT transcripts after G2 hold gestures; the log does not establish which microphone captured them. |
 | Provider history | Earlier sprint notes report real CREAO artifact normalization and ElevenLabs synthetic-audio STT/TTS. Not re-run during this release. Live correction tests here used Anthropic, not CREAO. Fresh bounded ElevenLabs checks: TTS HTTP 200, valid 3.019 s MP3 in 1.391 s; STT provider startup failed after 5.013 s, without a transcript. Guidance/progress recovered unchanged. [Voice evidence](evidence/release/elevenlabs-live.json). [Earlier status record](https://github.com/tanushsavadi/GhostBuild/blob/65ce651/docs/FINAL_SPRINT_STATUS.md). |
 
 ## Packages and security
@@ -38,7 +39,7 @@ PASS means the stated scope was exercised; it does not silently imply physical o
 | Required check | Status | Evidence / limit |
 |---|---|---|
 | Git work and contributions preserved | PASS | Existing history retained; isolated lanes cherry-picked; unrelated branches untouched. |
-| No unexpected dirty changes | NOT RUN | Final documentation commit/remote verification pending. Root checkout's pre-existing untracked agent configuration is preserved. |
+| No unexpected dirty changes | PASS | Release worktree clean after merge; a separate clean worktree of `main` matches the release head's file tree. Root checkout's pre-existing untracked agent configuration is preserved. |
 | Coherent architecture and generic BUILD/FIX | PASS | One card/action-graph runtime, single HUD writer; contracts and generic lint pass. |
 | Existing onboarding | PASS | Single WHAT DO YOU NEED prompt/catalog; cached requests and manual tasks work. Obsolete BUILD/FIX toggle is not restored. |
 | IKEA identity/manual guidance | PASS | Cached browser flow, matching MICKE orientation and step diagrams. Human wording spot-check remains required before physical assembly instructions. |
@@ -50,13 +51,13 @@ PASS means the stated scope was exercised; it does not silently imply physical o
 | Phone polish/usability | PASS | Fresh desktop/mobile, context/label/caption fixes, 390 px no overflow. |
 | G2 build/package | PASS | Portable and LAN archives above. |
 | Physical G2 status honest | PASS | Operator-reported checks distinguished from independent verification; details pending. |
-| Tests/lint | PASS | Counts and scope above; remote CI still pending. |
+| Tests/lint | PASS | Counts and scope above; GitHub Ubuntu CI passed on the PR and on `main`. |
 | Secret/security checks | PASS | Secret-pattern/Python/production npm checks pass. Full dev audit remains FAIL and disclosed above. |
 | README/docs/setup | PASS | Real captures, exact commands, linked setup/architecture; locked bootstrap exercised. |
 | Demo script | PASS | Five-minute IKEA + Mac walkthrough with cached text fallback; physical/manual review preflight remains. |
 | Submission copy / sponsor evidence | PASS | All four official tracks and seventeen challenge entries assessed; claims bounded. |
-| Integration branch pushed | NOT RUN | Initial HTTPS push timed out; retry/remote confirmation in progress. |
-| Main merged and remote verified | NOT RUN | Await remote branch publication and CI. No branch-protection bypass authorized or used. |
+| Integration branch pushed | PASS | `codex/final-sprint` pushed and confirmed with `git ls-remote`. |
+| Main merged and remote verified | PASS | PR #3 merge commit `29316b7` on `main`; main CI green. No protection bypass or force push. |
 | Release-blocking defects concealed | PASS | Hardware scope, human content review, missing publication assets and dev advisories explicitly recorded. |
 | Even Beta / video / Devpost | NOT RUN | Package built; official Even Hub portal is signed out in the available browser, so Beta upload requires account sign-in. No video URL or submission receipt established. |
 
