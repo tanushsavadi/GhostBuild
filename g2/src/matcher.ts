@@ -31,21 +31,21 @@ interface Sign {
 const letters = deck.letters as Record<string, { handshape: string | null; how: string }>
 const skip = new Set(deck.skip)
 
-// word -> [gloss, handshape, hands line, motion line, vimeo id]
-type LexRow = [string, string | null, string, string, string]
+// word -> [gloss, handshape, line 1, line 2, vimeo id, 1 = hand-written lines (tools/howto.json)]
+type LexRow = [string, string | null, string, string, string, number]
 const lexicon = asllex as unknown as Record<string, LexRow>
 
 // Hand-written deck first, then ASL-LEX; the first sign registered for a word wins.
 const byWord = new Map<string, Sign>()
 for (const sign of deck.signs as Sign[]) for (const w of sign.words) byWord.set(w, sign)
-for (const [word, [gloss, handshape, hands, motion, vimeo]] of Object.entries(lexicon)) {
+for (const [word, [gloss, handshape, hands, motion, vimeo, handWritten]] of Object.entries(lexicon)) {
   if (byWord.has(word)) continue
   byWord.set(word, {
     gloss,
     words: [word],
     handshape: handshape ?? '',
     how: [hands, motion],
-    status: 'AUTO',
+    status: handWritten ? 'UNCHECKED' : 'AUTO',
     video: vimeo ? `https://player.vimeo.com/video/${vimeo}` : undefined,
   })
 }

@@ -25,6 +25,7 @@ SOURCE_URL = "https://asl-lex.org/visualization/data/sign_props.json"
 ROOT = Path(__file__).resolve().parent.parent
 CACHE = ROOT / "tmp" / "asllex_sign_props.json"
 OUT = ROOT / "g2" / "src" / "asllex.json"
+HOWTO = ROOT / "tools" / "howto.json"
 
 HANDSHAPE = {
     "1": "Index finger up", "3": "Thumb, index, middle out", "4": "4 fingers up, thumb in",
@@ -72,7 +73,8 @@ MOVEMENT = {
 # Common English words whose usual ASL sign is filed under another entry.
 ALIASES = {
     "i": "me", "he": "this/it", "she": "this/it", "it": "this/it", "this": "this/it", "that": "this/it",
-    "goodbye": "bye", "okay": "fine_1", "ok": "fine_1", "food": "eat_1",
+    "goodbye": "bye", "okay": "fine_2", "ok": "fine_2", "food": "eat_1",
+    "mom": "mother", "dad": "father",
 }
 
 
@@ -102,6 +104,8 @@ def motion_line(e: dict) -> str:
         what = "change handshape" if e.get("FlexionChange.2.0") else "hold"
     else:
         what = MOVEMENT.get(move, "move")
+        if e.get("FlexionChange.2.0"):
+            what += ", fingers bend"
     second = e.get("SecondMinorLocation.2.0") or ""
     if second.endswith("Away") and move != "None":
         what += " away"
@@ -131,12 +135,26 @@ def main() -> None:
     for word, entry_id in ALIASES.items():
         best[word] = by_id[entry_id]
 
+    howto = {k: v for k, v in json.loads(HOWTO.read_text(encoding="utf-8")).items() if not k.startswith("_")}
+    for word, lines in howto.items():
+        if word not in best:
+            raise SystemExit(f"howto.json: '{word}' is not an ASL-LEX word")
+        if len(lines) != 2 or any(len(line) > 36 for line in lines):
+            raise SystemExit(f"howto.json: '{word}' needs 2 lines of at most 36 characters")
+
+    # Lines belong to the sign, so every word mapped to it (I -> ME, food -> EAT) gets them.
+    howto_by_entry = {best[w]["EntryID"]: lines for w, lines in howto.items()}
+
     out = {}
     for word, e in sorted(best.items()):
         # "this/it" is the pointing sign used for he, she, it, this and that.
         gloss = "POINT" if "/" in e["EntryID"] else re.sub(r"_\d+$", "", e["EntryID"]).replace("_", "-").upper()
         video = (e.get("VimeoVideo") or "").rsplit("/", 1)[-1]
-        out[word] = [gloss, e.get("Handshape.2.0"), hands_line(e), motion_line(e), video]
+        # Last field: 1 = hand-written lines from howto.json, 0 = template lines.
+        if e["EntryID"] in howto_by_entry:
+            out[word] = [gloss, e.get("Handshape.2.0"), *howto_by_entry[e["EntryID"]], video, 1]
+        else:
+            out[word] = [gloss, e.get("Handshape.2.0"), hands_line(e), motion_line(e), video, 0]
 
     OUT.write_text(json.dumps(out, separators=(",", ":")), encoding="utf-8")
     print(f"wrote {len(out)} words to {OUT.relative_to(ROOT)} ({OUT.stat().st_size // 1024} KB)")

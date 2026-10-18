@@ -1,0 +1,335 @@
+{
+  "_about": "Hand-written how-to lines (AI-drafted by Claude from each sign's ASL-LEX 2.0 coding) for common signs. tools/build_deck.py puts these on the cards instead of the template lines; the handshape image and video still come from ASL-LEX. Shown as UNCHECKED until compared with the video. Keep each line to 36 characters or fewer.",
+  "me": [
+    "Index finger",
+    "Point to your own chest"
+  ],
+  "want": [
+    "Both hands open, palms up",
+    "Pull in, curling the fingers"
+  ],
+  "need": [
+    "Index hooked, palm down",
+    "Bend wrist down twice"
+  ],
+  "like": [
+    "Middle finger + thumb on chest",
+    "Pull out, pinching them shut"
+  ],
+  "have": [
+    "Both hands bent flat",
+    "Fingertips touch your chest"
+  ],
+  "go": [
+    "Both index fingers up",
+    "Arc them forward, away"
+  ],
+  "come": [
+    "Flat hand, palm up, out front",
+    "Curl it back toward you"
+  ],
+  "eat": [
+    "Fingertips together on thumb",
+    "Tap them on your mouth twice"
+  ],
+  "drink": [
+    "C hand, like holding a cup",
+    "Tip it toward your mouth"
+  ],
+  "water": [
+    "W hand: 3 fingers up",
+    "Tap index side on chin twice"
+  ],
+  "bathroom": [
+    "T hand: thumb between fingers",
+    "Shake it side to side"
+  ],
+  "where": [
+    "Index up, palm out",
+    "Wag it side to side"
+  ],
+  "what": [
+    "Both hands open, palms up",
+    "Shake slightly side to side"
+  ],
+  "who": [
+    "L hand, thumb on chin",
+    "Wiggle the index finger"
+  ],
+  "when": [
+    "Both index fingers, one on top",
+    "Circle top one, land on tip"
+  ],
+  "why": [
+    "Fingertips on forehead",
+    "Pull away into a Y hand"
+  ],
+  "how": [
+    "Both bent hands, backs touching",
+    "Roll up and over, palms up"
+  ],
+  "good": [
+    "Flat hand, fingertips at chin",
+    "Move forward and down"
+  ],
+  "bad": [
+    "Flat hand, fingertips at chin",
+    "Flip down, palm facing down"
+  ],
+  "happy": [
+    "Flat hand on chest",
+    "Brush upward in circles"
+  ],
+  "sad": [
+    "Both open hands before face",
+    "Drag them down your face"
+  ],
+  "love": [
+    "Both fists crossed",
+    "Hug them to your chest"
+  ],
+  "friend": [
+    "Both index fingers hooked",
+    "Hook together, then swap"
+  ],
+  "family": [
+    "Both F hands, thumbs touch",
+    "Circle out until pinkies meet"
+  ],
+  "mother": [
+    "Open hand, thumb on chin",
+    "Tap thumb on chin twice"
+  ],
+  "father": [
+    "Open hand, thumb on forehead",
+    "Tap thumb on forehead twice"
+  ],
+  "work": [
+    "Both fists, palms down",
+    "Tap wrist on back of other x2"
+  ],
+  "school": [
+    "Both flat hands",
+    "Clap top palm on bottom twice"
+  ],
+  "home": [
+    "Fingertips together on thumb",
+    "Touch mouth, then cheek"
+  ],
+  "learn": [
+    "Fingers on other flat palm",
+    "Lift to forehead, closing them"
+  ],
+  "understand": [
+    "Fist by your forehead",
+    "Flick the index finger up"
+  ],
+  "know": [
+    "Flat hand, fingertips",
+    "Tap side of your forehead"
+  ],
+  "think": [
+    "Index finger",
+    "Touch side of your forehead"
+  ],
+  "feel": [
+    "Middle finger bent, on chest",
+    "Brush upward"
+  ],
+  "sign": [
+    "Both index fingers out",
+    "Circle alternately, toward you"
+  ],
+  "deaf": [
+    "Index finger",
+    "Touch near ear, then chin"
+  ],
+  "hearing": [
+    "Index finger by your mouth",
+    "Roll it forward in circles"
+  ],
+  "bye": [
+    "Open hand, palm out",
+    "Fold fingers down, like a wave"
+  ],
+  "fine": [
+    "Open hand, thumb on chest",
+    "Tap thumb on chest"
+  ],
+  "sick": [
+    "Both middle fingers bent",
+    "One on forehead, one on belly"
+  ],
+  "hurt": [
+    "Both index fingers point in",
+    "Jab the tips toward each other"
+  ],
+  "car": [
+    "Both fists, like on a wheel",
+    "Steer up and down"
+  ],
+  "coffee": [
+    "Two fists stacked",
+    "Grind the top one in circles"
+  ],
+  "more": [
+    "Both hands, fingertips on thumb",
+    "Tap fingertips together twice"
+  ],
+  "finish": [
+    "Both open hands, palms in",
+    "Flip them out, palms away"
+  ],
+  "again": [
+    "Flat palm up; other hand bent",
+    "Arc over, tips land on palm"
+  ],
+  "slow": [
+    "Flat hand on back of other",
+    "Slide slowly up to the wrist"
+  ],
+  "time": [
+    "Index finger hooked",
+    "Tap back of other wrist"
+  ],
+  "day": [
+    "Index up, elbow on other hand",
+    "Arc arm down across body"
+  ],
+  "night": [
+    "Bent hand over other wrist",
+    "Tap downward"
+  ],
+  "tomorrow": [
+    "Thumb up (A hand) at cheek",
+    "Arc forward, away"
+  ],
+  "today": [
+    "Both Y hands, palms up",
+    "Drop down slightly twice"
+  ],
+  "now": [
+    "Both Y hands, palms up",
+    "Drop down slightly once"
+  ],
+  "later": [
+    "L hand, palm out",
+    "Tip the index finger forward"
+  ],
+  "wait": [
+    "Both hands open, palms up",
+    "Wiggle the fingers"
+  ],
+  "stop": [
+    "Flat palm up; other flat hand",
+    "Chop edge down onto palm"
+  ],
+  "sit": [
+    "2 fingers bent over other 2",
+    "Rest them on top"
+  ],
+  "same": [
+    "Y hand, palm down",
+    "Move side to side"
+  ],
+  "different": [
+    "Both index fingers crossed",
+    "Pull them apart, outward"
+  ],
+  "big": [
+    "Both bent L hands, facing",
+    "Move them apart"
+  ],
+  "small": [
+    "Both flat hands, facing",
+    "Bring them close together"
+  ],
+  "hot": [
+    "Claw hand at mouth",
+    "Twist away and down"
+  ],
+  "cold": [
+    "Both fists by your chest",
+    "Shiver them"
+  ],
+  "right": [
+    "Both index fingers, side out",
+    "Tap top hand on bottom hand"
+  ],
+  "wrong": [
+    "Y hand",
+    "Tap middle fingers on chin"
+  ],
+  "hungry": [
+    "C hand on upper chest",
+    "Slide down to stomach"
+  ],
+  "tired": [
+    "Both bent hands on chest",
+    "Droop them downward"
+  ],
+  "sleep": [
+    "Open hand in front of face",
+    "Pull down, closing fingers"
+  ],
+  "can": [
+    "Both fists, palms down",
+    "Move down firmly together"
+  ],
+  "not": [
+    "Thumb under chin (A hand)",
+    "Flick forward, away"
+  ],
+  "welcome": [
+    "Flat hand out to the side",
+    "Sweep in toward your waist"
+  ],
+  "live": [
+    "Both A hands, thumbs up",
+    "Slide up your chest"
+  ],
+  "buy": [
+    "Fingertips on thumb, on palm",
+    "Lift forward and off"
+  ],
+  "money": [
+    "Hand out, thumb on fingertips",
+    "Rub thumb across fingers"
+  ],
+  "call": [
+    "Y hand by cheek, like a phone",
+    "Arc out, away from face"
+  ],
+  "text": [
+    "Both fists, thumbs up",
+    "Tap thumbs like texting"
+  ],
+  "write": [
+    "Pinch fingers like a pen",
+    "Write across other palm"
+  ],
+  "read": [
+    "V hand over other flat palm",
+    "Move down, like reading"
+  ],
+  "book": [
+    "Both flat hands, palms together",
+    "Open them like a book"
+  ],
+  "doctor": [
+    "D hand",
+    "Tap inside of other wrist"
+  ],
+  "hospital": [
+    "H hand on upper arm",
+    "Draw a small cross"
+  ],
+  "sign language": [
+    "Both index fingers out",
+    "Circle alternately, toward you"
+  ],
+  "down": [
+    "Index finger",
+    "Point downward"
+  ]
+}
