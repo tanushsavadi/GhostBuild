@@ -64,8 +64,8 @@
             }
           ],
           "action": {
-            "line1": "CHECK CAMERA LENS",
-            "line2": ""
+            "line1": "CAMERA VIEW LOST",
+            "line2": "CHECK CAMERA LENS"
           },
           "why": "Dark and flat frames mean little light reaches the sensor. A lens cover or paper flap is the first thing to check. Placeholder threshold, calibrate on the Pi spike.",
           "cites": [],
