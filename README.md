@@ -101,6 +101,14 @@ New-NetFirewallRule -DisplayName "Open Palm dev 5173" -Direction Inbound -Protoc
 
 Test it by opening `http://<laptop-ip>:5173` in the phone's browser first.
 
+**If the phone needs https, or can't reach the laptop** (venue Wi-Fi often blocks devices from talking to each other), use a free Cloudflare tunnel instead. No account, no firewall rule. Download `cloudflared-windows-amd64.exe` from [Cloudflare's releases](https://github.com/cloudflare/cloudflared/releases/latest) (saved here as `tmp/bin/cloudflared.exe`, git-ignored), then, with `npm run dev` running:
+
+```bash
+tmp/bin/cloudflared.exe tunnel --no-autoupdate --url http://localhost:5173
+```
+
+It prints an address like `https://some-words.trycloudflare.com`; use that in `npx evenhub qr --url <address>`. The address changes every time the tunnel starts, and anyone who has it can use the app (and its speech credit) while it runs, so don't post it publicly.
+
 **Useful URLs**
 
 | URL | Does |
