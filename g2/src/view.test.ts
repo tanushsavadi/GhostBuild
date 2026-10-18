@@ -125,9 +125,9 @@ describe('playbook step frames', () => {
   })
   it('the fixture frame (index 1 of 3) reads 2/3 with its simulated source tag', () => {
     const v = frameToView(example('hud_step'), O) as { tag: string }
-    expect(v.tag).toBe('2/3  SIMULATED  ASK ANYTIME')
+    expect(v.tag).toBe('2/3  SIMULATED  ▼ DONE ▲ BACK')
   })
-  it('the ask hint can be hidden without removing counter or evidence labels', () => {
+  it('the gesture hint can be hidden without removing counter or evidence labels', () => {
     const v = frameToView(example('hud_step'), { ...O, askHint: false }) as {tag: string}
     expect(v.tag).toBe('2/3  SIMULATED')
   })
@@ -151,13 +151,24 @@ describe('playbook step frames', () => {
     expect(v.tag).toContain('● 12/12 OK')
   })
   it('visual frame opened from a step: picture + caption + step counter and picture index', () => {
-    const f = { ...example('hud_visual'), step: { index: 2, count: 8, step_id: 'x', check: 'manual' as const, confirmed: false } }
+    const f = { ...example('hud_visual'), cue_id: 'card/x#where', step: { index: 2, count: 8, step_id: 'x', check: 'manual' as const, confirmed: false } }
     const v = frameToView(f, O)
     expect(v.kind).toBe('image')
     if (v.kind !== 'image') return
     expect(v.text).toContain('WHERE: CAMERA LENS')
-    expect(v.tag).toBe('3/8  PIC 1/3  ASK ANYTIME')
-    expect(v.fallback.tag).toBe('3/8  ASK ANYTIME')
+    expect(v.tag).toBe('3/8  PIC 1/3  ▲ BACK')
+    expect(v.fallback.tag).toBe('3/8  ▲ BACK')
+  })
+  it('gesture hints: measured steps only go back; a confirmed step goes next; menus move and select', () => {
+    expect((frameToView(step({ index: 2, count: 8, check: 'measured' }), O) as { tag: string }).tag).toContain('▲ BACK')
+    expect((frameToView(step({ index: 2, count: 8, check: 'measured' }), O) as { tag: string }).tag).not.toContain('DONE')
+    expect((frameToView(step({ index: 2, count: 8, confirmed: true }), O) as { tag: string }).tag).toContain('▼ NEXT ▲ BACK')
+    expect((frameToView(example('hud_menu'), O) as { tag: string }).tag).toContain('▲▼ MOVE ● SELECT')
+    expect((frameToView(example('hud_menu'), { ...O, glyphTier: 'ascii' }) as { tag: string }).tag).toContain('^v MOVE * SELECT')
+  })
+  it("a step's own default picture keeps the step gestures", () => {
+    const f = { ...example('hud_visual'), cue_id: 'card/x', step: { index: 0, count: 35, step_id: 'x', check: 'manual' as const, confirmed: false } }
+    expect((frameToView(f, O) as { tag: string }).tag).toContain('▼ DONE ▲ BACK')
   })
   it('visual frame without a step keeps the plain picture index', () => {
     expect((frameToView(example('hud_visual'), O) as { tag: string }).tag).toBe('1/3')

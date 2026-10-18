@@ -725,7 +725,8 @@ class PlaybookEngine:
                 return Screen.step_screen(view.fallback, self._step_ref(), cue_id=cue_id, immediate=True)
             nxt = g.views[idx + 1].view.upper() if idx + 1 < len(g.views) else None
             cue = Cue(line1=f"{view.title}: {g.title}".upper()[:24], line2=(f"PRESS FOR {nxt}" if nxt else "PRESS TO GO BACK")[:26])
-            return Screen.visual(cue, ref, cue_id=cue_id, step=self._step_ref())
+            # "#view": a picture opened from the step (swipe up returns to it), not the step's own default picture
+            return Screen.visual(cue, ref, cue_id=f"{cue_id}#{view.view}", step=self._step_ref())
         automatic = self._default_view(g) if g is not None else None
         if automatic is not None:
             ref=self._image_ref(g,automatic,g.views[automatic])

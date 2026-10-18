@@ -243,6 +243,8 @@ class Runtime:
         elif self.playbook is not None and self.sessions.flash_showing() and self.sessions.active is not None and self.sessions.active.phase == "task":
             self.sessions.dismiss_flash()  # the task-start cue hides the first step: a gesture only reveals it, never acts on it
             self.playbook.reveal()
+        elif gi.gesture == "swipe_up" and self._back_from_route_start():
+            pass
         elif self.discovery is not None and self.discovery.handle_input(gi):
             pass
         elif not self.sessions.handle_input(gi):
@@ -252,6 +254,22 @@ class Runtime:
                 self.engine.handle_input(gi)
         self.hud.sync()
         return self.hud.current
+
+    def _back_from_route_start(self) -> bool:
+        """Swipe up on a guide's first step (nothing earlier on its route): back to where it was opened from, the
+        product photo if a product search opened it, else the task list."""
+        pb, sess = self.playbook, self.sessions.active
+        if pb is None or sess is None or sess.phase != "task" or pb.done or pb.index != 0 or pb.path:
+            return False
+        if pb.view_idx is not None or pb.answer_data is not None or (pb.step.kind == "question" and pb.choice_idx > 0):
+            return False
+        card_id = pb.card.card_id
+        pb.detach()
+        self.playbook, self._pb_sid = None, None
+        self.sessions.return_to_menu()
+        if self.discovery is not None:
+            self.discovery.back_from_guide(sess.id, card_id)
+        return True
 
     def go_home(self) -> None:
         """Leave whatever is open (step, picture, answer, interview, product search) for the task list; the next request

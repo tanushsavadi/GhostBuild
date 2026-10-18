@@ -74,6 +74,21 @@ export function stepCounter(frame: HudFrame, opts: ViewOptions): string {
   return sanitizeLine(parts.join(' '), opts.glyphTier)
 }
 
+/**
+ * Mini gesture hint for the dim tag line, from the official glyph table (▲ ▼ ●; the ascii tier maps them to ^ v *).
+ * One rule everywhere: ▼ forward, ▲ back, ● select (double press: home). Only screens whose gestures are generic:
+ * menus, playbook steps (also when a step shows its own picture) and pictures opened from a step (core marks their
+ * cue_id with "#view"). Other screens name their own gestures in the cue.
+ */
+export function gestureHint(frame: HudFrame, counter: string, opts: ViewOptions): string {
+  if (opts.askHint === false || import.meta.env.VITE_FLAG_HELP_HINT === '0') return ''
+  let hint = ''
+  if (frame.mode === 'menu') hint = '▲▼ MOVE ● SELECT'
+  else if (counter && frame.mode === 'visual' && (frame.cue_id ?? '').includes('#')) hint = '▲ BACK' // opened picture
+  else if (counter) hint = frame.step?.check === 'measured' ? '▲ BACK' : frame.step?.confirmed ? '▼ NEXT ▲ BACK' : '▼ DONE ▲ BACK'
+  return hint ? sanitizeLine(hint, opts.glyphTier) : ''
+}
+
 function menuLines(frame: HudFrame, opts: ViewOptions): string[] | null {
   const m = frame.menu
   const options = m?.options as string[] | undefined
@@ -81,9 +96,6 @@ function menuLines(frame: HudFrame, opts: ViewOptions): string[] | null {
   const sel = Math.min(Math.max(0, m.selected ?? 0), options.length - 1)
   const rows = options.map((o, i) => `${i === sel ? '> ' : '  '}${sanitizeLine(String(o), opts.glyphTier)}`)
   const lines = [sanitizeLine(m.prompt ?? '', opts.glyphTier), ...rows]
-  // Hint line only when it still fits the container (prompt + 2 options + hint = 4 lines).
-  const hint = sanitizeLine(frame.cue?.line2 ?? '', opts.glyphTier)
-  if (hint && options.length <= 2) lines.push(hint)
   return centerBlock(lines.filter((l) => l.trim().length > 0), opts.centerCols)
 }
 
@@ -115,7 +127,7 @@ export function frameToView(frame: HudFrame, opts: ViewOptions = DEFAULT_VIEW_OP
 
   if (frame.mode === 'menu') {
     const lines = menuLines(frame, opts)
-    if (lines && lines.length) return textView(lines, joinTag(tag))
+    if (lines && lines.length) return textView(lines, joinTag(tag, gestureHint(frame, '', opts)))
     // fall through to the cue fallback
   }
 
@@ -128,7 +140,7 @@ export function frameToView(frame: HudFrame, opts: ViewOptions = DEFAULT_VIEW_OP
 
   let lines = cueLines(frame, opts)
   if (lines.length === 0) lines = [centerLine('NO CUE TEXT', opts.centerCols)]
-  const hint = counter && opts.askHint !== false && import.meta.env.VITE_FLAG_HELP_HINT !== '0' ? 'ASK ANYTIME' : ''
+  const hint = gestureHint(frame, counter, opts)
   const fallback = textView(lines, joinTag(counter, tag, hint))
 
   if (frame.mode === 'visual' && frame.image) {
