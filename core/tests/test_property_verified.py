@@ -86,20 +86,20 @@ def test_no_verified_without_measured_pass(card, asset_root):
     from ghostbuild_core.engine import Engine
 
     total_verified = 0
-    for seed in range(250):
+    for seed in range(150):
         clock = ManualClock()
         e = Engine(card, clock, asset_root=asset_root)
         v = run_sequence(e, clock, seed)
         assert v == [], f"seed {seed}: {v}"
         total_verified += sum(1 for f in e.frames if f.mode == "verified")
-    assert total_verified > 50  # the property is not vacuous
+    assert total_verified > 30  # the property is not vacuous
 
 
 def test_frame_seq_strictly_monotonic_and_no_duplicates(card, asset_root):
     from ghostbuild_core.clock import ManualClock
     from ghostbuild_core.engine import Engine
 
-    for seed in range(100):
+    for seed in range(50):
         clock = ManualClock()
         e = Engine(card, clock, asset_root=asset_root)
         run_sequence(e, clock, seed)

@@ -58,7 +58,7 @@ def resolve(req: GoalRequest, cards: list[Card]) -> GoalResolution:
     chosen: list[Card] = []
     text = (req.text or "").strip()
     if not text:
-        chosen = pool if len(pool) <= 1 else pool
+        chosen = pool  # exactly one => supported, several => ambiguous, none => unsupported
     else:
         scored = [(c, _score(c, text)) for c in pool]
         best = max((s for _, s in scored), default=0)

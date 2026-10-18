@@ -55,7 +55,7 @@ def _records(lines: Iterable[str]) -> list[tuple[int, str, object]]:
     return fixed
 
 
-def replay(source: Union[str, Path, Iterable[str]], card: Card, *, asset_root: Path | str | None = None, tail_ms: int = 6000) -> list[HudFrame]:
+def replay(source: Union[str, Path, Iterable[str]], card: Card, *, asset_root: Path | str | None = None, tail_ms: int = 4000) -> list[HudFrame]:
     if isinstance(source, (str, Path)):
         lines: Iterable[str] = Path(source).read_text().splitlines()
     else:
@@ -91,10 +91,19 @@ def _fmt(f: HudFrame) -> str:
 def main(argv: Optional[list[str]] = None) -> int:
     ap = argparse.ArgumentParser(prog="python -m ghostbuild_core.replay")
     ap.add_argument("log", help="session JSONL recorded by core (or raw observation lines)")
-    ap.add_argument("--card", default="contracts/examples/card_camera_lens.json")
+    ap.add_argument("--card", default=None, help="card JSON (default: first valid card in knowledge/cards, else the contract example)")
     ap.add_argument("--root", default=".", help="repo root for guide images")
     args = ap.parse_args(argv)
-    card = Card.model_validate_json(Path(args.card).read_text())
+    if args.card:
+        card = Card.model_validate_json(Path(args.card).read_text())
+    else:
+        from .cards import load_cards
+
+        found = load_cards(Path(args.root) / "knowledge" / "cards") or load_cards(Path(args.root) / "contracts" / "examples")
+        if not found:
+            print("no Repair Card found; pass --card", file=sys.stderr)
+            return 2
+        card = found[0]
     frames = replay(args.log, card, asset_root=args.root)
     print(f"REPLAY (not live) {args.log}: {len(frames)} frame(s)")
     for f in frames:
