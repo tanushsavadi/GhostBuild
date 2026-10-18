@@ -1,73 +1,28 @@
 # GhostBuild — START HERE
 
-> **Pivot (Sat 2026-10-17): read [`docs/PIVOT_GHOSTBUILD.md`](docs/PIVOT_GHOSTBUILD.md) first — it supersedes everything below.** The docs listed here are historical.
+Read [`docs/PIVOT_GHOSTBUILD.md`](docs/PIVOT_GHOSTBUILD.md) and [`CLAUDE.md`](CLAUDE.md). That is all. PIVOT is the only execution authority. Docs 00–21 are historical: open them only for G2 platform notes (08 §2–§6) and the honesty labels, never for scope.
 
-## Read these first
-
-Do NOT read all of the historical planning docs.
-
-Everyone should read:
-
-1. `docs/20_FINAL_IMPLEMENTATION_BIBLE.md`
-2. `docs/21_HACKATHON_CHECKLIST.md`
-
-These are the operational source of truth.
-
-Open older docs only when your implementation task needs additional detail.
-
-Most useful references:
-
-- `docs/05_CONTRACTS.md` — shared schemas, messages, endpoints and fixtures
-- `docs/19_SPONSOR_AND_TRACK_STRATEGY.md` — Even / Sentry / Fetch implementation details
-
-## Source-of-truth priority
-
-1. `20_FINAL_IMPLEMENTATION_BIBLE.md`
-2. `21_HACKATHON_CHECKLIST.md` for clocks and gates
-3. `19_SPONSOR_AND_TRACK_STRATEGY.md` for sponsor work
-4. `05_CONTRACTS.md` for shared interfaces
-5. Older docs for supporting detail only
+Product direction is frozen: a closed-loop repair copilot. *The fix is the input.*
 
 ## Owners
 
-A — Phone web page, wiring diagram, captain/demo/video
-
-B — G2/plugin/network/Beta
-
-C — Hardware rig, Arduino firmware, telemetry
-
-D — Contracts, core, world/diff/planner, knowledge/answers, integration authority, gate decisions
-
-Devin — `integrations/sentry_bridge/` and `integrations/fetch_agent/` only
+- **A:** phone page (`web/`), wiring diagram, README, captain, demo, video
+- **B:** G2 plugin (`g2/`), network, Beta packaging, device custody
+- **C:** firmware, rig, `hardware/WIRING.md`, telemetry, recordings
+- **D:** contracts, core, knowledge/card, Makefile, integration authority, gate decisions
 
 ## Non-negotiable execution rules
 
-- Contracts lock once at SAT 12:45.
-- After that, shared schema changes require D + every affected consumer owner.
-- After SUN 00:45, no schema changes.
-- P0 must always remain independently runnable.
-- Unknown physical state means abstain — never guess.
-- No AI model commits physical state.
-- Sponsor code stays inside `integrations/`.
-- Even / core reliability outrank sponsor stretch work.
-- "Almost green" at a gate = RED.
-- When a feature is killed, it stays killed.
-- Do not revive cut features.
+- Live-demo reliability beats features.
+- Contracts locked Sat 17:00. After that a shared-schema change needs D plus every consuming owner.
+- Only `core/ghostbuild_core/hud.py` writes HUD frames. No model output reaches G2 except through the reviewed Repair Card.
+- A G2 press is a recheck, never a commit.
+- Never show VERIFIED without the measured end-stop. Cues say `CHECK …`, never a diagnosis.
+- Never demo replay or simulated data as live.
+- Do not build anything in PIVOT §11. Follow PIVOT §5.10 cut order when behind.
+- "Almost green" at a gate is red. A killed feature stays killed.
 - Do not casually refactor somebody else's lane.
 
 ## Before asking an AI coding agent to work
 
-Tell it:
-
-- your owner letter;
-- the task you are working on;
-- the next gate/deadline;
-- which directories you own.
-
-Then paste the standard AI handoff prompt below.
-
-## If an AI proposes a new feature or architecture
-
-Ignore it unless the current task genuinely cannot be implemented under the frozen plan.
-
-We are executing now, not redesigning.
+Tell it your owner letter, the task, the next gate, and the directories you own. If it proposes a new feature or architecture, ignore it unless the task cannot be done under PIVOT. We are executing, not redesigning.

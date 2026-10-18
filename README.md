@@ -1,53 +1,58 @@
 # GhostBuild
 
-> **Pivot (Sat 2026-10-17):** GhostBuild is now a closed-loop repair copilot — the device tests itself, G2 shows one check only when a test fails, and the measured fix clears it. **[`docs/PIVOT_GHOSTBUILD.md`](docs/PIVOT_GHOSTBUILD.md) is the only execution authority**; everything below describes the previous plan and is being rewritten.
+**Quiet until it breaks. Silent once it's fixed.**
 
-An AI copilot for physical work: it reads the manual and the CAD, watches the real object, and shows one verified next action on Even G2 — going dark when the work matches the target.
+GhostBuild is a closed-loop repair copilot. The device being repaired runs its own tests. Even G2 shows one short cue only while a test fails, and the physical fix clears it. Nobody taps "done": the hardware confirms the repair and the glasses go dark.
 
-**Team:** read [`START_HERE.md`](START_HERE.md), then [`docs/20_FINAL_IMPLEMENTATION_BIBLE.md`](docs/20_FINAL_IMPLEMENTATION_BIBLE.md) and [`docs/21_HACKATHON_CHECKLIST.md`](docs/21_HACKATHON_CHECKLIST.md). Contracts: [`docs/05_CONTRACTS.md`](docs/05_CONTRACTS.md).
+**Team:** read [`docs/PIVOT_GHOSTBUILD.md`](docs/PIVOT_GHOSTBUILD.md). It is the only execution authority. Docs 00–21 are historical. Read them only for G2 platform notes, never for scope. Agent rules are in [`CLAUDE.md`](CLAUDE.md).
+
+## Lanes
+
+| Lane | Owner | Directory | Prove it without the other lanes |
+|---|---|---|---|
+| Phone page, README, demo, video | A | `web/`, `README.md`, `CLAUDE.md` | `/phone` against a recorded `/state` fixture |
+| G2 plugin, Beta packaging | B | `g2/` | `make g2-sim` fed by D's stub server |
+| Firmware, rig, wiring | C | `firmware/`, `hardware/WIRING.md`, `tools/`, `recordings/` | `python tools/serial_probe.py` |
+| Contracts, core, knowledge | D | `core/`, `contracts/`, `knowledge/`, `Makefile`, `pyproject.toml` | `make test`, `make core` with `--simulate` |
 
 ## Developer quick start
 
-Prerequisites: `uv` (Python 3.11 is pinned in `pyproject.toml`), Node ≥ 20, git. Lane extras: B — `npm i -g @evenrealities/evenhub-cli @evenrealities/evenhub-simulator` and a phone with the Even app; C — Arduino IDE or `arduino-cli`. No iOS app or Xcode is part of this project.
+Prerequisites: `uv` (Python 3.11 is pinned in `pyproject.toml`), Node ≥ 20, git. B also needs `npm i -g @evenrealities/evenhub-cli @evenrealities/evenhub-simulator` and a phone with the Even app. C needs Arduino IDE or `arduino-cli`.
 
 | Question | Command | Green means |
 |---|---|---|
 | Is my environment working? | `make setup && make doctor` | every line under "everyone" is `ok` |
-| Are contracts valid? (**the 12:45 lock check**) | `make contracts` | `GREEN python …` and `GREEN ts …` |
+| Are contracts valid? | `make contracts` | `GREEN python …` and `GREEN ts …` |
 | Can core start? | `make core` | `make health` shows core `/health` JSON |
-| Can the mock path run? | `make core-mock` | HUD frames reach `make g2-sim` / `/twin?mode=2d` |
-| Can tests run? | `make test` | contracts + lints + every existing lane's pytest/vitest pass |
+| Can tests run? | `make test` | contracts, lints and every existing lane's tests pass |
 | Any secret about to be committed? | `make check-secrets` | `check-secrets: ok` |
 
-Targets for lanes that don't exist yet stop with `not yet: <path> missing (owner X)`. Run `make help` for the full list.
+Targets for lanes that don't exist yet stop with `not yet: <path> missing (owner X)`. `make help` lists all targets.
 
-Secrets: copy `.env.example` to `.env` (gitignored) only for the keys your lane uses. `GB_CORE_URL` has no default by design.
+Secrets: copy `.env.example` to `.env` (gitignored). Only `make compile` needs `ANTHROPIC_API_KEY`. Never put a key in `g2/`.
 
-### Contract lock (D, Sat 12:45)
-`make contracts` runs `contracts/tools/lock_check.py` (export JSON Schema from `contracts/models.py`, validate every `contracts/examples/*.json`) and then `contracts/ts` (generate `index.ts`, validate the same examples with ajv, typecheck). It is red until all of these exist:
-- `contracts/models.py` defining `SCHEMAS = {name: Model}` and `FIXTURES = {"<filename glob>": name}`;
-- `contracts/examples/`: `observation_*.json`, `hud_*.json`, `g2_input_*.json`, `state_*.json`, `card_barrier.json` (docs/PIVOT_GHOSTBUILD.md §5.3).
+## Architecture
 
-Commit the generated `contracts/schema/` and `contracts/ts/index.ts`: B (G2 plugin) and A (phone page) read them without running Python.
+```
+[Gate: Uno + HC-SR04 + SG90 + end-stop + POWER switch]  firmware/barrier/barrier.ino
+   │ USB serial, one JSON line / 100 ms (raw observations)
+[Laptop: python -m ghostbuild_core :8787]               core/ghostbuild_core
+   serial → tests → engine → hud   (hud.py is the only HUD writer)
+   WS /ws?role=g2 (physical G2 and simulator get the same frames) · /hud · /state · /card · /health · /phone
+[Even app WebView → g2/ plugin]  renders hud frames; sends press / swipe
+[Any browser: /phone]            wiring card, why and sources, evidence timeline
+```
 
-## Service map
-
-| Service | Owner | Machine | Port / endpoint | Consumes → produces | Env | Health check |
-|---|---|---|---|---|---|---|
-| core | D | Mac 1 | `:8787` HTTP + `ws?role=vision\|g2\|twin`, `/control/*`, `/knowledge/*`, `/twin` | observation, g2_input → hud, twin, `logs/session-*.jsonl` | — | `curl http://<mac1>:8787/health` |
-| perception | C | Mac 1 | client of `ws://localhost:8787/ws?role=vision` | webcam → observation (`source: cv`) | — | `/health` `vision_fps` > 0 |
-| G2 plugin | B | B's laptop (dev) → Even app on the phone → G2 | Vite `:5173`; client of `ws://<mac1>:8787/ws?role=g2` or Funnel `wss://<laptop>.<tailnet>.ts.net` | hud → display; menu/tap → g2_input | — | `/health` `g2_connected`; `make g2-sim` |
-| 2D supervisor | B | served by core, shown on Mac 2 | `http://<mac1>:8787/twin?mode=2d` | twin → page | — | `/health` `twin_clients` |
-| knowledge compiler | D | any Mac, build time only | — | PDF + LDraw → committed `knowledge/<task>/bundle.json` | `ANTHROPIC_API_KEY` | `make compile` exits 0 |
-| Sentry bridge (optional) | Devin → B | Mac 1, `nice 19` | — (reads logs) | `logs/session-*.jsonl` → Sentry Tracing + Logs | `SENTRY_DSN` | `--dry-run` prints spans; trace visible in Sentry |
-| Fetch agent (optional) | Devin → B | B's laptop | — (Agentverse mailbox) | ASI:One ↔ core `GET /health`, `/knowledge`, one-shot `ws?role=twin`; ARMED-only `POST /control/task\|reset\|goal` | `GB_CORE_URL` (required), `GB_AGENT_ARMED=0`, `AGENT_SEED`, `SENTRY_DSN` (opt.) | starts without exiting; answers in ASI:One |
-
-`make health` probes core and `:5173` (set `CORE=http://<mac1>:8787 G2=<b-laptop>` from another machine).
+Runtime needs no internet. The Repair Card (`knowledge/cards/barrier.json`) is precompiled. Details are in PIVOT §5.
 
 ## Git workflow
 
-- `main` is the integration branch and must always run P0 (`make test` green before merging).
-- Short-lived branches per owner/task, merged within hours: `a/web`, `b/g2`, `c/firmware`, `d/core`. Rebase on `main` before merging; small PRs.
-- **Ownership = merge rights:** `contracts/` — only D merges (after 12:45, a shared-schema change also needs every consuming owner's OK in team chat; none after Sun 00:45). `integrations/*` — B lands Devin PRs; the diff must touch only its own directory.
-- **Merge hotspots:** `contracts/` (D only) · `Makefile` (add your lane's target in its own small commit) · `pyproject.toml` / `uv.lock` (one dependency change at a time; after a rebase run `uv lock`, never hand-merge the lockfile) · `README.md`, `CLAUDE.md` (A or D) · `docs/` (frozen; B edits only `docs/sentry_findings.md`) · `scenarios/`, `knowledge/fixtures/` (D).
-- Freezes: P0 freeze Sun 02:00 (nothing merges into the P0 path), product feature freeze 04:00 (bugs and rehearsal only; the isolated Fetch exception is the only feature work).
+- `main` is the integration branch. Run `make test` before merging.
+- Short-lived branches per owner: `a/web`, `b/g2`, `c/firmware`, `d/core`. Rebase on `main` first. Keep PRs small.
+- **Merge hotspots:** `contracts/` (D only; locked Sat 17:00, after that a shared-schema change needs D plus every consuming owner) · `Makefile` (one lane target per small commit) · `pyproject.toml` and `uv.lock` (D only; one dependency change per commit; `uv lock`, never hand-merge) · `README.md`, `CLAUDE.md` (A only).
+- Pins live in `hardware/WIRING.md`. A pin change updates WIRING.md, the card and `web/assets/wiring.svg` together within 10 minutes.
+- Freezes: P0 freeze Sun 02:00, product feature freeze Sun 04:00, deadline Sun 12:00 PDT.
+
+## Acceptance
+
+`docs/PIVOT_GHOSTBUILD.md` §8 is the live acceptance test (11 steps on physical G2). §8b is the judge handoff test. The simulator runs beside the glasses but never counts as a pass.
