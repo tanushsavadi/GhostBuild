@@ -25,7 +25,7 @@ PYTHONPATH=.:core:pi GB_DISCOVERY=1 GB_DISCOVERY_LIVE=0 \
 
 - `GB_DISCOVERY`: defaults on when the pre-index exists; `0` disables it.
 - `GB_DISCOVERY_LIVE`: defaults `1`; `0` keeps the demonstration offline. Live search needs backend `ANTHROPIC_API_KEY`; no credential belongs in the browser or G2 package.
-- `GB_DISCOVERY_RESEARCH`: defaults **0**. Optional uncached-manual research passes both validated manual and product-page URLs to the existing `LiveResearch`/CREAO path. The wiring is mock-tested only. The previously authorized CREAO run is spent: **do not enable or run another live CREAO request without the user's authorization**.
+- `GB_DISCOVERY_RESEARCH`: defaults to the value of `GB_LIVE_RESEARCH`. When a confirmed product has no prepared guide, the compile engine (Anthropic) builds one from that product's validated manual and product page only (no web search); the glasses show the research progress screen and the guide starts itself, labelled AI-compiled and not human-reviewed. A second selection of the same product reuses the compiled guide. Set `0` to opt out. It never starts a CREAO run.
 - `GB_DISCOVERY_MODEL` / `GB_DISCOVERY_SEARCH_TOOL` override the documented search defaults for explicit experiments; the verified combination is the one above.
 
 `GB_SMART_CACHE=0` disables the app-wide reuse cache; otherwise completed generic guides, successful queries and standalone grounded answers persist beside session logs. See [reuse and conversation details](../../docs/FLUID_ASSISTANT_REPORT.md). `GB_STEP_IMAGES=0` disables automatic MICKE step pictures; manual progress rules stay the same.

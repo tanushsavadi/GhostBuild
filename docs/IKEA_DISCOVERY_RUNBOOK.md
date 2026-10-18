@@ -18,7 +18,7 @@ BACKEND=http://<laptop-ip>:8787 make g2-dev
 
 For a fresh rehearsal only, use a fresh `--log-dir /tmp/ghostbuild-discovery-rehearsal-<unique-name>`. This avoids erasing any existing progress. A normal later conversation remembers the chosen cabinet side and correctly skips that question.
 
-`GB_DISCOVERY_LIVE=1` enables the Anthropic provider (backend key required); fresh saved choices that fit appear immediately without forcing a live query. New descriptions search when enabled; “Search the official site again” explicitly refreshes. Do not enable `GB_DISCOVERY_RESEARCH`: no further CREAO run is authorized.
+`GB_DISCOVERY_LIVE=1` enables the Anthropic provider (backend key required); fresh saved choices that fit appear immediately without forcing a live query. New descriptions search when enabled; “Search the official site again” explicitly refreshes. With `GB_LIVE_RESEARCH=1`, confirming a product that has no prepared guide compiles one from its official manual with the Anthropic compile engine (never CREAO): the glasses show RESEARCHING with progress, then the guide starts. `GB_DISCOVERY_RESEARCH=0` opts out.
 
 ## Exact interaction
 

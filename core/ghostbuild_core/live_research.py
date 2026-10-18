@@ -102,15 +102,16 @@ class LiveResearch:
         """True iff research was started for this unmatched request (the caller then answers RESEARCHING)."""
         text = (req.text or "").strip()
         task = self.rt.assistant.tasks.get(req.session_id)
-        if task and (task.critical_unknowns or task.confirmation_pending):
+        # doc_urls come from an explicitly confirmed product: its identity is settled, whatever an earlier chat left open.
+        if not doc_urls and task and (task.critical_unknowns or task.confirmation_pending):
             return False
         if not self.enabled or self.active is not None or len(text.split()) < 2:
             return False
         sess = self.rt.sessions.active
         if sess is None or sess.id != req.session_id or sess.phase != "menu":
             return False
-        if self.engine == "compile" and not doc_urls:
-            return self._start_compile(req, text)
+        if self.engine == "compile":
+            return self._start_compile(req, text, urls=doc_urls)
         if self.runs is None:
             return False
         from .research_runs import RunBody, RunRejected
@@ -160,7 +161,7 @@ class LiveResearch:
 
         threading.Thread(target=work, name="gb-prefetch", daemon=True).start()
 
-    def _start_compile(self, req: GoalRequest, text: str) -> bool:
+    def _start_compile(self, req: GoalRequest, text: str, urls: Optional[list[str]] = None) -> bool:
         """Official-source compiler as the research engine: search -> fetch -> compile -> verify, on a worker thread."""
         if self.started >= self._max():
             return False
@@ -172,6 +173,7 @@ class LiveResearch:
         task = self.rt.assistant.tasks.get(req.session_id)
         pre = self._prefetched.get(task.research_key()) if task else None  # same task, revision and identity only
         pre_urls = list(pre["urls"]) if pre and pre.get("urls") else None
+        given = list(urls) if urls else None  # the confirmed product's own official documents: no web search
         self.started += 1
         self.active = {"run_id": run_id, "session_id": req.session_id, "goal": text[:300], "mode": req.mode, "started": self._now(),
                        "engine": "compile", "stage": "finding official sources"}
@@ -185,7 +187,9 @@ class LiveResearch:
                 from knowledge.compile import compile_task
                 from knowledge.find_sources import find_sources
 
-                if pre_urls:
+                if given:
+                    urls, search = given, {"given": True, "picked": given}
+                elif pre_urls:
                     urls, search = pre_urls, {"prefetched": True, "picked": pre_urls}
                 else:
                     urls, search = find_sources(text)
@@ -213,6 +217,8 @@ class LiveResearch:
         if out.get("error") or not out.get("card"):
             self.last = {"run_id": act["run_id"], "goal": act["goal"], "ok": False, "status": "failed", "error": out.get("error"),
                          "engine": "compile", "took_s": round(took, 1), "at": time.time()}
+            if self.rt.discovery is not None:
+                self.rt.discovery.research_finished(act["session_id"], None)  # first: its redraw would clear the flash below
             self.rt.sessions.fail_research(Cue(line1="NO RELIABLE GUIDE", line2="NO VERIFIED SOURCE FOUND"))
             self.rt.elog.write("live_research", event="failed", run_id=act["run_id"], engine="compile", error=out.get("error"),
                                picked=(out.get("search") or {}).get("picked"))
@@ -227,6 +233,8 @@ class LiveResearch:
                      "took_s": round(took, 1), "sources": [s.url for s in card.sources], "stats": {k: out["stats"].get(k) for k in ("compile_s", "fetch_s", "rounds")},
                      "at": time.time()}
         cue = goal_mod.task_cue(card, card.goal_mode)
+        if self.rt.discovery is not None:
+            self.rt.discovery.research_finished(act["session_id"], card)  # before the start: the overlay steps aside
         started = self.rt.sessions.finish_research(act["session_id"], card, Cue(line1=cue.line1, line2="COMPILED FROM SOURCES"))
         self.rt.elog.write("live_research", event="ready", run_id=act["run_id"], card_id=card.card_id, started=started, engine="compile", took_s=round(took, 1))
 

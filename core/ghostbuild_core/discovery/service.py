@@ -51,6 +51,7 @@ class ProductDiscoveryService:
         self.timeout_s = timeout_s
         self.live = live
         self.research = research
+        self.compiled = set()  # guides compiled from a confirmed product's manual: identified by that selection
         self.states = {}
         self.pools = {}
         self.remembered = {}
@@ -125,7 +126,7 @@ class ProductDiscoveryService:
         return self.state(sid).phase in ACTIVE
 
     def requires_identification(self, card):
-        return card.card_id not in self.cards and any(src.wants(card.title + " " + " ".join(card.aliases)) for src in self.sources.values())
+        return card.card_id not in self.cards and card.card_id not in self.compiled and any(src.wants(card.title + " " + " ".join(card.aliases)) for src in self.sources.values())
 
     def names_other_product(self, sid, text):
         """While a product guide is open: does the person name a different product line than the selected one?"""
@@ -582,21 +583,29 @@ class ProductDiscoveryService:
         if b is None:
             s.phase = "unavailable"
             s.message = "Product confirmed. Its official manual is linked below; an offline step guide has not been prepared yet."
+            goal = f"Assemble {rec.name} ({rec.article}) following the official manual"
+            saved = self.rt.cache.guide(goal, "build") if rec.manual_verified and rec.manual_url else None
+            if saved is not None:  # compiled from this manual before: start it now, no second paid compile
+                card, review = saved
+                if all(c.card_id != card.card_id for c in self.rt.cards):
+                    self.rt.cards = [*self.rt.cards, card]
+                if review:
+                    self.rt.live.cards.setdefault(card.card_id, review)
+                if self.rt.sessions.start_card(sid, card, echo=False):
+                    self._confirmed(sid, card, f"{rec.name} guide ready: compiled from the official manual, not human-reviewed.")
+                    return
             if self.research and rec.manual_verified and rec.manual_url:
                 from contracts.models import GoalRequest
 
-                req = GoalRequest(
-                    session_id=sid,
-                    mode="build",
-                    via="phone_text",
-                    text=f"Assemble {rec.name} ({rec.article}) following the official manual",
-                )
+                req = GoalRequest(session_id=sid, mode="build", via="phone_text", text=goal)
                 if self.rt.live.try_start(
                     req, doc_urls=[rec.manual_url, rec.product_url]
                 ):
-                    s.phase = "loading"
-                    s.message = "Preparing a guide from the official manual. This takes minutes; the result needs review."
+                    s.phase = "loading"  # the glasses show the research progress screen, then the guide starts itself
+                    s.message = "Preparing a step-by-step guide from the official manual. It starts by itself when ready; AI-compiled, not human-reviewed."
             self._changed(sid)
+            if s.phase != "loading":  # never a silent return to the photo list after THIS ONE
+                self.rt.sessions.flash_message(sid, Cue(line1="NO STEP GUIDE YET", line2="MANUAL ON YOUR PHONE"), 6000)
             return
         s.config_question = b.config_question
         key = f"{rec.source}:{rec.article}"
@@ -631,11 +640,27 @@ class ProductDiscoveryService:
         self.cards[card.card_id] = card
         if not self.rt.sessions.start_card(sid, card, echo=False):
             raise ValueError("Session changed; start discovery again.")
+        self._confirmed(sid, card, f"{s.selected.name} guide ready. Manual step numbers match this guide.")
+
+    def research_finished(self, sid, card):
+        """The guide compiled from a confirmed product's manual finished (card) or failed (None)."""
+        s = self.states.get(sid)
+        if s is None or s.phase != "loading" or s.selected is None:
+            return
+        if card is None:
+            s.phase = "unavailable"
+            s.message = "Could not prepare a step guide from the official manual. The manual is linked below."
+            self._changed(sid)
+            return
+        self.compiled.add(card.card_id)
+        self._confirmed(sid, card, f"{s.selected.name} guide ready: compiled from the official manual, not human-reviewed.")
+
+    def _confirmed(self, sid, card, message):
+        s = self.states[sid]
+        self.compiled.add(card.card_id) if card.card_id not in self.cards else None
         s.card_id = card.card_id
         s.phase = "ready"
-        s.message = (
-            f"{s.selected.name} guide ready. Manual step numbers match this guide."
-        )
+        s.message = message
         task = self.rt.assistant.tasks.get(sid)
         if task:
             from ..assistant.adaptive import TaskFact
@@ -666,8 +691,9 @@ class ProductDiscoveryService:
     def _render_active(self):
         sid = self.rt.sessions.active_id
         if sid:
+            preparing = self.state(sid).phase == "loading"  # the research progress screen shows instead
             self.rt.sessions.show_discovery(
-                sid, self.screen(sid) if self.active(sid) else None
+                sid, self.screen(sid) if self.active(sid) and not preparing else None
             )
 
     def _options(self, s):
@@ -796,6 +822,8 @@ class ProductDiscoveryService:
         if not sid or not self.active(sid) or self.rt.sessions.active.phase != "menu":
             return False
         s = self.states[sid]
+        if s.phase == "loading":
+            return False  # the progress screen owns the gestures; never act on the hidden photo list
         g = gi.gesture
         if g not in ("press", "swipe_down", "swipe_up"):
             return True

@@ -524,3 +524,107 @@ def test_every_manual_step_has_an_automatic_image_and_guard(env):
         and rt.hud.current.mode == "visual"
         and rt.hud.current.step.index == 1
     )
+
+
+# ---------------------------------------------------------------- confirmed product without a prepared guide
+# Operator log 2026-10-18 08:16: KLEPPSTAD / STJARNO "PRESS: THIS ONE" returned to the photo list five times; nothing was
+# generated. A confirmed product now compiles a step guide from ITS official manual, shows progress, then starts it.
+def _compile_env(env, monkeypatch, fail=False):
+    import shutil
+    import knowledge.compile as comp
+    import knowledge.find_sources as fs
+
+    rt, d, _ = env
+    d.research = True
+    monkeypatch.setenv("GB_LIVE_RESEARCH", "1")
+    monkeypatch.setenv("GB_RESEARCH_ENGINE", "compile")
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-only")
+    monkeypatch.setattr(fs, "find_sources", lambda *a, **k: (_ for _ in ()).throw(AssertionError("no web search for a confirmed product")))
+    calls = []
+    base = next(c for c in rt.cards if c.steps).model_dump(mode="json")
+
+    def fake_compile(goal, urls, **kw):
+        calls.append((goal, list(urls)))
+        if fail:
+            raise ValueError("nothing usable")
+        return {**base, "card_id": "zz_test_compiled_alex", "title": "ALEX assembly"}, {"rounds": 1}
+
+    monkeypatch.setattr(comp, "compile_task", fake_compile)
+    return rt, d, calls, lambda: shutil.rmtree(ROOT / "knowledge/live/compiled_cards/zz_test_compiled_alex", ignore_errors=True)
+
+
+def _until(rt, pred):
+    end = time.monotonic() + 3
+    while time.monotonic() < end:
+        rt.tick()
+        if pred():
+            return True
+        time.sleep(0.02)
+    return False
+
+
+def test_confirmed_product_compiles_from_its_manual_shows_progress_then_starts_the_steps(env, monkeypatch):
+    rt, d, calls, cleanup = _compile_env(env, monkeypatch)
+    try:
+        say(rt, DEMO)
+        s = d.state(rt.session().id)
+        rec = next(c.record for c in s.candidates if c.record.name == "ALEX")
+        d.select(s.session_id, rec.article)
+        assert s.phase == "loading" and rt.hud.current.cue.line1.startswith("RESEARCHING"), rt.hud.current.cue  # at once
+        assert _until(rt, lambda: rt.playbook is not None)
+        assert calls == [(calls[0][0], [rec.manual_url, rec.product_url])]  # its own manual, nothing searched
+        assert rt.playbook.card.card_id == "zz_test_compiled_alex" and d.state(s.session_id).phase == "ready"
+        assert rt.hud.current.mode in ("step", "visual", "intervene") and rt.session().phase == "task"
+        # choosing the same product again reuses the compiled guide instantly: no second paid compile
+        say(rt, DEMO)
+        s = d.state(rt.session().id)
+        d.select(s.session_id, rec.article)
+        assert len(calls) == 1 and rt.playbook is not None and rt.playbook.card.card_id == "zz_test_compiled_alex"
+    finally:
+        cleanup()
+
+
+def test_gestures_during_preparation_never_pick_a_hidden_photo(env, monkeypatch):
+    rt, d, calls, cleanup = _compile_env(env, monkeypatch)
+    import knowledge.compile as comp
+    gate = Event()
+    inner = comp.compile_task
+    monkeypatch.setattr(comp, "compile_task", lambda *a, **k: (gate.wait(2), inner(*a, **k))[1])
+    try:
+        say(rt, DEMO)
+        s = d.state(rt.session().id)
+        rec = next(c.record for c in s.candidates if c.record.name == "ALEX")
+        d.select(s.session_id, rec.article)
+        rt.handle_input(G2Input(gesture="press", seq_seen=rt.hud.current.seq))
+        assert d.state(s.session_id).selected.article == rec.article and d.state(s.session_id).phase == "loading"
+        gate.set()
+        assert _until(rt, lambda: rt.playbook is not None)
+    finally:
+        gate.set()
+        cleanup()
+
+
+def test_failed_preparation_says_so_and_keeps_the_manual(env, monkeypatch):
+    rt, d, calls, cleanup = _compile_env(env, monkeypatch, fail=True)
+    try:
+        say(rt, DEMO)
+        s = d.state(rt.session().id)
+        rec = next(c.record for c in s.candidates if c.record.name == "ALEX")
+        d.select(s.session_id, rec.article)
+        assert _until(rt, lambda: d.state(s.session_id).phase != "loading")
+        s = d.state(s.session_id)
+        assert s.phase == "unavailable" and "could not" in s.message.lower() and rt.playbook is None
+        assert rt.hud.current.cue.line1 == "NO RELIABLE GUIDE"  # said on the glasses, not a silent photo list
+    finally:
+        cleanup()
+
+
+def test_a_guide_that_cannot_start_says_so_on_the_glasses(env):
+    """Live research off (or busy / at its cap): never a silent return to the photo list after THIS ONE."""
+    rt, d, _ = env
+    say(rt, DEMO)
+    s = d.state(rt.session().id)
+    rec = next(c.record for c in s.candidates if c.record.name == "ALEX")
+    d.select(s.session_id, rec.article)
+    assert s.phase == "unavailable" and rt.hud.current.cue.line1 == "NO STEP GUIDE YET"
+    assert rt.hud.current.cue.line2 == "MANUAL ON YOUR PHONE"

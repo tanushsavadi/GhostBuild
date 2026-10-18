@@ -106,7 +106,7 @@ The server reads `.env` at startup from the working directory. The supplied exam
 | Compile a new task asynchronously | `ANTHROPIC_API_KEY`, `GB_LIVE_RESEARCH=1`, `GB_RESEARCH_ENGINE=compile` | Paid search/compile; `GB_LIVE_RESEARCH_MAX=3` is the default per-process cap. Generated guides remain unreviewed. |
 | Explicit CREAO research/review | `GB_CREAO=1`, `CREAO_API_KEY`, `CREAO_APP_ID`, `GB_ADMIN_TOKEN` | Use your CREAO app. Approval requires a reviewer name and local admin token. |
 | Live CREAO guide path | Above plus `GB_LIVE_RESEARCH=1`, `GB_RESEARCH_ENGINE=creao` | Can start a labelled unreviewed draft; distinct from human approval. |
-| Optional unknown-product manual research | `GB_DISCOVERY_RESEARCH=1` | Off by default; adapter wiring is mock-tested. Keep disabled for the reliable demo unless separately verified. |
+| Guide from a confirmed product's manual | `GB_DISCOVERY_RESEARCH` (defaults to `GB_LIVE_RESEARCH`) | When a confirmed product has no prepared guide, the Anthropic compile engine builds one from its official manual and product page (about a minute; progress on the glasses; starts itself; labelled not human-reviewed). `0` opts out. Never uses CREAO. |
 | Voice input | `GB_VOICE=1`, `ELEVENLABS_API_KEY` | Explicit user consent; phone recording generally requires localhost or HTTPS secure context. G2 needs its voice build too. |
 | Spoken replies | `GB_TTS=1`, `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID` | Choose an account-available voice. Plays through phone/earbuds, never a G2 speaker. |
 
