@@ -143,9 +143,10 @@ def test_help_offer_before_fault_rejected(tmp_path: Path):
 def test_image_paths_only_checked_on_request(tmp_path: Path):
     data = _load(CAMERA)
     assert _errors_for(tmp_path, data) == []
+    data["guides"][0]["views"][0]["image"] = "knowledge/guides/camera_lens/nope.png"
     cards = _write_card(tmp_path, data)
     errors = validate_cards(cards, root=REPO_ROOT, check_images=True)
-    assert any("missing" in e and "where.g2.png" in e for e in errors), errors
+    assert any("missing" in e and "nope.png" in e for e in errors), errors
 
 
 def test_file_stem_must_match_card_id(tmp_path: Path):
