@@ -8,107 +8,155 @@ import {
   CreateStartUpPageContainer,
   OsEventTypeList,
 } from '@evenrealities/even_hub_sdk'
+import { cardsFor, CREDIT, type Card } from './matcher'
 
-// Step 0 probe (docs/SIGN_COACH_PLAN.md): can a wearer name ASL-LEX handshapes
-// on the real lens, and how long does each image send take?
-// Tap 1 reveals the handshape name, tap 2 shows the next card. Double-tap exits.
+// Sign coach: a phrase becomes a sequence of cards (handshape image + how-to
+// lines). Tap = next card, double-tap = exit. The phrase comes from the phone
+// page below; speech is added later (docs/SIGN_COACH_PLAN.md step 4).
 
-const HANDSHAPES = ['open_b', 'closed_b', '1', 'h', 'a', 's']
-const VARIANTS = ['bold', 'thin', 'bold96']
-const CARDS = VARIANTS.flatMap(variant => HANDSHAPES.map(id => ({ id, variant })))
+const DEMO_PHRASES = ['Hello, nice to meet you', 'My name is Abdul', 'Thank you']
+// Handshape drawing style; switch after the step 0 lens test (?style=thin|bold|bold96).
+const STYLE = new URLSearchParams(location.search).get('style') ?? 'bold'
 
 const IMG = { id: 2, name: 'hand' }
 const INFO = { id: 1, name: 'info' }
 
+// ---- phone page -------------------------------------------------------------
+
+const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T
+const phraseInput = $<HTMLInputElement>('phrase')
+const phoneCard = $<HTMLDivElement>('card')
+$<HTMLParagraphElement>('credit').textContent = CREDIT
+for (const p of DEMO_PHRASES) {
+  const b = document.createElement('button')
+  b.textContent = p
+  b.onclick = () => start(p)
+  $<HTMLDivElement>('demos').append(b)
+}
+$<HTMLFormElement>('form').onsubmit = e => {
+  e.preventDefault()
+  if (phraseInput.value.trim()) start(phraseInput.value)
+}
+
+function showOnPhone(card: Card | undefined, n: number, total: number): void {
+  if (!card) {
+    phoneCard.textContent = 'No phrase yet.'
+    return
+  }
+  const video = card.video ? `<a href="${card.video}" target="_blank" rel="noopener">Reference video (ASL-LEX)</a>` : ''
+  phoneCard.innerHTML =
+    `<b>${card.title}</b> <span>${n}/${total}</span><br>${card.how[0]}<br>${card.how[1]}` +
+    `<br><small>${card.label}</small><br>${video}`
+}
+
+// ---- glasses ----------------------------------------------------------------
+
 const bridge = await waitForEvenAppBridge()
 
-const info = new TextContainerProperty({
-  xPosition: 176,
-  yPosition: 40,
-  width: 384,
-  height: 208,
-  borderWidth: 0,
-  borderColor: 5,
-  paddingLength: 4,
-  containerID: INFO.id,
-  containerName: INFO.name,
-  content: 'LOADING HANDSHAPES',
-  isEventCapture: 1,
-})
-
-const hand = new ImageContainerProperty({
-  xPosition: 16,
-  yPosition: 72,
-  width: 144,
-  height: 144,
-  containerID: IMG.id,
-  containerName: IMG.name,
-})
-
 await bridge.createStartUpPageContainer(
-  new CreateStartUpPageContainer({ containerTotalNum: 2, textObject: [info], imageObject: [hand] }),
+  new CreateStartUpPageContainer({
+    containerTotalNum: 2,
+    textObject: [
+      new TextContainerProperty({
+        xPosition: 176, yPosition: 40, width: 384, height: 208,
+        borderWidth: 0, borderColor: 5, paddingLength: 4,
+        containerID: INFO.id, containerName: INFO.name,
+        content: 'SIGN COACH\nType or pick a phrase\non the phone.',
+        isEventCapture: 1,
+      }),
+    ],
+    imageObject: [
+      new ImageContainerProperty({
+        xPosition: 16, yPosition: 72, width: 144, height: 144,
+        containerID: IMG.id, containerName: IMG.name,
+      }),
+    ],
+  }),
 )
 
-// Fetch every PNG up front so send timing measures only the bridge + BLE.
-const pngs = new Map<string, Uint8Array>()
-for (const { id, variant } of CARDS) {
-  const key = `${id}_${variant}`
-  const res = await fetch(`/handshapes/${key}.png`)
-  pngs.set(key, new Uint8Array(await res.arrayBuffer()))
-}
-
-const sendTimes: number[] = []
+let cards: Card[] = []
 let index = 0
-let revealed = false
-let lastSend = ''
 
-function median(xs: number[]): number {
-  const s = [...xs].sort((a, b) => a - b)
-  return s.length ? s[Math.floor(s.length / 2)] : 0
-}
-
-async function setInfo(): Promise<void> {
-  const card = CARDS[index]
-  const name = revealed ? card.id.toUpperCase() : '? (TAP TO REVEAL)'
-  const content = [
-    `HANDSHAPE ${index + 1}/${CARDS.length}`,
-    name,
-    `STYLE ${card.variant.toUpperCase()}`,
+function lensText(): string {
+  const card = cards[index]
+  if (!card) return 'SIGN COACH\nType or pick a phrase\non the phone.'
+  const next = cards[index + 1]
+  return [
+    `${card.title}   ${index + 1}/${cards.length}`,
+    card.how[0],
+    card.how[1],
     '',
-    lastSend,
-    `MEDIAN ${median(sendTimes)} MS (N=${sendTimes.length})`,
+    card.label,
+    next ? `NEXT ${next.title.split('  ')[0]}` : 'LAST · TAP TO REPEAT',
   ].join('\n')
-  await bridge.textContainerUpgrade(
-    new TextContainerUpgrade({ containerID: INFO.id, containerName: INFO.name, content }),
-  )
 }
 
-// One image send in flight at a time (SDK rule); a busy tap is ignored.
-let busy = false
-async function showCard(): Promise<void> {
-  if (busy) return
-  busy = true
+const pngCache = new Map<string, Uint8Array>()
+async function png(key: string): Promise<Uint8Array> {
+  let bytes = pngCache.get(key)
+  if (!bytes) {
+    const res = await fetch(`/handshapes/${key}.png`)
+    if (!res.ok) throw new Error(`handshape ${key}: HTTP ${res.status}`)
+    bytes = new Uint8Array(await res.arrayBuffer())
+    pngCache.set(key, bytes)
+  }
+  return bytes
+}
+
+// Render loop: one bridge call in flight, latest state wins, and the image is
+// only resent when the handshape changes.
+let version = 0
+let rendered = -1
+let rendering = false
+let shownImage = ''
+
+async function render(): Promise<void> {
+  if (rendering) return
+  rendering = true
   try {
-    const card = CARDS[index]
-    const t0 = performance.now()
-    const result = await bridge.updateImageRawData(
-      new ImageRawDataUpdate({
-        containerID: IMG.id,
-        containerName: IMG.name,
-        imageData: pngs.get(`${card.id}_${card.variant}`),
-      }),
-    )
-    const ms = Math.round(performance.now() - t0)
-    if (result === ImageRawDataUpdateResult.success) sendTimes.push(ms)
-    lastSend = `SEND ${ms} MS ${result === ImageRawDataUpdateResult.success ? 'OK' : String(result).toUpperCase()}`
-    console.log(`[probe] ${card.id}_${card.variant} ${ms} ms ${result}`)
-    await setInfo()
+    while (rendered !== version) {
+      const v = version
+      const card = cards[index]
+      showOnPhone(card, index + 1, cards.length)
+      const image = card?.handshape ? `${card.handshape}_${STYLE}` : 'blank'
+      if (image !== shownImage) {
+        const t0 = performance.now()
+        const result = await bridge.updateImageRawData(
+          new ImageRawDataUpdate({ containerID: IMG.id, containerName: IMG.name, imageData: await png(image) }),
+        )
+        console.log(`[coach] image ${image} ${Math.round(performance.now() - t0)} ms ${result}`)
+        if (result === ImageRawDataUpdateResult.success) shownImage = image
+      }
+      await bridge.textContainerUpgrade(
+        new TextContainerUpgrade({ containerID: INFO.id, containerName: INFO.name, content: lensText() }),
+      )
+      rendered = v
+    }
+  } catch (err) {
+    console.error('[coach] render failed', err)
   } finally {
-    busy = false
+    rendering = false
   }
 }
 
-await showCard()
+function start(phrase: string): void {
+  cards = cardsFor(phrase)
+  index = 0
+  version++
+  void render()
+}
+
+function next(): void {
+  if (!cards.length) return
+  index = (index + 1) % cards.length
+  version++
+  void render()
+}
+
+// ?phrase=... starts a phrase on load (simulator checks and demo links).
+const initial = new URLSearchParams(location.search).get('phrase')
+if (initial) start(initial)
+else void render()
 
 // A tap arrives with eventType undefined (CLICK = 0 is omitted on the wire), so
 // only read eventType from an envelope that exists.
@@ -120,14 +168,5 @@ bridge.onEvenHubEvent(event => {
     bridge.shutDownPageContainer(1)
     return
   }
-  if (types.includes(OsEventTypeList.CLICK_EVENT) && !busy) {
-    if (!revealed) {
-      revealed = true
-      void setInfo()
-    } else {
-      revealed = false
-      index = (index + 1) % CARDS.length
-      void showCard()
-    }
-  }
+  if (types.includes(OsEventTypeList.CLICK_EVENT)) next()
 })

@@ -3,10 +3,38 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>GhostBuild</title>
+    <title>Sign coach</title>
+    <style>
+      html, body {
+        margin: 0;
+        background: #232323;
+        color: #e5e5e5;
+        font: 16px/1.4 -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+        touch-action: manipulation;
+        -webkit-text-size-adjust: 100%;
+      }
+      main { padding: 16px; max-width: 480px; margin: 0 auto; }
+      h1 { font-size: 20px; margin: 0 0 12px; }
+      form { display: flex; gap: 8px; }
+      input { flex: 1; font: inherit; padding: 10px; border-radius: 8px; border: 1px solid #555; background: #111; color: inherit; }
+      button { font: inherit; padding: 10px 14px; border-radius: 8px; border: 1px solid #555; background: #333; color: inherit; }
+      #demos { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+      #card { margin-top: 12px; padding: 12px; border-radius: 8px; background: #111; min-height: 96px; }
+      #card a { color: #8fd18f; }
+      #credit { font-size: 12px; color: #999; margin-top: 24px; }
+    </style>
   </head>
   <body>
-    <p>GhostBuild is running. Check the glasses.</p>
+    <main>
+      <h1>Sign coach</h1>
+      <form id="form">
+        <input id="phrase" placeholder="Type what you want to say" autocomplete="off" />
+        <button type="submit">Show</button>
+      </form>
+      <div id="demos"></div>
+      <div id="card">No phrase yet.</div>
+      <p id="credit"></p>
+    </main>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

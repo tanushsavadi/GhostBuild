@@ -1,13 +1,11 @@
-# GhostBuild — project rules
-24 h hackathon. Live-demo reliability > features. **docs/PIVOT_GHOSTBUILD.md is the only execution authority**; docs/00–21 are historical (read them only for G2 platform notes, never for scope).
-- Product: closed-loop repair copilot. Device tests → deterministic engine → one G2 cue → the physical fix clears it.
-- Scope: only what PIVOT §5 builds; follow its cut order when behind; never build PIVOT §11 items (3D/CAD, spatial, LEGO, perception, voice, sponsor integrations, runtime LLM on the cue path).
-- Only core/ghostbuild_core/hud.py writes HUD frames. No model output reaches G2 except through the reviewed Repair Card. A G2 press is a recheck, never a commit.
-- Never show VERIFIED without the measured end-stop; never phrase a cue as a diagnosis (use CHECK …); unknown state never yields a confident physical instruction.
-- core/ and contracts/ are device-agnostic (make lint-generic); device facts live in knowledge/cards/ and firmware/.
-- Contracts: D owns; lock Sat 17:00; later shared-schema changes need D + every consuming owner. Run `make contracts`.
-- Label sources: MEASURED LIVE, COMMANDED, DETERMINISTIC, MANUFACTURER DOC, AUTHORED PROJECT SPEC, AI-EXTRACTED · HUMAN-REVIEWED, AUTHORED DEMO METADATA, REPLAY, SIMULATED. Never demo replay/simulated data as live.
-- Pins live in hardware/WIRING.md; a pin change updates WIRING.md, the card and web/assets/wiring.svg together.
-- Even G2: verify every SDK call via the everything-evenhub skills + hub.evenrealities.com/docs (SDK 0.0.16). No API keys in g2/.
-- Claude API: official `anthropic` SDK + the claude-api skill; claude-opus-5-5; structured outputs, not forced tool_choice; build time only (knowledge/).
-- `make test` before merging; every feature behind its flag. P0 freeze Sun 02:00; product feature freeze 04:00.
+# Sign coach (branch test_sim) — project rules
+Solo hackathon MVP on Even G2. Deadline Sun 2026-10-18 12:00 PDT. Live-demo reliability > features. **docs/SIGN_COACH_PLAN.md is the only execution authority on this branch.** The rest of docs/ describes GhostBuild and is historical; read it only for G2 platform notes.
+- Product: a hearing G2 wearer says an English phrase; the glasses show one card per sign (ASL-LEX handshape image + two short how-to lines); the wearer signs it to a Deaf person. Scope is individual signs, not ASL translation. Never call it translation or an interpreter.
+- Only signs in g2/src/deck.json are shown as signs; g2/src/matcher.ts (pure, runs on the phone) turns a phrase into cards. Unknown words: names and numbers are fingerspelled; anything else is fingerspelled, or explained by AI only behind the AI flag and labelled AI · UNCHECKED. Never show a confident sign that is not in the deck.
+- Card labels: REF-CHECKED (a person compared it with a reference video), UNCHECKED, AI · UNCHECKED, FINGERSPELL. No card claims a Deaf signer checked it.
+- Data: ASL-LEX 2.0 database, visualization and handshape images are CC BY-NC 4.0: non-commercial use only, credit "ASL-LEX 2.0 (asl-lex.org), CC BY-NC 4.0" in the README and on the phone page. ASL-LEX videos are © with no licence: link or view only, never bundle. No WLASL or How2Sign media.
+- Privacy: no audio is stored by default; any tool that logs audio must be opt-in.
+- Even G2: SDK 0.0.16. Verify every call with the everything-evenhub skills and node_modules/@evenrealities/even_hub_sdk/dist/index.d.ts (the .d.ts wins). updateImageRawData takes encoded PNG bytes, serially, one in flight. Images ≤ 288×144, 4-bit grey. Double-tap always exits. No API keys in g2/.
+- Speech: offline Vosk on the laptop, grammar limited to the deck vocabulary plus the configured name; a typed phrase on the phone is the backup.
+- Claude API: official `anthropic` SDK + the claude-api skill; claude-opus-5-5; structured outputs, not forced tool_choice. Build time for the deck; at runtime only behind the AI flag.
+- Test on the physical G2 before calling anything done: the simulator has no BLE timing and renders glyphs differently.

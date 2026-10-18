@@ -1,0 +1,131 @@
+{
+  "credit": "Handshapes and sign data: ASL-LEX 2.0 (asl-lex.org), CC BY-NC 4.0. Handshape drawings served by aslcdi.website.",
+  "drafted": "How-to lines drafted by AI (Claude) from each sign's ASL-LEX 2.0 phonology. A sign is REF-CHECKED only after a person compares it with the ASL-LEX video and changes status.",
+  "signs": [
+    {
+      "id": "hello", "gloss": "HELLO", "words": ["hello", "hi", "hey"],
+      "handshape": "closed_b",
+      "how": ["Flat hand at forehead", "Salute outward, away"],
+      "status": "UNCHECKED",
+      "asllex": { "type": "OneHanded", "location": "Forehead", "movement": "Straight, away from head" },
+      "video": "https://player.vimeo.com/video/345973004"
+    },
+    {
+      "id": "nice", "gloss": "NICE", "words": ["nice"],
+      "handshape": "open_b",
+      "how": ["Both flat hands, palms meet", "Top hand slides off forward"],
+      "status": "UNCHECKED",
+      "asllex": { "type": "AsymmetricalSameHandshape", "location": "Palm", "movement": "Straight" },
+      "video": "https://player.vimeo.com/video/346777900"
+    },
+    {
+      "id": "meet", "gloss": "MEET", "words": ["meet", "meeting"],
+      "handshape": "1",
+      "how": ["Both index fingers up, apart", "Bring hands together"],
+      "status": "UNCHECKED",
+      "asllex": { "type": "SymmetricalOrAlternating", "location": "Neutral space", "movement": "Straight" },
+      "video": "https://player.vimeo.com/video/345970023"
+    },
+    {
+      "id": "you", "gloss": "YOU", "words": ["you", "your"],
+      "handshape": "1",
+      "how": ["Index finger out", "Point at the person"],
+      "status": "UNCHECKED",
+      "asllex": { "type": "OneHanded", "location": "Neutral space", "movement": "Straight" },
+      "video": "https://player.vimeo.com/video/345973780"
+    },
+    {
+      "id": "my", "gloss": "MY", "words": ["my", "mine"],
+      "handshape": "open_b",
+      "how": ["Flat hand, palm in", "Place palm on your chest"],
+      "status": "UNCHECKED",
+      "asllex": { "type": "OneHanded", "location": "Upper chest", "movement": "Straight" },
+      "video": "https://player.vimeo.com/video/345578777"
+    },
+    {
+      "id": "name", "gloss": "NAME", "words": ["name"],
+      "handshape": "h",
+      "how": ["Both hands: 2 fingers out", "Tap top fingers on other x2"],
+      "status": "UNCHECKED",
+      "asllex": { "type": "DominanceViolation", "location": "Other hand, index side", "movement": "Straight, repeated" },
+      "video": "https://player.vimeo.com/video/345803647"
+    },
+    {
+      "id": "thank_you", "gloss": "THANK-YOU", "words": ["thank you", "thanks"],
+      "handshape": "open_b",
+      "how": ["Flat hand, fingertips at chin", "Move forward and down"],
+      "status": "UNCHECKED",
+      "asllex": { "type": "OneHanded", "location": "Mouth", "movement": "Curved, away from head" },
+      "video": "https://player.vimeo.com/video/346804430"
+    },
+    {
+      "id": "please", "gloss": "PLEASE", "words": ["please"],
+      "handshape": "open_b",
+      "how": ["Flat hand on chest", "Rub in a circle"],
+      "status": "UNCHECKED",
+      "asllex": { "type": "OneHanded", "location": "Upper chest", "movement": "Circular, repeated" },
+      "video": "https://player.vimeo.com/video/345536463"
+    },
+    {
+      "id": "yes", "gloss": "YES", "words": ["yes", "yeah", "yep"],
+      "handshape": "s",
+      "how": ["Fist in front of you", "Nod the fist down twice"],
+      "status": "UNCHECKED",
+      "asllex": { "type": "OneHanded", "location": "Neutral space", "movement": "Straight, repeated" },
+      "video": "https://player.vimeo.com/video/346778768"
+    },
+    {
+      "id": "no", "gloss": "NO", "words": ["no", "nope"],
+      "handshape": "flat_h",
+      "how": ["Index, middle and thumb out", "Snap them shut twice"],
+      "status": "UNCHECKED",
+      "asllex": { "type": "OneHanded", "location": "Neutral space", "movement": "Handshape change, repeated" },
+      "video": "https://player.vimeo.com/video/345799501"
+    },
+    {
+      "id": "help", "gloss": "HELP", "words": ["help"],
+      "handshape": "a",
+      "how": ["Thumb-up fist on flat palm", "Lift both hands up together"],
+      "status": "UNCHECKED",
+      "asllex": { "type": "AsymmetricalDifferentHandshape", "location": "Other hand, palm", "movement": "Straight" },
+      "video": "https://player.vimeo.com/video/345804607"
+    },
+    {
+      "id": "sorry", "gloss": "SORRY", "words": ["sorry"],
+      "handshape": "a",
+      "how": ["Fist on chest, thumb up", "Rub in a circle"],
+      "status": "UNCHECKED",
+      "asllex": { "type": "OneHanded", "location": "Upper chest", "movement": "Circular, repeated" },
+      "video": "https://player.vimeo.com/video/345577184"
+    }
+  ],
+  "letters": {
+    "a": { "handshape": "a", "how": "Fist, thumb at the side" },
+    "b": { "handshape": "closed_b", "how": "Flat hand, thumb across palm" },
+    "c": { "handshape": "c", "how": "Curve the hand into a C" },
+    "d": { "handshape": "d", "how": "Index up, others touch thumb" },
+    "e": { "handshape": "e", "how": "Fingertips curled onto thumb" },
+    "f": { "handshape": "f", "how": "Index touches thumb, 3 up" },
+    "g": { "handshape": "g", "how": "Index and thumb point sideways" },
+    "h": { "handshape": "h", "how": "Index and middle out, sideways" },
+    "i": { "handshape": "i", "how": "Pinky up" },
+    "j": { "handshape": "i", "how": "Pinky up, draw a J" },
+    "k": { "handshape": "k", "how": "Index, middle up, thumb between" },
+    "l": { "handshape": "l", "how": "Index up, thumb out" },
+    "m": { "handshape": null, "how": "Thumb tucked under 3 fingers" },
+    "n": { "handshape": null, "how": "Thumb tucked under 2 fingers" },
+    "o": { "handshape": "o", "how": "Fingertips touch thumb, round" },
+    "p": { "handshape": "p", "how": "K shape, pointing down" },
+    "q": { "handshape": "g", "how": "G shape, pointing down" },
+    "r": { "handshape": "r", "how": "Cross middle over index" },
+    "s": { "handshape": "s", "how": "Fist, thumb across fingers" },
+    "t": { "handshape": "t", "how": "Thumb between index and middle" },
+    "u": { "handshape": "h", "how": "Index and middle up, together" },
+    "v": { "handshape": "v", "how": "Index and middle up, apart" },
+    "w": { "handshape": "w", "how": "3 fingers up, apart" },
+    "x": { "handshape": "curved_1", "how": "Index finger hooked" },
+    "y": { "handshape": "y", "how": "Thumb and pinky out" },
+    "z": { "handshape": "1", "how": "Index finger, draw a Z" }
+  },
+  "skip": ["is", "am", "are", "to", "the", "a", "an", "and", "it", "its", "it's", "i'm", "be", "of"]
+}
