@@ -155,6 +155,7 @@ export type PiLastSeq = number | null;
 export type PiLink = "up" | "stale" | "down";
 export type Source1 = ("pi_live" | "replay" | "simulated") | null;
 export type UptimeS = number;
+export type Voice = "off" | "on";
 export type CueId = string | null;
 export type Count = number;
 export type GuideId1 = string;
@@ -485,6 +486,7 @@ export interface Health {
   pi_link: PiLink;
   source?: Source1;
   uptime_s: UptimeS;
+  voice?: Voice;
 }
 /**
  * The only thing G2 renders. Written by core/ghostbuild_core/hud.py and nothing else.

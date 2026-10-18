@@ -159,6 +159,15 @@
         "uptime_s": {
           "title": "Uptime S",
           "type": "number"
+        },
+        "voice": {
+          "default": "off",
+          "enum": [
+            "off",
+            "on"
+          ],
+          "title": "Voice",
+          "type": "string"
         }
       },
       "required": [

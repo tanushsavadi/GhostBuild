@@ -198,6 +198,7 @@ class Health(Strict):
     source: Optional[Source] = None
     camera: Literal["ok", "unavailable", "frozen", "unknown"] = "unknown"
     g2_clients: int = Field(ge=0)
+    voice: Literal["off", "on"] = "off"
 
 
 class Session(Strict):
