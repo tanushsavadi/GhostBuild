@@ -58,6 +58,7 @@ class Runtime:
             record=lambda kind, **d: self.elog.write(kind, **d),
         )
         self.sessions.restore()
+        self.hud.session_id = self._sid()
         self.sim = None
         if simulate:
             from .simulate import SimPi
@@ -103,8 +104,13 @@ class Runtime:
     def hello(self, h: G2Hello) -> HudFrame:
         self.elog.write("input", hello=h.model_dump(mode="json"))
         self.sessions.hello(h)
+        self.hud.session_id = self._sid()
         self.hud.sync()
         return self.hud.current
+
+    def _sid(self) -> Optional[str]:
+        sid = self.sessions.view().id
+        return None if sid == "none" else sid
 
     def tick(self) -> None:
         self.sessions.tick()

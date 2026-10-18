@@ -193,6 +193,10 @@ export type Mode2 = "quiet" | "welcome" | "menu" | "intervene" | "visual" | "ask
  * monotonic; unchanged frames are never re-sent
  */
 export type Seq = number;
+/**
+ * current session; the plugin stores it and sends it in G2Hello on reconnect so the welcome never repeats
+ */
+export type SessionId3 = string | null;
 export type Source2 = "pi_live" | "replay" | "simulated";
 /**
  * true if backed by data older than the staleness limit; plugin shows ERROR instead
@@ -504,6 +508,7 @@ export interface HudFrame {
   menu?: Menu | null;
   mode: Mode2;
   seq: Seq;
+  session_id?: SessionId3;
   source: Source2;
   stale?: Stale;
   ttl_ms?: TtlMs;

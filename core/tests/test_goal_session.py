@@ -131,6 +131,15 @@ def test_reconnect_with_known_id_never_rewelcomes(rt):
     assert sum(1 for x in rt.hud.frames if x.mode == "welcome") == 1
 
 
+def test_frames_carry_session_id_so_plugin_can_resume(rt):
+    first = rt.hello(hello())
+    assert first.session_id == rt.session().id != "none"
+    rt.clock.advance(2600)
+    rt.tick()
+    assert rt.hud.current.session_id == first.session_id
+    assert rt.hello(hello(first.session_id)).session_id == first.session_id
+
+
 def test_unknown_id_creates_new_session_with_welcome(rt):
     rt.hello(hello())
     first = rt.session().id

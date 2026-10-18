@@ -128,6 +128,7 @@ class HudFrame(Strict):
     cue_id: Optional[str] = None
     ttl_ms: Optional[int] = Field(default=None, description="plugin clears locally after this as a fallback")
     source: Source
+    session_id: Optional[str] = Field(default=None, description="current session; the plugin stores it and sends it in G2Hello on reconnect so the welcome never repeats")
     stale: bool = Field(default=False, description="true if backed by data older than the staleness limit; plugin shows ERROR instead")
 
     @model_validator(mode="after")

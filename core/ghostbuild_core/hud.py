@@ -106,10 +106,13 @@ class Hud:
         self._layers: dict[str, Optional[Screen]] = {}
         self._subs: list[Callable[[HudFrame], None]] = []
         self._last_nonquiet_ms: Optional[int] = None
+        self.session_id: Optional[str] = None  # stamped on frames; not part of the change key
 
     # ---- public ------------------------------------------------------------
     @property
     def current(self) -> HudFrame:
+        if self._current.session_id != self.session_id:
+            self._current = self._current.model_copy(update={"session_id": self.session_id})
         return self._current
 
     def subscribe(self, fn: Callable[[HudFrame], None]) -> Callable[[], None]:
@@ -172,6 +175,7 @@ class Hud:
                 cue_id=s.cue_id,
                 ttl_ms=s.ttl_ms,
                 source=self.source,
+                session_id=self.session_id,
                 stale=s.stale,
             )
         except Exception:  # a malformed screen is a bug; never take the HUD down

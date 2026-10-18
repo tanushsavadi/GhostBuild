@@ -217,6 +217,19 @@
       "title": "Seq",
       "type": "integer"
     },
+    "session_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "current session; the plugin stores it and sends it in G2Hello on reconnect so the welcome never repeats",
+      "title": "Session Id"
+    },
     "source": {
       "enum": [
         "pi_live",
