@@ -9,7 +9,7 @@
   "permissions": [
     {
       "name": "g2-microphone",
-      "desc": "Hold the temple and say what you want to sign; the sentence is turned into text and is not stored."
+      "desc": "Long-press, choose Speak a sentence or Prepare a conversation, and say it; the speech is turned into text and is not stored."
     }
   ],
   "supported_languages": ["en"]

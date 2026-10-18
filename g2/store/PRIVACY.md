@@ -13,7 +13,7 @@ The app uses no location, camera, photos or contacts, and has no accounts.
 
 ## Servers the app talks to
 
-- **The developer's server** (laptop), reached at `https://NGROK_DOMAIN` (an ngrok address run by the developer; the only address in the app's network whitelist). It does three things:
+- **The developer's server** (laptop), reached at `https://likeness-cedar-deluxe.ngrok-free.dev` (an ngrok address run by the developer; the only address in the app's network whitelist). It does three things:
   - **speech** (`/api/stt`): passes your recording to **ElevenLabs** (`api.elevenlabs.io`) and returns the text;
   - **sign order** (`/api/translate`): the sentence text is processed by an AI model running **on the developer's laptop** (Ollama); it is not sent to any third party;
   - **conversation prep** (`/api/prepare`): the situation you describe (text) is sent to a **CREAO** agent (`agent.creao.ai`), which plans likely sentences.

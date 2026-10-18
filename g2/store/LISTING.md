@@ -18,7 +18,7 @@ Speak or type a sentence, or prepare a whole conversation in advance; signs adva
 
 **Permissions (as declared in the package):**
 - G2 microphone: you choose "Speak a sentence" or "Prepare a conversation" in the menu, say it, and tap; the speech is turned into text. Nothing is recorded or stored.
-- Network: the developer's server for speech-to-text, sign order and conversation prep (`https://NGROK_DOMAIN`).
+- Network: the developer's server for speech-to-text, sign order and conversation prep (`https://likeness-cedar-deluxe.ngrok-free.dev`).
 
 **Privacy policy:** g2/store/PRIVACY.md (link to its GitHub page).
 
