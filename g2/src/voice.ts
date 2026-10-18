@@ -57,6 +57,8 @@ export interface VoiceOptions {
   sendHold: (g: 'hold_start' | 'hold_end') => void
   makeWs?: (url: string) => VoiceWs
   now?: () => number
+  /** Consent was given by the deployment's own notice (shown on the welcome screen): the first deliberate hold records. */
+  preconsent?: boolean
 }
 
 export function voiceWsUrl(backend: string, sessionId: string | null): string {
@@ -126,6 +128,7 @@ export class Voice implements VoiceCapture {
     this.released = false
     this.bytesSent = 0
     this.buf = new Uint8Array(0)
+    if (this.o.preconsent) this.consent = true
     if (this.consent === null) {
       let v: string | null = null
       try { v = await this.o.kv.get(CONSENT_KEY) } catch { v = null }

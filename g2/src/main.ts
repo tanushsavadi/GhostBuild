@@ -42,6 +42,7 @@ const voice = createVoice(flags.voice, {
   kv,
   backend: () => backend,
   sessionId: () => sessionId,
+  preconsent: flags.voicePreconsent,
   sendHold: (g) => void conn.sendInput({ type: 'g2_input', v: 2, gesture: g, seq_seen: controller.lastSeq, surface }),
 })
 let status: ConnStatus = 'connecting'

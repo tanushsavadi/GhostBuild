@@ -280,7 +280,7 @@ class SessionManager:
         if res.status == "supported" and res.card_id:
             card = self._card(res.card_id)
             if card is not None:
-                self._start(sess, card, req.mode, res.cue)
+                self._start(sess, card, req.mode, res.cue, echo=req.via == "voice")
         elif res.status == "ambiguous" and sess.phase == "menu" and sess.id == self.active_id:
             shown, labels, more = goal_mod.chooser_options(goal_mod.candidates(req, cards))
             self._choice = _Choice(mode=req.mode, cards=shown, labels=labels, more=more)
@@ -291,7 +291,7 @@ class SessionManager:
             self._render()
         return res
 
-    def _start(self, sess: Session, card: Card, mode: str, cue: Optional[Cue] = None) -> None:
+    def _start(self, sess: Session, card: Card, mode: str, cue: Optional[Cue] = None, echo: bool = False) -> None:
         """Begin a task on `card` for this session (fresh playbook progress)."""
         now = self.clock.now_ms()
         cue = cue or goal_mod.task_cue(card, mode)
@@ -307,7 +307,8 @@ class SessionManager:
                 self.hud.set_layer("ui", None)  # clear the menu first so the first step can be emitted at once
             self._on_task(card, True)
             # a playbook goes straight to its first step (a title card would swallow the first swipe); a fault card keeps its cue
-            self._flash = None if card.steps else (Screen.intervene(cue, cue_id="task_start", ttl_ms=FLASH_MS, immediate=True), now + FLASH_MS)
+            # (a spoken request is acknowledged with the task card so the wearer sees what was understood; any gesture then only reveals step 1)
+            self._flash = None if (card.steps and not echo) else (Screen.intervene(cue, cue_id="task_start", ttl_ms=FLASH_MS, immediate=True), now + FLASH_MS)
             self._render()
 
     # ------------------------------------------------------------------ time
@@ -351,7 +352,7 @@ class SessionManager:
         if self._flash is not None and now < self._flash[1]:
             screen = self._flash[0]
         elif s is not None and s.phase == "welcome":
-            screen = Screen.welcome(Cue(line1="GHOSTBUILD", line2="HANDS BUSY. MIND CLEAR."), WELCOME_MS)
+            screen = Screen.welcome(Cue(line1="GHOSTBUILD", line2="VOICE VIA ELEVENLABS" if self._voice_on() else "HANDS BUSY. MIND CLEAR."), WELCOME_MS)
         elif s is not None and s.phase == "menu":
             ch = self._choice or (self._root_choice() if self._show_list else None)
             if ch is not None:

@@ -1,10 +1,13 @@
 export interface Flags {
   voice: boolean
+  /** The deployment shows the audio notice itself (welcome screen + phone page), so the first hold records instead of asking again. */
+  voicePreconsent: boolean
 }
 
 export interface RuntimeEnv {
   VITE_BACKEND_URL?: string
   VITE_FLAG_VOICE?: string
+  VITE_VOICE_PRECONSENT?: string
   VITE_GLYPHS?: string
   VITE_CENTER_COLS?: string
 }
@@ -30,7 +33,7 @@ export function resolveBackend(query: string | null, stored: string | null, env:
 }
 
 export function readFlags(env: RuntimeEnv): Flags {
-  return { voice: env.VITE_FLAG_VOICE === '1' }
+  return { voice: env.VITE_FLAG_VOICE === '1', voicePreconsent: env.VITE_VOICE_PRECONSENT === '1' }
 }
 
 /** sn reported by evenhub-simulator 0.9.5 (observed in a run; hard-coded profile). */

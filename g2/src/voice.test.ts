@@ -22,7 +22,7 @@ class FakeWs implements VoiceWs {
   bin() { return this.sent.filter((m): m is Uint8Array => typeof m !== 'string') }
 }
 
-function rig(opts: { consent?: boolean; audio?: 'ok' | 'false' | 'throw' | 'slow'; wsFail?: boolean } = {}) {
+function rig(opts: { consent?: boolean; audio?: 'ok' | 'false' | 'throw' | 'slow'; wsFail?: boolean; preconsent?: boolean } = {}) {
   const log: string[] = []
   const store = new Map<string, string>()
   if (opts.consent !== false) store.set(CONSENT_KEY, '1')
@@ -51,6 +51,7 @@ function rig(opts: { consent?: boolean; audio?: 'ok' | 'false' | 'throw' | 'slow
     sendHold: (g) => { holds.push(g); log.push(g) },
     makeWs: (u) => { if (opts.wsFail) throw new Error('socket blocked'); return new FakeWs(u) },
     now: () => t,
+    preconsent: opts.preconsent,
   })
   const ws = () => FakeWs.all.at(-1)!
   const tick = async (ms = 0) => { t += ms; await vi.advanceTimersByTimeAsync(ms) }
@@ -241,6 +242,16 @@ describe('consent gate', () => {
     r.setNow(2000)
     r.v.start(); await r.tick()
     expect(r.store.get(CONSENT_KEY)).toBe('1')
+    r.ws().open()
+    expect(r.ws().ctl()).toEqual([{ type: 'start', consent: true }])
+    expect(r.log).toEqual(['hold_start', 'mic:open:glasses'])
+    r.v.onAudio(r.pcm(3200)); r.v.stop(); await r.tick()
+    expectMicClosed(r)
+  })
+
+  it('preconsent (the welcome screen carries the audio notice): the very first hold records, no second hold needed', async () => {
+    const r = rig({ consent: false, preconsent: true })
+    r.v.start(); await r.tick()
     r.ws().open()
     expect(r.ws().ctl()).toEqual([{ type: 'start', consent: true }])
     expect(r.log).toEqual(['hold_start', 'mic:open:glasses'])

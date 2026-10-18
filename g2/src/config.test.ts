@@ -20,6 +20,8 @@ describe('config', () => {
   })
   it('flags default off', () => {
     expect(readFlags({}).voice).toBe(false)
+    expect(readFlags({}).voicePreconsent).toBe(false)
+    expect(readFlags({ VITE_VOICE_PRECONSENT: '1' }).voicePreconsent).toBe(true)
     expect(readFlags({ VITE_FLAG_VOICE: '0' }).voice).toBe(false)
     expect(readFlags({ VITE_FLAG_VOICE: '1' }).voice).toBe(true)
   })

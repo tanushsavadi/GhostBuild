@@ -518,3 +518,19 @@ def test_swipe_up_after_completion_still_reopens_the_last_step(tmp_path):
     rt.handle_input(gi("swipe_up"))  # first gesture dismisses the acknowledgement
     f = rt.handle_input(gi("swipe_up"))
     assert f.mode == "step" and f.step.index == 1
+
+
+def test_a_spoken_request_is_acknowledged_with_the_task_card_and_a_swipe_only_reveals_step_one(led, tmp_path):
+    rt = boot([led], tmp_path)
+    to_menu(rt)
+    res = rt.resolve_goal(GoalRequest(session_id=rt.session().id, mode="build", via="voice", text="light an led"))
+    assert res.status == "supported"
+    f = cur(rt)
+    assert f.mode == "intervene" and f.cue.line1.startswith("BUILD: ")  # what was understood, shown before step 1
+    rt.handle_input(gi("swipe_down"))
+    assert cur(rt).mode == "step" and cur(rt).step.index == 0 and rt.state().playbook.confirmed == []  # revealed, never confirmed
+    # a typed request (phone) goes straight to the step: the phone already shows what was understood
+    rt2 = boot([led], tmp_path / "b")
+    to_menu(rt2)
+    rt2.resolve_goal(GoalRequest(session_id=rt2.session().id, mode="build", via="phone_text", text="light an led"))
+    assert cur(rt2).mode == "step"
