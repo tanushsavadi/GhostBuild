@@ -35,6 +35,12 @@
     </div>
     <div class="ready-guides"><p class="eyebrow">OR PICK A READY GUIDE</p><div id="task-catalog" class="catalog"><p class="meta">Loading reviewed guides…</p></div></div>
   </section>
+  <section id="sec-chat" class="card area-chat" aria-labelledby="h-chat" hidden>
+    <div class="card-head"><h2 id="h-chat">Conversation</h2><span id="chat-typing" class="chat-typing" hidden><i></i><i></i><i></i><span class="sr">Thinking</span></span></div>
+    <div id="chat-log" class="chat-log" aria-live="polite"></div>
+    <div id="chat-chips" class="chat-chips"></div>
+    <form id="chat-form" class="chat-form" autocomplete="off"><label class="sr" for="chat-input">Message</label><input id="chat-input" type="text" maxlength="300" placeholder="Say or type what you need…"><button type="submit">Send</button></form>
+  </section>
   <section class="card area-mirror" aria-labelledby="h-mirror">
     <div class="card-head"><h2 id="h-mirror">In your line of sight</h2><span id="src-badge" class="src src-none">NO SOURCE</span></div>
     <div id="g2" class="g2" role="img" aria-label="Mirror of the current glasses display"><div id="g2-inner" class="g2-inner"></div><div id="g2-tag" class="g2-tag" hidden></div><div id="g2-veil" class="g2-veil" hidden></div></div>
@@ -113,5 +119,5 @@
   <details class="card area-time" aria-labelledby="h-time"><summary id="h-time">Progress & evidence</summary><ol id="timeline" class="timeline"></ol></details>
 </div></main>
 <footer class="foot">Quiet intelligence, revealed when you need it.<span>G2 has no camera or speaker. Manual progress is confirmed by you.</span></footer>
-<script src="logic.js"></script><script src="app.js"></script><script src="audio-utils.js"></script><script src="audio.js"></script>
+<script src="logic.js"></script><script src="app.js"></script><script src="audio-utils.js"></script><script src="audio.js"></script><script src="assistant.js"></script>
 </body></html>

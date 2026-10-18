@@ -347,7 +347,7 @@
   function renderPlaybook() {
     var sec_ = $('sec-playbook'), c = S.card, st = S.state, pb = st && st.playbook;
     var show = !!(pb && st);
-    var key = JSON.stringify([show, S.live && S.live.unreviewed_cards, pb, c && c.card_id, c && c.steps, c && c.sources, S.cardErr, fresh().ok, st && st.hud && st.hud.step]);
+    var key = JSON.stringify([show, S.assistant && S.assistant.notes, S.live && S.live.unreviewed_cards, pb, c && c.card_id, c && c.steps, c && c.sources, S.cardErr, fresh().ok, st && st.hud && st.hud.step]);
     memo(sec_, key, function () {
       sec_.hidden = !show; if (!show) return;
       var head = $('pb-head'), ol = $('pb-steps'), cur = $('pb-current'), cnt = $('pb-count');
@@ -383,6 +383,7 @@
       cur.appendChild(h('h3', { text: 'Step ' + (idx + 1) + ': ' + stp.title }));
       cur.appendChild(h('div', { class: 'cue' }, stp.cue.line1, stp.cue.line2 ? h('br') : null, stp.cue.line2 || null));
       cur.appendChild(h('div', { class: 'meta', text: 'Completion: ' + L.stepRule(stp) + '.' }));
+      var notes_ = stepNotes(c, stp); if (notes_) cur.appendChild(notes_);
       cur.appendChild(h('p', { class: 'detail', text: stp.detail || 'The card has no longer explanation for this step.' }));
       (stp.warnings || []).forEach(function (w) { cur.appendChild(h('div', { class: 'warn' }, h('b', { text: 'WARNING ' }), w)); });
       var wy = h('dl', { class: 'kv wy' });
@@ -483,6 +484,7 @@
     memo(hint, t, function () { hint.textContent = t; });
   }
   function showAsk(r, note) {
+    if (r.pending) { var pb_ = $('ask-result'); clear(pb_); pb_.appendChild(h('div', { class: 'res ambiguous' }, h('div', { class: 'st', text: 'THINKING' }), h('p', { class: 'detail', text: 'Your answer appears here, in the Conversation panel, and on your glasses in a moment.' }))); window.dispatchEvent(new Event('ghostbuild:asked')); return; }
     if (['where', 'how', 'correct'].indexOf(r.intent) >= 0) S.guideView = r.intent;
     var box = $('ask-result'); clear(box);
     var el = h('div', { class: 'res ' + (r.answer ? 'supported' : 'ambiguous') },
@@ -771,6 +773,14 @@
       btn.addEventListener('click', function () { $('goal-text').value = task.title; $('goal-form').requestSubmit(); }); box.appendChild(btn);
     });
     if (!box.children.length) box.appendChild(h('p',{class:'meta',text:'No prepared guide yet. Describe your task above and it can be researched.'}));
+  }
+  window.addEventListener('ghostbuild:assistant', function (e) { S.assistant = e.detail; tick(true); });
+  function stepNotes(card, stp) {
+    var list = window.GBAssistant ? window.GBAssistant.notesFor(card.card_id, stp.id) : [];
+    if (!list.length) return null;
+    var box = h('div', { class: 'step-notes' }, h('h4', { text: 'Extra help on this step' }));
+    list.forEach(function (n) { box.appendChild(h('div', { class: 'note' }, h('div', { class: 'nt', text: n.title }), h('div', { class: 'meta', text: 'You asked: ' + n.question }), h('div', { text: n.answer }), h('div', { class: 'meta', text: n.grounding === 'guide' ? 'From the guide' : n.grounding === 'general' ? 'General knowledge, not from the guide' : 'Not sure. Check the source' }))); });
+    return box;
   }
   // ------------------------------------------------------------------ live research panel: GET /research/live
   function fmtClock(sec) { return Math.floor(sec / 60) + ':' + ('0' + (sec % 60)).slice(-2); }
