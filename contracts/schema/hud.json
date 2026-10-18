@@ -123,7 +123,7 @@
           "items": {
             "type": "string"
           },
-          "maxItems": 3,
+          "maxItems": 4,
           "minItems": 2,
           "title": "Options",
           "type": "array"

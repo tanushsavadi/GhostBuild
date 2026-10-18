@@ -232,9 +232,9 @@ export type View1 = "where" | "how" | "correct";
 export type W = number;
 /**
  * @minItems 2
- * @maxItems 3
+ * @maxItems 4
  */
-export type Options = [string, string] | [string, string, string];
+export type Options = [string, string] | [string, string, string] | [string, string, string, string];
 export type Prompt = string;
 export type Selected = number;
 export type Mode2 =

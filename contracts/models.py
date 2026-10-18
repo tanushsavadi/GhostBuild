@@ -99,7 +99,7 @@ class Menu(Strict):
     """Onboarding choice. swipe moves `selected`, press confirms (core tracks it; a selection is a goal, never a repair commit)."""
 
     prompt: str = Field(max_length=24)
-    options: list[str] = Field(min_length=2, max_length=3)
+    options: list[str] = Field(min_length=2, max_length=4)
     selected: int = Field(ge=0)
 
 
