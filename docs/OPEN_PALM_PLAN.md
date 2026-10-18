@@ -44,6 +44,9 @@ From `g2/`: `npm install` (then `npm rebuild @evenrealities/evenhub-simulator` i
 ## Live AI word order (built 2026-10-18 ~03:20)
 New sentences of 2+ words → `/api/translate` (laptop server) → Ollama qwen3.5:4b (kept loaded, ~1 s) → cleanup (WH-word last, NOT-X split, I→ME, filler dropped) → `cardsForAi` builds cards from our data, labelled AI ORDER; fallback word-by-word after 8 s. Checked in the simulator: "What time does the store close?" → TIME SHOP CLOSE WHAT, brows down, 1.1 s.
 
+## Conversation prep with CREAO (built 2026-10-18 ~04:00)
+Phone: describe the conversation -> /api/prepare -> CREAO "Open Palm conversation prep" agent (tools/creao_prep_prompt.md, CREAO_PREP_APP_ID) -> 6 sentences in ASL order + up to 4 practice signs -> cleaned and saved as the phrasebook; said or typed prepared sentences show instantly. The plan arrives as an attached JSON file behind a redirect to pre-signed S3 (fetched without the CREAO header). Real runs: "Lunch with Sam" 12 sentences in 66 s; "Ordering coffee from a Deaf barista" 6 sentences in 40 s. Opt-in history (text only, tmp/open_palm on the laptop) feeds HISTORY / HARD SIGNS into the prompt.
+
 ## AI model comparison (2026-10-18 02:00, `uv run tools/bench_llm.py <models>`)
 Same prompt (rules + 4 examples), 18 test sentences, temperature 0, JSON schema; laptop RTX 3060 6 GB. Score: 0.4 signs present + 0.2 face cue + 0.2 ASL order + 0.2 no English filler. References are AI-drafted (UNCHECKED): good for ranking models, not for grading ASL.
 

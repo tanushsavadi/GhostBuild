@@ -77,6 +77,7 @@ ALIASES = {
     "i": "me", "he": "this/it", "she": "this/it", "it": "this/it", "this": "this/it", "that": "this/it",
     "goodbye": "bye", "okay": "fine_2", "ok": "fine_2", "food": "eat_1",
     "mom": "mother", "dad": "father", "store": "shop_2",
+    "large": "big", "sugar": "sweet", "how much": "many", "how many": "many",
 }
 
 

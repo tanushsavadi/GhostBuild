@@ -12,7 +12,7 @@
                     -> {"signs": [{"gloss": "YOU", "spell": false}, ...],
                         "face": "brows down", "source": "AI · LOCAL", "ms": 2900}
   POST /api/prepare {"scenario": "Lunch with Sam", "use_history": true} -> CREAO
-                    agent plans 10-12 sentences in ASL order (~1 min, background)
+                    agent plans 6 sentences in ASL order (~1 min, background)
                     -> {"job": "1"}; GET /api/prepare/1 -> status + phrasebook
   GET  /api/phrasebook   the last prepared phrasebook
   POST /api/history {"kind": "sentence"|"hard_sign", "text": ...}  opt-in, text only
@@ -183,6 +183,7 @@ DATA = ROOT / "tmp" / "open_palm"
 HISTORY = DATA / "history.jsonl"
 PHRASEBOOK = DATA / "phrasebook.json"
 jobs: dict[str, dict] = {}
+PREP_SENTENCES = 6
 
 
 def creao_headers() -> dict:
@@ -230,7 +231,9 @@ def extract_json(text: str) -> dict | None:
 async def run_prep(job_id: str, scenario: str) -> None:
     job = jobs[job_id]
     app_id = os.environ.get("CREAO_PREP_APP_ID", "")
-    text = scenario + ("\n\n" + history_summary() if job["use_history"] else "")
+    # Kept short on purpose: fewer sentences to rehearse, and a faster run.
+    text = (f"{scenario}\n\nGive exactly {PREP_SENTENCES} sentences and at most 4 practice signs."
+            + ("\n\n" + history_summary() if job["use_history"] else ""))
     # The field CREAO reads isn't documented; this combination reached the agent in testing.
     body = {"appId": app_id, "input": text, "message": text, "prompt": text,
             "inputs": {"details": text, "input": text}, "text": text}
@@ -251,8 +254,12 @@ async def run_prep(job_id: str, scenario: str) -> None:
             if not plan or "sentences" not in plan:  # the JSON may be in an attached file
                 for art in result.get("artifacts", []):
                     if art.get("type") == "application/json":
-                        raw = (await client.get(art["url"], headers=creao_headers())).text
-                        plan = extract_json(raw)
+                        # CREAO answers with a redirect to a pre-signed S3 link, which
+                        # refuses requests that still carry the CREAO Authorization header.
+                        res = await client.get(art["url"], headers=creao_headers())
+                        if res.is_redirect:
+                            res = await client.get(res.headers["location"])
+                        plan = extract_json(res.text)
                         if plan and "sentences" in plan:
                             break
         if not plan or "sentences" not in plan:
@@ -262,13 +269,13 @@ async def run_prep(job_id: str, scenario: str) -> None:
         print(f"[prep] {job_id} failed: {job['error']}")
         return
     sentences = []
-    for s in plan.get("sentences", [])[:15]:
+    for s in plan.get("sentences", [])[:PREP_SENTENCES + 2]:
         face = s.get("face", "") if s.get("face") in ("brows down", "brows up", "head shake") else ""
         signs = clean(s.get("signs", []), face)
         if s.get("english") and signs:
             sentences.append({"english": str(s["english"])[:120], "signs": signs, "face": face})
     book = {"title": str(plan.get("title") or scenario)[:80], "scenario": scenario, "sentences": sentences,
-            "practice": [str(p).upper() for p in plan.get("practice", [])][:6], "source": "AI · CREAO",
+            "practice": [str(p).upper() for p in plan.get("practice", [])][:4], "source": "AI · CREAO",
             "ms": round((time.perf_counter() - t0) * 1000)}
     DATA.mkdir(parents=True, exist_ok=True)
     PHRASEBOOK.write_text(json.dumps(book, indent=1), encoding="utf-8")

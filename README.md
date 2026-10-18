@@ -157,6 +157,8 @@ Typed sentences are handled entirely on the phone. Speech goes glasses mic → p
 3. **Single word**: hand-written demo sign (`deck.json`) first, then ASL-LEX (`asllex.json`); plurals and *-ing*/*-ed* forms are handled.
 4. **Anything else is fingerspelled.** It never makes up a sign.
 
+**Conversation prep (CREAO).** On the phone page, describe an upcoming conversation ("Ordering coffee from a Deaf barista") and press *Prepare with CREAO*. A CREAO agent plans the 6 sentences you'll most likely need, in ASL order with face cues, plus up to 4 signs to practise (about 40 s). They become one-tap buttons, and saying any of them later shows its cards instantly. With *Remember my sentences* on (off by default), the laptop keeps the sentences you sign and the signs you opened HOW for, as text, and *Use what I signed before* lets CREAO reuse them. Needs `CREAO_API_KEY` and `CREAO_PREP_APP_ID` in `.env`; the agent's instructions are in `tools/creao_prep_prompt.md`.
+
 `g2/src/main.ts` draws the cards: one image container (144×144 handshape, 4-bit green) and one text container, one bridge call at a time, and the image is only resent when the handshape changes.
 
 ### Where the content comes from
