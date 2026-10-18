@@ -62,12 +62,14 @@ class Runtime:
         self.research = ResearchQueue(self.asset_root, self.clock)
         self.engine = self._make_engine(self._default_card())
         self.sim = None  # set below when simulating; startable_cards() reads it while sessions load
+        self.voice = None  # optional VoiceService (voice.py), attached by its constructor; None = voice off (read while sessions load)
         sess_path = Path(log_dir) / "sessions.json" if log_dir is not None else None
         self.sessions = SessionManager(
             self.hud, self.clock, lambda: self.cards, self._set_card, sess_path,
             record=lambda kind, **d: self.elog.write(kind, **d),
             refine=self._refine_unsupported,
             startable=self.startable_cards,
+            voice_on=lambda: self.voice is not None,
         )
         self.sessions.restore()
         self.hud.session_id = self._sid()
@@ -77,7 +79,6 @@ class Runtime:
             self.sim = SimPi(self.clock)
         self._last_poll_ms: Optional[int] = None
         self.ws_clients = 0
-        self.voice = None  # optional VoiceService (voice.py), attached by its constructor; None = voice off
 
     # ------------------------------------------------------------------ cards / engine
     def _default_card(self) -> Card:

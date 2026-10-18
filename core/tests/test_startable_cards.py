@@ -54,3 +54,12 @@ def test_with_a_device_reporting_the_fault_card_is_listed_too():
 def test_simulated_device_keeps_the_fault_card_available():
     rt, _ = rig(require_device_link=True, simulate=True)
     assert "camera_lens" in {c.card_id for c in rt.startable_cards()}
+
+
+def test_first_screen_says_hold_to_speak_only_when_voice_is_on():
+    rt, clock = rig()
+    press_through_welcome(rt, clock)
+    assert rt.hud.current.menu.prompt == "WHAT DO YOU NEED?"
+    rt.voice = object()  # VoiceService attaches itself here when enabled
+    rt.sessions.refresh()
+    assert rt.hud.current.menu.prompt == "HOLD TO SPEAK OR PICK" and len(rt.hud.current.menu.prompt) <= 24

@@ -48,10 +48,12 @@ class SessionManager:
         record: Optional[Callable[..., None]] = None,
         refine: Optional[Callable[[GoalRequest, GoalResolution], GoalResolution]] = None,
         startable: Optional[Callable[[], list[Card]]] = None,
+        voice_on: Optional[Callable[[], bool]] = None,
     ) -> None:
         self.hud = hud
         self.clock = clock
         self._cards = cards
+        self._voice_on = voice_on or (lambda: False)  # when spoken goals are available the first screen says so
         self._startable = startable or cards  # cards that can START a task now (a fault card needs its device reporting); _cards resolves running ones
         self._on_task = on_task
         self._path = path
@@ -324,6 +326,7 @@ class SessionManager:
             if ch is None:
                 screen = Screen.uncertain(Cue(line1="NOTHING LOADED YET", line2="SEE PHONE"), ttl_ms=FLASH_MS)
             else:
-                screen = Screen.make_menu("WHAT DO YOU NEED?" if ch.mode == "any" else "PICK A TASK", ch.labels, ch.selected)
+                prompt = ("HOLD TO SPEAK OR PICK" if self._voice_on() else "WHAT DO YOU NEED?") if ch.mode == "any" else "PICK A TASK"
+                screen = Screen.make_menu(prompt, ch.labels, ch.selected)
         self.hud.set_layer("ui", screen)
         self.hud.sync()
