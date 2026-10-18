@@ -41,6 +41,19 @@ From `g2/`: `npm install` (then `npm rebuild @evenrealities/evenhub-simulator` i
 - Handshape PNGs: `uv run tools/build_handshapes.py --all` (writes `g2/public/handshapes/`). Vocabulary: `uv run tools/build_deck.py` (writes `g2/src/asllex.json`).
 - Windows: the phone can only reach the dev server if port 5173 is allowed inbound (the venue network is Public).
 
+## AI model comparison (2026-10-18 02:00, `uv run tools/bench_llm.py <models>`)
+Same prompt (rules + 4 examples), 18 test sentences, temperature 0, JSON schema; laptop RTX 3060 6 GB. Score: 0.4 signs present + 0.2 face cue + 0.2 ASL order + 0.2 no English filler. References are AI-drafted (UNCHECKED): good for ranking models, not for grading ASL.
+
+| Model | Score | Usable signs | Median latency | On GPU |
+|---|---|---|---|---|
+| qwen3.5:4b-q4_K_M | 0.94 | 97% | 3.2 s | fully |
+| gemma4:e2b-it-qat | 0.93 | 91% | 2.8 s | fully |
+| qwen2.5:7b-instruct-q4_K_M | 0.93 | 94% | 4.1 s | 82% (rest on CPU) |
+| qwen3:8b (think off) | 0.86 | 93% | 5.5 s | partly |
+| qwen3:4b-instruct-2507-q4_K_M | 0.81 | 94% | 3.1 s | fully |
+
+Shared mistakes, to fix in code after the model: question word not last, NOT-X compounds (NOT-HUNGRY), NOT-LIKE vs DONT-LIKE, spelling words we have a sign for (STORE). Plan: CREAO agent first (prompt in `tools/creao_agent_prompt.md`), local qwen3.5:4b as fallback, word-by-word last.
+
 ## Decisions
 - Solo branch; no Deaf reviewer; physical G2 available; no ring.
 - Speech recognition: offline Vosk on the laptop (tools/keyword_server.py proved the path once).
