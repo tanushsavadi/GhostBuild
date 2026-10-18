@@ -259,3 +259,31 @@ def test_camera_lens_standin_is_flagged_placeholder():
     man = json.loads((ROOT / "knowledge/guides/camera_lens/manifest.json").read_text())
     assert [v["view"] for v in man["views"]] == ["where", "how", "correct"]
     assert all(v["placeholder"] and v["provenance"] == "AUTHORED DEMO METADATA" for v in man["views"])
+
+
+def test_custom_placeholder_banner_text_is_optional_and_validated(tmp_path):
+    gdir = make_guide(tmp_path / "a", placeholder=True)
+    ann = json.loads((gdir / "annotations.json").read_text())
+    ann["banner"] = "SCHEMATIC – REPLACE WITH PHOTO"
+    (gdir / "annotations.json").write_text(json.dumps(ann))
+    spec = gi.parse_guide(gdir / "annotations.json")
+    assert spec.views[0].banner == "SCHEMATIC – REPLACE WITH PHOTO"
+    default = bg.build_guide(make_guide(tmp_path / "b", placeholder=True), tmp_path / "o", write=False)
+    custom = bg.build_guide(gdir, tmp_path / "o", write=False)
+    assert custom[1]["where.png"] == default[1]["where.png"]              # G2 image unchanged
+    assert custom[1]["where.phone.png"] != default[1]["where.phone.png"]  # banner text differs on the phone image
+    for bad in ("NO DASH HERE", "A – " + "B" * 50, 12):
+        ann["banner"] = bad
+        (gdir / "annotations.json").write_text(json.dumps(ann))
+        with pytest.raises(gi.GuideError, match="banner"):
+            gi.parse_guide(gdir / "annotations.json")
+
+
+def test_paper_cup_standins_are_flagged_schematic_placeholders():
+    for gid, views in (("cup_fold_half", ["where", "how", "correct"]), ("cup_pinch", ["where", "how"])):
+        man = json.loads((ROOT / f"knowledge/guides/{gid}/manifest.json").read_text())
+        spec = gi.parse_guide(ROOT / f"assets/sources/{gid}/annotations.json")
+        assert [v["view"] for v in man["views"]] == views
+        assert man["placeholder"] is True and spec.views[0].banner == "SCHEMATIC – REPLACE WITH PHOTO"
+        assert all(v["placeholder"] and v["provenance"] == "AUTHORED DEMO METADATA" for v in man["views"])
+        assert all(v["depicts"].startswith("SCHEMATIC stand-in") for v in man["views"])

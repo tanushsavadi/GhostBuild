@@ -7,7 +7,15 @@ Exit 0 when every card is valid, 1 with readable errors otherwise.
 
 Rules beyond the Card schema:
 - Cue text: upper case; only A-Z 0-9 space and . - / ' · plus ● (the status marker used by ok cues).
-- Cue text never reads as a diagnosis: no IS, ARE, BROKEN, DEAD or FAULTY as whole words.
+  Playbook step text (Card.steps) may also use , : ? ! ( ) + = (all plain ASCII, so g2/src/glyphs.ts passes them
+  through). The check mark is NOT allowed: the plugin folds it to the letters OK.
+- Cue text never reads as a diagnosis: no IS, ARE, BROKEN, DEAD or FAULTY as whole words (steps also: WRONG, BAD,
+  DEFECTIVE, DAMAGED).
+- Playbooks (Card.steps): unique step ids; `requires` names EARLIER steps; step/troubleshoot guide_id names a guide of the
+  card; every verify.when / troubleshoot.when signal exists on Observation; verify may only use ALLOWED_VERIFY_SIGNALS;
+  a manual step (no verify) never says VERIFIED or CORRECT; a LED-command verify never says VERIFIED; faq questions are
+  lowercase; troubleshoot cites follow the same verbatim-quote rule as fault checks.
+- Alias strings are unique per goal_mode across the cards directory (the resolver would be ambiguous otherwise).
 - Predicate.signal must be a real path into contracts.models.Observation (e.g. camera.mean_luma).
 - Numeric predicate values sit inside the physical range of the signal; op/value shapes match.
 - offer_help_after_ms is not earlier than fail_after_ms; functional within_ms is positive.
@@ -29,13 +37,29 @@ from pathlib import Path
 
 from pydantic import BaseModel, ValidationError
 
-from contracts.models import Card, Cue, Observation
+from contracts.models import Card, Check, Cue, Observation, Step
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_CARDS_DIR = REPO_ROOT / "knowledge" / "cards"
 
 CUE_GLYPHS = re.compile(r"^[A-Z0-9 .\-/'·●]*$")
+# Playbook step text: the same set plus plain-ASCII punctuation. Deliberately no check mark: g2/src/glyphs.ts folds it to "OK".
+STEP_GLYPHS = re.compile(r"^[A-Z0-9 .\-/'·●,:?!()+=]*$")
 DIAGNOSIS = re.compile(r"\b(IS|ARE|BROKEN|DEAD|FAULTY)\b")
+STEP_DIAGNOSIS = re.compile(r"\b(IS|ARE|BROKEN|DEAD|FAULTY|WRONG|BAD|DEFECTIVE|DAMAGED)\b")
+MANUAL_FORBIDDEN = re.compile(r"\b(VERIFIED|CORRECT)\b")
+# Telemetry a Pi station actually reports (docs/sponsors/CREAO_AGENT_BRIEF.md). A step `verify` may use only these.
+ALLOWED_VERIFY_SIGNALS = frozenset(
+    {
+        "camera.mean_luma",
+        "camera.luma_std",
+        "camera.detail",
+        "camera.motion",
+        "camera.frame_seq",
+        "camera.frame_age_ms",
+        "led.commanded_on",
+    }
+)
 
 # Physical ranges of Observation signals (contracts/models.py CameraObs). Numeric predicates must fit.
 SIGNAL_RANGES: dict[str, tuple[float, float | None]] = {
@@ -90,21 +114,52 @@ def _is_number(value: object) -> bool:
     return isinstance(value, (int, float)) and not isinstance(value, bool)
 
 
-def _iter_cues(card: Card) -> list[tuple[str, Cue]]:
-    cues: list[tuple[str, Cue]] = []
+def _iter_cues(card: Card) -> list[tuple[str, Cue, bool]]:
+    """(where, cue, is_step_text). Step text may use the wider glyph set and the wider diagnosis word list."""
+    cues: list[tuple[str, Cue, bool]] = []
     for ti, test in enumerate(card.tests):
         base = f"tests[{ti}]({test.id})"
-        cues.append((f"{base}.fact", test.fact))
-        cues.append((f"{base}.ok", test.ok))
+        cues.append((f"{base}.fact", test.fact, False))
+        cues.append((f"{base}.ok", test.ok, False))
         for ci, check in enumerate(test.checks):
-            cues.append((f"{base}.checks[{ci}].action", check.action))
+            cues.append((f"{base}.checks[{ci}].action", check.action, False))
     if card.functional is not None:
-        cues.append(("functional.prompt", card.functional.prompt))
-        cues.append(("functional.ok", card.functional.ok))
+        cues.append(("functional.prompt", card.functional.prompt, False))
+        cues.append(("functional.ok", card.functional.ok, False))
     for gi, guide in enumerate(card.guides):
         for vi, view in enumerate(guide.views):
-            cues.append((f"guides[{gi}].views[{vi}].fallback", view.fallback))
+            cues.append((f"guides[{gi}].views[{vi}].fallback", view.fallback, False))
+    for si, step in enumerate(card.steps):
+        for where, cue in _step_cues(step, f"steps[{si}]({step.id})"):
+            cues.append((where, cue, True))
     return cues
+
+
+def _step_cues(step: Step, base: str) -> list[tuple[str, Cue]]:
+    cues: list[tuple[str, Cue]] = [(f"{base}.cue", step.cue)]
+    if step.why is not None:
+        cues.append((f"{base}.why", step.why))
+    if step.where is not None:
+        cues.append((f"{base}.where", step.where))
+    for fi, faq in enumerate(step.faq):
+        cues.append((f"{base}.faq[{fi}].a", faq.a))
+    for ci, check in enumerate(step.troubleshoot):
+        cues.append((f"{base}.troubleshoot[{ci}].action", check.action))
+    if step.verify is not None:
+        cues.append((f"{base}.verify.ok", step.verify.ok))
+    return cues
+
+
+def iter_checks(card: Card) -> list[tuple[str, Check]]:
+    """Every Check in the card: fault-test checks and playbook troubleshoot entries."""
+    checks: list[tuple[str, Check]] = []
+    for ti, test in enumerate(card.tests):
+        for ci, check in enumerate(test.checks):
+            checks.append((f"tests[{ti}]({test.id}).checks[{ci}]", check))
+    for si, step in enumerate(card.steps):
+        for ci, check in enumerate(step.troubleshoot):
+            checks.append((f"steps[{si}]({step.id}).troubleshoot[{ci}]", check))
+    return checks
 
 
 def _iter_predicates(card: Card) -> list[tuple[str, object]]:
@@ -120,6 +175,14 @@ def _iter_predicates(card: Card) -> list[tuple[str, object]]:
             preds.append((f"functional.trigger[{pi}]", pred))
         if card.functional.expect_commanded is not None:
             preds.append(("functional.expect_commanded", card.functional.expect_commanded))
+    for si, step in enumerate(card.steps):
+        base = f"steps[{si}]({step.id})"
+        if step.verify is not None:
+            for pi, pred in enumerate(step.verify.when):
+                preds.append((f"{base}.verify.when[{pi}]", pred))
+        for ci, check in enumerate(step.troubleshoot):
+            for pi, pred in enumerate(check.when):
+                preds.append((f"{base}.troubleshoot[{ci}].when[{pi}]", pred))
     return preds
 
 
@@ -131,17 +194,20 @@ def _resolve_repo_path(relative: str, root: Path) -> Path:
     return root / relative
 
 
-def _check_cue(where: str, cue: Cue) -> list[str]:
+def _check_cue(where: str, cue: Cue, step_text: bool = False) -> list[str]:
     errors: list[str] = []
+    glyphs = STEP_GLYPHS if step_text else CUE_GLYPHS
+    diagnosis = STEP_DIAGNOSIS if step_text else DIAGNOSIS
     for line_name, text in (("line1", cue.line1), ("line2", cue.line2)):
         if not text:
             continue
         if text != text.upper():
             errors.append(f"{where}.{line_name}: cue must be upper case: {text!r}")
-        if not CUE_GLYPHS.match(text):
-            bad = sorted({c for c in text if not CUE_GLYPHS.match(c)})
-            errors.append(f"{where}.{line_name}: characters not allowed on G2 {bad}: {text!r}")
-        found = DIAGNOSIS.search(text)
+        if not glyphs.match(text):
+            bad = sorted({c for c in text if not glyphs.match(c)})
+            hint = " (the G2 plugin folds the check mark to the letters OK; write OK or DONE)" if "✓" in bad else ""
+            errors.append(f"{where}.{line_name}: characters not allowed on G2 {bad}: {text!r}{hint}")
+        found = diagnosis.search(text)
         if found:
             errors.append(
                 f"{where}.{line_name}: reads as a diagnosis ({found.group(0)}); use CHECK ... wording: {text!r}"
@@ -219,27 +285,19 @@ def _check_card(card: Card, path: Path, root: Path, check_images: bool) -> list[
                 f"{label}: tests[{ti}]({test.id}) offer_help_after_ms "
                 f"({test.offer_help_after_ms}) is earlier than fail_after_ms ({test.fail_after_ms})"
             )
-        for ci, check in enumerate(test.checks):
-            if check.guide_id is not None and check.guide_id not in guide_ids:
-                errors.append(
-                    f"{label}: tests[{ti}]({test.id}).checks[{ci}] guide_id {check.guide_id!r} "
-                    f"is not a guide of this card"
-                )
-            for cite_index, cite in enumerate(check.cites):
-                errors.extend(
-                    _check_cite(
-                        f"{label}: tests[{ti}]({test.id}).checks[{ci}].cites[{cite_index}]",
-                        cite,
-                        card,
-                        source_files,
-                    )
-                )
+    for where, check in iter_checks(card):
+        if check.guide_id is not None and check.guide_id not in guide_ids:
+            errors.append(f"{label}: {where} guide_id {check.guide_id!r} is not a guide of this card")
+        for cite_index, cite in enumerate(check.cites):
+            errors.extend(_check_cite(f"{label}: {where}.cites[{cite_index}]", cite, card, source_files))
+
+    errors.extend(_check_steps(label, card, guide_ids))
 
     if card.functional is not None and card.functional.within_ms <= 0:
         errors.append(f"{label}: functional within_ms must be positive")
 
-    for where, cue in _iter_cues(card):
-        errors.extend(_check_cue(f"{label}: {where}", cue))
+    for where, cue, step_text in _iter_cues(card):
+        errors.extend(_check_cue(f"{label}: {where}", cue, step_text))
 
     for where, pred in _iter_predicates(card):
         errors.extend(_check_predicate(f"{label}: {where}", pred))
@@ -257,6 +315,57 @@ def _check_card(card: Card, path: Path, root: Path, check_images: bool) -> list[
                         f"{label}: guides[{gi}].views[{vi}].{field_name} missing: {rel}"
                     )
 
+    return errors
+
+
+def _check_steps(label: str, card: Card, guide_ids: set[str]) -> list[str]:
+    """Playbook rules that need the whole card (cue glyphs and predicates are checked by the shared loops)."""
+    errors: list[str] = []
+    seen: list[str] = []
+    for si, step in enumerate(card.steps):
+        base = f"{label}: steps[{si}]({step.id})"
+        if step.id in seen:
+            errors.append(f"{base}: duplicate step id {step.id!r}")
+        for req in step.requires:
+            if req == step.id:
+                errors.append(f"{base}: requires itself")
+            elif req not in seen:
+                later = req in {s.id for s in card.steps}
+                errors.append(
+                    f"{base}: requires {req!r}, which is "
+                    + ("a LATER step; requires must name earlier steps" if later else "not a step of this card")
+                )
+        seen.append(step.id)
+        if step.guide_id is not None and step.guide_id not in guide_ids:
+            errors.append(f"{base}: guide_id {step.guide_id!r} is not a guide of this card")
+        for fi, faq in enumerate(step.faq):
+            if not faq.q.strip() or faq.q != faq.q.lower():
+                errors.append(f"{base}.faq[{fi}].q: must be non-empty lowercase, as a person would ask it aloud: {faq.q!r}")
+
+        if step.verify is None:
+            for where, cue in _step_cues(step, base):
+                for line_name, text in (("line1", cue.line1), ("line2", cue.line2)):
+                    found = MANUAL_FORBIDDEN.search(text)
+                    if found:
+                        errors.append(
+                            f"{where}.{line_name}: a manual step (no verify) is HUMAN CONFIRMED, never {found.group(0)}: {text!r}"
+                        )
+        else:
+            signals = [p.signal for p in step.verify.when]
+            for pi, signal in enumerate(signals):
+                if signal not in ALLOWED_VERIFY_SIGNALS:
+                    errors.append(
+                        f"{base}.verify.when[{pi}]: signal {signal!r} is not an allowed telemetry signal "
+                        f"({', '.join(sorted(ALLOWED_VERIFY_SIGNALS))})"
+                    )
+            if any(sig.startswith("led.") for sig in signals):
+                ok = step.verify.ok
+                for line_name, text in (("line1", ok.line1), ("line2", ok.line2)):
+                    if re.search(r"\b(VERIFIED|CONFIRMED|CORRECT)\b", text):
+                        errors.append(
+                            f"{base}.verify.ok.{line_name}: an LED command is COMMANDED, not measured light; "
+                            f"do not say VERIFIED/CONFIRMED/CORRECT: {text!r}"
+                        )
     return errors
 
 
@@ -279,6 +388,23 @@ def _check_cite(where: str, cite, card: Card, source_files: dict[str, Path | Non
     return errors
 
 
+def _check_alias_clashes(parsed: list[tuple[Path, Card]]) -> list[str]:
+    """The goal resolver matches aliases by substring; the same alias on two cards of one goal_mode makes it ambiguous."""
+    owners: dict[tuple[str, str], str] = {}
+    errors: list[str] = []
+    for path, card in parsed:
+        for alias in {a.strip().lower() for a in card.aliases if a.strip()}:
+            key = (card.goal_mode, alias)
+            if key in owners and owners[key] != card.card_id:
+                errors.append(
+                    f"{path.name}: alias {alias!r} is also an alias of {owners[key]!r} (same goal_mode {card.goal_mode}); "
+                    "the resolver would be ambiguous"
+                )
+            else:
+                owners[key] = card.card_id
+    return errors
+
+
 def validate_cards(
     cards_dir: Path = DEFAULT_CARDS_DIR,
     *,
@@ -287,6 +413,7 @@ def validate_cards(
 ) -> list[str]:
     """Return a list of readable error strings. Empty means every card is valid."""
     errors: list[str] = []
+    parsed: list[tuple[Path, Card]] = []
     paths = sorted(Path(cards_dir).glob("*.json"))
     if not paths:
         errors.append(f"{cards_dir}: no card files found")
@@ -304,6 +431,8 @@ def validate_cards(
                 errors.append(f"{path.name}: [{loc}] {item['msg']}")
             continue
         errors.extend(_check_card(card, path, root, check_images))
+        parsed.append((path, card))
+    errors.extend(_check_alias_clashes(parsed))
     return errors
 
 

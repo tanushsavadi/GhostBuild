@@ -80,7 +80,7 @@ def inventory_md(manifests: list[dict], errors: dict[str, str]) -> str:
             "| guide | view | step_id | file | provenance | placeholder? | status |", "|---|---|---|---|---|---|---|"]
     for m in manifests:
         for v in m["views"]:
-            status = "PLACEHOLDER schematic - needs real rig photo" if v["placeholder"] else "built from real photo"
+            status = "PLACEHOLDER schematic - needs real photo" if v["placeholder"] else "built from real photo"
             rows.append(f"| {m['guide_id']} | {v['view']} | {v['step_id']} | `{v['image']}` ({v['w']}x{v['h']}, {v['bytes']} B) "
                         f"| {v['provenance']} | {'yes' if v['placeholder'] else 'no'} | {status} |")
     for gid, err in errors.items():

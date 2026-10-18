@@ -7,7 +7,7 @@ Envelope shape (docs/sponsors/CREAO_AGENT_BRIEF.md):
     {run_id, request, card, source_texts{source_id: text}, research{sources, video_notes, visual_references, uncertainties}}
 
 validate_envelope applies the same rules knowledge/validate.py applies to shipped cards (schema, glyphs and length,
-signals exist, guide ids resolve, no diagnosis words) plus the draft-only rules: verbatim quotes against the supplied
+signals exist, guide ids resolve, no diagnosis words, playbook step rules) plus the draft-only rules: verbatim quotes against the supplied
 source_texts, http(s) URLs only, safe ids and paths, 1 MB cap. Nothing here fetches a URL.
 """
 
@@ -25,7 +25,7 @@ from typing import Any
 from pydantic import ValidationError
 
 from contracts.models import Card
-from knowledge.validate import REPO_ROOT, _check_card, _normalise
+from knowledge.validate import REPO_ROOT, _check_card, _normalise, iter_checks
 
 MAX_ENVELOPE_BYTES = 1_000_000  # 1 MB
 
@@ -128,25 +128,24 @@ def _card_errors(card_raw: dict, source_texts: dict, root: Path) -> list[str]:
                 errors.append(f"card.guides[{guide.id}].{view.view}.reference_url: must be http(s): {view.reference_url!r}")
 
     source_ids = {s.id for s in card.sources}
-    for ti, test in enumerate(card.tests):
-        for ci, check in enumerate(test.checks):
-            for ki, cite in enumerate(check.cites):
-                where = f"card.tests[{ti}]({test.id}).checks[{ci}].cites[{ki}]"
-                if cite.url is not None and not is_http_url(cite.url):
-                    errors.append(f"{where}: url must be http(s): {cite.url!r}")
-                if cite.source not in source_ids:
-                    continue  # reported by the shared house rules below
-                if cite.quote is None:
-                    continue
-                text = source_texts.get(cite.source)
-                if text is None:
-                    errors.append(f"{where}: quote given but envelope.source_texts has no text for {cite.source!r}")
-                    continue
-                needle = _normalise(cite.quote)
-                if not needle:
-                    errors.append(f"{where}: quote is empty")
-                elif needle not in _normalise(text):
-                    errors.append(f"{where}: quote not found verbatim in source_texts[{cite.source!r}]: {cite.quote!r}")
+    for check_where, check in iter_checks(card):
+        for ki, cite in enumerate(check.cites):
+            where = f"card.{check_where}.cites[{ki}]"
+            if cite.url is not None and not is_http_url(cite.url):
+                errors.append(f"{where}: url must be http(s): {cite.url!r}")
+            if cite.source not in source_ids:
+                continue  # reported by the shared house rules below
+            if cite.quote is None:
+                continue
+            text = source_texts.get(cite.source)
+            if text is None:
+                errors.append(f"{where}: quote given but envelope.source_texts has no text for {cite.source!r}")
+                continue
+            needle = _normalise(cite.quote)
+            if not needle:
+                errors.append(f"{where}: quote is empty")
+            elif needle not in _normalise(text):
+                errors.append(f"{where}: quote not found verbatim in source_texts[{cite.source!r}]: {cite.quote!r}")
 
     # Shared house rules on a quote-free, file-free copy: the quote check above is the envelope's version of it.
     rules_raw = copy.deepcopy(card_raw)
@@ -154,6 +153,10 @@ def _card_errors(card_raw: dict, source_texts: dict, root: Path) -> list[str]:
         source["file"] = None
     for test in rules_raw.get("tests", []):
         for check in test.get("checks", []):
+            for cite in check.get("cites", []):
+                cite["quote"] = None
+    for step in rules_raw.get("steps", []):
+        for check in step.get("troubleshoot", []):
             for cite in check.get("cites", []):
                 cite["quote"] = None
     rules_card = Card.model_validate(rules_raw)

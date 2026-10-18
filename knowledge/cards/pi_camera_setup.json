@@ -1,0 +1,512 @@
+{
+  "v": 2,
+  "card_id": "pi_camera_setup",
+  "title": "Set up the Pi camera station",
+  "provenance": "AUTHORED DEMO METADATA",
+  "sources": [
+    {
+      "id": "picam_install",
+      "kind": "MANUFACTURER DOC",
+      "title": "Raspberry Pi docs: Install a Raspberry Pi camera",
+      "url": "https://www.raspberrypi.com/documentation/accessories/camera.html",
+      "file": "knowledge/sources/pi_camera_setup__picam_install.md"
+    },
+    {
+      "id": "picam_hello",
+      "kind": "MANUFACTURER DOC",
+      "title": "Raspberry Pi docs: rpicam-hello",
+      "url": "https://www.raspberrypi.com/documentation/computers/camera_software.html",
+      "file": "knowledge/sources/pi_camera_setup__picam_hello.md"
+    },
+    {
+      "id": "picam_troubleshoot",
+      "kind": "MANUFACTURER DOC",
+      "title": "Raspberry Pi docs: camera software troubleshooting",
+      "url": "https://www.raspberrypi.com/documentation/computers/camera_software.html",
+      "file": "knowledge/sources/pi_camera_setup__picam_troubleshoot.md"
+    },
+    {
+      "id": "pi_gpio_python",
+      "kind": "MANUFACTURER DOC",
+      "title": "Raspberry Pi docs: Use GPIO from Python",
+      "url": "https://www.raspberrypi.com/documentation/computers/os.html",
+      "file": "knowledge/sources/pi_camera_setup__pi_gpio_python.md"
+    },
+    {
+      "id": "team_notes",
+      "kind": "AUTHORED PROJECT SPEC",
+      "title": "GhostBuild PIVOT section 0A (hand-wave LED test)",
+      "url": null,
+      "file": "docs/PIVOT_GHOSTBUILD.md"
+    }
+  ],
+  "tests": [],
+  "steps": [
+    {
+      "id": "lens_film",
+      "title": "Peel the lens shipping film",
+      "cue": {
+        "line1": "CHECK FOR LENS FILM",
+        "line2": "PEEL BLUE FILM OFF"
+      },
+      "detail": "Some cameras might come with a small piece of translucent blue plastic film covering the lens. This is only present to protect the lens during shipping. To remove it, gently peel it off. (Raspberry Pi docs, Install a Raspberry Pi camera, Step 1.) If your camera has no film, skip this step.",
+      "why": {
+        "line1": "FILM ONLY PROTECTS",
+        "line2": "THE LENS IN SHIPPING"
+      },
+      "where": {
+        "line1": "OVER THE CAMERA LENS",
+        "line2": ""
+      },
+      "warnings": [],
+      "faq": [
+        {
+          "q": "what blue film",
+          "a": {
+            "line1": "A SHIPPING FILM",
+            "line2": "PEEL IT OFF GENTLY"
+          }
+        }
+      ],
+      "troubleshoot": [
+        {
+          "when": [],
+          "action": {
+            "line1": "CHECK LENS CLEAR",
+            "line2": "NO FILM OR COVER"
+          },
+          "why": "The Raspberry Pi docs describe a shipping film that covers the lens on some cameras.",
+          "cites": [
+            {
+              "source": "picam_install",
+              "loc": "Step 1. Prepare",
+              "quote": "Some cameras might come with a small piece of translucent blue plastic film covering the lens.",
+              "url": "https://www.raspberrypi.com/documentation/accessories/camera.html"
+            }
+          ],
+          "guide_id": null
+        }
+      ],
+      "guide_id": null,
+      "verify": null,
+      "requires": []
+    },
+    {
+      "id": "power_off",
+      "title": "Shut down and unplug the Pi",
+      "cue": {
+        "line1": "SHUT DOWN THE PI",
+        "line2": "UNPLUG ITS POWER"
+      },
+      "detail": "Shut down your Raspberry Pi and disconnect it from power. (Raspberry Pi docs, Step 2.) The docs also warn that cameras are sensitive to static: touch a sink tap or similar to earth yourself before handling the camera board.",
+      "why": {
+        "line1": "DOCS ORDER THIS FIRST",
+        "line2": "NO REASON GIVEN"
+      },
+      "where": null,
+      "warnings": [
+        "Cameras are sensitive to static. Earth yourself prior to handling the PCB (docs warning)."
+      ],
+      "faq": [
+        {
+          "q": "why unplug it first",
+          "a": {
+            "line1": "DOCS SAY SO, NO REASON",
+            "line2": "STATIC WARNING ON PAGE"
+          }
+        }
+      ],
+      "troubleshoot": [
+        {
+          "when": [],
+          "action": {
+            "line1": "CHECK PI POWERED OFF",
+            "line2": "BEFORE THE CABLE"
+          },
+          "why": "The docs install procedure starts with shutting down and disconnecting power.",
+          "cites": [
+            {
+              "source": "picam_install",
+              "loc": "Step 2. Connect the cable to your Raspberry Pi",
+              "quote": "Shut down your Raspberry Pi and disconnect it from power.",
+              "url": "https://www.raspberrypi.com/documentation/accessories/camera.html"
+            }
+          ],
+          "guide_id": null
+        }
+      ],
+      "guide_id": null,
+      "verify": null,
+      "requires": [
+        "lens_film"
+      ]
+    },
+    {
+      "id": "cable",
+      "title": "Connect the camera cable",
+      "cue": {
+        "line1": "FOLLOW THE CAMERA DOCS",
+        "line2": "FOR THE RIBBON CABLE"
+      },
+      "detail": "Follow the official Raspberry Pi page 'Install a Raspberry Pi camera' (Steps 2 and 3) for your exact Pi model and camera: which connector, which cable, how the flap opens and which way the contacts face. GhostBuild does not repeat those details because they differ by model. Your camera usually ships with the cable already attached. The same docs say the cable goes in the camera connector, not a display connector.",
+      "why": {
+        "line1": "UNCERTAIN: PORT LABELS",
+        "line2": "DIFFER BY PI MODEL"
+      },
+      "where": {
+        "line1": "CAMERA PORT, NOT DISPLAY",
+        "line2": "SEE DOCS FOR YOUR PI"
+      },
+      "warnings": [
+        "Do not bend the flexible cable at a sharp angle (docs).",
+        "Keep the Pi powered off until the cable is seated."
+      ],
+      "faq": [
+        {
+          "q": "which port does the camera use",
+          "a": {
+            "line1": "CAMERA PORT, NOT DISPLAY",
+            "line2": "SEE DOCS FOR YOUR PI"
+          }
+        },
+        {
+          "q": "which way do the contacts face",
+          "a": {
+            "line1": "FOLLOW THE OFFICIAL DOCS",
+            "line2": "FOR YOUR PI MODEL"
+          }
+        }
+      ],
+      "troubleshoot": [
+        {
+          "when": [],
+          "action": {
+            "line1": "CHECK CABLE SEATED",
+            "line2": "STRAIGHT, FULLY IN"
+          },
+          "why": "The docs list a firmly seated, fully inserted, evenly inserted cable first.",
+          "cites": [
+            {
+              "source": "picam_troubleshoot",
+              "loc": "Troubleshooting",
+              "quote": "Check that the FFC (Flat Flexible Cable) is firmly seated, fully inserted, and that the contacts face the correct direction.",
+              "url": "https://www.raspberrypi.com/documentation/computers/camera_software.html"
+            }
+          ],
+          "guide_id": null
+        },
+        {
+          "when": [],
+          "action": {
+            "line1": "CHECK CSI PORT",
+            "line2": "NOT THE DSI PORT"
+          },
+          "why": "The docs say the cable fits either port but only the CSI port powers and controls the camera.",
+          "cites": [
+            {
+              "source": "picam_troubleshoot",
+              "loc": "Troubleshooting",
+              "quote": "The connector fits into either port, but only the CSI port powers and controls the camera.",
+              "url": "https://www.raspberrypi.com/documentation/computers/camera_software.html"
+            }
+          ],
+          "guide_id": null
+        }
+      ],
+      "guide_id": null,
+      "verify": null,
+      "requires": [
+        "power_off"
+      ]
+    },
+    {
+      "id": "power_on",
+      "title": "Power the Pi back on",
+      "cue": {
+        "line1": "RECONNECT PI POWER",
+        "line2": "AND TURN IT ON"
+      },
+      "detail": "Reconnect your Raspberry Pi device to power and turn it on. (Raspberry Pi docs, Step 4.) Then make sure your software is up to date and install rpicam-apps as the docs describe. Start the GhostBuild Pi service as written in pi/README.md.",
+      "why": null,
+      "where": null,
+      "warnings": [],
+      "faq": [
+        {
+          "q": "do i need to update software",
+          "a": {
+            "line1": "DOCS SAY UPDATE FIRST",
+            "line2": "THEN SET UP RPICAM-APPS"
+          }
+        }
+      ],
+      "troubleshoot": [
+        {
+          "when": [],
+          "action": {
+            "line1": "CHECK POWER SUPPLY",
+            "line2": "TRY A DIFFERENT ONE"
+          },
+          "why": "The docs say the camera adds about 200-250mA and a low quality supply may not power it.",
+          "cites": [
+            {
+              "source": "picam_troubleshoot",
+              "loc": "Troubleshooting",
+              "quote": "The Camera Module adds about 200-250mA to the power requirements of your Raspberry Pi.",
+              "url": "https://www.raspberrypi.com/documentation/computers/camera_software.html"
+            }
+          ],
+          "guide_id": null
+        }
+      ],
+      "guide_id": null,
+      "verify": null,
+      "requires": [
+        "cable"
+      ]
+    },
+    {
+      "id": "camera_feed",
+      "title": "Camera feed live",
+      "cue": {
+        "line1": "KEEP LENS UNCOVERED",
+        "line2": "WAITING FOR FEED"
+      },
+      "detail": "Measured step: the GhostBuild Pi service reports camera frames. This step completes only when frames keep arriving (camera.frame_seq above 0) and the picture is not dark (camera.mean_luma above 25) for 1.5 s. 'Camera frame received' is MEASURED LIVE; 'scene visible' is only INFERRED from brightness. To see the camera yourself, the docs say rpicam-hello briefly displays a preview window containing the video feed from a connected camera.",
+      "why": {
+        "line1": "UNCERTAIN: DARK LIMIT",
+        "line2": "PLACEHOLDER VALUE 25"
+      },
+      "where": {
+        "line1": "CAMERA FIXED VIEW",
+        "line2": ""
+      },
+      "warnings": [],
+      "faq": [
+        {
+          "q": "how do i see the camera",
+          "a": {
+            "line1": "RUN RPICAM-HELLO",
+            "line2": "ON THE PI"
+          }
+        }
+      ],
+      "troubleshoot": [
+        {
+          "when": [
+            {
+              "signal": "camera.mean_luma",
+              "op": "lt",
+              "value": 25
+            }
+          ],
+          "action": {
+            "line1": "CHECK LENS COVER",
+            "line2": "OR FILM REMOVED"
+          },
+          "why": "A dark picture can mean the lens is covered; the docs mention a shipping film.",
+          "cites": [
+            {
+              "source": "picam_install",
+              "loc": "Step 1. Prepare",
+              "quote": "To remove it, gently peel it off.",
+              "url": "https://www.raspberrypi.com/documentation/accessories/camera.html"
+            }
+          ],
+          "guide_id": null
+        },
+        {
+          "when": [
+            {
+              "signal": "camera.frame_seq",
+              "op": "eq",
+              "value": 0
+            }
+          ],
+          "action": {
+            "line1": "CHECK CABLE SEATED",
+            "line2": "STRAIGHT, FULLY IN"
+          },
+          "why": "No new frames: the docs list the cable seating first.",
+          "cites": [
+            {
+              "source": "picam_troubleshoot",
+              "loc": "Troubleshooting",
+              "quote": "Check that the FFC (Flat Flexible Cable) is firmly seated, fully inserted, and that the contacts face the correct direction.",
+              "url": "https://www.raspberrypi.com/documentation/computers/camera_software.html"
+            }
+          ],
+          "guide_id": null
+        },
+        {
+          "when": [],
+          "action": {
+            "line1": "CHECK PI SOFTWARE",
+            "line2": "UPDATE, THEN RETRY"
+          },
+          "why": "The docs also list updating to the latest software.",
+          "cites": [
+            {
+              "source": "picam_troubleshoot",
+              "loc": "Troubleshooting",
+              "quote": "Update to the latest software.",
+              "url": "https://www.raspberrypi.com/documentation/computers/camera_software.html"
+            }
+          ],
+          "guide_id": null
+        }
+      ],
+      "guide_id": null,
+      "verify": {
+        "when": [
+          {
+            "signal": "camera.frame_seq",
+            "op": "gt",
+            "value": 0
+          },
+          {
+            "signal": "camera.mean_luma",
+            "op": "gt",
+            "value": 25
+          }
+        ],
+        "hold_ms": 1500,
+        "ok": {
+          "line1": "● CAMERA FEED LIVE",
+          "line2": "SCENE LOOKS LIT"
+        }
+      },
+      "requires": [
+        "power_on"
+      ]
+    },
+    {
+      "id": "led_wiring",
+      "title": "Find the LED pin",
+      "cue": {
+        "line1": "READ LED PIN FROM",
+        "line2": "YOUR OWN WIRING"
+      },
+      "detail": "Look at how YOUR LED is wired and write the GPIO (BCM) pin number in hardware/WIRING.md. GhostBuild never guesses the pin. The Raspberry Pi GPIO page uses GPIO17 only as a code example, not as a requirement.",
+      "why": {
+        "line1": "UNCERTAIN: YOUR PIN MAY",
+        "line2": "DIFFER FROM DOC EXAMPLE"
+      },
+      "where": {
+        "line1": "HARDWARE/WIRING SHEET",
+        "line2": "OR THE LED JUMPER"
+      },
+      "warnings": [
+        "Do not copy a pin number from an example; use the one actually wired."
+      ],
+      "faq": [
+        {
+          "q": "which pin is the led on",
+          "a": {
+            "line1": "READ IT FROM YOUR",
+            "line2": "OWN WIRING"
+          }
+        }
+      ],
+      "troubleshoot": [
+        {
+          "when": [],
+          "action": {
+            "line1": "CHECK PIN MATCHES WIRING",
+            "line2": "NOT THE DOC EXAMPLE"
+          },
+          "why": "The docs example controls an LED on GPIO17; that is only an example.",
+          "cites": [
+            {
+              "source": "pi_gpio_python",
+              "loc": "LED control",
+              "quote": "The following example code controls an LED connected to GPIO17:",
+              "url": "https://www.raspberrypi.com/documentation/computers/os.html"
+            }
+          ],
+          "guide_id": null
+        }
+      ],
+      "guide_id": null,
+      "verify": null,
+      "requires": [
+        "camera_feed"
+      ]
+    },
+    {
+      "id": "led_test",
+      "title": "LED command test",
+      "cue": {
+        "line1": "WAVE A HAND IN FRONT",
+        "line2": "OF THE CAMERA"
+      },
+      "detail": "Measured step, but only of the COMMAND: when the camera sees motion the Pi commands the LED on and reports led.commanded_on. That is COMMANDED, not measured light. Watch the LED with your own eyes. (PIVOT section 0A.)",
+      "why": {
+        "line1": "PI COMMANDS THE LED",
+        "line2": "YOU MUST SEE THE LIGHT"
+      },
+      "where": {
+        "line1": "IN CAMERA FIXED VIEW",
+        "line2": ""
+      },
+      "warnings": [],
+      "faq": [
+        {
+          "q": "does this prove the led lit",
+          "a": {
+            "line1": "NO, ONLY THE COMMAND",
+            "line2": "LOOK AT THE LED"
+          }
+        }
+      ],
+      "troubleshoot": [
+        {
+          "when": [],
+          "action": {
+            "line1": "CHECK LED WIRED TO PIN",
+            "line2": "FROM YOUR WIRING SHEET"
+          },
+          "why": "The command can succeed while the LED stays dark if the wiring differs from the configured pin.",
+          "cites": [
+            {
+              "source": "team_notes",
+              "loc": "PIVOT section 0A",
+              "quote": "A hand wave in the camera's field of view makes the Pi command the LED on"
+            }
+          ],
+          "guide_id": null
+        }
+      ],
+      "guide_id": null,
+      "verify": {
+        "when": [
+          {
+            "signal": "led.commanded_on",
+            "op": "eq",
+            "value": true
+          }
+        ],
+        "hold_ms": 500,
+        "ok": {
+          "line1": "● LED COMMANDED",
+          "line2": "LOOK AT THE LED"
+        }
+      },
+      "requires": [
+        "camera_feed",
+        "led_wiring"
+      ]
+    }
+  ],
+  "functional": null,
+  "guides": [],
+  "goal_mode": "build",
+  "aliases": [
+    "pi camera station",
+    "camera station",
+    "raspberry pi camera",
+    "pi camera setup",
+    "install camera",
+    "connect camera",
+    "camera cable"
+  ]
+}

@@ -1,0 +1,418 @@
+{
+  "v": 2,
+  "card_id": "led_breadboard",
+  "title": "Light an LED on a breadboard",
+  "provenance": "AUTHORED DEMO METADATA",
+  "sources": [
+    {
+      "id": "dummies_circuit",
+      "kind": "WEB TUTORIAL",
+      "title": "For Dummies: How to Build a Simple Electronic Circuit",
+      "url": "https://www.dummies.com/article/technology/electronics/circuitry/how-to-build-a-simple-electronic-circuit-180237/",
+      "file": "knowledge/sources/led_breadboard__dummies_circuit.md"
+    },
+    {
+      "id": "sparkfun_leds",
+      "kind": "WEB TUTORIAL",
+      "title": "SparkFun: Light-Emitting Diodes (LEDs)",
+      "url": "https://learn.sparkfun.com/tutorials/light-emitting-diodes-leds",
+      "file": "knowledge/sources/led_breadboard__sparkfun_leds.md"
+    },
+    {
+      "id": "adafruit_leds",
+      "kind": "WEB TUTORIAL",
+      "title": "Adafruit: Arduino Lesson 2. LEDs",
+      "url": "https://learn.adafruit.com/adafruit-arduino-lesson-2-leds/leds",
+      "file": "knowledge/sources/led_breadboard__adafruit_leds.md"
+    }
+  ],
+  "tests": [],
+  "steps": [
+    {
+      "id": "parts",
+      "title": "Gather the parts",
+      "cue": {
+        "line1": "GATHER THE PARTS",
+        "line2": "SEE PHONE FOR THE LIST"
+      },
+      "detail": "Parts used by the Dummies tutorial: small solderless breadboard, 470 ohm 1/4 W resistor, red LED 5 mm, 9 V battery snap connector, 9 V battery, short jumper wire (1 inch or less). UNCERTAIN: the right resistor value depends on the battery and LED. Dummies uses 470 ohm with a 9 V battery; SparkFun suggests 330 ohm as a starting point for most LEDs. Use a resistor, never none.",
+      "why": {
+        "line1": "UNCERTAIN: RESISTOR",
+        "line2": "SIZE DEPENDS ON BATTERY"
+      },
+      "where": null,
+      "warnings": [
+        "Do not connect the LED directly to the battery without a resistor. If you do, the LED will flash brightly, and then it will be dead forever. (Dummies)"
+      ],
+      "faq": [
+        {
+          "q": "which resistor do i need",
+          "a": {
+            "line1": "470 OHM WITH 9V BATTERY",
+            "line2": "IN THE SOURCE TUTORIAL"
+          }
+        },
+        {
+          "q": "can i skip the resistor",
+          "a": {
+            "line1": "NO, USE A RESISTOR",
+            "line2": "OR THE LED CAN BURN OUT"
+          }
+        }
+      ],
+      "troubleshoot": [
+        {
+          "when": [],
+          "action": {
+            "line1": "CHECK YOU HAVE A",
+            "line2": "RESISTOR IN THE KIT"
+          },
+          "why": "All three tutorials put a resistor in series with the LED.",
+          "cites": [
+            {
+              "source": "dummies_circuit",
+              "loc": "Intro",
+              "quote": "This simple circuit consists of just three components: a 9 V battery, a light-emitting diode (LED), and a resistor.",
+              "url": "https://www.dummies.com/article/technology/electronics/circuitry/how-to-build-a-simple-electronic-circuit-180237/"
+            },
+            {
+              "source": "sparkfun_leds",
+              "loc": "LEDs Without Math",
+              "quote": "just connect your battery, resistor and LED in series.",
+              "url": "https://learn.sparkfun.com/tutorials/light-emitting-diodes-leds"
+            }
+          ],
+          "guide_id": null
+        }
+      ],
+      "guide_id": null,
+      "verify": null,
+      "requires": []
+    },
+    {
+      "id": "snap",
+      "title": "Place the battery snap leads",
+      "cue": {
+        "line1": "RED LEAD TO TOP STRIP",
+        "line2": "BLACK TO BOTTOM STRIP"
+      },
+      "detail": "Insert the red lead in the top bus strip and the black lead in the bottom bus strip. Any hole will do, but it makes sense to connect the battery at the very end of the breadboard. Do NOT attach the battery to the snap connector yet. (Dummies, step 1.)",
+      "why": null,
+      "where": {
+        "line1": "RAILS ALONG THE EDGES",
+        "line2": ""
+      },
+      "warnings": [
+        "Keep the battery unplugged from the snap connector until the last wiring step."
+      ],
+      "faq": [],
+      "troubleshoot": [
+        {
+          "when": [],
+          "action": {
+            "line1": "CHECK RED AND BLACK",
+            "line2": "ON SEPARATE STRIPS"
+          },
+          "why": "The source puts the red and black leads in different bus strips.",
+          "cites": [
+            {
+              "source": "dummies_circuit",
+              "loc": "Step 1",
+              "quote": "Insert the red lead in the top bus strip and the black lead in the bottom bus strip.",
+              "url": "https://www.dummies.com/article/technology/electronics/circuitry/how-to-build-a-simple-electronic-circuit-180237/"
+            }
+          ],
+          "guide_id": null
+        }
+      ],
+      "guide_id": null,
+      "verify": null,
+      "requires": [
+        "parts"
+      ]
+    },
+    {
+      "id": "resistor",
+      "title": "Place the resistor",
+      "cue": {
+        "line1": "RESISTOR: ONE END IN",
+        "line2": "BOTTOM STRIP, OTHER IN ROW"
+      },
+      "detail": "Insert one end of the resistor into any hole in the bottom bus strip. Then, pick a row in the nearby terminal strip and insert the other end into a hole in that terminal strip. (Dummies, step 2.)",
+      "why": null,
+      "where": null,
+      "warnings": [],
+      "faq": [
+        {
+          "q": "which way does the resistor go",
+          "a": {
+            "line1": "EITHER WAY ROUND",
+            "line2": "NO POSITIVE OR NEGATIVE"
+          }
+        }
+      ],
+      "troubleshoot": [
+        {
+          "when": [],
+          "action": {
+            "line1": "CHECK ONE END IN STRIP",
+            "line2": "ONE END IN A ROW"
+          },
+          "why": "The source places one end in the bus strip and the other in a terminal row.",
+          "cites": [
+            {
+              "source": "dummies_circuit",
+              "loc": "Step 2",
+              "quote": "Insert one end of the resistor into any hole in the bottom bus strip.",
+              "url": "https://www.dummies.com/article/technology/electronics/circuitry/how-to-build-a-simple-electronic-circuit-180237/"
+            },
+            {
+              "source": "adafruit_leds",
+              "loc": "Resistors",
+              "quote": "They can be connected either way around.",
+              "url": "https://learn.adafruit.com/adafruit-arduino-lesson-2-leds/leds"
+            }
+          ],
+          "guide_id": null
+        }
+      ],
+      "guide_id": null,
+      "verify": null,
+      "requires": [
+        "snap"
+      ]
+    },
+    {
+      "id": "led",
+      "title": "Place the LED",
+      "cue": {
+        "line1": "LONG LEG: TOP STRIP",
+        "line2": "SHORT LEG: NEARBY ROW"
+      },
+      "detail": "The leads of the LED are not the same length. Put the LONG lead into the top bus strip (the one with the red battery lead) and the SHORT lead into a hole in a nearby terminal row. LED polarity: SparkFun and Adafruit both say the longer lead is the positive side (anode). The Dummies page puts the SHORT lead on the strip where the red battery lead goes, which conflicts with them; this card follows SparkFun and Adafruit and swaps the LED leads relative to the Dummies text. UNCERTAIN: if the LED stays dark, flip it (all three pages say to try reversing it).",
+      "why": {
+        "line1": "LONG LEG = POSITIVE",
+        "line2": "UNCERTAIN: 1 PAGE DIFFERS"
+      },
+      "where": {
+        "line1": "LONG LEG ON RED STRIP",
+        "line2": ""
+      },
+      "warnings": [],
+      "faq": [
+        {
+          "q": "which leg is longer",
+          "a": {
+            "line1": "LONG LEG = POSITIVE",
+            "line2": "SHORT LEG = NEGATIVE"
+          }
+        },
+        {
+          "q": "does the led work backwards",
+          "a": {
+            "line1": "NO, IT WILL NOT LIGHT",
+            "line2": "FLIP IT AROUND"
+          }
+        }
+      ],
+      "troubleshoot": [
+        {
+          "when": [],
+          "action": {
+            "line1": "CHECK LEG DIRECTION",
+            "line2": "TRY FLIPPING THE LED"
+          },
+          "why": "A reversed LED blocks current, so nothing lights; flipping it is the documented fix.",
+          "cites": [
+            {
+              "source": "sparkfun_leds",
+              "loc": "How to Use Them",
+              "quote": "So don't freak out if adding an LED breaks your circuit. Try flipping it around.",
+              "url": "https://learn.sparkfun.com/tutorials/light-emitting-diodes-leds"
+            },
+            {
+              "source": "dummies_circuit",
+              "loc": "Step 6",
+              "quote": "try reversing the leads of the LED (you may have inserted it backwards)",
+              "url": "https://www.dummies.com/article/technology/electronics/circuitry/how-to-build-a-simple-electronic-circuit-180237/"
+            }
+          ],
+          "guide_id": null
+        },
+        {
+          "when": [],
+          "action": {
+            "line1": "CHECK LONG LEG ON RED",
+            "line2": "SIDE OF THE CIRCUIT"
+          },
+          "why": "Two sources identify the longer lead as the positive side.",
+          "cites": [
+            {
+              "source": "adafruit_leds",
+              "loc": "LEDs",
+              "quote": "Firstly, the positive lead is longer.",
+              "url": "https://learn.adafruit.com/adafruit-arduino-lesson-2-leds/leds"
+            },
+            {
+              "source": "sparkfun_leds",
+              "loc": "How to Use Them",
+              "quote": "is marked by having a longer \"lead,\" or leg.",
+              "url": "https://learn.sparkfun.com/tutorials/light-emitting-diodes-leds"
+            }
+          ],
+          "guide_id": null
+        }
+      ],
+      "guide_id": null,
+      "verify": null,
+      "requires": [
+        "resistor"
+      ]
+    },
+    {
+      "id": "jumper",
+      "title": "Join LED and resistor rows",
+      "cue": {
+        "line1": "JUMPER FROM LED ROW",
+        "line2": "TO RESISTOR ROW"
+      },
+      "detail": "Use the short jumper wire to connect the terminal strips into which you inserted the LED and the resistor. The jumper wire will hop over the gap that runs down the middle of the breadboard. (Dummies, step 3.) UNCERTAIN: the Dummies text also says the LED and the resistor share a row; if your two leads already sit in the same row, no jumper is needed because holes in one row are connected.",
+      "why": null,
+      "where": {
+        "line1": "ACROSS THE CENTER GAP",
+        "line2": ""
+      },
+      "warnings": [],
+      "faq": [],
+      "troubleshoot": [
+        {
+          "when": [],
+          "action": {
+            "line1": "CHECK LED ROW AND",
+            "line2": "RESISTOR ROW JOINED"
+          },
+          "why": "The source joins the two rows with a short jumper wire.",
+          "cites": [
+            {
+              "source": "dummies_circuit",
+              "loc": "Step 3",
+              "quote": "Use the short jumper wire to connect the terminal strips into which you inserted the LED and the resistor.",
+              "url": "https://www.dummies.com/article/technology/electronics/circuitry/how-to-build-a-simple-electronic-circuit-180237/"
+            }
+          ],
+          "guide_id": null
+        }
+      ],
+      "guide_id": null,
+      "verify": null,
+      "requires": [
+        "led"
+      ]
+    },
+    {
+      "id": "battery",
+      "title": "Connect the battery",
+      "cue": {
+        "line1": "CONNECT THE 9V BATTERY",
+        "line2": "TO THE SNAP LEADS"
+      },
+      "detail": "Connect the battery to the snap connector. The LED will light up. If it doesn't, double-check your connections to make sure the circuit is assembled correctly. If it still doesn't light up, try reversing the leads of the LED (you may have inserted it backwards). If that doesn't work, try a different battery. (Dummies.) GhostBuild cannot see the LED: you confirm it yourself.",
+      "why": null,
+      "where": null,
+      "warnings": [],
+      "faq": [],
+      "troubleshoot": [
+        {
+          "when": [],
+          "action": {
+            "line1": "CHECK EVERY CONNECTION",
+            "line2": "AGAIN"
+          },
+          "why": "The source's first suggestion when the LED stays dark.",
+          "cites": [
+            {
+              "source": "dummies_circuit",
+              "loc": "Step 5",
+              "quote": "double-check your connections to make sure the circuit is assembled correctly",
+              "url": "https://www.dummies.com/article/technology/electronics/circuitry/how-to-build-a-simple-electronic-circuit-180237/"
+            }
+          ],
+          "guide_id": null
+        },
+        {
+          "when": [],
+          "action": {
+            "line1": "TRY FLIPPING THE LED",
+            "line2": "THEN TRY A NEW BATTERY"
+          },
+          "why": "The source's next suggestions, in its order.",
+          "cites": [
+            {
+              "source": "dummies_circuit",
+              "loc": "Step 5",
+              "quote": "try reversing the leads of the LED (you may have inserted it backwards)",
+              "url": "https://www.dummies.com/article/technology/electronics/circuitry/how-to-build-a-simple-electronic-circuit-180237/"
+            }
+          ],
+          "guide_id": null
+        }
+      ],
+      "guide_id": null,
+      "verify": null,
+      "requires": [
+        "jumper"
+      ]
+    },
+    {
+      "id": "look",
+      "title": "Look at the LED",
+      "cue": {
+        "line1": "LOOK AT THE LED",
+        "line2": "CONFIRM IF IT GLOWS"
+      },
+      "detail": "This step is checked by you only. GhostBuild has no sensor on this circuit, so confirming it records what you saw (HUMAN CONFIRMED). If the LED is dark, go back through the troubleshooting hints on the previous step.",
+      "why": {
+        "line1": "NO SENSOR ON THIS",
+        "line2": "CIRCUIT, ONLY YOUR EYES"
+      },
+      "where": null,
+      "warnings": [],
+      "faq": [],
+      "troubleshoot": [
+        {
+          "when": [],
+          "action": {
+            "line1": "CHECK LED DIRECTION",
+            "line2": "THEN TRY A NEW BATTERY"
+          },
+          "why": "Same order as the source.",
+          "cites": [
+            {
+              "source": "dummies_circuit",
+              "loc": "Step 5",
+              "quote": "If that doesn’t work, try a different battery.",
+              "url": "https://www.dummies.com/article/technology/electronics/circuitry/how-to-build-a-simple-electronic-circuit-180237/"
+            }
+          ],
+          "guide_id": null
+        }
+      ],
+      "guide_id": null,
+      "verify": null,
+      "requires": [
+        "battery"
+      ]
+    }
+  ],
+  "functional": null,
+  "guides": [],
+  "goal_mode": "build",
+  "aliases": [
+    "light an led",
+    "led breadboard",
+    "breadboard",
+    "blink an led",
+    "led circuit",
+    "resistor"
+  ]
+}
