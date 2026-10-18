@@ -101,3 +101,22 @@ def test_unknown_and_error_and_healthy(card_dict):
     assert I.answer("where", _ctx(card_dict, erroring=True)).kind == "suppress"
     assert I.answer("where", _ctx(card_dict, fault=None, check=None)).kind == "status"
     assert I.NOT_SURE.line2 == "TRY: WHERE? HOW?"
+
+
+@pytest.mark.parametrize("text", [
+    "What is the next step?", "Why is the next step important?",
+    "What if I am done but it still looks wrong?", "I am not done",
+    "Don't continue", "I think I am done", "why should I go back to the previous step?",
+])
+def test_questions_and_ambiguous_speech_never_confirm_or_navigate(text):
+    assert I.classify_playbook(text, []) not in ("next", "back")
+
+
+@pytest.mark.parametrize("text", ["next", "please continue", "I'm done", "I've done that. What's next?", "I have finished this", "all done", "next step please"])
+def test_deliberate_control_utterances_can_request_manual_progress(text):
+    assert I.classify_playbook(text, []) == "next"
+
+
+@pytest.mark.parametrize("text,intent", [("show me how", "how"), ("How do I do this?", "how"), ("What should it look like?", "correct"), ("repeat that", "repeat")])
+def test_explicit_visual_and_repeat_intents(text, intent):
+    assert I.classify_playbook(text, []) == intent

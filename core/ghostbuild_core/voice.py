@@ -8,9 +8,8 @@ Hard rules: audio is only relayed to the STT provider, never written to disk or 
 provider name and its true origin); a voice command never commits a physical state or clears a fault; any failure degrades to an
 honest VOICE UNAVAILABLE / USE TOUCH frame and the touch path keeps working untouched.
 
-Provider note (docs.cartesia.ai/api-reference/stt/websocket, read 2026-10-17): manual endpoint wss://api.cartesia.ai/stt/websocket,
-query model/encoding/sample_rate/cartesia_version, header X-API-Key, binary audio frames, text "finalize" -> "flush_done",
-transcript events are deltas (concatenate `text` where is_final).
+Provider: ElevenLabs Scribe v2 realtime through integrations/elevenlabs/client.py.
+Only deliberate, consented PTT utterances are committed; audio is never stored locally.
 """
 
 from __future__ import annotations
@@ -20,9 +19,9 @@ import json
 import logging
 import os
 from typing import TYPE_CHECKING, Callable, Optional, Protocol
-from urllib.parse import urlencode
 
 from contracts.models import Cue, GoalRequest
+from integrations.elevenlabs.client import ElevenLabsStt, VoiceProviderError, elevenlabs_factory
 
 from . import goal as goal_mod
 from . import intent as intent_mod
@@ -46,13 +45,12 @@ def voice_enabled_from_env() -> bool:
 
 
 # --------------------------------------------------------------------------- providers
-class ProviderUnavailable(Exception):
-    """No key / cannot connect. Surfaces to the wearer as VOICE UNAVAILABLE."""
+ProviderUnavailable = VoiceProviderError
 
 
 class SttProvider(Protocol):
     name: str
-    origin: str  # true origin of the transcript: "cartesia_stt" | "fake_test"
+    origin: str  # true origin of the transcript: "elevenlabs_stt" | "fake_test"
 
     async def start(self) -> None: ...
     async def feed(self, frame: bytes) -> None: ...
@@ -92,86 +90,12 @@ class FakeStt:
         self.closed = True
 
 
-class CartesiaStt:
-    """Cartesia Realtime STT (Manual) client: the wearer holds to talk, release == `finalize`.
-
-    NOT exercised against the real service in this repo (needs CARTESIA_API_KEY); tests run it against a local protocol fake.
-    """
-
-    name = "cartesia"
-    origin = "cartesia_stt"
-    URL = "wss://api.cartesia.ai/stt/websocket"
-
-    def __init__(self, api_key: str, *, url: Optional[str] = None, model: str = "ink-2", version: Optional[str] = None, sample_rate: int = 16000) -> None:
-        self.api_key = api_key
-        self.base = url or self.URL
-        self.model = model
-        self.version = version or os.environ.get("CARTESIA_VERSION", "2026-08-14")
-        self.sample_rate = sample_rate
-        self._ws = None
-
-    def endpoint(self) -> str:
-        q = urlencode({"model": self.model, "encoding": "pcm_s16le", "sample_rate": self.sample_rate, "cartesia_version": self.version})
-        return f"{self.base}?{q}"
-
-    async def start(self) -> None:
-        from websockets.asyncio.client import connect
-
-        try:
-            self._ws = await asyncio.wait_for(connect(self.endpoint(), additional_headers={"X-API-Key": self.api_key}, max_size=2**20), 5.0)
-        except Exception as exc:
-            raise ProviderUnavailable(f"cartesia connect failed: {type(exc).__name__}") from exc
-
-    async def feed(self, frame: bytes) -> None:
-        if self._ws is None:
-            raise ProviderUnavailable("cartesia not connected")
-        await self._ws.send(frame)
-
-    async def finalize(self) -> str:
-        if self._ws is None:
-            raise ProviderUnavailable("cartesia not connected")
-        await self._ws.send("finalize")
-        parts: list[str] = []
-        while True:
-            raw = await self._ws.recv()
-            if isinstance(raw, bytes):
-                continue
-            ev = json.loads(raw)
-            kind = ev.get("type")
-            if kind == "transcript":
-                if ev.get("is_final"):
-                    parts.append(str(ev.get("text", "")))  # deltas: do not strip whitespace
-            elif kind == "flush_done":
-                return "".join(parts).strip()
-            elif kind == "error":
-                raise ProviderUnavailable(f"cartesia error {ev.get('status_code')}: {ev.get('title')}")
-
-    async def close(self) -> None:
-        ws, self._ws = self._ws, None
-        if ws is not None:
-            try:
-                await ws.send("close")
-            except Exception:
-                pass
-            try:
-                await ws.close()
-            except Exception:
-                pass
-
-
-def cartesia_factory() -> SttProvider:
-    key = os.environ.get("CARTESIA_API_KEY", "").strip()
-    if not key:
-        raise ProviderUnavailable("CARTESIA_API_KEY not set")
-    return CartesiaStt(key)
-
-
 # --------------------------------------------------------------------------- service
 class VoiceService:
     def __init__(
         self,
         runtime: "Runtime",
-        provider_factory: Callable[[], SttProvider] = cartesia_factory,
+        provider_factory: Callable[[], SttProvider] = elevenlabs_factory,
         *,
         timeout_ms: int = TIMEOUT_MS,
         listen_cap_ms: int = LISTEN_CAP_MS,
@@ -184,6 +108,10 @@ class VoiceService:
         self._deadline = 0
         self._released_at = 0
         self.socket_started = False
+        self._active_socket: object | None = None
+        self._utterance_context: tuple | None = None
+        self._last_reply_text = ""
+        self._transcript_accepted = False
         runtime.voice = self
 
     # ---------------------------------------------------------------- HUD (hud.py is the only writer)
@@ -210,6 +138,9 @@ class VoiceService:
         if sess is None or sess.phase == "welcome":
             return
         if gesture == "hold_start":
+            if self.state in ("listening", "thinking"):
+                return  # duplicate start cannot extend recording indefinitely
+            self._utterance_context = self._context_key()
             self.socket_started = False
             self._deadline = self._now() + self.listen_cap_ms
             self._show(intent_mod.LISTENING, None, "listening")
@@ -236,10 +167,27 @@ class VoiceService:
         elif self.state == "result" and self._now() >= self._deadline:
             self._clear()
 
+    def _context_key(self) -> tuple:
+        """Capture the actual task before STT: a late utterance cannot act on a later step."""
+        sess = self.rt.sessions.active
+        pb = self.rt.playbook
+        if pb is not None:
+            return (sess.id if sess else None, id(pb), pb.index, pb.done, tuple(pb.confirmed), tuple(pb.verified))
+        tr = self.rt.engine.current_track()
+        return (sess.id if sess else None, sess.phase if sess else None,
+                self.rt.engine.card.card_id, tr.test.id if tr else None, tr.check_idx if tr else None)
+
     # ---------------------------------------------------------------- transcript -> reply
     def on_transcript(self, text: str, provider: str, origin: str) -> None:
+        self._transcript_accepted = False
+        self._last_reply_text = ""
         if self.state not in ("listening", "thinking"):
             return  # late (after the timeout screen) or unsolicited: ignored
+        if self._utterance_context is not None and self._utterance_context != self._context_key():
+            self.rt.elog.write("voice_ignored", reason="task changed while listening")
+            self._clear()
+            return
+        self._transcript_accepted = True
         text = (text or "").strip()[:300]
         self.rt.elog.write("voice_transcript", provider=provider, origin=origin, text=text)  # transcript text only, never audio
         if not text:
@@ -282,7 +230,9 @@ class VoiceService:
 
     def _ask_playbook(self, text: str) -> None:
         self._clear()  # drop the voice overlay; the playbook shows its answer on the engine layer
-        self.rt.ask(text)
+        result = self.rt.ask(text)
+        if result is not None:
+            self._last_reply_text = result.as_json()["text"]
 
     def _ctx(self) -> intent_mod.Ctx:
         e = self.rt.engine
@@ -305,6 +255,7 @@ class VoiceService:
         e = self.rt.engine
         r = intent_mod.answer(intent, self._ctx())  # type: ignore[arg-type]
         self.rt.elog.write("voice_intent", intent=intent, reply=r.kind, target=r.target)
+        self._last_reply_text = r.phone_text or ((r.cue.line1 + " " + r.cue.line2).strip() if r.cue else "")
         if r.phone_text:
             e.note(f"voice answer ({intent}): {r.phone_text}", r.phone_label or "DETERMINISTIC", {"heard": heard})
         if r.kind == "suppress":
@@ -331,6 +282,7 @@ class VoiceService:
         await websocket.accept()
         stt: Optional[SttProvider] = None
         total = 0
+        owner = object()
 
         async def reply(obj: dict) -> None:
             try:
@@ -340,21 +292,28 @@ class VoiceService:
 
         async def drop() -> None:
             nonlocal stt
+            if self._active_socket is owner:
+                self._active_socket = None
             s, stt = stt, None
             if s is not None:
                 try:
                     await s.close()
                 except Exception:
-                    log.exception("provider close failed")
+                    log.warning("provider close failed")
 
         try:
             while True:
-                msg = await websocket.receive()
+                msg = await asyncio.wait_for(websocket.receive(), (self.listen_cap_ms + self.timeout_ms) / 1000)
                 if msg.get("type") == "websocket.disconnect":
                     break
                 data = msg.get("bytes")
                 if data is not None:
-                    if stt is not None and total < MAX_AUDIO_BYTES:
+                    if stt is not None:
+                        if len(data) % 2 or total + len(data) > MAX_AUDIO_BYTES:
+                            self.unavailable("invalid or oversized PCM")
+                            await drop()
+                            await reply({"type": "unavailable"})
+                            continue
                         total += len(data)
                         try:
                             await stt.feed(data)
@@ -369,25 +328,37 @@ class VoiceService:
                     continue
                 kind = ctl.get("type") if isinstance(ctl, dict) else None
                 if kind == "start":
+                    if stt is not None or (self._active_socket is not None and self._active_socket is not owner):
+                        await reply({"type": "busy"})
+                        continue
                     await drop()
                     total = 0
                     if ctl.get("consent") is not True:
                         self.need_consent()  # no mic, no provider until the wearer has seen HOLD TO TALK / AUDIO SENT TO SERVER
                         await reply({"type": "consent_required"})
                         continue
+                    self._active_socket = owner
+                    if self.state != "listening":
+                        self.on_hold("hold_start")  # phone PTT uses the same lifecycle without a temple event
+                    if self.state != "listening":
+                        self._active_socket = None
+                        await reply({"type": "unavailable"})
+                        continue
                     self.socket_started = True
                     try:
                         stt = self.provider_factory()
                         await stt.start()
                     except Exception as exc:
-                        log.warning("stt unavailable: %s", exc)
-                        self.unavailable(str(exc)[:120])
+                        log.warning("stt unavailable: %s", type(exc).__name__)
+                        self.unavailable(f"start failed: {type(exc).__name__}")
                         await drop()
                         await reply({"type": "unavailable"})
                 elif kind == "end":
                     s, stt = stt, None
                     if s is None:
                         continue  # start failed already; the wearer saw VOICE UNAVAILABLE
+                    if self.state == "listening":
+                        self.on_hold("hold_end")
                     try:
                         text = await asyncio.wait_for(s.finalize(), FINALIZE_TIMEOUT_S)
                     except Exception as exc:
@@ -396,8 +367,13 @@ class VoiceService:
                         await reply({"type": "unavailable"})
                     else:
                         self.on_transcript(text, s.name, s.origin)
-                        await reply({"type": "done", "origin": s.origin})
+                        await reply({"type": "done", "origin": s.origin,
+                            "transcript": text if self._transcript_accepted else "",
+                            "text": self._last_reply_text,
+                            "ignored": not self._transcript_accepted})
                     finally:
+                        if self._active_socket is owner:
+                            self._active_socket = None
                         try:
                             await s.close()
                         except Exception:
@@ -408,7 +384,10 @@ class VoiceService:
                         self.unavailable(f"abort: {str(ctl.get('reason', ''))[:40]}")
         except WebSocketDisconnect:
             pass
-        except Exception:
-            log.exception("voice socket failed")
+        except Exception as exc:
+            log.warning("voice socket failed: %s", type(exc).__name__)
         finally:
+            was_active = self._active_socket is owner
             await drop()
+            if was_active and self.state in ("listening", "thinking"):
+                self.unavailable("audio connection closed")

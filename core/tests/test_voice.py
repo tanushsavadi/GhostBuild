@@ -151,7 +151,7 @@ def test_hold_start_listening_hold_end_thinking(mk):
     assert r.cue == ("ask", "THINKING", "")
 
 
-def test_no_transcript_times_out_then_returns_to_previous_screen(mk):
+def test_disconnected_audio_immediately_falls_back_then_restores_previous_screen(mk):
     r = mk(stt=FakeStt("x"))
     r.to_task()
     r.fault()
@@ -162,10 +162,7 @@ def test_no_transcript_times_out_then_returns_to_previous_screen(mk):
         ws.send_json({"type": "start", "consent": True})
         ws.send_bytes(AUDIO)
     r.hold("hold_end")
-    r.advance(7800)
-    assert r.cue == ("ask", "THINKING", "")
-    r.advance(400)
-    assert r.cue == ("ask", "DIDN'T CATCH THAT", "TRY AGAIN OR TAP")
+    assert r.cue == ("ask", "VOICE UNAVAILABLE", "USE TOUCH")
     r.advance(5200)
     assert r.cue[:2] == prev[:2] and r.rt.engine.state == "FAULT"  # same fault cue (line2 may be the engine's own PRESS FOR PICTURE offer)
 
@@ -357,8 +354,8 @@ def test_provider_finalize_failure_shows_unavailable(mk):
 
 
 def test_no_api_key_shows_unavailable(mk, monkeypatch):
-    monkeypatch.delenv("CARTESIA_API_KEY", raising=False)
-    r = mk(factory=V.cartesia_factory)
+    monkeypatch.delenv("ELEVENLABS_API_KEY", raising=False)
+    r = mk(factory=V.elevenlabs_factory)
     r.to_task()
     r.fault()
     r.hold("hold_start")
@@ -437,73 +434,73 @@ def test_late_transcript_after_timeout_is_ignored(mk):
     assert r.cue[1] == "DIDN'T CATCH THAT"
 
 
-# ----------------------------------------------------------------------------- Cartesia protocol (against a LOCAL fake of the documented protocol)
-def test_cartesia_client_speaks_the_documented_manual_protocol():
-    import websockets
-    from websockets.asyncio.server import serve
-
-    seen = {}
-
-    async def handler(ws):
-        seen["path"] = ws.request.path
-        seen["key"] = ws.request.headers.get("X-API-Key")
-        frames = []
-        async for m in ws:
-            if isinstance(m, bytes):
-                frames.append(m)
-            elif m == "finalize":
-                await ws.send(json.dumps({"type": "transcript", "is_final": False, "text": "wher", "request_id": "r"}))
-                await ws.send(json.dumps({"type": "transcript", "is_final": True, "text": "where ", "request_id": "r"}))
-                await ws.send(json.dumps({"type": "transcript", "is_final": True, "text": "is it", "request_id": "r"}))
-                await ws.send(json.dumps({"type": "flush_done", "request_id": "r"}))
-            elif m == "close":
-                seen["closed"] = True
-                await ws.send(json.dumps({"type": "done"}))
-        seen["bytes"] = sum(len(f) for f in frames)
-
-    async def run():
-        async with serve(handler, "127.0.0.1", 0) as srv:
-            port = srv.sockets[0].getsockname()[1]
-            stt = V.CartesiaStt("k-test", url=f"ws://127.0.0.1:{port}/stt/websocket")
-            await stt.start()
-            await stt.feed(b"\x00\x01" * 1600)
-            await stt.feed(b"\x00\x01" * 1600)
-            text = await stt.finalize()
-            await stt.close()
-            return text
-
-    assert asyncio.run(run()) == "where is it"
-    assert seen["key"] == "k-test"
-    q = seen["path"]
-    for part in ("model=ink-2", "encoding=pcm_s16le", "sample_rate=16000", "cartesia_version=2026-08-14"):
-        assert part in q
-    assert q.startswith("/stt/websocket?")
 
 
-def test_cartesia_error_event_raises():
-    from websockets.asyncio.server import serve
-
-    async def handler(ws):
-        async for m in ws:
-            if m == "finalize":
-                await ws.send(json.dumps({"type": "error", "status_code": 401, "title": "Unauthorized", "message": "bad key"}))
-
-    async def run():
-        async with serve(handler, "127.0.0.1", 0) as srv:
-            port = srv.sockets[0].getsockname()[1]
-            stt = V.CartesiaStt("bad", url=f"ws://127.0.0.1:{port}/stt/websocket")
-            await stt.start()
-            with pytest.raises(V.ProviderUnavailable):
-                await stt.finalize()
-            await stt.close()
-
-    asyncio.run(run())
+def test_phone_ptt_alone_starts_and_finishes_lifecycle(mk):
+    r = mk(stt=FakeStt("where is it"))
+    r.to_task()
+    r.fault()
+    with r.client.websocket_connect("/ws/voice") as ws:
+        ws.send_json({"type": "start", "consent": True})
+        ws.send_bytes(AUDIO)
+        ws.send_json({"type": "end"})
+        result = ws.receive_json()
+    assert result["type"] == "done" and result["origin"] == "fake_test"
+    assert result["transcript"] == "where is it" and result["ignored"] is False
+    assert r.rt.hud.current.mode == "visual"
 
 
-def test_cartesia_unreachable_is_provider_unavailable():
-    async def run():
-        stt = V.CartesiaStt("k", url="ws://127.0.0.1:1/stt/websocket")
-        with pytest.raises(V.ProviderUnavailable):
-            await stt.start()
+def test_changed_step_rejects_late_done_transcript(mk):
+    from pbhelpers import make_card
+    r = mk(cards=[make_card(3)], stt=FakeStt("done"))
+    r.to_task(mode="build", text="synthetic", feed=False)
+    r.advance(1600, obs=False)
+    r.hold("hold_start")
+    with r.client.websocket_connect("/ws/voice") as ws:
+        ws.send_json({"type": "start", "consent": True})
+        ws.send_bytes(AUDIO)
+        # Another interface advances while STT is pending. The transcript belongs to s0.
+        r.rt.playbook.index = 1
+        ws.send_json({"type": "end"})
+        result = ws.receive_json()
+    assert result["ignored"] is True and result["transcript"] == ""
+    assert r.rt.playbook.index == 1 and r.rt.playbook.confirmed == []
 
-    asyncio.run(run())
+
+def test_duplicate_start_does_not_replace_provider_or_repeat_action(mk):
+    stt = FakeStt("where is it")
+    r = mk(stt=stt)
+    r.to_task()
+    r.fault()
+    with r.client.websocket_connect("/ws/voice") as ws:
+        ws.send_json({"type": "start", "consent": True})
+        ws.send_bytes(AUDIO)
+        ws.send_json({"type": "start", "consent": True})
+        assert ws.receive_json()["type"] == "busy"
+        ws.send_json({"type": "end"})
+        assert ws.receive_json()["type"] == "done"
+    assert stt.bytes == len(AUDIO) and stt.closed
+
+
+def test_oversized_or_odd_pcm_is_rejected_before_provider_feed(mk):
+    stt = FakeStt("done")
+    r = mk(stt=stt)
+    r.to_task()
+    with r.client.websocket_connect("/ws/voice") as ws:
+        ws.send_json({"type": "start", "consent": True})
+        ws.send_bytes(b"\0" * (V.MAX_AUDIO_BYTES + 2))
+        assert ws.receive_json()["type"] == "unavailable"
+    assert stt.bytes == 0 and stt.closed
+
+
+def test_done_response_contains_documented_card_answer_for_phone_audio(mk):
+    from pbhelpers import make_card
+    r = mk(cards=[make_card(3)], stt=FakeStt("why"))
+    r.to_task(mode="build", text="synthetic", feed=False)
+    with r.client.websocket_connect("/ws/voice") as ws:
+        ws.send_json({"type": "start", "consent": True})
+        ws.send_bytes(AUDIO)
+        ws.send_json({"type": "end"})
+        result = ws.receive_json()
+    assert result["text"] == "WHY 0: SAFETY"
+    assert result["origin"] == "fake_test"  # never represent this fixture as microphone/provider evidence

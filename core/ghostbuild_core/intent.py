@@ -195,14 +195,23 @@ def answer(intent: Intent, ctx: Ctx) -> Reply:
 
 
 # --------------------------------------------------------------------------- playbook follow-ups (/ask and the voice lane)
-PbIntent = Literal["where", "why", "faq", "troubleshoot", "next", "back", "picture", "status", "unknown"]
+PbIntent = Literal["where", "how", "correct", "repeat", "why", "faq", "troubleshoot", "next", "back", "picture", "status", "unknown"]
 
 NOT_IN_PLAYBOOK = Cue(line1="NOT IN MY PLAYBOOK", line2="SEE PHONE")
 
 _PB_STATUS = re.compile(r"\b(which|what) step\b|\bwhere am i\b|\bprogress\b|\bhow many (steps?|left)\b|\bstatus\b|\bam i done\b|\bsteps? (left|remaining)\b")
 _PB_PICTURE = re.compile(r"\b(show|see|open|display)\b.*\b(picture|photo|image|diagram|pic|view)\b|\bpicture\b|\bphoto\b|\bdiagram\b")
-_PB_NEXT = re.compile(r"^(next|next step|done|finished|continue|go on|move on|forward)$|\b(next step|i am done|i'm done|im done|all done)\b")
-_PB_BACK = re.compile(r"^(back|previous|go back|previous step|last step)$|\b(previous step|go back|last step)\b")
+_PB_NEXT = re.compile(
+    r"^(?:(?:ok|okay|please) )?(?:next(?: step)?|done|finished|continue|go on|move on|forward|all done|"
+    r"(?:i've|i have|i am|i'm|im) (?:done|finished)(?: (?:that|this|with this|with that))?)"
+    r"(?: (?:what's|what is) next)?(?: please)?$"
+)
+_PB_HOW = re.compile(r"\bshow (?:me )?how\b|\bhow (?:do|should|can) i\b|^how$|\bhow (?:view|picture)\b")
+_PB_CORRECT = re.compile(r"\b(?:look like|looks like|should it look|correct (?:view|picture|look))\b|^correct$")
+_PB_REPEAT = re.compile(r"^(?:please )?(?:repeat|repeat that|say that again|what did you say|explain that again)(?: please)?$")
+
+_PB_BACK = re.compile(r"^(?:please )?(?:back|previous|go back|previous step|last step|go back to the previous step)(?: please)?$")
+
 _PB_TROUBLE = re.compile(
     r"\bdid not work\b|\bdidn't work\b|\bdoesn't work\b|\bdoes not work\b|\bnot working\b|\bwhat if\b|\bstill (not|wrong|broken|dark|off)\b|"
     r"\bnothing (changed|happened)\b|\bno luck\b|\bfailed\b|\bstuck\b|\bwon't\b|\bwhat else\b|\bproblem\b"
@@ -258,6 +267,12 @@ def classify_playbook(text: str, faqs: list) -> PbIntent:
         return "next"
     if _PB_BACK.search(t):
         return "back"
+    if _PB_REPEAT.search(t):
+        return "repeat"
+    if _PB_CORRECT.search(t):
+        return "correct"
+    if _PB_HOW.search(t):
+        return "how"
     if _PB_PICTURE.search(t):
         return "picture"
     if _PB_WHERE.search(t):
