@@ -38,7 +38,7 @@ EvidenceLabel = Literal[
 ]
 GuideViewName = Literal["where", "how", "correct"]
 # HUD modes mirror the UX amendment: 0 quiet, 1 intervention, 2/3 visual assist (3 = multi-view), 4 ask, 5 verified, 6 error.
-HudMode = Literal["quiet", "welcome", "menu", "intervene", "visual", "ask", "verified", "uncertain", "error"]
+HudMode = Literal["quiet", "welcome", "menu", "step", "intervene", "visual", "ask", "verified", "uncertain", "error"]
 GoalMode = Literal["fix", "build"]
 GoalVia = Literal["g2_menu", "voice", "phone_text"]
 Gesture = Literal["press", "swipe_down", "swipe_up", "hold_start", "hold_end"]
@@ -103,6 +103,16 @@ class Menu(Strict):
     selected: int = Field(ge=0)
 
 
+class StepRef(Strict):
+    """Where the wearer is in a playbook. Rendered as a small counter next to the action line."""
+
+    index: int = Field(ge=0)
+    count: int = Field(ge=1)
+    step_id: str
+    check: Literal["manual", "measured"] = Field(description="manual = the wearer confirms (HUMAN CONFIRMED); measured = evidence verifies it")
+    confirmed: bool = False
+
+
 class ImageRef(Strict):
     guide_id: str
     view: GuideViewName
@@ -128,6 +138,7 @@ class HudFrame(Strict):
     cue: Optional[Cue] = Field(default=None, description="null in quiet mode (render blank)")
     image: Optional[ImageRef] = Field(default=None, description="present only in visual mode; cue is the text fallback")
     menu: Optional[Menu] = Field(default=None, description="present only in menu mode; cue is the text fallback")
+    step: Optional[StepRef] = Field(default=None, description="present in step mode and in visual mode opened from a step")
     cue_id: Optional[str] = None
     ttl_ms: Optional[int] = Field(default=None, description="plugin clears locally after this as a fallback")
     source: Source
@@ -144,6 +155,8 @@ class HudFrame(Strict):
             raise ValueError("image only in visual mode")
         if (self.menu is not None) != (self.mode == "menu"):
             raise ValueError("menu iff mode == menu")
+        if self.mode == "step" and self.step is None:
+            raise ValueError("step mode needs a step ref")
         return self
 
 
@@ -189,6 +202,7 @@ class GoalResolution(Strict):
     cue: Cue
     detail: str = Field(description="phone-side explanation: what is supported and what is not")
     alternatives: list[str] = Field(default_factory=list)
+    research_queued: bool = Field(default=False, description="true if an unsupported request was saved for an async research run; nothing is available NOW")
 
 
 # --------------------------------------------------------------------------- core -> phone/tools
@@ -212,10 +226,19 @@ class Session(Strict):
     welcome_shown: bool = False
 
 
+class PlaybookState(Strict):
+    card_id: str
+    step_index: int = Field(ge=0)
+    step_count: int = Field(ge=1)
+    step_id: str
+    confirmed: list[str] = Field(default_factory=list, description="HUMAN CONFIRMED step ids")
+    verified: list[str] = Field(default_factory=list, description="step ids satisfied by measured evidence")
+
+
 class State(Strict):
     v: Literal[2] = 2
     session: Session
-    engine: Literal["NO_LINK", "HEALTHY", "FAULT", "EXHAUSTED", "AWAIT_FUNC"]
+    engine: Literal["NO_LINK", "HEALTHY", "FAULT", "EXHAUSTED", "AWAIT_FUNC", "PLAYBOOK"]
     card_id: str
     test: Optional[str] = None
     step_id: Optional[str] = None
@@ -224,6 +247,7 @@ class State(Strict):
     source: Optional[Source] = None
     health: Health
     hud: Optional[HudFrame] = None
+    playbook: Optional[PlaybookState] = None
     events: list[Evidence] = Field(default_factory=list)
 
 
@@ -298,17 +322,55 @@ class Functional(Strict):
     within_ms: int = Field(ge=0)
 
 
+class Faq(Strict):
+    q: str = Field(description="how a confused beginner would ASK it out loud, lowercase, e.g. 'which leg is longer'")
+    a: Cue
+
+
+class StepVerify(Strict):
+    """Optional evidence check. Without it a step is manual: only the wearer can confirm it (HUMAN CONFIRMED, never VERIFIED)."""
+
+    when: list[Predicate] = Field(min_length=1)
+    hold_ms: int = Field(default=1500, ge=0)
+    ok: Cue = Field(description="shown once when measured evidence satisfies the step")
+
+
+class Step(Strict):
+    id: str
+    title: str = Field(max_length=28)
+    cue: Cue = Field(description="the glasses text for this step: one action")
+    detail: str = Field(default="", max_length=600, description="phone-only full explanation")
+    why: Optional[Cue] = None
+    where: Optional[Cue] = None
+    warnings: list[str] = Field(default_factory=list)
+    faq: list[Faq] = Field(default_factory=list)
+    troubleshoot: list[Check] = Field(default_factory=list)
+    guide_id: Optional[str] = None
+    verify: Optional[StepVerify] = None
+    requires: list[str] = Field(default_factory=list)
+
+
 class Card(Strict):
     v: Literal[2] = 2
     card_id: str
     title: str
     provenance: EvidenceLabel
     sources: list[Source_]
-    tests: list[Test] = Field(min_length=1)
+    tests: list[Test] = Field(default_factory=list)
+    steps: list[Step] = Field(default_factory=list, description="a playbook: ordered steps navigated by the wearer; tests (fault mode) and steps may coexist")
     functional: Optional[Functional] = None
     guides: list[Guide] = Field(default_factory=list)
     goal_mode: GoalMode = Field(default="fix", description="fix = repair/diagnose; build = guided supported setup")
     aliases: list[str] = Field(default_factory=list, description="lowercase phrases the deterministic goal resolver matches, e.g. 'camera', 'inspection station'")
+
+    @model_validator(mode="after")
+    def _has_content(self) -> "Card":
+        if not self.tests and not self.steps:
+            raise ValueError("a card needs tests (fault mode) or steps (playbook)")
+        ids = [st.id for st in self.steps]
+        if len(ids) != len(set(ids)):
+            raise ValueError("step ids must be unique")
+        return self
 
 
 SCHEMAS: dict[str, type[BaseModel]] = {

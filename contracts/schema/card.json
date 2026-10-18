@@ -111,6 +111,25 @@
       "title": "Cue",
       "type": "object"
     },
+    "Faq": {
+      "additionalProperties": false,
+      "properties": {
+        "a": {
+          "$ref": "#/$defs/Cue"
+        },
+        "q": {
+          "description": "how a confused beginner would ASK it out loud, lowercase, e.g. 'which leg is longer'",
+          "title": "Q",
+          "type": "string"
+        }
+      },
+      "required": [
+        "q",
+        "a"
+      ],
+      "title": "Faq",
+      "type": "object"
+    },
     "Functional": {
       "additionalProperties": false,
       "description": "Post-repair functional demonstration. Success is a measured camera fact; the LED is only COMMANDED.",
@@ -405,6 +424,141 @@
       "title": "Source_",
       "type": "object"
     },
+    "Step": {
+      "additionalProperties": false,
+      "properties": {
+        "cue": {
+          "$ref": "#/$defs/Cue",
+          "description": "the glasses text for this step: one action"
+        },
+        "detail": {
+          "default": "",
+          "description": "phone-only full explanation",
+          "maxLength": 600,
+          "title": "Detail",
+          "type": "string"
+        },
+        "faq": {
+          "items": {
+            "$ref": "#/$defs/Faq"
+          },
+          "title": "Faq",
+          "type": "array"
+        },
+        "guide_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Guide Id"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "requires": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Requires",
+          "type": "array"
+        },
+        "title": {
+          "maxLength": 28,
+          "title": "Title",
+          "type": "string"
+        },
+        "troubleshoot": {
+          "items": {
+            "$ref": "#/$defs/Check"
+          },
+          "title": "Troubleshoot",
+          "type": "array"
+        },
+        "verify": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StepVerify"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        },
+        "where": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Cue"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "why": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Cue"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "cue"
+      ],
+      "title": "Step",
+      "type": "object"
+    },
+    "StepVerify": {
+      "additionalProperties": false,
+      "description": "Optional evidence check. Without it a step is manual: only the wearer can confirm it (HUMAN CONFIRMED, never VERIFIED).",
+      "properties": {
+        "hold_ms": {
+          "default": 1500,
+          "minimum": 0,
+          "title": "Hold Ms",
+          "type": "integer"
+        },
+        "ok": {
+          "$ref": "#/$defs/Cue",
+          "description": "shown once when measured evidence satisfies the step"
+        },
+        "when": {
+          "items": {
+            "$ref": "#/$defs/Predicate"
+          },
+          "minItems": 1,
+          "title": "When",
+          "type": "array"
+        }
+      },
+      "required": [
+        "when",
+        "ok"
+      ],
+      "title": "StepVerify",
+      "type": "object"
+    },
     "Test": {
       "additionalProperties": false,
       "properties": {
@@ -535,11 +689,18 @@
       "title": "Sources",
       "type": "array"
     },
+    "steps": {
+      "description": "a playbook: ordered steps navigated by the wearer; tests (fault mode) and steps may coexist",
+      "items": {
+        "$ref": "#/$defs/Step"
+      },
+      "title": "Steps",
+      "type": "array"
+    },
     "tests": {
       "items": {
         "$ref": "#/$defs/Test"
       },
-      "minItems": 1,
       "title": "Tests",
       "type": "array"
     },
@@ -558,8 +719,7 @@
     "card_id",
     "title",
     "provenance",
-    "sources",
-    "tests"
+    "sources"
   ],
   "title": "Card",
   "type": "object"

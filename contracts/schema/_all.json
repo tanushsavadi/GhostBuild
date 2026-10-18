@@ -148,11 +148,18 @@
           "title": "Sources",
           "type": "array"
         },
+        "steps": {
+          "description": "a playbook: ordered steps navigated by the wearer; tests (fault mode) and steps may coexist",
+          "items": {
+            "$ref": "#/$defs/Step"
+          },
+          "title": "Steps",
+          "type": "array"
+        },
         "tests": {
           "items": {
             "$ref": "#/$defs/Test"
           },
-          "minItems": 1,
           "title": "Tests",
           "type": "array"
         },
@@ -171,8 +178,7 @@
         "card_id",
         "title",
         "provenance",
-        "sources",
-        "tests"
+        "sources"
       ],
       "title": "Card",
       "type": "object"
@@ -350,6 +356,25 @@
         "label"
       ],
       "title": "Evidence",
+      "type": "object"
+    },
+    "Faq": {
+      "additionalProperties": false,
+      "properties": {
+        "a": {
+          "$ref": "#/$defs/Cue"
+        },
+        "q": {
+          "description": "how a confused beginner would ASK it out loud, lowercase, e.g. 'which leg is longer'",
+          "title": "Q",
+          "type": "string"
+        }
+      },
+      "required": [
+        "q",
+        "a"
+      ],
+      "title": "Faq",
       "type": "object"
     },
     "Functional": {
@@ -589,6 +614,12 @@
           ],
           "title": "Mode",
           "type": "string"
+        },
+        "research_queued": {
+          "default": false,
+          "description": "true if an unsupported request was saved for an async research run; nothing is available NOW",
+          "title": "Research Queued",
+          "type": "boolean"
         },
         "session_id": {
           "title": "Session Id",
@@ -919,6 +950,7 @@
             "quiet",
             "welcome",
             "menu",
+            "step",
             "intervene",
             "visual",
             "ask",
@@ -962,6 +994,18 @@
           "description": "true if backed by data older than the staleness limit; plugin shows ERROR instead",
           "title": "Stale",
           "type": "boolean"
+        },
+        "step": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StepRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "present in step mode and in visual mode opened from a step"
         },
         "ttl_ms": {
           "anyOf": [
@@ -1244,6 +1288,53 @@
       "title": "Observation",
       "type": "object"
     },
+    "PlaybookState": {
+      "additionalProperties": false,
+      "properties": {
+        "card_id": {
+          "title": "Card Id",
+          "type": "string"
+        },
+        "confirmed": {
+          "description": "HUMAN CONFIRMED step ids",
+          "items": {
+            "type": "string"
+          },
+          "title": "Confirmed",
+          "type": "array"
+        },
+        "step_count": {
+          "minimum": 1,
+          "title": "Step Count",
+          "type": "integer"
+        },
+        "step_id": {
+          "title": "Step Id",
+          "type": "string"
+        },
+        "step_index": {
+          "minimum": 0,
+          "title": "Step Index",
+          "type": "integer"
+        },
+        "verified": {
+          "description": "step ids satisfied by measured evidence",
+          "items": {
+            "type": "string"
+          },
+          "title": "Verified",
+          "type": "array"
+        }
+      },
+      "required": [
+        "card_id",
+        "step_index",
+        "step_count",
+        "step_id"
+      ],
+      "title": "PlaybookState",
+      "type": "object"
+    },
     "Predicate": {
       "additionalProperties": false,
       "properties": {
@@ -1438,7 +1529,8 @@
             "HEALTHY",
             "FAULT",
             "EXHAUSTED",
-            "AWAIT_FUNC"
+            "AWAIT_FUNC",
+            "PLAYBOOK"
           ],
           "title": "Engine",
           "type": "string"
@@ -1474,6 +1566,17 @@
           "anyOf": [
             {
               "$ref": "#/$defs/HudFrame"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "playbook": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PlaybookState"
             },
             {
               "type": "null"
@@ -1539,6 +1642,183 @@
         "health"
       ],
       "title": "State",
+      "type": "object"
+    },
+    "Step": {
+      "additionalProperties": false,
+      "properties": {
+        "cue": {
+          "$ref": "#/$defs/Cue",
+          "description": "the glasses text for this step: one action"
+        },
+        "detail": {
+          "default": "",
+          "description": "phone-only full explanation",
+          "maxLength": 600,
+          "title": "Detail",
+          "type": "string"
+        },
+        "faq": {
+          "items": {
+            "$ref": "#/$defs/Faq"
+          },
+          "title": "Faq",
+          "type": "array"
+        },
+        "guide_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Guide Id"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "requires": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Requires",
+          "type": "array"
+        },
+        "title": {
+          "maxLength": 28,
+          "title": "Title",
+          "type": "string"
+        },
+        "troubleshoot": {
+          "items": {
+            "$ref": "#/$defs/Check"
+          },
+          "title": "Troubleshoot",
+          "type": "array"
+        },
+        "verify": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StepVerify"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        },
+        "where": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Cue"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "why": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Cue"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "cue"
+      ],
+      "title": "Step",
+      "type": "object"
+    },
+    "StepRef": {
+      "additionalProperties": false,
+      "description": "Where the wearer is in a playbook. Rendered as a small counter next to the action line.",
+      "properties": {
+        "check": {
+          "description": "manual = the wearer confirms (HUMAN CONFIRMED); measured = evidence verifies it",
+          "enum": [
+            "manual",
+            "measured"
+          ],
+          "title": "Check",
+          "type": "string"
+        },
+        "confirmed": {
+          "default": false,
+          "title": "Confirmed",
+          "type": "boolean"
+        },
+        "count": {
+          "minimum": 1,
+          "title": "Count",
+          "type": "integer"
+        },
+        "index": {
+          "minimum": 0,
+          "title": "Index",
+          "type": "integer"
+        },
+        "step_id": {
+          "title": "Step Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "index",
+        "count",
+        "step_id",
+        "check"
+      ],
+      "title": "StepRef",
+      "type": "object"
+    },
+    "StepVerify": {
+      "additionalProperties": false,
+      "description": "Optional evidence check. Without it a step is manual: only the wearer can confirm it (HUMAN CONFIRMED, never VERIFIED).",
+      "properties": {
+        "hold_ms": {
+          "default": 1500,
+          "minimum": 0,
+          "title": "Hold Ms",
+          "type": "integer"
+        },
+        "ok": {
+          "$ref": "#/$defs/Cue",
+          "description": "shown once when measured evidence satisfies the step"
+        },
+        "when": {
+          "items": {
+            "$ref": "#/$defs/Predicate"
+          },
+          "minItems": 1,
+          "title": "When",
+          "type": "array"
+        }
+      },
+      "required": [
+        "when",
+        "ok"
+      ],
+      "title": "StepVerify",
       "type": "object"
     },
     "Test": {

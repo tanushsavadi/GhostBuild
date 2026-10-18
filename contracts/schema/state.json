@@ -239,6 +239,7 @@
             "quiet",
             "welcome",
             "menu",
+            "step",
             "intervene",
             "visual",
             "ask",
@@ -282,6 +283,18 @@
           "description": "true if backed by data older than the staleness limit; plugin shows ERROR instead",
           "title": "Stale",
           "type": "boolean"
+        },
+        "step": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StepRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "present in step mode and in visual mode opened from a step"
         },
         "ttl_ms": {
           "anyOf": [
@@ -442,6 +455,53 @@
       "title": "Menu",
       "type": "object"
     },
+    "PlaybookState": {
+      "additionalProperties": false,
+      "properties": {
+        "card_id": {
+          "title": "Card Id",
+          "type": "string"
+        },
+        "confirmed": {
+          "description": "HUMAN CONFIRMED step ids",
+          "items": {
+            "type": "string"
+          },
+          "title": "Confirmed",
+          "type": "array"
+        },
+        "step_count": {
+          "minimum": 1,
+          "title": "Step Count",
+          "type": "integer"
+        },
+        "step_id": {
+          "title": "Step Id",
+          "type": "string"
+        },
+        "step_index": {
+          "minimum": 0,
+          "title": "Step Index",
+          "type": "integer"
+        },
+        "verified": {
+          "description": "step ids satisfied by measured evidence",
+          "items": {
+            "type": "string"
+          },
+          "title": "Verified",
+          "type": "array"
+        }
+      },
+      "required": [
+        "card_id",
+        "step_index",
+        "step_count",
+        "step_id"
+      ],
+      "title": "PlaybookState",
+      "type": "object"
+    },
     "Session": {
       "additionalProperties": false,
       "properties": {
@@ -498,6 +558,48 @@
       ],
       "title": "Session",
       "type": "object"
+    },
+    "StepRef": {
+      "additionalProperties": false,
+      "description": "Where the wearer is in a playbook. Rendered as a small counter next to the action line.",
+      "properties": {
+        "check": {
+          "description": "manual = the wearer confirms (HUMAN CONFIRMED); measured = evidence verifies it",
+          "enum": [
+            "manual",
+            "measured"
+          ],
+          "title": "Check",
+          "type": "string"
+        },
+        "confirmed": {
+          "default": false,
+          "title": "Confirmed",
+          "type": "boolean"
+        },
+        "count": {
+          "minimum": 1,
+          "title": "Count",
+          "type": "integer"
+        },
+        "index": {
+          "minimum": 0,
+          "title": "Index",
+          "type": "integer"
+        },
+        "step_id": {
+          "title": "Step Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "index",
+        "count",
+        "step_id",
+        "check"
+      ],
+      "title": "StepRef",
+      "type": "object"
     }
   },
   "additionalProperties": false,
@@ -524,7 +626,8 @@
         "HEALTHY",
         "FAULT",
         "EXHAUSTED",
-        "AWAIT_FUNC"
+        "AWAIT_FUNC",
+        "PLAYBOOK"
       ],
       "title": "Engine",
       "type": "string"
@@ -560,6 +663,17 @@
       "anyOf": [
         {
           "$ref": "#/$defs/HudFrame"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "playbook": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PlaybookState"
         },
         {
           "type": "null"

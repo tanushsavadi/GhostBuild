@@ -76,14 +76,14 @@ def test_load_cards_skips_invalid(tmp_path, caplog):
     (tmp_path / "other.json").write_text(json.dumps({"hello": 1}))
     with caplog.at_level("WARNING"):
         cards = load_cards(tmp_path)
-    assert [c.card_id for c in cards] == ["camera_lens"]
+    assert sorted(c.card_id for c in cards) == ["camera_lens", "led_breadboard"]
     assert "skipping invalid card" in caplog.text and "unreadable JSON" in caplog.text
     assert load_cards(tmp_path / "nope") == []
 
 
 def test_load_examples_dir_loads_the_fixture_card():
     cards = load_cards(REPO / "contracts" / "examples")
-    assert [c.card_id for c in cards] == ["camera_lens"]
+    assert sorted(c.card_id for c in cards) == ["camera_lens", "led_breadboard"]
 
 
 def make_log(path, card, asset_root):

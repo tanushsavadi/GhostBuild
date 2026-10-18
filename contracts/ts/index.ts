@@ -99,13 +99,18 @@ export type Title2 = string;
 export type Url = string | null;
 export type Sources = Source_[];
 /**
- * @minItems 1
+ * phone-only full explanation
  */
-export type Tests = [Test, ...Test[]];
+export type Detail = string;
 /**
- * @minItems 1
+ * how a confused beginner would ASK it out loud, lowercase, e.g. 'which leg is longer'
  */
-export type Checks = [Check, ...Check[]];
+export type Q = string;
+export type Faq = Faq1[];
+export type GuideId = string | null;
+export type Id3 = string;
+export type Requires = string[];
+export type Title3 = string;
 /**
  * page/section, or a timestamp like t=00:12:34 for video
  */
@@ -117,9 +122,24 @@ export type Source = string;
  */
 export type Url1 = string | null;
 export type Cites = Cite[];
-export type GuideId = string | null;
+export type GuideId1 = string | null;
 export type When = Predicate[];
 export type Why = string;
+export type Troubleshoot = Check[];
+export type HoldMs = number;
+/**
+ * @minItems 1
+ */
+export type When1 = [Predicate, ...Predicate[]];
+export type Warnings = string[];
+/**
+ * a playbook: ordered steps navigated by the wearer; tests (fault mode) and steps may coexist
+ */
+export type Steps = Step[];
+/**
+ * @minItems 1
+ */
+export type Checks = [Check, ...Check[]];
 export type FailAfterMs = number;
 /**
  * ALL must hold for the window to count as failing
@@ -127,13 +147,14 @@ export type FailAfterMs = number;
  * @minItems 1
  */
 export type FailWhen = [Predicate, ...Predicate[]];
-export type Id3 = string;
+export type Id4 = string;
 /**
  * gentle PRESS FOR PICTURE offer; once per fault
  */
 export type OfferHelpAfterMs = number;
 export type PassAfterMs = number;
-export type Title3 = string;
+export type Tests = Test[];
+export type Title4 = string;
 export type V = 2;
 export type ClientId = string;
 export type SessionId = string | null;
@@ -161,8 +182,12 @@ export type CardId1 = string | null;
 /**
  * phone-side explanation: what is supported and what is not
  */
-export type Detail = string;
+export type Detail1 = string;
 export type Mode1 = "fix" | "build";
+/**
+ * true if an unsupported request was saved for an async research run; nothing is available NOW
+ */
+export type ResearchQueued = boolean;
 export type SessionId2 = string;
 export type Status = "supported" | "unsupported" | "ambiguous";
 export type TaskTitle = string | null;
@@ -178,7 +203,7 @@ export type UptimeS = number;
 export type Voice = "off" | "on";
 export type CueId = string | null;
 export type Count = number;
-export type GuideId1 = string;
+export type GuideId2 = string;
 export type H = number;
 export type Index = number;
 export type Provenance2 =
@@ -198,7 +223,7 @@ export type Provenance2 =
   | "SIMULATED";
 export type Sha256 = string;
 export type StepId1 = string;
-export type Title4 = string;
+export type Title5 = string;
 /**
  * path on core, e.g. /guides/camera_lens/where.png (G2-ready 4-bit grey PNG)
  */
@@ -212,7 +237,8 @@ export type W = number;
 export type Options = [string, string] | [string, string, string];
 export type Prompt = string;
 export type Selected = number;
-export type Mode2 = "quiet" | "welcome" | "menu" | "intervene" | "visual" | "ask" | "verified" | "uncertain" | "error";
+export type Mode2 =
+  "quiet" | "welcome" | "menu" | "step" | "intervene" | "visual" | "ask" | "verified" | "uncertain" | "error";
 /**
  * monotonic; unchanged frames are never re-sent
  */
@@ -227,6 +253,14 @@ export type Source2 = "pi_live" | "replay" | "simulated";
  */
 export type Stale = boolean;
 /**
+ * manual = the wearer confirms (HUMAN CONFIRMED); measured = evidence verifies it
+ */
+export type Check1 = "manual" | "measured";
+export type Confirmed = boolean;
+export type Count1 = number;
+export type Index1 = number;
+export type StepId2 = string;
+/**
  * plugin clears locally after this as a fallback
  */
 export type TtlMs = number | null;
@@ -239,7 +273,7 @@ export type At = number;
 /**
  * variance of Laplacian (focus/detail); low when covered or defocused
  */
-export type Detail1 = number;
+export type Detail2 = number;
 /**
  * age of the frame when this observation was built
  */
@@ -284,8 +318,8 @@ export type Seq1 = number;
 export type Source3 = "pi_live" | "replay" | "simulated";
 export type V6 = 2;
 export type CardId2 = string;
-export type Check1 = number | null;
-export type Engine = "NO_LINK" | "HEALTHY" | "FAULT" | "EXHAUSTED" | "AWAIT_FUNC";
+export type Check2 = number | null;
+export type Engine = "NO_LINK" | "HEALTHY" | "FAULT" | "EXHAUSTED" | "AWAIT_FUNC" | "PLAYBOOK";
 /**
  * core epoch ms
  */
@@ -308,13 +342,25 @@ export type Label =
 export type Text1 = string;
 export type Events = Evidence[];
 export type HelpView = ("where" | "how" | "correct") | null;
-export type CardId3 = string | null;
+export type CardId3 = string;
+/**
+ * HUMAN CONFIRMED step ids
+ */
+export type Confirmed1 = string[];
+export type StepCount = number;
+export type StepId3 = string;
+export type StepIndex = number;
+/**
+ * step ids satisfied by measured evidence
+ */
+export type Verified = string[];
+export type CardId4 = string | null;
 export type Goal = ("fix" | "build") | null;
-export type Id4 = string;
+export type Id5 = string;
 export type Phase = "welcome" | "menu" | "task";
 export type WelcomeShown = boolean;
 export type Source4 = ("pi_live" | "replay" | "simulated") | null;
-export type StepId2 = string | null;
+export type StepId4 = string | null;
 export type Test1 = string | null;
 export type V7 = 2;
 
@@ -341,8 +387,9 @@ export interface Card {
   guides?: Guides;
   provenance: Provenance1;
   sources: Sources;
-  tests: Tests;
-  title: Title3;
+  steps?: Steps;
+  tests?: Tests;
+  title: Title4;
   v?: V;
 }
 /**
@@ -414,17 +461,36 @@ export interface Source_ {
 }
 /**
  * This interface was referenced by `GhostBuildContracts`'s JSON-Schema
- * via the `definition` "Test".
+ * via the `definition` "Step".
  */
-export interface Test {
-  checks: Checks;
-  fact: Cue;
-  fail_after_ms: FailAfterMs;
-  fail_when: FailWhen;
+export interface Step {
+  cue: Cue1;
+  detail?: Detail;
+  faq?: Faq;
+  guide_id?: GuideId;
   id: Id3;
-  offer_help_after_ms?: OfferHelpAfterMs;
-  ok: Cue;
-  pass_after_ms: PassAfterMs;
+  requires?: Requires;
+  title: Title3;
+  troubleshoot?: Troubleshoot;
+  verify?: StepVerify | null;
+  warnings?: Warnings;
+  where?: Cue | null;
+  why?: Cue | null;
+}
+/**
+ * the glasses text for this step: one action
+ */
+export interface Cue1 {
+  line1: Line1;
+  line2?: Line2;
+}
+/**
+ * This interface was referenced by `GhostBuildContracts`'s JSON-Schema
+ * via the `definition` "Faq".
+ */
+export interface Faq1 {
+  a: Cue;
+  q: Q;
 }
 /**
  * This interface was referenced by `GhostBuildContracts`'s JSON-Schema
@@ -433,7 +499,7 @@ export interface Test {
 export interface Check {
   action: Cue;
   cites?: Cites;
-  guide_id?: GuideId;
+  guide_id?: GuideId1;
   when?: When;
   why: Why;
 }
@@ -446,6 +512,38 @@ export interface Cite {
   quote?: Quote;
   source: Source;
   url?: Url1;
+}
+/**
+ * Optional evidence check. Without it a step is manual: only the wearer can confirm it (HUMAN CONFIRMED, never VERIFIED).
+ *
+ * This interface was referenced by `GhostBuildContracts`'s JSON-Schema
+ * via the `definition` "StepVerify".
+ */
+export interface StepVerify {
+  hold_ms?: HoldMs;
+  ok: Cue2;
+  when: When1;
+}
+/**
+ * shown once when measured evidence satisfies the step
+ */
+export interface Cue2 {
+  line1: Line1;
+  line2?: Line2;
+}
+/**
+ * This interface was referenced by `GhostBuildContracts`'s JSON-Schema
+ * via the `definition` "Test".
+ */
+export interface Test {
+  checks: Checks;
+  fact: Cue;
+  fail_after_ms: FailAfterMs;
+  fail_when: FailWhen;
+  id: Id4;
+  offer_help_after_ms?: OfferHelpAfterMs;
+  ok: Cue;
+  pass_after_ms: PassAfterMs;
 }
 /**
  * First message on every (re)connect. Core replies with the current frame. Welcome shows only when session_id is null/unknown.
@@ -494,8 +592,9 @@ export interface GoalResolution {
   alternatives?: Alternatives;
   card_id?: CardId1;
   cue: Cue;
-  detail: Detail;
+  detail: Detail1;
   mode: Mode1;
+  research_queued?: ResearchQueued;
   session_id: SessionId2;
   status: Status;
   task_title?: TaskTitle;
@@ -541,6 +640,10 @@ export interface HudFrame {
   session_id?: SessionId3;
   source: Source2;
   stale?: Stale;
+  /**
+   * present in step mode and in visual mode opened from a step
+   */
+  step?: StepRef | null;
   ttl_ms?: TtlMs;
   type?: Type2;
   v?: V5;
@@ -551,13 +654,13 @@ export interface HudFrame {
  */
 export interface ImageRef {
   count: Count;
-  guide_id: GuideId1;
+  guide_id: GuideId2;
   h: H;
   index: Index;
   provenance: Provenance2;
   sha256: Sha256;
   step_id: StepId1;
-  title: Title4;
+  title: Title5;
   url: Url2;
   view: View1;
   w: W;
@@ -572,6 +675,19 @@ export interface Menu {
   options: Options;
   prompt: Prompt;
   selected: Selected;
+}
+/**
+ * Where the wearer is in a playbook. Rendered as a small counter next to the action line.
+ *
+ * This interface was referenced by `GhostBuildContracts`'s JSON-Schema
+ * via the `definition` "StepRef".
+ */
+export interface StepRef {
+  check: Check1;
+  confirmed?: Confirmed;
+  count: Count1;
+  index: Index1;
+  step_id: StepId2;
 }
 /**
  * This interface was referenced by `GhostBuildContracts`'s JSON-Schema
@@ -598,7 +714,7 @@ export interface Observation {
  * via the `definition` "CameraObs".
  */
 export interface CameraObs {
-  detail: Detail1;
+  detail: Detail2;
   frame_age_ms: FrameAgeMs;
   frame_seq: FrameSeq;
   luma_std: LumaStd;
@@ -624,15 +740,16 @@ export interface LedObs {
  */
 export interface State {
   card_id: CardId2;
-  check?: Check1;
+  check?: Check2;
   engine: Engine;
   events?: Events;
   health: Health;
   help_view?: HelpView;
   hud?: HudFrame | null;
+  playbook?: PlaybookState | null;
   session: Session;
   source?: Source4;
-  step_id?: StepId2;
+  step_id?: StepId4;
   test?: Test1;
   v?: V7;
 }
@@ -651,12 +768,24 @@ export interface Evidence1 {
 }
 /**
  * This interface was referenced by `GhostBuildContracts`'s JSON-Schema
+ * via the `definition` "PlaybookState".
+ */
+export interface PlaybookState {
+  card_id: CardId3;
+  confirmed?: Confirmed1;
+  step_count: StepCount;
+  step_id: StepId3;
+  step_index: StepIndex;
+  verified?: Verified;
+}
+/**
+ * This interface was referenced by `GhostBuildContracts`'s JSON-Schema
  * via the `definition` "Session".
  */
 export interface Session {
-  card_id?: CardId3;
+  card_id?: CardId4;
   goal?: Goal;
-  id: Id4;
+  id: Id5;
   phase: Phase;
   welcome_shown?: WelcomeShown;
 }

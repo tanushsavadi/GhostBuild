@@ -61,6 +61,12 @@
       "title": "Mode",
       "type": "string"
     },
+    "research_queued": {
+      "default": false,
+      "description": "true if an unsupported request was saved for an async research run; nothing is available NOW",
+      "title": "Research Queued",
+      "type": "boolean"
+    },
     "session_id": {
       "title": "Session Id",
       "type": "string"

@@ -1,0 +1,138 @@
+{
+  "v": 2,
+  "card_id": "led_breadboard",
+  "title": "Light an LED on a breadboard",
+  "provenance": "AUTHORED DEMO METADATA",
+  "sources": [
+    {
+      "id": "ex",
+      "kind": "WEB TUTORIAL",
+      "title": "Example source (fixture)",
+      "url": "https://example.com/led",
+      "file": null
+    }
+  ],
+  "tests": [],
+  "steps": [
+    {
+      "id": "parts",
+      "title": "Gather parts",
+      "cue": {
+        "line1": "GATHER LED + RESISTOR",
+        "line2": "+ BATTERY PACK"
+      },
+      "detail": "Fixture step. One LED, one resistor, a battery pack, a breadboard.",
+      "why": null,
+      "where": {
+        "line1": "ON YOUR PARTS TRAY",
+        "line2": ""
+      },
+      "warnings": [],
+      "faq": [],
+      "troubleshoot": [],
+      "guide_id": null,
+      "verify": null,
+      "requires": []
+    },
+    {
+      "id": "led",
+      "title": "Place the LED",
+      "cue": {
+        "line1": "PUSH LED INTO BOARD",
+        "line2": "LONG LEG TO THE RIGHT"
+      },
+      "detail": "",
+      "why": {
+        "line1": "LEDS ONLY WORK ONE WAY",
+        "line2": ""
+      },
+      "where": null,
+      "warnings": [],
+      "faq": [
+        {
+          "q": "which leg is longer",
+          "a": {
+            "line1": "LONG LEG = POSITIVE",
+            "line2": ""
+          }
+        }
+      ],
+      "troubleshoot": [
+        {
+          "when": [],
+          "action": {
+            "line1": "CHECK LEG DIRECTION",
+            "line2": ""
+          },
+          "why": "Fixture troubleshoot entry.",
+          "cites": [],
+          "guide_id": null
+        }
+      ],
+      "guide_id": "led",
+      "verify": null,
+      "requires": []
+    },
+    {
+      "id": "power",
+      "title": "Connect power",
+      "cue": {
+        "line1": "CONNECT BATTERY PACK",
+        "line2": ""
+      },
+      "detail": "",
+      "why": null,
+      "where": null,
+      "warnings": [],
+      "faq": [],
+      "troubleshoot": [],
+      "guide_id": null,
+      "verify": {
+        "when": [
+          {
+            "signal": "led.commanded_on",
+            "op": "eq",
+            "value": true
+          }
+        ],
+        "hold_ms": 500,
+        "ok": {
+          "line1": "● CHECK PASSED",
+          "line2": ""
+        }
+      },
+      "requires": []
+    }
+  ],
+  "functional": null,
+  "guides": [
+    {
+      "id": "led",
+      "title": "LED",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "led.where",
+          "title": "WHERE",
+          "image": "knowledge/guides/led/where.png",
+          "phone_image": null,
+          "provenance": "AUTHORED DEMO METADATA",
+          "depicts": "Fixture",
+          "fallback": {
+            "line1": "LED GOES ON THE BOARD",
+            "line2": ""
+          },
+          "fov_note": null,
+          "reference_url": null
+        }
+      ]
+    }
+  ],
+  "goal_mode": "build",
+  "aliases": [
+    "led",
+    "breadboard",
+    "blink",
+    "light an led"
+  ]
+}
