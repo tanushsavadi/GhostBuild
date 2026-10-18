@@ -1,0 +1,12 @@
+{
+  "enabled": true,
+  "reason": null,
+  "approval": true,
+  "limits": {
+    "max_runs_per_process": 20,
+    "min_seconds_between_runs": 10,
+    "active_runs": 1
+  },
+  "started_this_process": 3,
+  "FIXTURE": "MOCK"
+}

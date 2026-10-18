@@ -1,0 +1,70 @@
+{
+  "runs": [
+    {
+      "creao_status": "running",
+      "error": null,
+      "device": null,
+      "model": null,
+      "intent": "build",
+      "session_id": null,
+      "doc_urls": [],
+      "video_urls": [],
+      "follow_up": null,
+      "created_at": "2026-10-18T03:00:00Z",
+      "updated_at": "2026-10-18T03:04:00Z",
+      "validation_errors": [],
+      "approved_by": null,
+      "FIXTURE": "MOCK data, not real CREAO output",
+      "run_id": "r-demo3",
+      "creao_run_id": "MOCK-run-3",
+      "status": "running",
+      "draft_id": null,
+      "goal": "replace a bicycle inner tube"
+    },
+    {
+      "creao_status": "completed",
+      "error": "2 validation error(s)",
+      "device": null,
+      "model": null,
+      "intent": "build",
+      "session_id": null,
+      "doc_urls": [],
+      "video_urls": [],
+      "follow_up": null,
+      "created_at": "2026-10-18T03:00:00Z",
+      "updated_at": "2026-10-18T03:04:00Z",
+      "validation_errors": [
+        "card: [steps.0.cue.line1] String should have at most 24 characters",
+        "card.steps[0](open).cue.line1: reads as a diagnosis (IS); use CHECK ... wording"
+      ],
+      "approved_by": null,
+      "FIXTURE": "MOCK data, not real CREAO output",
+      "run_id": "r-demo2",
+      "creao_run_id": "MOCK-run-2",
+      "status": "invalid",
+      "draft_id": null,
+      "goal": "tighten a loose cabinet hinge"
+    },
+    {
+      "creao_status": "completed",
+      "error": null,
+      "device": null,
+      "model": null,
+      "intent": "build",
+      "session_id": null,
+      "doc_urls": [],
+      "video_urls": [],
+      "follow_up": null,
+      "created_at": "2026-10-18T03:00:00Z",
+      "updated_at": "2026-10-18T03:04:00Z",
+      "validation_errors": [],
+      "approved_by": null,
+      "FIXTURE": "MOCK data, not real CREAO output",
+      "run_id": "r-demo1",
+      "creao_run_id": "MOCK-run-router",
+      "status": "draft_ready",
+      "draft_id": "reset_a_home_router_to_factory_settings_e227-20261018T043229",
+      "goal": "reset a home router to factory settings"
+    }
+  ]
+}

@@ -166,3 +166,17 @@ button:disabled{background:#333;color:#888;cursor:not-allowed}
 .lead{margin:6px 0 12px}
 button.ghost{background:transparent;color:var(--accent);border:2px solid var(--accent);margin-top:12px;font-size:15px;padding:10px}
 .stale .area-playbook .pb-steps,.stale .area-playbook #pb-current{opacity:.45}
+
+/* CREAO research box (shown only when core reports it enabled) */
+.creao{margin-top:22px;border-top:2px solid var(--line);padding-top:14px}
+.creao input[type=text],.creao input[type=password],.creao textarea{width:100%;box-sizing:border-box}
+.runs{list-style:none;margin:0;padding:0}
+.runs li{display:flex;gap:10px;align-items:center;justify-content:space-between;border:2px solid var(--line);border-radius:10px;padding:8px 10px;margin:6px 0;cursor:pointer}
+.runs li.sel{border-color:var(--accent)}
+.runs .goal{overflow-wrap:anywhere;flex:1}
+.draft{margin-top:12px;border:3px solid var(--amber);border-radius:12px;padding:12px;background:var(--surface2)}
+.draft .banner-draft{font-weight:900;letter-spacing:.05em;color:#ffd58a}
+.draft ol,.draft ul{padding-left:20px}
+.draft .refonly{border-left:4px solid var(--amber);padding-left:8px;margin:6px 0}
+.draft .verr{color:#ff8a85}
+.draft .approve{margin-top:12px;border-top:2px solid var(--line);padding-top:10px}

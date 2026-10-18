@@ -244,14 +244,23 @@ def test_chooser_three_cards(tmp_path):
 def test_chooser_more_than_three_shows_more_on_phone_hint_only(tmp_path):
     rt = boot(build_cards(5), tmp_path)
     f = start_build(rt)
-    # the Menu contract allows at most 3 options: two cards + MORE ON PHONE
-    assert f.menu.options == ["ASSEMBLE A SHELF", "BUILD A BIRD FEEDER", "MORE ON PHONE"]
-    swipes(rt, 2)
+    # the Menu contract allows at most 4 options: three cards + MORE ON PHONE
+    assert f.menu.options == ["ASSEMBLE A SHELF", "BUILD A BIRD FEEDER", "CHANGE A BIKE TIRE", "MORE ON PHONE"]
+    swipes(rt, 3)
     f = rt.handle_input(gi("press"))
     assert f.mode == "uncertain" and (f.cue.line1, f.cue.line2) == ("USE THE PHONE", "TYPE YOUR TASK")
     assert rt.session().phase == "menu" and rt.playbook is None
     settle(rt)
-    assert cur(rt).mode == "menu" and cur(rt).menu.selected == 2
+    assert cur(rt).mode == "menu" and cur(rt).menu.selected == 3
+
+
+def test_chooser_four_cards_shows_all_four_no_more(tmp_path):
+    rt = boot(build_cards(4), tmp_path)
+    f = start_build(rt)
+    assert len(f.menu.options) == 4 and "MORE ON PHONE" not in f.menu.options
+    swipes(rt, 3)
+    rt.handle_input(gi("press"))
+    assert rt.session().card_id == "task_3"
 
 
 def test_double_press_is_never_sent_so_chooser_has_no_special_case(tmp_path):

@@ -46,3 +46,30 @@ Never trigger another run, never start yourself, never call any other endpoint.
 
 ## Feasibility spike (30 min cap)
 Run once on the Pi camera docs page + one GitHub repo + one YouTube tutorial. If the agent cannot produce a schema-valid draft in two runs, stop; keep hand-authored cards. CREAO never blocks the Even submission.
+
+## API adapter (build time, optional; UNVERIFIED against the real CREAO API)
+Status, honestly: this adapter has only ever run against MOCK servers (`httpx.MockTransport`) in tests. No `CREAO_API_KEY` has been used; no request has reached CREAO. The agent already exists ("GhostBuild Intelligence", app id `032b9dc5-2fc7-4b5d-af36-8efdbd2648ac`, https://agent.creao.ai/apps/032b9dc5-2fc7-4b5d-af36-8efdbd2648ac); do not recreate it. The API per the project owner: `POST https://agent.creao.ai/api/v1/runs`, `GET https://agent.creao.ai/api/v1/runs/{id}`, backend-only key `capi_...`. (developer.creao.ai documents a different /v2 project-key API; it is NOT used here.) Unverified until the first real response: request body field names, auth header, status values, output location/shape, latency.
+
+Code: `knowledge/creao.py` (client + CLI), `knowledge/creao_normalize.py` (output -> envelope), `core/ghostbuild_core/research_runs.py` (`GB_CREAO=1` runs + approval endpoint), phone page Research box.
+
+Environment (all optional except the key): `CREAO_API_KEY` (shell only; never in files, git, g2/ or web/), `CREAO_APP_ID`, `CREAO_BASE_URL` (default https://agent.creao.ai), `CREAO_AUTH_HEADER` (default `Authorization`), `CREAO_AUTH_SCHEME` (default `Bearer`; empty = raw key), `CREAO_RUN_PATH` (default `/api/v1/runs`), `CREAO_RUN_BODY` (JSON template with `{app_id} {goal} {device} {model} {intent} {doc_urls} {video_urls} {follow_up}`; an exact-placeholder string keeps its type and an empty value drops the key). Core: `GB_CREAO=1` enables `POST /research/run`; `GB_ADMIN_TOKEN` enables `POST /cards/drafts/{id}/approve` (header `X-GhostBuild-Token`).
+
+Default request body (a GUESS): `{"app_id": APP_ID, "inputs": {"goal", "device", "model", "intent", "documentation_urls": [...], "video_urls": [...], "follow_up"}}`, empty optional inputs omitted.
+
+Probe once a key exists:
+
+    export CREAO_API_KEY=capi_...            # this shell only
+    uv run python -m knowledge.creao probe --goal "replace a bicycle inner tube" --dry-run   # prints the exact request, no key, no network
+    uv run python -m knowledge.creao probe --goal "replace a bicycle inner tube" --doc-url https://... --video-url https://...
+    uv run python -m knowledge.creao status <run_id>
+    uv run python -m knowledge.creao normalize knowledge/requests/creao_raw/<run_id>.json   # offline, repeatable
+
+`probe` saves the COMPLETE raw responses to `knowledge/requests/creao_raw/<run_id>.json` (gitignored), prints a structural summary (keys, types, lengths) and then the normalizer and validator results. Without the key it prints a message and exits 2 without touching the network.
+
+Tuning from the first real response:
+1. HTTP 4xx: the error shows the status and a redacted, truncated body. Fix the body with `CREAO_RUN_BODY` (field names, nesting) or the auth with `CREAO_AUTH_HEADER`/`CREAO_AUTH_SCHEME`; retry `--dry-run` to check, then probe again. 429/5xx are retried with backoff; 4xx never are.
+2. Run id not found: add the real key to `find_run_id`. Never reaches a terminal state or ends too early: read the status values in the shape summary and extend `SUCCESS_STATUSES`/`FAILURE_STATUSES` in `knowledge/creao.py`.
+3. `extract_payload: NOTHING FOUND` or a validation list: open the saved raw file, find where the playbook is, add that key to `OUTPUT_KEYS` (or the playbook keys to `STEP_LIST_KEYS` etc.) in `knowledge/creao_normalize.py`, and add that real shape (names redacted) as a test next to the MOCK shapes. Re-run `normalize` on the saved file; no new credits are spent.
+Rules the normalizer keeps whatever the agent returns: steps are manual unless an allowed telemetry signal is named; cues are shortened at word boundaries only, with the full sentence in `detail` and every shortening recorded in `research.uncertainties`; no `guides` are ever created (picture descriptions/links become `research.visual_references`, shown on the phone as "reference only — no picture on glasses"); quotes only if verbatim in supplied `source_texts`; provenance is never AUTHORED or HUMAN-REVIEWED (only `knowledge.approve` sets the latter).
+
+Guard rails in core: one active run, one new run per 10 s, 20 runs per core process, `503 creao disabled` without the flag or key; run table `knowledge/requests/creao_runs.json` (gitignored); approval needs `GB_ADMIN_TOKEN` + reviewer name, refuses alias clashes and hand-authored overwrites, then reloads cards in place (`Runtime.reload_cards`; an active playbook keeps its position only if the step ids are unchanged).

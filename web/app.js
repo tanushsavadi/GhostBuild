@@ -544,6 +544,145 @@
     }).then(function () { S.resBusy = false; renderResearchHint(); });
   });
 
+  // ------------------------------------------------------------------ CREAO research runs (hidden unless GET /research/status says enabled)
+  // Admin token and reviewer name live only in these inputs/variables: never stored, never logged, never put in a URL.
+  var C = { enabled: false, checked: false, runs: [], selected: null, detail: null, busy: false, approving: false, lastErr: null };
+  function creaoUrl(path) {
+    if (FIXTURE) return 'fixtures/' + ({ '/research/status': 'research_status_enabled', '/research/runs': 'research_runs' }[path] || ('research_run_' + path.split('/').pop())) + '.json';
+    return CORE + path;
+  }
+  function creaoGet(path) {
+    var ctl = new AbortController(), t = setTimeout(function () { ctl.abort(); }, 4000);
+    return fetch(creaoUrl(path), { signal: ctl.signal, cache: 'no-store' }).then(function (r) {
+      clearTimeout(t); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json();
+    }, function (e) { clearTimeout(t); throw e; });
+  }
+  function creaoCheck() {
+    // fixtures: the CREAO box is only shown with &creao=1 so the existing fixture screens stay unchanged
+    if (FIXTURE && qs.get('creao') !== '1') { C.checked = true; return; }
+    creaoGet('/research/status').then(function (j) { C.enabled = L.creaoEnabled(j); }, function () { C.enabled = false; })
+      .then(function () { C.checked = true; renderCreao(); if (C.enabled) creaoPoll(); else setTimeout(creaoCheck, 30000); });
+  }
+  function creaoPoll() {
+    if (!C.enabled) return;
+    creaoGet('/research/runs').then(function (j) {
+      C.runs = (j && j.runs) || [];
+      if (C.selected) return creaoGet('/research/runs/' + encodeURIComponent(C.selected)).then(function (d) { C.detail = d; }, function () { /* keep the last detail */ });
+    }).catch(function () { /* transient; shown as stale by the next success */ })
+      .then(function () { renderCreao(); setTimeout(creaoPoll, L.anyActive(C.runs) ? 2000 : 8000); });
+  }
+  function renderCreao() {
+    var box = $('creao-box');
+    box.hidden = !C.enabled;
+    if (!C.enabled) return;
+    var hint = $('creao-hint'), btn = $('creao-send');
+    btn.disabled = C.busy;
+    memo(hint, String(C.busy), function () { hint.textContent = 'Starts a CREAO run. Limits: one active run, one new run per 10 s, 20 per core process.'; });
+    var ul = $('creao-runs');
+    memo(ul, JSON.stringify([C.runs, C.selected]), function () {
+      clear(ul);
+      if (!C.runs.length) ul.appendChild(h('li', { class: 'empty', text: 'no runs yet' }));
+      C.runs.forEach(function (r) {
+        var st = L.runStatus(r);
+        var li = h('li', { class: r.run_id === C.selected ? 'sel' : '', tabindex: '0', role: 'button' },
+          h('span', { class: 'goal', text: r.goal }), h('span', { class: 'pill pill-' + st.kind, text: st.label }));
+        var pick = function () { C.selected = r.run_id; C.detail = null; renderCreao(); creaoGet('/research/runs/' + encodeURIComponent(r.run_id)).then(function (d) { C.detail = d; renderCreao(); }, function () {}); };
+        li.addEventListener('click', pick); li.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } });
+        ul.appendChild(li);
+      });
+    });
+    renderDraft();
+  }
+  function renderDraft() {
+    var box = $('creao-draft'), rec = C.detail;
+    memo(box, JSON.stringify([rec, C.approving]), function () {
+      clear(box);
+      if (!rec) return;
+      var st = L.runStatus(rec);
+      var el = h('div', { class: 'draft' });
+      el.appendChild(h('div', { class: 'banner-draft', text: st.label }));
+      el.appendChild(h('div', { class: 'meta', text: 'Run ' + rec.run_id + (rec.creao_run_id ? ' · CREAO run ' + rec.creao_run_id : '') }));
+      if (rec.error) el.appendChild(h('div', { class: 'res err', role: 'alert' }, h('div', { class: 'st', text: 'ERROR' }), h('div', { text: rec.error })));
+      var vErr = rec.validation_errors || [];
+      if (rec.status === 'invalid' && vErr.length) {
+        el.appendChild(h('div', { class: 'verr' }, h('b', { text: 'Validation errors (' + vErr.length + ')' }), h('ul', null, vErr.slice(0, 12).map(function (e) { return h('li', { text: e }); }))));
+      }
+      var v = L.draftView(rec.draft);
+      if (v) {
+        el.appendChild(h('h4', { text: v.title }));
+        el.appendChild(h('div', null, lbl(v.provenance), ' ', h('span', { class: 'meta', text: v.mode.toUpperCase() + ' · ' + v.cardId + ' · DRAFT: not reviewed by a human' })));
+        el.appendChild(h('ol', null, v.steps.map(function (s) {
+          return h('li', null, h('b', { text: s.title }), ' ', h('span', { class: 'pill', text: s.check }), h('div', { class: 'cue', text: s.cue }),
+            s.detail ? h('div', { class: 'meta', text: s.detail }) : null,
+            s.warnings.map(function (w) { return h('div', { class: 'warn' }, h('b', { text: 'WARNING ' }), w); }));
+        })));
+        el.appendChild(h('h4', { text: 'Sources' }));
+        el.appendChild(h('ul', null, v.sources.map(function (so) {
+          return h('li', null, lbl(so.kind), ' ', so.url ? h('a', { href: so.url, target: '_blank', rel: 'noopener noreferrer', text: so.title }) : h('span', { text: so.title }));
+        })));
+        if (v.timestamps.length) el.appendChild(h('ul', null, v.timestamps.map(function (t) {
+          var loc = h('span', { class: 'ts', text: t.loc });
+          return h('li', null, t.step + ' → ', t.url ? h('a', { href: t.url, target: '_blank', rel: 'noopener noreferrer' }, loc) : loc);
+        })));
+        if (v.uncertainties.length) {
+          el.appendChild(h('h4', { text: 'Uncertainties' }));
+          el.appendChild(h('ul', null, v.uncertainties.map(function (u) { return h('li', { text: u }); })));
+        }
+        if (v.references.length) {
+          el.appendChild(h('h4', { text: 'Visual references' }));
+          el.appendChild(h('div', { class: 'meta', text: L.REFERENCE_ONLY }));
+          v.references.forEach(function (r) {
+            el.appendChild(h('div', { class: 'refonly' }, h('b', { text: r.view.toUpperCase() + ' · ' + L.REFERENCE_ONLY }), h('div', { text: r.description || '(link only)' }),
+              r.url ? h('a', { href: r.url, target: '_blank', rel: 'noopener noreferrer', text: r.url }) : null));
+          });
+        }
+        el.appendChild(h('div', { class: v.validationOk ? 'meta' : 'verr', text: v.validationOk ? 'Validation: OK' : 'Validation errors: ' + v.validationErrors.join(' | ') }));
+        if (!v.hasPictures) el.appendChild(h('div', { class: 'meta', text: 'No pictures: this card shows text cues on the glasses.' }));
+        if (rec.status === 'draft_ready' && !rec.approved_by) el.appendChild(approveBlock(rec));
+      }
+      box.appendChild(el);
+    });
+  }
+  function approveBlock(rec) {
+    var who = h('input', { type: 'text', id: 'creao-reviewer', maxlength: '80', autocomplete: 'off', placeholder: 'reviewer name' });
+    var tok = h('input', { type: 'password', id: 'creao-token', autocomplete: 'off', placeholder: 'admin token (kept in memory only)' });
+    var out = h('div', { id: 'creao-approve-out', 'aria-live': 'polite' });
+    var btn = h('button', { type: 'button', text: 'Approve this draft' });
+    btn.addEventListener('click', function () {
+      var chk = L.canApprove(rec, who.value, tok.value);
+      if (!chk.ok) { out.textContent = chk.why; return; }
+      if (C.approving) return;
+      C.approving = true; btn.disabled = true; out.textContent = 'Approving...';
+      var p = FIXTURE ? Promise.resolve({ status: 200, ok: true, json: { approved: true, fixture: true } })
+        : fetch(CORE + '/cards/drafts/' + encodeURIComponent(rec.draft_id) + '/approve', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-GhostBuild-Token': tok.value }, body: JSON.stringify({ reviewer: who.value.trim() }) })
+          .then(function (r) { return r.text().then(function (t) { var j = null; try { j = JSON.parse(t); } catch (e) { /* not JSON */ } return { status: r.status, ok: r.ok, text: t, json: j }; }); }, function () { return { status: 0, ok: false, text: '' }; });
+      p.then(function (r) {
+        C.approving = false; btn.disabled = false; tok.value = '';
+        if (!r.ok) { out.textContent = L.approveError(r.status, r.text); return; }
+        out.textContent = FIXTURE ? 'FIXTURE RESPONSE: nothing was approved.' : 'Approved by ' + who.value.trim() + '. The task is now in the BUILD/FIX list on the glasses and here.';
+      });
+    });
+    return h('div', { class: 'approve' }, h('div', { class: 'meta', text: 'Approving means you reviewed this draft against its sources. The admin token and your name are not stored.' }), who, tok, btn, out);
+  }
+  $('creao-form').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    if (C.busy) return;
+    var checked = document.querySelector('input[name=cintent]:checked');
+    var res = L.buildRunBody({ goal: $('creao-goal').value, device: $('creao-device').value, model: $('creao-model').value, intent: checked && checked.value,
+      docUrls: $('creao-docs').value, videoUrls: $('creao-videos').value, followUp: $('creao-follow').value, sessionId: S.state && S.state.session && S.state.session.id !== 'none' ? S.state.session.id : '' });
+    var msg = $('creao-msg'); clear(msg);
+    if (!res.ok) { msg.appendChild(h('div', { class: 'res err', role: 'alert' }, h('div', { class: 'st', text: 'NOT STARTED' }), h('div', { text: res.errors.join(' ') }))); return; }
+    C.busy = true; renderCreao();
+    var p = FIXTURE ? Promise.resolve({ status: 202, ok: true, json: { run_id: 'r-fixture' } })
+      : postJson('/research/run', res.body);
+    p.then(function (r) {
+      if (!r.ok) { msg.appendChild(h('div', { class: 'res err', role: 'alert' }, h('div', { class: 'st', text: 'NOT STARTED' }), h('div', { text: L.runError(r.status, r.text) }))); return; }
+      msg.appendChild(h('div', { class: 'res ambiguous' }, h('div', { class: 'queued', text: 'Run started' }), h('div', { text: 'Run ' + r.json.run_id + (FIXTURE ? ' (FIXTURE RESPONSE: no backend was contacted)' : '') + '. This takes minutes; the result will be a draft.' })));
+      if (!FIXTURE) creaoGet('/research/runs').then(function (j) { C.runs = j.runs || []; C.selected = r.json.run_id; renderCreao(); }, function () {});
+    }).then(function () { C.busy = false; renderCreao(); });
+  });
+  creaoCheck();
+
   // ------------------------------------------------------------------ dev bar
   function devbar() {
     if (!FIXTURE) return;
