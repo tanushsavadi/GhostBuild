@@ -1,8 +1,10 @@
 import deck from './deck.json'
+import asllex from './asllex.json'
 
-// Turns an English phrase into the cards to sign, in order. Only signs in
-// deck.json become sign cards; every other word is fingerspelled. Pure, so it
-// can be checked without the glasses.
+// Turns an English phrase into the cards to sign, in order. Words in deck.json
+// (hand-written lines) win; then every ASL-LEX 2.0 sign from asllex.json
+// (lines composed from its phonology coding, built by tools/build_deck.py);
+// anything else is fingerspelled. Pure, so it can be checked without glasses.
 
 export type Status = 'REF-CHECKED' | 'UNCHECKED'
 
@@ -26,14 +28,54 @@ interface Sign {
   video?: string
 }
 
-const signs = deck.signs as Sign[]
 const letters = deck.letters as Record<string, { handshape: string | null; how: string }>
 const skip = new Set(deck.skip)
 
+// word -> [gloss, handshape, hands line, motion line, vimeo id]
+type LexRow = [string, string | null, string, string, string]
+const lexicon = asllex as unknown as Record<string, LexRow>
+
+// Hand-written deck first, then ASL-LEX; the first sign registered for a word wins.
+const byWord = new Map<string, Sign>()
+for (const sign of deck.signs as Sign[]) for (const w of sign.words) byWord.set(w, sign)
+for (const [word, [gloss, handshape, hands, motion, vimeo]] of Object.entries(lexicon)) {
+  if (byWord.has(word)) continue
+  byWord.set(word, {
+    gloss,
+    words: [word],
+    handshape: handshape ?? '',
+    how: [hands, motion],
+    status: 'AUTO',
+    video: vimeo ? `https://player.vimeo.com/video/${vimeo}` : undefined,
+  })
+}
+
 // Longest phrase first, so "thank you" wins over a single "you".
-const phrases = signs
-  .flatMap(sign => sign.words.map(w => ({ tokens: w.split(' '), sign })))
+const phrases = [...byWord.entries()]
+  .map(([w, sign]) => ({ tokens: w.split(' '), sign }))
+  .filter(p => p.tokens.length > 1)
   .sort((a, b) => b.tokens.length - a.tokens.length)
+
+// "wants" -> "want", "learning" -> "learn", "studied" -> "study".
+function lookup(word: string): Sign | undefined {
+  const bare = word.replace(/'s$/, '')
+  const candidates = [
+    bare,
+    bare.replace(/ies$/, 'y'),
+    bare.replace(/es$/, ''),
+    bare.replace(/s$/, ''),
+    bare.replace(/ing$/, ''),
+    bare.replace(/ing$/, 'e'),
+    bare.replace(/ied$/, 'y'),
+    bare.replace(/ed$/, ''),
+    bare.replace(/d$/, ''),
+  ]
+  for (const c of candidates) {
+    const sign = c.length > 1 || c === bare ? byWord.get(c) : undefined
+    if (sign) return sign
+  }
+  return undefined
+}
 
 export function tokenize(text: string): string[] {
   return text
@@ -48,8 +90,8 @@ function signCard(sign: Sign): Card {
     kind: 'sign',
     title: sign.gloss,
     how: [sign.how[0], sign.how[1]],
-    handshape: sign.handshape,
-    label: sign.status === 'REF-CHECKED' ? 'REF-CHECKED' : 'UNCHECKED',
+    handshape: sign.handshape || null,
+    label: sign.status === 'REF-CHECKED' ? 'REF-CHECKED' : sign.status === 'AUTO' ? 'AUTO · UNCHECKED' : 'UNCHECKED',
     video: sign.video,
   }
 }
@@ -84,10 +126,14 @@ export function cardsFor(text: string): Card[] {
     if (hit) {
       cards.push(signCard(hit.sign))
       i += hit.tokens.length
-    } else {
-      if (!skip.has(tokens[i])) cards.push(...spell(tokens[i]))
-      i += 1
+      continue
     }
+    const word = tokens[i]
+    i += 1
+    if (skip.has(word)) continue
+    const sign = lookup(word)
+    if (sign) cards.push(signCard(sign))
+    else cards.push(...spell(word))
   }
   return cards
 }

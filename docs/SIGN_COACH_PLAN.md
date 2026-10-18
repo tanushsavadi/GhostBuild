@@ -23,6 +23,7 @@ Handshape image 144×144 on the left; text on the right: sign name and n/N, two 
 | 0 Go/no-go | Pixelated ASL-LEX handshapes on the real G2 at 144 px (thin / bold / 96 px bold): `/probe.html` | 5 of 5 handshapes named on the lens; send time recorded | Built; lens test pending |
 | 1 Cards | Card layout, tap = next | Works on the G2 | Built, simulator-checked |
 | 2 Deck | `g2/src/deck.json`: ASL-LEX phonology for the 12 signs; lines drafted by AI (Claude, in session) from it; a person checks each against its ASL-LEX video and sets `status` to `REF-CHECKED` | 12 signs + 26 letters, every sign card REF-CHECKED | Drafted; all UNCHECKED |
+| 2b Full vocabulary | `g2/src/asllex.json` from `uv run tools/build_deck.py`: 2,311 words from all ASL-LEX 2.0 signs, lines composed from phonology coding (AUTO · UNCHECKED); aliases such as I → ME; plural/-ing/-ed handling; M and N drawings | Everyday phrases sign instead of fingerspelling | Built, simulator-checked |
 | 3 Typed phrase | Phone page text box → `matcher.ts` on the phone → cards (no laptop needed) | The 3 demo phrases give the right cards | Built, simulator-checked |
 | 4 Speech | Glasses mic → laptop Vosk → phrase → cards | 9/10 spoken phrases right; first card ≤ 2 s | 1.5 h |
 | 5 Unknown words | Fingerspelling; AI · UNCHECKED behind a flag | No confident wrong sign | 1 h |
@@ -34,7 +35,7 @@ Cut order if behind: the AI part of step 5, then step 4 (typing still works).
 From `g2/`: `npm install` (then `npm rebuild @evenrealities/evenhub-simulator` if `npm run simulate` is not found), `npm run dev`, then either `npm run simulate` or `npx evenhub qr --url http://<laptop-wifi-ip>:5173`.
 - `/` is the sign coach; `/?phrase=Thank%20you` starts a phrase on load; `/?style=thin|bold|bold96` picks the drawing style (default bold).
 - `/probe.html` is the step 0 handshape test.
-- Handshape PNGs: `uv run tools/build_handshapes.py` (writes `g2/public/handshapes/`).
+- Handshape PNGs: `uv run tools/build_handshapes.py --all` (writes `g2/public/handshapes/`). Vocabulary: `uv run tools/build_deck.py` (writes `g2/src/asllex.json`).
 - Windows: the phone can only reach the dev server if port 5173 is allowed inbound (the venue network is Public).
 
 ## Decisions

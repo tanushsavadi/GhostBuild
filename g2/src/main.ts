@@ -81,11 +81,13 @@ function lensText(): string {
   const card = cards[index]
   if (!card) return 'SIGN COACH\nType or pick a phrase\non the phone.'
   const next = cards[index + 1]
+  // About 36 characters fit on a line; long lines wrap, so drop the spacer.
+  const long = card.how.some(line => line.length > 36)
   return [
     `${card.title}   ${index + 1}/${cards.length}`,
     card.how[0],
     card.how[1],
-    '',
+    ...(long ? [] : ['']),
     card.label,
     next ? `NEXT ${next.title.split('  ')[0]}` : 'LAST · TAP TO REPEAT',
   ].join('\n')

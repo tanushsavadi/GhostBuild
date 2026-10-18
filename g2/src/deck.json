@@ -1,5 +1,5 @@
 {
-  "credit": "Handshapes and sign data: ASL-LEX 2.0 (asl-lex.org), CC BY-NC 4.0. Handshape drawings served by aslcdi.website.",
+  "credit": "Handshapes and sign data: ASL-LEX 2.0 (asl-lex.org), CC BY-NC 4.0; drawings served by aslcdi.website. Letters M and N: wpclipart.com, public domain (Wikimedia Commons).",
   "drafted": "How-to lines drafted by AI (Claude) from each sign's ASL-LEX 2.0 phonology. A sign is REF-CHECKED only after a person compares it with the ASL-LEX video and changes status.",
   "signs": [
     {
@@ -112,8 +112,8 @@
     "j": { "handshape": "i", "how": "Pinky up, draw a J" },
     "k": { "handshape": "k", "how": "Index, middle up, thumb between" },
     "l": { "handshape": "l", "how": "Index up, thumb out" },
-    "m": { "handshape": null, "how": "Thumb tucked under 3 fingers" },
-    "n": { "handshape": null, "how": "Thumb tucked under 2 fingers" },
+    "m": { "handshape": "letter_m", "how": "Thumb tucked under 3 fingers" },
+    "n": { "handshape": "letter_n", "how": "Thumb tucked under 2 fingers" },
     "o": { "handshape": "o", "how": "Fingertips touch thumb, round" },
     "p": { "handshape": "p", "how": "K shape, pointing down" },
     "q": { "handshape": "g", "how": "G shape, pointing down" },
@@ -127,5 +127,5 @@
     "y": { "handshape": "y", "how": "Thumb and pinky out" },
     "z": { "handshape": "1", "how": "Index finger, draw a Z" }
   },
-  "skip": ["is", "am", "are", "to", "the", "a", "an", "and", "it", "its", "it's", "i'm", "be", "of"]
+  "skip": ["is", "am", "are", "do", "does", "to", "the", "a", "an", "and", "it", "its", "it's", "i'm", "be", "of"]
 }

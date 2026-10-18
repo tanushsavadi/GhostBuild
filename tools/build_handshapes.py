@@ -58,6 +58,26 @@ def fetch(hid: str) -> Path:
     return path
 
 
+def fetch_letter(letter: str) -> Image.Image:
+    """M and N have no ASL-LEX drawing; use the public-domain wpclipart
+    line drawings from Wikimedia Commons, padded square to match."""
+    path = RAW_DIR / f"letter_{letter}.png"
+    if not path.exists():
+        RAW_DIR.mkdir(parents=True, exist_ok=True)
+        url = f"https://commons.wikimedia.org/wiki/Special:FilePath/Sign_language_{letter.upper()}.svg?width=400"
+        req = urllib.request.Request(url, headers={"User-Agent": "sign-coach-build/0.1"})
+        with urllib.request.urlopen(req, timeout=20) as res:
+            path.write_bytes(res.read())
+    rgba = Image.open(path).convert("RGBA")
+    flat = Image.new("RGBA", rgba.size, "white")
+    flat.alpha_composite(rgba)
+    grey = flat.convert("L")
+    side = max(grey.size)
+    square = Image.new("L", (side, side), 255)
+    square.paste(grey, ((side - grey.width) // 2, (side - grey.height) // 2))
+    return square.resize((200, 200), Image.LANCZOS)  # black lines on white, like ASL-LEX
+
+
 def quantise(img: Image.Image) -> Image.Image:
     # 16 levels: 0, 17, 34, ... 255, matching the lens's 4-bit greys.
     return img.point(lambda v: round(v / 17) * 17)
@@ -90,6 +110,13 @@ def main() -> None:
         render(raw, bold=True, draw_size=SIZE).save(OUT_DIR / f"{hid}_bold.png", optimize=True)
         render(raw, bold=True, draw_size=96).save(OUT_DIR / f"{hid}_bold96.png", optimize=True)
         print(f"{hid}: thin, bold, bold96")
+    for letter in ("m", "n"):
+        raw = fetch_letter(letter)
+        hid = f"letter_{letter}"
+        render(raw, bold=False, draw_size=SIZE).save(OUT_DIR / f"{hid}_thin.png", optimize=True)
+        render(raw, bold=True, draw_size=SIZE).save(OUT_DIR / f"{hid}_bold.png", optimize=True)
+        render(raw, bold=True, draw_size=96).save(OUT_DIR / f"{hid}_bold96.png", optimize=True)
+        print(f"{hid}: thin, bold, bold96 (public domain, wpclipart via Wikimedia Commons)")
     print(f"wrote {len(ids) * 3} PNGs to {OUT_DIR.relative_to(ROOT)}", file=sys.stderr)
 
 
