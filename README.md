@@ -10,8 +10,8 @@ You can't hold a phone and sign at the same time: signing needs both hands, and 
 
 ## What it does
 
-1. You **hold the temple and say** a sentence (or type it on the phone): *"What's your name?"*
-2. It becomes ASL signs in ASL order: **YOUR → NAME → WHAT**, with the facial expression to hold (*brows down: it's a what-question*).
+1. You **long-press, choose *Speak a sentence*, say it and tap** (or type it on the phone): *"What's your name?"*
+2. It becomes ASL signs in ASL order: **YOUR → NAME → WHAT**, with a small face showing the expression to hold (*brows down: it's a what-question*).
 3. The glasses show one card per sign:
 
 ```
@@ -27,11 +27,13 @@ You can't hold a phone and sign at the same time: signing needs both hands, and 
 
 | On the glasses | Does |
 |---|---|
-| Tap | Next sign |
-| Swipe down | Full step-by-step description of this sign (pages) |
-| Swipe up | Back to the card |
-| Hold (long press) | Speak a sentence; let go to translate it |
+| Tap | Next sign (while listening: done speaking; in the menu: choose) |
+| Swipe down | Full step-by-step description of this sign, in pages (in the menu: move down) |
+| Swipe up | Back to the card (in the menu: move up) |
+| Long-press | Open / close the menu: **Speak a sentence**, **Prepare a conversation**, **Prepared sentences**, **Practice signs**, Close |
 | Double-tap | Exit |
+
+Each card is kept minimal: the hand picture, the sign's name, two how-to lines, and a small **face** at the top right that shows the ASL grammar (brows down for what/where/who questions, brows up for yes/no questions, arrows for a "no" head shake) and the sentence's emotion (smile, frown, surprise). Sign status, progress and sources are on the phone page.
 
 The phone page shows the same card, the full description, and a link to a reference video of the sign.
 

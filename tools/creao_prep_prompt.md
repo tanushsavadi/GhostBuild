@@ -18,8 +18,9 @@ Plan the conversation:
    - Base forms only (GO, EAT). Negation: NOT after the verb, or DONT-KNOW / DONT-LIKE / DONT-WANT / NOT-UNDERSTAND.
    - Names and places: "spell": true.
    - face: "brows down" for WHO/WHAT/WHERE/WHEN/WHY/HOW questions, "brows up" for yes/no questions, "head shake" for negative sentences, otherwise "".
+   - emotion: the feeling to show: "happy" (greetings, thanks, good news), "sad" (sorry, bad news), "surprised", otherwise "".
 4. Pick up to 4 signs to practise first: signs from your sentences that appear in HARD SIGNS, then the least common ones.
 
 Do not search the web. Do not explain. Answer only with this JSON, as your final message:
 
-{"title": "Lunch with Sam", "sentences": [{"english": "Nice to meet you", "signs": [{"gloss": "NICE", "spell": false}, {"gloss": "MEET", "spell": false}, {"gloss": "YOU", "spell": false}], "face": ""}], "practice": ["MEET", "LUNCH"]}
+{"title": "Lunch with Sam", "sentences": [{"english": "Nice to meet you", "signs": [{"gloss": "NICE", "spell": false}, {"gloss": "MEET", "spell": false}, {"gloss": "YOU", "spell": false}], "face": "", "emotion": "happy"}], "practice": ["MEET", "LUNCH"]}

@@ -30,6 +30,7 @@ Run (from the repo root):  uv run tools/open_palm_server.py
 from __future__ import annotations
 
 import asyncio
+import copy
 import importlib.util
 import json
 import os
@@ -53,12 +54,40 @@ _spec = importlib.util.spec_from_file_location("bench_llm", ROOT / "tools" / "be
 bench = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(bench)
 
+# The benchmark prompt plus an emotion for the face picture (happy / sad / surprised).
+EMOTIONS = ("happy", "sad", "surprised")
+SCHEMA = copy.deepcopy(bench.SCHEMA)
+SCHEMA["properties"]["emotion"] = {"type": "string", "enum": [*EMOTIONS, ""]}
+SCHEMA["required"] = [*SCHEMA["required"], "emotion"]
+EMOTION_RULE = ('\n- emotion: the feeling to show on the face: "happy" (greetings, thanks, good news), '
+                '"sad" (sorry, bad news), "surprised" (wow, really?), else "".')
+
+
+def messages(text: str) -> list[dict]:
+    msgs = bench.messages(text)
+    msgs[0] = {**msgs[0], "content": msgs[0]["content"] + EMOTION_RULE}
+    return msgs
+
+
 WH = {"WHO", "WHAT", "WHERE", "WHEN", "WHY", "HOW", "WHICH"}
 FILLER = {"IS", "ARE", "AM", "WAS", "WERE", "THE", "A", "AN", "DO", "DOES", "DID", "TO", "BE", "OF", "WILL"}
 # Compounds the model invents -> the sign names our vocabulary uses.
 RENAME = {"I": ["ME"], "NOT-LIKE": ["DONT-LIKE"], "NOT-KNOW": ["DONT-KNOW"], "DO-NOT-KNOW": ["DONT-KNOW"],
           "NOT-WANT": ["DONT-WANT"], "DONT-UNDERSTAND": ["NOT-UNDERSTAND"], "SIGN-LANGUAGE": ["SIGN-LANGUAGE"]}
 KEEP_COMPOUND = {"NOT-UNDERSTAND", "DONT-KNOW", "DONT-LIKE", "DONT-WANT", "THANK-YOU", "I-LOVE-YOU", "SIGN-LANGUAGE"}
+
+
+QUESTION_START = re.compile(r"^\s*(do|does|did|are|is|am|was|were|can|could|will|would|have|has|should|may)\b", re.I)
+
+
+def check_face(face: str, english: str, signs: list[dict]) -> str:
+    """The model puts question brows on statements now and then; keep them only for real questions."""
+    question = english.strip().endswith("?") or bool(QUESTION_START.match(english))
+    if face == "brows down" and not any(s["gloss"] in WH for s in signs):
+        return ""
+    if face == "brows up" and not question:
+        return ""
+    return face
 
 
 def clean(signs: list[dict], face: str) -> list[dict]:
@@ -114,8 +143,8 @@ async def translate(request: Request) -> dict:
     text = str((await request.json()).get("text", "")).strip()[:300]
     if not text:
         raise HTTPException(400, "no text")
-    body = {"model": MODEL, "stream": False, "format": bench.SCHEMA, "keep_alive": "60m", "think": False,
-            "options": {"temperature": 0}, "messages": bench.messages(text)}
+    body = {"model": MODEL, "stream": False, "format": SCHEMA, "keep_alive": "60m", "think": False,
+            "options": {"temperature": 0}, "messages": messages(text)}
     t0 = time.perf_counter()
     try:
         async with httpx.AsyncClient(timeout=10) as client:
@@ -125,10 +154,12 @@ async def translate(request: Request) -> dict:
     except (httpx.HTTPError, KeyError, ValueError) as err:
         raise HTTPException(503, f"local model unavailable: {type(err).__name__}")
     face = answer.get("face", "") if answer.get("face") in ("brows down", "brows up", "head shake") else ""
+    emotion = answer.get("emotion", "") if answer.get("emotion") in EMOTIONS else ""
     signs = clean(answer.get("signs", []), face)
+    face = check_face(face, text, signs)
     ms = round((time.perf_counter() - t0) * 1000)
     print(f"[translate] {len(text)} chars -> {len(signs)} signs in {ms} ms")
-    return {"signs": signs, "face": face, "source": "AI · LOCAL", "ms": ms}
+    return {"signs": signs, "face": face, "emotion": emotion, "source": "AI · LOCAL", "ms": ms}
 
 
 @app.on_event("startup")
@@ -232,7 +263,8 @@ async def run_prep(job_id: str, scenario: str) -> None:
     job = jobs[job_id]
     app_id = os.environ.get("CREAO_PREP_APP_ID", "")
     # Kept short on purpose: fewer sentences to rehearse, and a faster run.
-    text = (f"{scenario}\n\nGive exactly {PREP_SENTENCES} sentences and at most 4 practice signs."
+    text = (f"{scenario}\n\nGive exactly {PREP_SENTENCES} sentences and at most 4 practice signs. "
+            'Give each sentence an "emotion" too: "happy", "sad", "surprised" or "".'
             + ("\n\n" + history_summary() if job["use_history"] else ""))
     # The field CREAO reads isn't documented; this combination reached the agent in testing.
     body = {"appId": app_id, "input": text, "message": text, "prompt": text,
@@ -273,7 +305,9 @@ async def run_prep(job_id: str, scenario: str) -> None:
         face = s.get("face", "") if s.get("face") in ("brows down", "brows up", "head shake") else ""
         signs = clean(s.get("signs", []), face)
         if s.get("english") and signs:
-            sentences.append({"english": str(s["english"])[:120], "signs": signs, "face": face})
+            emotion = s.get("emotion", "") if s.get("emotion") in EMOTIONS else ""
+            face = check_face(face, str(s["english"]), signs)
+            sentences.append({"english": str(s["english"])[:120], "signs": signs, "face": face, "emotion": emotion})
     book = {"title": str(plan.get("title") or scenario)[:80], "scenario": scenario, "sentences": sentences,
             "practice": [str(p).upper() for p in plan.get("practice", [])][:4], "source": "AI · CREAO",
             "ms": round((time.perf_counter() - t0) * 1000)}

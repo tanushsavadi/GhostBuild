@@ -17,6 +17,42 @@ const checked = checkedFile.checked as Record<string, string>
 
 export type Status = 'REF-CHECKED' | 'UNCHECKED'
 
+// ---- faces ------------------------------------------------------------------
+// ASL grammar lives on the face: brows down for what/where/who questions,
+// brows up for yes/no questions, a head shake for "not". Emotion adds the mouth.
+// Drawn by tools/build_faces.py as public/faces/face_<brows>_<mouth>_<shake>.png.
+
+export type Grammar = 'wh' | 'yn' | 'neg' | ''
+export type Emotion = 'happy' | 'sad' | 'surprised' | ''
+export interface Face { grammar: Grammar; emotion: Emotion }
+
+const GRAMMAR_WORDS: Record<string, Grammar> = { 'brows down': 'wh', 'brows up': 'yn', 'head shake': 'neg' }
+const EMOTIONS = new Set(['happy', 'sad', 'surprised'])
+
+/** From the AI's words ("brows down", "happy") or a hand-written cue ("Brows up, friendly (question)"). */
+export function faceFrom(cue = '', emotion = ''): Face | undefined {
+  const c = cue.toLowerCase()
+  const grammar: Grammar = GRAMMAR_WORDS[c] ?? (c.includes('brows down') ? 'wh' : c.includes('brows up') ? 'yn' : c.includes('shake') ? 'neg' : '')
+  let mood = (EMOTIONS.has(emotion) ? emotion : '') as Emotion
+  if (!mood && /smile|friendly/.test(c)) mood = 'happy'
+  return grammar || mood ? { grammar, emotion: mood } : undefined
+}
+
+/** Picture name for a face, or null for no face. */
+export function faceImage(f?: Face): string | null {
+  if (!f) return null
+  const brows = f.grammar === 'wh' ? 'down' : f.grammar === 'yn' || f.emotion === 'surprised' ? 'up' : 'flat'
+  const mouth = f.emotion === 'happy' ? 'smile' : f.emotion === 'sad' ? 'frown' : f.emotion === 'surprised' ? 'open' : 'flat'
+  return `face_${brows}_${mouth}_${f.grammar === 'neg' ? 1 : 0}`
+}
+
+/** For the phone page: "what/where question, happy". */
+export function faceWords(f?: Face): string {
+  if (!f) return ''
+  const g = { wh: 'question (brows down)', yn: 'yes/no question (brows up)', neg: 'shake your head', '': '' }[f.grammar]
+  return [g, f.emotion].filter(Boolean).join(', ')
+}
+
 export interface Card {
   kind: 'sign' | 'letter' | 'unsupported'
   title: string
@@ -28,8 +64,8 @@ export interface Card {
   video?: string
   /** Full step-by-step description from Wiktionary (CC BY-SA 4.0), when it has the sign. */
   detail?: { text: string; url: string }
-  /** Facial expression to hold while signing, when the card is part of a known sentence. */
-  face?: string
+  /** Facial expression to hold while signing (ASL grammar + emotion), shown as a small face. */
+  face?: Face
   /** The ASL sentence this card belongs to, e.g. "YOUR NAME WHAT?". */
   sentence?: string
   /** Who chose the word order when it wasn't a hand-written sentence, e.g. "AI · LOCAL". */
@@ -150,7 +186,7 @@ function phraseCards(p: Phrase): Card[] {
   })
   const question = p.face?.toLowerCase().includes('question') ? '?' : ''
   const sentence = cards.map(c => c.title).join(' ') + question
-  return cards.map(c => ({ ...c, face: p.face, sentence }))
+  return cards.map(c => ({ ...c, face: faceFrom(p.face), sentence }))
 }
 
 function signCard(sign: Sign): Card {
@@ -249,7 +285,7 @@ function signForGloss(gloss: string): Sign | undefined {
   return byGloss.get(gloss) ?? lookup(gloss.toLowerCase().replace(/-/g, ' ')) ?? lookup(gloss.toLowerCase())
 }
 
-export function cardsForAi(signs: AiSign[], face: string, source: string): Card[] {
+export function cardsForAi(signs: AiSign[], face: string, source: string, emotion = ''): Card[] {
   const cards: Card[] = []
   for (const s of signs) {
     const sign = signForGloss(s.gloss)
@@ -264,10 +300,8 @@ export function cardsForAi(signs: AiSign[], face: string, source: string): Card[
     if (sign && !(s.spell && !byWord.has(s.gloss.toLowerCase()))) cards.push(signCard(sign))
     else cards.push(...spell(s.gloss.toLowerCase().replace(/[^a-z0-9]/g, '')))
   }
-  const faceCue = face === 'brows down' ? 'Brows down (question)' : face === 'brows up' ? 'Brows up (yes/no question)'
-    : face === 'head shake' ? 'Shake your head slightly' : undefined
   const sentence = `${cards.map(c => c.title.split('  ')[0]).join(' ')}${face.startsWith('brows') ? '?' : ''}`
-  return cards.map(c => ({ ...c, face: faceCue, sentence, order: source }))
+  return cards.map(c => ({ ...c, face: faceFrom(face, emotion), sentence, order: source }))
 }
 
 /** Throws if a phrases.json step names a word with no sign (run in tests/checks). */
