@@ -1,0 +1,70 @@
+import { describe, expect, it } from 'vitest'
+import { DEFAULT_BACKEND, normalizeBackend, readFlags, resolveBackend, resolveCenterCols, resolveGlyphTier, resolveSurface } from './config'
+import { K, adoptSession, loadIdentity, makeStorage } from './session'
+
+describe('config', () => {
+  it('normalizes only http(s) origins', () => {
+    expect(normalizeBackend('http://192.168.1.2:8787/')).toBe('http://192.168.1.2:8787')
+    expect(normalizeBackend('https://x.ts.net/path?q=1')).toBe('https://x.ts.net')
+    expect(normalizeBackend('ws://x')).toBeNull()
+    expect(normalizeBackend('javascript:alert(1)')).toBeNull()
+    expect(normalizeBackend('')).toBeNull()
+    expect(normalizeBackend(null)).toBeNull()
+  })
+  it('priority: query > stored > env > default', () => {
+    const env = { VITE_BACKEND_URL: 'http://env:1' }
+    expect(resolveBackend('http://q:2', 'http://s:3', env)).toBe('http://q:2')
+    expect(resolveBackend(null, 'http://s:3', env)).toBe('http://s:3')
+    expect(resolveBackend(null, null, env)).toBe('http://env:1')
+    expect(resolveBackend('garbage', 'also garbage', {})).toBe(DEFAULT_BACKEND)
+  })
+  it('flags default off', () => {
+    expect(readFlags({}).voice).toBe(false)
+    expect(readFlags({ VITE_FLAG_VOICE: '0' }).voice).toBe(false)
+    expect(readFlags({ VITE_FLAG_VOICE: '1' }).voice).toBe(true)
+  })
+  it('surface, glyphs, columns', () => {
+    expect(resolveSurface('simulator')).toBe('simulator')
+    expect(resolveSurface(null)).toBe('g2')
+    expect(resolveGlyphTier({ VITE_GLYPHS: 'ascii' })).toBe('ascii')
+    expect(resolveGlyphTier({})).toBe('full')
+    expect(resolveCenterCols({ VITE_CENTER_COLS: '36' })).toBe(36)
+    expect(resolveCenterCols({ VITE_CENTER_COLS: '2' })).toBe(30)
+  })
+})
+
+describe('session persistence', () => {
+  const mem = () => {
+    const m = new Map<string, string>()
+    return { m, kv: { async get(k: string) { return m.get(k) ?? null }, async set(k: string, v: string) { m.set(k, v) } } }
+  }
+  it('creates a stable client_id and session_id once, then restores them', async () => {
+    const { kv, m } = mem()
+    const a = await loadIdentity(kv, () => 'abcd1234')
+    expect(a.clientId).toBe('g2-abcd1234')
+    expect(m.get(K.sessionId)).toBe(a.sessionId)
+    const b = await loadIdentity(kv, () => 'zzzzzzzz')
+    expect(b).toEqual(a)
+  })
+  it('adopts a server-assigned session id', async () => {
+    const { kv, m } = mem()
+    expect(await adoptSession(kv, 's-old', { type: 'session', session_id: 's-new' })).toBe('s-new')
+    expect(m.get(K.sessionId)).toBe('s-new')
+    expect(await adoptSession(kv, 's-old', { type: 'hud', seq: 1 })).toBe('s-old')
+  })
+  it('mirrors SDK storage and window.localStorage; survives either failing', async () => {
+    const sdk = new Map<string, string>()
+    const bridge = { getLocalStorage: async (k: string) => sdk.get(k) ?? '', setLocalStorage: async (k: string, v: string) => (sdk.set(k, v), true) }
+    const win = new Map<string, string>()
+    const store = { getItem: (k: string) => win.get(k) ?? null, setItem: (k: string, v: string) => void win.set(k, v) }
+    const kv = makeStorage(bridge, store)
+    await kv.set('a', '1')
+    expect(sdk.get('a')).toBe('1')
+    expect(win.get('a')).toBe('1')
+    sdk.clear()
+    expect(await kv.get('a')).toBe('1') // falls back to the mirror
+    const broken = makeStorage({ getLocalStorage: async () => { throw new Error('x') }, setLocalStorage: async () => { throw new Error('y') } }, null)
+    await broken.set('k', 'v')
+    expect(await broken.get('k')).toBeNull()
+  })
+})
