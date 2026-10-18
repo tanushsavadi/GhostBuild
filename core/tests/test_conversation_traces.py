@@ -384,3 +384,16 @@ def test_i_a_long_model_goal_is_clipped_to_the_contract_not_a_crash(tmp_path, mo
     ask_goal(rt, "yes, on level pavement", via="phone_text")
     settle(rt)
     assert len(sent) == 1 and len(sent[0]) <= 300 and sent[0].startswith("Fix a flat tire on a 2024 Toyota Corolla")
+
+
+def test_i_help_phrasings_start_a_new_task_but_answers_do_not():
+    """Operator check 2026-10-18 07:59: 'I need help fixing a flat tire on my 2024 Toyota Corolla' continued the old,
+    blocked task (and its transcript) instead of starting a new one."""
+    from ghostbuild_core.assistant.adaptive import new_goal
+    for text in ("I need help fixing a flat tire on my 2024 Toyota Corolla.", "I need help with fixing my bike chain",
+                 "Can you help me repair a leaking tap?", "I'd like help assembling a desk", "help me set up my printer",
+                 "I want to fix my mac screen", "build a bookshelf"):
+        assert new_goal(text), text
+    for text in ("Both.", "Yes, level ground on a pavement.", "2024 Toyota Corolla.", "What do you mean?",
+                 "I need help", "the fixing kit is in the trunk"):
+        assert not new_goal(text), text

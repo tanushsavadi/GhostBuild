@@ -181,7 +181,9 @@ def new_goal(text: str) -> bool:
             t,
         )
         or re.match(
-            r"^(?:(?:actually|now|instead|please)[, ]+)*(?:(?:i (?:want|need|would like) to|help me|can you help me)\s+)?(?:build(?:ing)?|assemble|fix|repair|make|fold|set up|install)\b",
+            r"^(?:(?:actually|now|instead|please)[, ]+)*(?:(?:i (?:want|need|would like) to|i(?: need|'d like| would like| want) (?:some )?help(?: with)?|"
+            r"(?:can|could) you help me(?: with)?|help me(?: with)?)\s+)?"
+            r"(?:build(?:ing)?|assembl(?:e|ing)|fix(?:ing)?|repair(?:ing)?|mak(?:e|ing)|fold(?:ing)?|set(?:ting)? up|install(?:ing)?)\b",
             t,
         )
     )
