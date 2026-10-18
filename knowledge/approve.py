@@ -139,6 +139,9 @@ def main(argv: list[str] | None = None) -> int:
         "reviewer": reviewer,
         "at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "validator_ok": True,
+        "run_id": envelope["run_id"],
+        "request": envelope["request"],
+        "provider": envelope.get("provider"),
     }
     (draft_dir / "review.json").write_text(json.dumps(review, indent=2) + "\n", encoding="utf-8")
     print(f"APPROVED: wrote {target} (reviewer {reviewer}); run `make test` before committing")

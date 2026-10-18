@@ -43,7 +43,7 @@ VISUAL_KEYS = ("visuals", "images", "diagrams", "visual_references", "pictures")
 FENCE = re.compile(r"```[ \t]*(?:json|JSON)?[ \t]*\r?\n(.*?)```", re.DOTALL)
 
 MANUFACTURER_HOSTS = (
-    "raspberrypi.com", "docs.arduino.cc", "learn.adafruit.com", "learn.sparkfun.com", "ifixit.com",
+    "raspberrypi.com", "docs.arduino.cc", "learn.adafruit.com", "learn.sparkfun.com",
 )
 HARD_WORDS = re.compile(r"\b(BROKEN|DEAD|FAULTY|WRONG|BAD|DEFECTIVE|DAMAGED|VERIFIED|CORRECT)\b")
 SOFT_WORDS = re.compile(r"\b(IS|ARE)\b")
@@ -64,8 +64,8 @@ def _is_playbookish(d: dict) -> bool:
     return False
 
 
-def _json_in_text(text: str) -> Any:
-    """A parsed JSON object/array from a fenced block or a bare object inside prose; None if there is none."""
+def _json_in_text(text: str):
+    """Yield JSON candidates, so a metadata block cannot hide a later actual playbook."""
     candidates: list[str] = [m.group(1) for m in FENCE.finditer(text)]
     stripped = text.strip()
     if stripped[:1] in "{[":
@@ -76,7 +76,7 @@ def _json_in_text(text: str) -> Any:
         except ValueError:
             continue
         if isinstance(value, (dict, list)) and value:
-            return value
+            yield value
     decoder = json.JSONDecoder()
     for m in re.finditer(r"\{", text):
         try:
@@ -84,16 +84,18 @@ def _json_in_text(text: str) -> Any:
         except ValueError:
             continue
         if isinstance(value, dict) and value:
-            return value
-    return None
+            yield value
 
 
 def _find(obj: Any, depth: int) -> Any:
     if depth > MAX_DEPTH or obj is None:
         return None
     if isinstance(obj, str):
-        inner = _json_in_text(obj)
-        return _find(inner, depth + 1) if inner is not None else None
+        for inner in _json_in_text(obj):
+            found = _find(inner, depth + 1)
+            if found is not None:
+                return found
+        return None
     if isinstance(obj, dict):
         if _is_playbookish(obj):
             return obj
@@ -268,8 +270,6 @@ def classify_source(url: Optional[str]) -> tuple[str, str]:
         return "VIDEO TUTORIAL", "video"
     if host == "github.com" or host.endswith(".github.com") or host in ("raw.githubusercontent.com", "gist.github.com"):
         return "GITHUB SOURCE", "github"
-    if host == "ifixit.com" or host.endswith(".ifixit.com"):
-        return "MANUFACTURER DOC", "docs"
     for known in MANUFACTURER_HOSTS:
         if host == known or host.endswith("." + known):
             return "MANUFACTURER DOC", "docs"
@@ -860,7 +860,8 @@ def to_envelope(payload: Any, request: str, *, run_id: Optional[str] = None, dev
         envelope.setdefault("source_texts", {})
         if not isinstance(envelope["source_texts"], dict):
             envelope["source_texts"] = {}
-        envelope["run_id"] = envelope.get("run_id") if isinstance(envelope.get("run_id"), str) and envelope.get("run_id") else rid
+        # Transport metadata wins over a model-authored run id.
+        envelope["run_id"] = run_id or (envelope.get("run_id") if isinstance(envelope.get("run_id"), str) and envelope.get("run_id") else rid)
         envelope["request"] = envelope.get("request") if isinstance(envelope.get("request"), str) and envelope.get("request").strip() else request
         return envelope
     if isinstance(payload, dict) and isinstance(payload.get("steps"), list) and payload.get("card_id") and payload.get("v") == 2:  # (a) our Card

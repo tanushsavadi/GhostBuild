@@ -130,10 +130,10 @@ def test_shape_b_steps_titles_and_ids():
 def test_shape_b_source_kinds_by_host_and_timestamps():
     env = run(MOCK_B_FENCED_RUN, MOCK_B_REQUEST)
     kinds = {s["url"]: s["kind"] for s in env["card"]["sources"]}
-    assert kinds["https://www.ifixit.com/Guide/MOCK-Reset-A-Router/000000"] == "MANUFACTURER DOC"
+    assert kinds["https://www.ifixit.com/Guide/MOCK-Reset-A-Router/000000"] == "WEB TUTORIAL"
     assert kinds["https://www.youtube.com/watch?v=MOCKrouter02"] == "VIDEO TUTORIAL"
     assert kinds["https://forum.example.org/threads/router-reset-hold-time"] == "WEB TUTORIAL"
-    assert env["card"]["provenance"] == "MANUFACTURER DOC"
+    assert env["card"]["provenance"] == "VIDEO TUTORIAL"
     step5 = env["card"]["steps"][4]
     cite = step5["troubleshoot"][0]["cites"][0]
     assert cite["loc"] == "t=00:04:20" and cite["url"].endswith("t=260s") and step5["troubleshoot"][0]["action"]["line1"].startswith("CHECK")
@@ -282,7 +282,7 @@ def test_non_http_urls_dropped_and_recorded():
         ("https://www.youtube.com/watch?v=abc", "VIDEO TUTORIAL"), ("https://youtu.be/abc", "VIDEO TUTORIAL"),
         ("https://github.com/org/repo", "GITHUB SOURCE"), ("https://docs.arduino.cc/hardware/uno", "MANUFACTURER DOC"),
         ("https://learn.adafruit.com/guide", "MANUFACTURER DOC"), ("https://learn.sparkfun.com/tutorials/x", "MANUFACTURER DOC"),
-        ("https://www.raspberrypi.com/documentation/", "MANUFACTURER DOC"), ("https://www.ifixit.com/Guide/x/1", "MANUFACTURER DOC"),
+        ("https://www.raspberrypi.com/documentation/", "MANUFACTURER DOC"), ("https://www.ifixit.com/Guide/x/1", "WEB TUTORIAL"),
         ("https://blog.example.com/post", "WEB TUTORIAL"), ("ftp://x.org", "WEB TUTORIAL"),
     ],
 )
@@ -359,3 +359,14 @@ def test_step_ids_unique_when_titles_repeat():
     env = n.to_envelope({"title": "T", "steps": [{"action": "Tighten the nut"}, {"action": "Tighten the nut"}, "Tighten the nut"]}, "t")
     ids = [s["id"] for s in env["card"]["steps"]]
     assert len(set(ids)) == 3 and validate_envelope(env)["ok"]
+
+
+def test_metadata_json_before_playbook_cannot_mask_result():
+    raw = {"output": '```json\n{"research_status":"complete"}\n```\nThe guide:\n```json\n' + json.dumps(PLAYBOOK) + '\n```'}
+    env = run(raw, "descale a kettle", run_id="actual-transport-id")
+    assert len(env["card"]["steps"]) == 2 and validate_envelope(env)["ok"]
+
+
+def test_transport_run_id_overrides_model_claim():
+    env = run(MOCK_A_ENVELOPE_RUN, MOCK_A_REQUEST, run_id="actual-provider-id")
+    assert env["run_id"] == "actual-provider-id"

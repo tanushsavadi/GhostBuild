@@ -57,7 +57,9 @@ class MockCreao:
         if req.method == "POST":
             body = json.loads(req.content)
             self.posts.append(body)
-            goal = body["inputs"]["goal"]
+            assert body["appId"] == "032b9dc5-2fc7-4b5d-af36-8efdbd2648ac"
+            assert set(body["inputs"]) == {"goal", "intent"}
+            goal = body["inputs"]["goal"].split("\n\nResearch context:")[0]
             rid = f"mock_{len(self.posts)}"
             self.runs[rid] = self.canned[goal]
             return httpx.Response(200, json={"id": rid, "status": "queued"})
@@ -134,7 +136,8 @@ def test_end_to_end_two_different_tasks_neither_is_hardcoded(world, caplog):
     rid1 = start(c, MOCK_A_REQUEST, intent="build", device="road bike")
     rec1 = wait_status(c, rid1)
     assert rec1["status"] == "draft_ready" and rec1["creao_run_id"] == "mock_1" and rec1["draft"]["card_id"] == "replace_bicycle_inner_tube"
-    assert c.mock.posts[0]["inputs"]["goal"] == MOCK_A_REQUEST and c.mock.posts[0]["inputs"]["intent"] == "build"
+    assert c.mock.posts[0]["inputs"]["goal"].startswith(MOCK_A_REQUEST) and c.mock.posts[0]["inputs"]["intent"] == "build"
+    assert "Device: road bike" in c.mock.posts[0]["inputs"]["goal"]
     assert c.mock.auth_seen[0] == f"Bearer {KEY}"
     draft1 = rec1["draft_id"]
     assert (c.root / "knowledge" / "drafts" / draft1 / "envelope.json").is_file()
@@ -406,3 +409,35 @@ def test_reload_with_empty_directory_never_drops_all_cards(tmp_path, card):
     rt = Runtime([card], log_dir=tmp_path / "l", asset_root=tmp_path / "empty")
     res = rt.reload_cards()
     assert [c.card_id for c in rt.cards] == [card.card_id] and res["loaded"] == 1
+
+
+def test_actual_transport_run_id_and_share_link_survive_approval_and_restart(world):
+    c = world
+    c.mock.canned[MOCK_A_REQUEST] = {**MOCK_A_ENVELOPE_RUN, "shareUrl": "https://agent.creao.ai/shared/real-id"}
+    rec = wait_status(c, start(c, MOCK_A_REQUEST))
+    assert rec["share_url"] == "https://agent.creao.ai/shared/real-id"
+    provider = rec["draft"]["provider"]
+    assert provider["run_id"] == rec["creao_run_id"] == "mock_1"
+    assert provider["live_api_verified"] is False
+    env_path = c.root / "knowledge" / "drafts" / rec["draft_id"] / "envelope.json"
+    env = json.loads(env_path.read_text())
+    assert env["run_id"] == "mock_1"  # never model-authored run_mock_bike_01
+    assert c.post(f"/cards/drafts/{rec['draft_id']}/approve", json={"reviewer": "Ada"}, headers=H).status_code == 200
+    review = json.loads((env_path.parent / "review.json").read_text())
+    assert review["run_id"] == "mock_1" and review["provider"] == provider
+    restarted = ResearchRuns(c.root, enabled=True)
+    assert restarted.get(rec["run_id"])["share_url"] == rec["share_url"]
+    assert restarted.get(rec["run_id"])["approved_by"] == "Ada"
+
+
+def test_repeated_phone_request_reuses_cached_draft_and_survives_restart(world):
+    c = world
+    rid = start(c, MOCK_A_REQUEST, session_id="phone-session", intent="build")
+    rec = wait_status(c, rid)
+    assert rec["status"] == "draft_ready"
+    assert start(c, MOCK_A_REQUEST, session_id="phone-session", intent="build") == rid
+    again = ResearchRuns(c.root, enabled=True, min_gap_s=0, client_factory=lambda: None)
+    from ghostbuild_core.research_runs import RunBody
+    assert again.start(RunBody(goal=MOCK_A_REQUEST, session_id="phone-session", intent="build")) == rid
+    assert again.status()["started_this_process"] == 0
+    assert len(c.mock.posts) == 1

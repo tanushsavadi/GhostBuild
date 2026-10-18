@@ -188,6 +188,14 @@ class ResearchRuns:
         if not self.enabled:
             raise RunRejected(503, "creao disabled")
         with self._lock:
+            # A lost phone response or double submit must not spend another run. Reuse this session's
+            # identical in-flight/cached draft; a changed goal/context or a new session starts new research.
+            if body.session_id:
+                request_fields = body.model_dump()
+                for rec in reversed(list(self._runs.values())):
+                    if rec.get("status") in ("queued", "running", "draft_ready") and all(rec.get(k) == v for k, v in request_fields.items()):
+                        if rec["status"] != "draft_ready" or self.draft_preview(rec.get("draft_id") or "") is not None:
+                            return rec["run_id"]
             if any(r["status"] in ("queued", "running") for r in self._runs.values()):
                 raise RunRejected(429, "a research run is already active; wait for it to finish")
             if self._started >= self.max_runs:
@@ -198,7 +206,7 @@ class ResearchRuns:
             run_id = "r-" + secrets.token_hex(4)
             stamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
             self._runs[run_id] = {
-                "run_id": run_id, "creao_run_id": None, "status": "queued", "creao_status": None, "error": None, "draft_id": None,
+                "run_id": run_id, "creao_run_id": None, "share_url": None, "status": "queued", "creao_status": None, "error": None, "draft_id": None,
                 "goal": body.goal, "device": body.device, "model": body.model, "intent": body.intent, "session_id": body.session_id,
                 "doc_urls": body.doc_urls, "video_urls": body.video_urls, "follow_up": body.follow_up,
                 "created_at": stamp, "updated_at": stamp, "validation_errors": [], "approved_by": None,
@@ -227,7 +235,7 @@ class ResearchRuns:
             inputs = {"goal": body.goal, "device": body.device, "model": body.model, "intent": body.intent,
                       "doc_urls": body.doc_urls, "video_urls": body.video_urls, "follow_up": body.follow_up}
             creao_id = client.start_run(inputs)
-            self._update(run_id, creao_run_id=creao_id, status="running")
+            self._update(run_id, creao_run_id=creao_id, status="running", share_url=creao.find_share_url(client.last_start_response))
             raw = client.poll(creao_id, interval=self.poll_interval, max_wait=self.max_wait,
                               on_update=lambda status, _raw: self._update(run_id, creao_status=status))
             try:
@@ -236,6 +244,8 @@ class ResearchRuns:
             except Exception:
                 log.exception("could not save the raw CREAO response")
             state, status = creao.run_state(raw)
+            share_url = creao.find_share_url(raw) or creao.find_share_url(client.last_start_response)
+            self._update(run_id, creao_status=status, share_url=share_url)
             if state == "failed":
                 detail = creao.failure_detail(raw, getattr(client, "_api_key", None))
                 self._update(run_id, status="failed", creao_status=status, error=f"CREAO run ended {status}" + (f": {detail}" if detail else ""))
@@ -250,6 +260,8 @@ class ResearchRuns:
                 self._save_envelope(creao_id, envelope)
                 self._update(run_id, status="invalid", error=f"{len(result['errors'])} validation error(s)", validation_errors=result["errors"][:40])
                 return
+            envelope["provider"] = {"name": "CREAO", "app_id": getattr(client, "app_id", creao.DEFAULT_APP_ID),
+                                    "run_id": creao_id, "share_url": share_url, "live_api_verified": self._factory is None}
             draft_id = write_draft(envelope, self.root)
             self._update(run_id, status="draft_ready", draft_id=draft_id, error=None, validation_errors=[])
         except Exception as exc:  # the worker must never raise into the void
@@ -286,6 +298,7 @@ class ResearchRuns:
             "title": card.get("title"),
             "goal_mode": card.get("goal_mode"),
             "provenance": card.get("provenance"),
+            "provider": env.get("provider"),
             "provenance_note": "DRAFT: not reviewed by a human; it cannot reach the glasses until approved",
             "aliases": card.get("aliases", []),
             "steps": [
@@ -377,7 +390,7 @@ def mount_research_runs(app: FastAPI, runtime, runs: Optional[ResearchRuns] = No
             run_id = runs.start(body)
         except RunRejected as exc:
             raise HTTPException(status_code=exc.status, detail=exc.detail)
-        return JSONResponse({"run_id": run_id, "status": "queued"}, status_code=202)
+        return JSONResponse({"run_id": run_id, "status": runs.get(run_id)["status"]}, status_code=202)
 
     @app.get("/research/runs")
     async def get_runs() -> Response:

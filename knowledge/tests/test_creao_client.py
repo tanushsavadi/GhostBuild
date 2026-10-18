@@ -33,7 +33,7 @@ def test_start_run_default_body_and_auth_header():
     assert rid == "run_1" and req.method == "POST" and str(req.url) == "https://agent.creao.ai/api/v1/runs"
     assert req.headers["authorization"] == f"Bearer {KEY}"
     body = json.loads(req.content)
-    assert body == {"app_id": creao.DEFAULT_APP_ID, "inputs": {"goal": "replace a bike tube", "documentation_urls": ["https://a.example/x"]}}
+    assert body == {"appId": creao.DEFAULT_APP_ID, "inputs": {"goal": "replace a bike tube\n\nResearch context:\nDocumentation URLs: https://a.example/x", "intent": "build"}}
 
 
 @pytest.mark.parametrize("resp,expected", [({"run_id": "r2"}, "r2"), ({"runId": "r3"}, "r3"), ({"data": {"id": "r4"}}, "r4"), ({"id": 7}, "7")])
@@ -88,7 +88,7 @@ def test_429_then_success_is_retried_with_backoff():
 def test_5xx_exhausts_attempts():
     c = client(lambda r: httpx.Response(503, text="down"), max_attempts=3)
     with pytest.raises(CreaoError, match="after 3 attempts"):
-        c.start_run({"goal": "g"})
+        c.get_run("existing")
     assert len(c.sleeps) == 2
 
 
@@ -216,3 +216,32 @@ def test_cli_probe_end_to_end_with_mock(monkeypatch, tmp_path, capsys):
     doc = json.loads(saved.read_text())
     assert doc["final"]["run_id"] == "run_mock_router_02" and doc["start_response"] == {"id": "run_mock_router_02"}
     assert creao.main(["normalize", str(saved)]) == 0  # offline path on the saved file
+
+
+@pytest.mark.parametrize("failure", ["transport", "server"])
+def test_start_outcome_unknown_never_retries_a_possibly_paid_run(failure):
+    seen = []
+    def handler(req):
+        seen.append(req)
+        if failure == "transport":
+            raise httpx.ReadTimeout("response lost", request=req)
+        return httpx.Response(503, text="upstream lost")
+    c = client(handler)
+    with pytest.raises(CreaoError, match="not retried.*duplicate paid run"):
+        c.start_run({"goal": "g"})
+    assert len(seen) == 1 and c.sleeps == []
+
+
+def test_owner_confirmed_saved_form_contract():
+    assert creao.default_body(creao.DEFAULT_APP_ID, {"goal": "build a box", "intent": "build"}) == {
+        "appId": creao.DEFAULT_APP_ID, "inputs": {"goal": "build a box", "intent": "build"}}
+    body = creao.default_body("app", {"goal": "fix a lid", "intent": "fix", "device": "a jar", "model": "small", "video_urls": ["https://example.org/video"], "follow_up": "no tools"})
+    assert set(body["inputs"]) == {"goal", "intent"}
+    assert "Model: small" in body["inputs"]["goal"] and "Follow-up: no tools" in body["inputs"]["goal"]
+
+
+def test_share_url_preserves_actual_link_and_never_guesses():
+    assert creao.find_share_url({"id": "r1"}) is None
+    assert creao.find_share_url({"data": {"shareUrl": "https://agent.creao.ai/shared/run-123"}}) == "https://agent.creao.ai/shared/run-123"
+    assert creao.find_share_url({"share_url": "javascript:alert(1)"}) is None
+    assert creao.find_share_url({"share_url": "https://example.org/?token=" + KEY}) is None

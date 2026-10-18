@@ -3,9 +3,10 @@
 STATUS: UNVERIFIED against the real API. The official endpoints (per the project owner) are
     POST https://agent.creao.ai/api/v1/runs        start a run
     GET  https://agent.creao.ai/api/v1/runs/{id}    read a run
-with a backend-only key `CREAO_API_KEY` (starts `capi_`). The request-body field names, the auth header, the status values
-and the output location are NOT publicly documented, so every one of them is a documented GUESS that can be overridden by
-environment variables (see CreaoClient) and tuned from the first real response (`python -m knowledge.creao probe`).
+with a backend-only key `CREAO_API_KEY` (starts `capi_`). The owner-confirmed start contract is
+`{appId, inputs: {goal, intent}}` with Authorization: Bearer. Only those saved form fields are sent by default;
+optional context is appended to goal. Response status values and output locations remain tolerant until a real response
+is available (`python -m knowledge.creao probe`).
 This module has only ever talked to mock servers in tests.
 
 The API key is read from the environment only. It is never written to disk, never logged, and every error/log string is
@@ -84,6 +85,21 @@ def find_run_id(resp: Any) -> Optional[str]:
     return None
 
 
+def find_share_url(resp: Any) -> Optional[str]:
+    """Preserve an actual provider share URL; never construct or infer one from a run id."""
+    if not isinstance(resp, dict):
+        return None
+    from knowledge.importer import is_http_url
+
+    for holder in (resp, resp.get("data"), resp.get("run"), resp.get("result")):
+        if isinstance(holder, dict):
+            for name in ("shareUrl", "share_url", "publicUrl", "public_url"):
+                value = holder.get(name)
+                if is_http_url(value) and not KEY_PATTERN.search(value):
+                    return value
+    return None
+
+
 def read_status(raw: Any) -> Optional[str]:
     """Lower-case status string from `status|state|run_status` (top level or under `data`), else None."""
     if not isinstance(raw, dict):
@@ -132,17 +148,17 @@ def _is_empty(value: Any) -> bool:
 
 
 def default_body(app_id: str, inputs: dict) -> dict:
-    """The DEFAULT request body: a documented guess. Override the whole shape with CREAO_RUN_BODY."""
-    values = {
-        "goal": inputs.get("goal"),
-        "device": inputs.get("device"),
-        "model": inputs.get("model"),
-        "intent": inputs.get("intent"),
-        "documentation_urls": list(inputs.get("doc_urls") or []),
-        "video_urls": list(inputs.get("video_urls") or []),
-        "follow_up": inputs.get("follow_up"),
-    }
-    return {"app_id": app_id, "inputs": {k: v for k, v in values.items() if not _is_empty(v)}}
+    """Existing GhostBuild Intelligence form contract; extra context uses the saved goal field."""
+    goal = str(inputs.get("goal") or "").strip()
+    context = []
+    for key, label in (("device", "Device"), ("model", "Model"), ("doc_urls", "Documentation URLs"),
+                       ("video_urls", "Video URLs"), ("follow_up", "Follow-up")):
+        value = inputs.get(key)
+        if not _is_empty(value):
+            context.append(f"{label}: {', '.join(map(str, value)) if isinstance(value, list) else value}")
+    if context:
+        goal += "\n\nResearch context:\n" + "\n".join(context)
+    return {"appId": app_id, "inputs": {"goal": goal, "intent": inputs.get("intent") or "build"}}
 
 
 def render_template(template: Any, values: dict[str, Any]) -> Any:
@@ -286,6 +302,8 @@ class CreaoClient:
             except httpx.HTTPError as exc:
                 last = f"transport error: {type(exc).__name__}: {redact(exc, self._api_key)[:200]}"
                 status = 0
+                if method == "POST":
+                    raise CreaoError(f"CREAO start outcome unknown after {last}; not retried to avoid a duplicate paid run. Check the agent run history before starting again.") from None
             else:
                 status = resp.status_code
                 if status < 400:
@@ -302,6 +320,8 @@ class CreaoClient:
                         body=text,
                     )
                 last = f"HTTP {status}: {text!r}"
+                if method == "POST" and status >= 500:
+                    raise CreaoError(f"CREAO start outcome unknown ({last}); not retried to avoid a duplicate paid run. Check the agent run history before starting again.", status=status, body=text)
                 retry_after = resp.headers.get("retry-after")
                 if retry_after and retry_after.isdigit():
                     delay = max(delay, min(float(retry_after), 15.0))
