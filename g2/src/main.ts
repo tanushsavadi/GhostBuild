@@ -264,7 +264,8 @@ function showBook(next: Phrasebook): void {
   }
 }
 
-void fetch('/api/phrasebook').then(r => r.ok ? r.json() : null).then(b => b && showBook(b)).catch(() => {})
+const bookLoaded = fetch('/api/phrasebook', { signal: AbortSignal.timeout(3000) })
+  .then(r => r.ok ? r.json() : null).then(b => { if (b) showBook(b) }).catch(() => {})
 
 $<HTMLButtonElement>('forget').onclick = () => {
   void fetch('/api/history', { method: 'DELETE' }).then(() => { $<HTMLParagraphElement>('prepstatus').textContent = 'History forgotten.' })
@@ -433,7 +434,7 @@ if (params.get('review') === 'top') {
   cards = (top as string[]).flatMap(word => cardsForWord(word))
   version++
   void render()
-} else if (initial) start(initial)
+} else if (initial) void bookLoaded.then(() => start(initial)) // so prepared sentences match
 else void render()
 
 // A tap arrives with eventType undefined (CLICK = 0 is omitted on the wire), so

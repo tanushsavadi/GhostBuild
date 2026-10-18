@@ -253,6 +253,12 @@ export function cardsForAi(signs: AiSign[], face: string, source: string): Card[
   const cards: Card[] = []
   for (const s of signs) {
     const sign = signForGloss(s.gloss)
+    // A compound the model made up (TRAIN-TICKET): use its parts if we have all of them.
+    const parts = s.gloss.split('-').filter(Boolean)
+    if (!sign && parts.length > 1 && parts.every(p => signForGloss(p))) {
+      for (const p of parts) cards.push(signCard(signForGloss(p)!))
+      continue
+    }
     // A word the model wanted spelled but we have a sign for (e.g. BATHROOM) gets the sign;
     // names are rarely in the vocabulary, so they stay spelled.
     if (sign && !(s.spell && !byWord.has(s.gloss.toLowerCase()))) cards.push(signCard(sign))
