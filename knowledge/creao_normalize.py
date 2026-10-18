@@ -830,6 +830,12 @@ def _sanitize_provenance(card: dict, ctx: _Ctx) -> None:
         card["provenance"] = _draft_provenance(ctx) if ctx.sources else next((s["kind"] for s in card.get("sources", []) if isinstance(s, dict) and isinstance(s.get("kind"), str)), "WEB TUTORIAL")
 
 
+def _apply_intent(card: dict, intent: str) -> None:
+    """An explicit request intent decides goal_mode (fix|repair|troubleshoot -> fix, anything else -> build)."""
+    if intent and intent.strip():
+        card["goal_mode"] = "fix" if intent.strip().lower() in ("fix", "repair", "troubleshoot") else "build"
+
+
 def to_envelope(payload: Any, request: str, *, run_id: Optional[str] = None, device: str = "", model: str = "", intent: str = "") -> dict:
     """Payload -> import envelope, or {"error": {...}} when the payload is unusable."""
     request = (request or "").strip() or "research request"
@@ -842,6 +848,7 @@ def to_envelope(payload: Any, request: str, *, run_id: Optional[str] = None, dev
             if isinstance(s, dict) and isinstance(s.get("kind"), str):
                 ctx.sources.append(s)
         _sanitize_provenance(card, ctx)
+        _apply_intent(card, intent)
         research = envelope.get("research") if isinstance(envelope.get("research"), dict) else {}
         for name in ("sources", "video_notes", "visual_references", "uncertainties"):
             if not isinstance(research.get(name), list):
@@ -862,6 +869,7 @@ def to_envelope(payload: Any, request: str, *, run_id: Optional[str] = None, dev
             if isinstance(s, dict) and isinstance(s.get("kind"), str):
                 ctx.sources.append(s)
         _sanitize_provenance(card, ctx)
+        _apply_intent(card, intent)
         return {"run_id": rid, "request": request, "card": card, "source_texts": {},
                 "research": {"sources": [], "video_notes": [], "visual_references": [], "uncertainties": ctx.notes}}
     if isinstance(payload, list) and _looks_like_steps(payload):

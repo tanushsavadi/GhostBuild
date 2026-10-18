@@ -18,6 +18,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from contracts.models import G2Hello, G2Input, GoalMode, GoalRequest, HudFrame, Observation
 
 from .cards_api import mount_cards_api
+from .research_runs import mount_research_runs
 from .runtime import Runtime
 
 log = logging.getLogger("ghostbuild.server")
@@ -48,6 +49,7 @@ def create_app(
     tick_interval: Optional[float] = 0.2,
     sim_interval: Optional[float] = 0.1,
     web_dir: Path | str | None = None,
+    research_runs=None,
 ) -> FastAPI:
     clients: list[asyncio.Queue] = []
 
@@ -274,6 +276,7 @@ def create_app(
         raise HTTPException(status_code=404, detail="no such guide view")
 
     mount_cards_api(app, runtime)  # card import endpoints (build-time tooling; see cards_api.py)
+    mount_research_runs(app, runtime, research_runs)  # optional CREAO runs + draft approval (GB_CREAO=1; research_runs.py)
 
     # ------------------------------------------------------------------ optional voice lane (only when --voice / GB_VOICE=1)
     if runtime.voice is not None:

@@ -234,6 +234,10 @@ class CreaoClient:
     def __repr__(self) -> str:  # never include the key
         return f"CreaoClient(base_url={self.base_url!r}, app_id={self.app_id!r}, key_set={bool(self._api_key)})"
 
+    def redact(self, text: Any) -> str:
+        """Redact this client's key (and anything shaped like one) from text."""
+        return redact(text, self._api_key)
+
     # ------------------------------------------------------------------ request building
     @property
     def has_key(self) -> bool:

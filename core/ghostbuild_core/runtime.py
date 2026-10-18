@@ -22,6 +22,7 @@ from contracts.models import (
 )
 
 from .clock import Clock, as_clock
+from .cards import load_cards
 from .engine import Engine
 from .hud import Hud
 from .log import EventLog
@@ -120,6 +121,44 @@ class Runtime:
         elif self.engine.card.card_id != card.card_id or self.engine.passive:
             self.engine = self._make_engine(card)
             self.engine.tick()
+
+    def reload_cards(self, directory: Path | str | None = None) -> dict:
+        """Re-read the cards directory (default <asset_root>/knowledge/cards) without a restart, e.g. after `knowledge.approve`.
+
+        Cards that exist only in memory are kept (disk wins on a card_id clash); a reload never leaves zero cards. The chooser reads
+        `self.cards` each time it opens, so a new card is selectable immediately. The active session and task stay intact: if the
+        active card's definition changed, a playbook keeps its position only when the ordered step ids are unchanged (otherwise it
+        restarts at step 1). Returns {"loaded": n, "added": [ids], "changed": [ids], "active": "kept"|"updated"|"restarted"|"none"}.
+        """
+        d = Path(directory) if directory is not None else self.asset_root / "knowledge" / "cards"
+        disk = load_cards(d)
+        by_id = {c.card_id: c for c in disk}
+        merged = disk + [c for c in self.cards if c.card_id not in by_id]
+        if not merged:
+            return {"loaded": len(self.cards), "added": [], "changed": [], "active": "none"}
+        old = {c.card_id: c for c in self.cards}
+        added = [c.card_id for c in merged if c.card_id not in old]
+        changed = [c.card_id for c in merged if c.card_id in old and c.model_dump() != old[c.card_id].model_dump()]
+        self.cards = merged
+        active = "none"
+        current = self.playbook.card if self.playbook is not None else (self.engine.card if self.sessions.active is not None and self.sessions.active.phase == "task" else None)
+        if current is not None:
+            new = self.card_by_id(current.card_id)
+            if new is None or current.card_id not in changed:
+                active = "kept"
+            elif self.playbook is not None:
+                same_steps = [s.id for s in new.steps] == [s.id for s in current.steps]
+                self.playbook.detach()
+                self.playbook = None
+                self._set_card(new, fresh=not same_steps)  # progress is read back from the session unless fresh
+                active = "updated" if same_steps else "restarted"
+            else:
+                self.engine = self._make_engine(new, passive=self.engine.passive)
+                self.engine.tick()
+                active = "updated"
+        self.elog.write("event", text=f"cards reloaded: added={added} changed={changed} active={active}")
+        log.info("cards reloaded: %d loaded, added=%s changed=%s active=%s", len(merged), added, changed, active)
+        return {"loaded": len(merged), "added": added, "changed": changed, "active": active}
 
     @property
     def active_card(self) -> Card:
