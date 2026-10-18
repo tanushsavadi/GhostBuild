@@ -423,7 +423,7 @@
   function renderGoalHint() {
     var btn = $('goal-send'), hint = $('goal-hint'), f = fresh();
     btn.disabled = !sessionReady() || S.goalBusy;
-    var t = !S.state ? 'Connecting to your workspace…' : !f.ok ? 'Connection lost. Your progress is kept; reconnect to continue.' : 'Choose a prepared guide or describe a new task. New research needs review.';
+    var t = !S.state ? 'Connecting to your workspace…' : !f.ok ? 'Connection lost. Your progress is kept; reconnect to continue.' : 'Pick a ready guide or describe any physical task. If there is no ready guide, GhostBuild researches one now (a few minutes) and starts it for you.';
     memo(hint, t, function () { hint.textContent = t; });
   }
   function showResolution(r, note) {
