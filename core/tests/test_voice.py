@@ -158,6 +158,9 @@ def test_no_transcript_times_out_then_returns_to_previous_screen(mk):
     prev = r.cue
     assert prev[0] == "intervene"
     r.hold("hold_start")
+    with r.client.websocket_connect("/ws/voice") as ws:  # the plugin opened the socket, then never sent `end`
+        ws.send_json({"type": "start", "consent": True})
+        ws.send_bytes(AUDIO)
     r.hold("hold_end")
     r.advance(7800)
     assert r.cue == ("ask", "THINKING", "")
@@ -365,6 +368,18 @@ def test_no_api_key_shows_unavailable(mk, monkeypatch):
     assert r.cue == ("ask", "VOICE UNAVAILABLE", "USE TOUCH")
 
 
+def test_release_without_any_audio_socket_falls_back_after_grace(mk):
+    r = mk(stt=FakeStt("x"))
+    r.to_task()
+    r.fault()
+    r.hold("hold_start")
+    r.hold("hold_end")
+    r.advance(1800)
+    assert r.cue == ("ask", "THINKING", "")
+    r.advance(300)
+    assert r.cue == ("ask", "VOICE UNAVAILABLE", "USE TOUCH")
+
+
 def test_plugin_abort_shows_fallback_immediately(mk):
     r = mk(stt=FakeStt("x"))
     r.to_task()
@@ -414,6 +429,7 @@ def test_late_transcript_after_timeout_is_ignored(mk):
     r.to_task()
     r.fault()
     r.hold("hold_start")
+    r.svc.socket_started = True  # plugin opened the socket but the provider never answered
     r.hold("hold_end")
     r.advance(8300)
     assert r.cue[1] == "DIDN'T CATCH THAT"

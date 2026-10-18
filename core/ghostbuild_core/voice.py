@@ -36,6 +36,7 @@ log = logging.getLogger("ghostbuild.voice")
 TIMEOUT_MS = 8000  # no transcript this long after release -> DIDN'T CATCH THAT
 LISTEN_CAP_MS = 15000  # plugin caps a hold at 10 s; core never stays in LISTENING forever
 RESULT_TTL_MS = 5000
+NO_SOCKET_MS = 2000  # released, but the plugin never opened /ws/voice (mic/socket failed before it could say so): fallback now
 MAX_AUDIO_BYTES = 640_000  # 20 s of 16 kHz s16le mono; anything beyond is dropped
 FINALIZE_TIMEOUT_S = 7.0
 
@@ -181,6 +182,8 @@ class VoiceService:
         self.timeout_ms, self.listen_cap_ms, self.result_ttl_ms = timeout_ms, listen_cap_ms, result_ttl_ms
         self.state = "idle"  # idle | listening | thinking | result
         self._deadline = 0
+        self._released_at = 0
+        self.socket_started = False
         runtime.voice = self
 
     # ---------------------------------------------------------------- HUD (hud.py is the only writer)
@@ -207,9 +210,11 @@ class VoiceService:
         if sess is None or sess.phase == "welcome":
             return
         if gesture == "hold_start":
+            self.socket_started = False
             self._deadline = self._now() + self.listen_cap_ms
             self._show(intent_mod.LISTENING, None, "listening")
         elif gesture == "hold_end" and self.state == "listening":
+            self._released_at = self._now()
             self._deadline = self._now() + self.timeout_ms
             self._show(intent_mod.THINKING, None, "thinking")
 
@@ -222,6 +227,9 @@ class VoiceService:
             self._result(intent_mod.UNAVAILABLE)
 
     def tick(self) -> None:
+        if self.state == "thinking" and not self.socket_started and self._now() - self._released_at >= NO_SOCKET_MS:
+            self.unavailable("released without an audio socket")
+            return
         if self.state in ("listening", "thinking") and self._now() >= self._deadline:
             self.rt.elog.write("voice_timeout", state=self.state)
             self._result(intent_mod.DIDNT_CATCH)
@@ -360,6 +368,7 @@ class VoiceService:
                         self.need_consent()  # no mic, no provider until the wearer has seen HOLD TO TALK / AUDIO SENT TO SERVER
                         await reply({"type": "consent_required"})
                         continue
+                    self.socket_started = True
                     try:
                         stt = self.provider_factory()
                         await stt.start()
