@@ -1,6 +1,6 @@
 # GhostBuild — START HERE
 
-> **Pivot (Sat 2026-10-17): read [`docs/PIVOT_GHOSTBUILD.md`](docs/PIVOT_GHOSTBUILD.md) first — it supersedes everything below.** The docs listed here are historical.
+> **Branch `test_sim` is Sign Coach: read [`README.md`](README.md) and [`docs/SIGN_COACH_PLAN.md`](docs/SIGN_COACH_PLAN.md).** Everything below is the historical GhostBuild onboarding.
 
 ## Read these first
 

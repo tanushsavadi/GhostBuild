@@ -1,53 +1,179 @@
-# GhostBuild
+# Sign Coach for Even G2
 
-> **Pivot (Sat 2026-10-17):** GhostBuild is now a closed-loop repair copilot — the device tests itself, G2 shows one check only when a test fails, and the measured fix clears it. **[`docs/PIVOT_GHOSTBUILD.md`](docs/PIVOT_GHOSTBUILD.md) is the only execution authority**; everything below describes the previous plan and is being rewritten.
+**Say what you want to tell a Deaf person; the glasses show you how to sign it, one sign at a time.**
 
-An AI copilot for physical work: it reads the manual and the CAD, watches the real object, and shows one verified next action on Even G2 — going dark when the work matches the target.
+You can't hold a phone and sign at the same time: signing needs both hands, and eye contact matters. Sign Coach puts the instructions in your field of view on Even Realities G2 glasses, so your hands stay free and your eyes stay on the person you're talking to.
 
-**Team:** read [`START_HERE.md`](START_HERE.md), then [`docs/20_FINAL_IMPLEMENTATION_BIBLE.md`](docs/20_FINAL_IMPLEMENTATION_BIBLE.md) and [`docs/21_HACKATHON_CHECKLIST.md`](docs/21_HACKATHON_CHECKLIST.md). Contracts: [`docs/05_CONTRACTS.md`](docs/05_CONTRACTS.md).
+> Branch `test_sim`. This repository started as GhostBuild; the other files under `docs/` describe that earlier project and are historical. The plan for this project is [`docs/SIGN_COACH_PLAN.md`](docs/SIGN_COACH_PLAN.md).
 
-## Developer quick start
+---
 
-Prerequisites: `uv` (Python 3.11 is pinned in `pyproject.toml`), Node ≥ 20, git. Lane extras: B — `npm i -g @evenrealities/evenhub-cli @evenrealities/evenhub-simulator` and a phone with the Even app; C — Arduino IDE or `arduino-cli`. No iOS app or Xcode is part of this project.
+## What it does
 
-| Question | Command | Green means |
+1. You type (or, soon, say) a sentence on the phone: *"What's your name?"*
+2. It becomes ASL signs in ASL order: **YOUR → NAME → WHAT**, with the facial expression to hold (*brows down: it's a what-question*).
+3. The glasses show one card per sign:
+
+```
+┌──────────────────────────────────────────────────────────┐
+│   ┌──────────┐   WHAT   3/3                               │
+│   │  (open   │   Both hands open, palms facing up         │
+│   │   hand   │   Shake slightly side to side              │
+│   │  drawing)│   FACE: Brows down (what-question)         │
+│   └──────────┘   UNCHECKED · ▼ HOW                        │
+│                  LAST · TAP TO REPEAT                     │
+└──────────────────────────────────────────────────────────┘
+```
+
+| On the glasses | Does |
+|---|---|
+| Tap | Next sign |
+| Swipe down | Full step-by-step description of this sign (pages) |
+| Swipe up | Back to the card |
+| Double-tap | Exit |
+
+The phone page shows the same card, the full description, and a link to a reference video of the sign.
+
+### What it covers
+
+- **About 2,300 English words** with an ASL sign, from the ASL-LEX 2.0 database.
+- **About 22 everyday sentences** signed as real ASL sentences, not word by word: *How are you? · What did you say? · Where is the bathroom? · I don't understand · Can you repeat that? · Please sign slower · Are you deaf?* and more.
+- **Fingerspelling A–Z** for names and words without a sign (*"My name is Abdul"* → MY · NAME · A-B-D-U-L).
+- **ASL grammar basics:** words ASL drops (*is, are, the, do*) are skipped, contractions are understood (*can't* → CANNOT), and *I* is signed ME.
+
+### What it is not
+
+It is a phrasebook coach for a hearing person's first conversations, not an interpreter. ASL is its own language with its own grammar; this shows individual signs in a simplified order. Nobody on the team is Deaf, and no Deaf signer has reviewed the cards yet; every card says so (see [Labels](#labels-on-the-cards)).
+
+---
+
+## Quick start
+
+**Needs:** Node 20+, [`uv`](https://docs.astral.sh/uv/) (only to rebuild the data), the Even Realities app on a phone, and G2 glasses (or just the simulator).
+
+```bash
+cd g2
+npm install
+npm rebuild @evenrealities/evenhub-simulator   # only if "npm run simulate" says not found
+npm run dev                                    # leave running
+```
+
+**Simulator** (second terminal, in `g2/`):
+
+```bash
+npm run simulate
+```
+
+**Real glasses:**
+
+1. Phone and laptop on the same Wi-Fi (or the laptop on the phone's hotspot).
+2. In `g2/`: `npx evenhub qr --url http://<laptop-ip>:5173` (find the IP with `ipconfig` / `ifconfig`).
+3. Scan the QR code in the Even Realities app. Keep the phone screen on.
+
+**Windows:** the phone can only reach the dev server if inbound port 5173 is allowed. In an administrator PowerShell:
+
+```powershell
+New-NetFirewallRule -DisplayName "Sign coach dev 5173" -Direction Inbound -Protocol TCP -LocalPort 5173 -Action Allow -Profile Any
+```
+
+Test it by opening `http://<laptop-ip>:5173` in the phone's browser first.
+
+**Useful URLs**
+
+| URL | Does |
+|---|---|
+| `/` | Sign Coach |
+| `/?phrase=How%20are%20you` | Starts that sentence on load (demos, testing) |
+| `/?style=thin` | Handshape drawing style: `bold` (default), `thin`, `bold96` |
+| `/probe.html` | Handshape legibility test: shows each drawing in 3 styles and the image send time |
+
+---
+
+## How it works
+
+```
+ phone (Even app WebView, g2/)                               glasses
+ ┌───────────────────────────────────────────────┐
+ │ sentence ──► matcher.ts ──► cards ──► main.ts ─┼── BLE ──►  handshape image + text
+ │               │                               │          ◄── tap / swipe
+ │   phrases.json  (sentences in ASL order)      │
+ │   deck.json     (hand-written demo signs)     │
+ │   asllex.json   (2,300 words → signs)         │
+ │   wiktionary.json (full descriptions)         │
+ └───────────────────────────────────────────────┘
+```
+
+Everything runs on the phone; no server and no internet are needed at demo time.
+
+`g2/src/matcher.ts` turns a sentence into cards, in this order of preference:
+
+1. **Known sentence** (`phrases.json`): ASL order plus a face cue.
+2. **Multi-word sign** (*thank you*, *I love you*, *sign language*).
+3. **Single word**: hand-written demo sign (`deck.json`) first, then ASL-LEX (`asllex.json`); plurals and *-ing*/*-ed* forms are handled.
+4. **Anything else is fingerspelled.** It never makes up a sign.
+
+`g2/src/main.ts` draws the cards: one image container (144×144 handshape, 4-bit green) and one text container, one bridge call at a time, and the image is only resent when the handshape changes.
+
+### Where the content comes from
+
+| Content | Source | Licence | Built by |
+|---|---|---|---|
+| Which sign a word uses; handshape, location and movement coding; reference videos (linked, not copied) | [ASL-LEX 2.0](https://asl-lex.org) | CC BY-NC 4.0 | `uv run tools/build_deck.py` → `g2/src/asllex.json` |
+| Handshape drawings (58) | ASL-LEX visualization, served by aslcdi.website | CC BY-NC 4.0 | `uv run tools/build_handshapes.py --all` → `g2/public/handshapes/` |
+| Letters M and N drawings | wpclipart.com via Wikimedia Commons | Public domain | same script |
+| Full step-by-step descriptions (swipe down) | [Wiktionary](https://en.wiktionary.org/wiki/Category:American_Sign_Language_lemmas) ASL entries | CC BY-SA 4.0 | `uv run tools/fetch_wiktionary.py` → `g2/src/wiktionary.json` |
+| Short two-line instructions for ~100 common signs; letter tips; sentence orders and face cues | Written by AI (Claude) in this project, from ASL-LEX's coding | This repo | `tools/howto.json`, `g2/src/deck.json`, `g2/src/phrases.json` |
+| Two-line instructions for the other ~2,200 signs | Generated from ASL-LEX coding by a template | (derived from ASL-LEX) | `tools/build_deck.py` |
+
+The ASL-LEX data is for non-commercial use. Wiktionary text must be credited and anything adapted from it shared under CC BY-SA. The phone page shows these credits. Lifeprint (ASL University) is **not** used: its terms forbid use in apps.
+
+### Labels on the cards
+
+| Label | Means |
+|---|---|
+| `REF-CHECKED` | A person compared the card with the sign's reference video |
+| `UNCHECKED` | Hand-written by AI, not yet compared with a video |
+| `AUTO · UNCHECKED` | Generated from ASL-LEX coding; may be vague, check the video |
+| `FINGERSPELL · UNCHECKED` | Letter of a fingerspelled word |
+| `▼ HOW` | A full Wiktionary description is available (swipe down) |
+
+To mark a sign checked: watch its reference video (linked on the phone page), fix the two lines if needed, and set `"status": "REF-CHECKED"` in `g2/src/deck.json` (move it there from `tools/howto.json` if needed).
+
+---
+
+## Editing the content
+
+| To | Edit | Then |
 |---|---|---|
-| Is my environment working? | `make setup && make doctor` | every line under "everyone" is `ok` |
-| Are contracts valid? (**the 12:45 lock check**) | `make contracts` | `GREEN python …` and `GREEN ts …` |
-| Can core start? | `make core` | `make health` shows core `/health` JSON |
-| Can the mock path run? | `make core-mock` | HUD frames reach `make g2-sim` / `/twin?mode=2d` |
-| Can tests run? | `make test` | contracts + lints + every existing lane's pytest/vitest pass |
-| Any secret about to be committed? | `make check-secrets` | `check-secrets: ok` |
+| Fix or add a common sign's two lines | `tools/howto.json` (≤ 36 characters per line; write "palm facing up", not "palm up") | `uv run tools/build_deck.py` |
+| Add a sentence signed in ASL order | `g2/src/phrases.json`: English variants, signs in order, face cue | nothing (the dev server reloads) |
+| Change a demo sign or a letter tip | `g2/src/deck.json` | nothing |
+| Refresh Wiktionary descriptions | — | `uv run tools/fetch_wiktionary.py` (a few batched requests) |
 
-Targets for lanes that don't exist yet stop with `not yet: <path> missing (owner X)`. Run `make help` for the full list.
+Raw downloads are cached in `tmp/` (git-ignored).
 
-Secrets: copy `.env.example` to `.env` (gitignored) only for the keys your lane uses. `GB_CORE_URL` has no default by design.
+## Project layout
 
-### Contract lock (D, Sat 12:45)
-`make contracts` runs `contracts/tools/lock_check.py` (export JSON Schema from `contracts/models.py`, validate every `contracts/examples/*.json`) and then `contracts/ts` (generate `index.ts`, validate the same examples with ajv, typecheck). It is red until all of these exist:
-- `contracts/models.py` defining `SCHEMAS = {name: Model}` and `FIXTURES = {"<filename glob>": name}`;
-- `contracts/examples/`: `observation_*.json`, `hud_*.json`, `g2_input_*.json`, `state_*.json`, `card_barrier.json` (docs/PIVOT_GHOSTBUILD.md §5.3).
+```
+g2/                     Even G2 plugin (Vite + TypeScript, SDK 0.0.16)
+  index.html            phone page (type a sentence, see the card and credits)
+  src/main.ts           glasses UI: cards, paging, gestures
+  src/matcher.ts        sentence -> cards (pure, no network)
+  src/phrases.json      sentences in ASL order + face cues
+  src/deck.json         hand-written demo signs, letters, skipped words, credits
+  src/asllex.json       generated: ~2,300 words -> ASL-LEX signs
+  src/wiktionary.json   generated: full sign descriptions
+  public/handshapes/    generated: 4-bit 144x144 handshape PNGs
+  probe.html, src/probe.ts   handshape legibility test
+tools/                  data builders (run with uv)
+docs/SIGN_COACH_PLAN.md plan, steps and decisions
+CLAUDE.md               rules for AI coding agents on this branch
+```
 
-Commit the generated `contracts/schema/` and `contracts/ts/index.ts`: B (G2 plugin) and A (phone page) read them without running Python.
+## Status and limits
 
-## Service map
-
-| Service | Owner | Machine | Port / endpoint | Consumes → produces | Env | Health check |
-|---|---|---|---|---|---|---|
-| core | D | Mac 1 | `:8787` HTTP + `ws?role=vision\|g2\|twin`, `/control/*`, `/knowledge/*`, `/twin` | observation, g2_input → hud, twin, `logs/session-*.jsonl` | — | `curl http://<mac1>:8787/health` |
-| perception | C | Mac 1 | client of `ws://localhost:8787/ws?role=vision` | webcam → observation (`source: cv`) | — | `/health` `vision_fps` > 0 |
-| G2 plugin | B | B's laptop (dev) → Even app on the phone → G2 | Vite `:5173`; client of `ws://<mac1>:8787/ws?role=g2` or Funnel `wss://<laptop>.<tailnet>.ts.net` | hud → display; menu/tap → g2_input | — | `/health` `g2_connected`; `make g2-sim` |
-| 2D supervisor | B | served by core, shown on Mac 2 | `http://<mac1>:8787/twin?mode=2d` | twin → page | — | `/health` `twin_clients` |
-| knowledge compiler | D | any Mac, build time only | — | PDF + LDraw → committed `knowledge/<task>/bundle.json` | `ANTHROPIC_API_KEY` | `make compile` exits 0 |
-| Sentry bridge (optional) | Devin → B | Mac 1, `nice 19` | — (reads logs) | `logs/session-*.jsonl` → Sentry Tracing + Logs | `SENTRY_DSN` | `--dry-run` prints spans; trace visible in Sentry |
-| Fetch agent (optional) | Devin → B | B's laptop | — (Agentverse mailbox) | ASI:One ↔ core `GET /health`, `/knowledge`, one-shot `ws?role=twin`; ARMED-only `POST /control/task\|reset\|goal` | `GB_CORE_URL` (required), `GB_AGENT_ARMED=0`, `AGENT_SEED`, `SENTRY_DSN` (opt.) | starts without exiting; answers in ASI:One |
-
-`make health` probes core and `:5173` (set `CORE=http://<mac1>:8787 G2=<b-laptop>` from another machine).
-
-## Git workflow
-
-- `main` is the integration branch and must always run P0 (`make test` green before merging).
-- Short-lived branches per owner/task, merged within hours: `a/web`, `b/g2`, `c/firmware`, `d/core`. Rebase on `main` before merging; small PRs.
-- **Ownership = merge rights:** `contracts/` — only D merges (after 12:45, a shared-schema change also needs every consuming owner's OK in team chat; none after Sun 00:45). `integrations/*` — B lands Devin PRs; the diff must touch only its own directory.
-- **Merge hotspots:** `contracts/` (D only) · `Makefile` (add your lane's target in its own small commit) · `pyproject.toml` / `uv.lock` (one dependency change at a time; after a rebase run `uv lock`, never hand-merge the lockfile) · `README.md`, `CLAUDE.md` (A or D) · `docs/` (frozen; B edits only `docs/sentry_findings.md`) · `scenarios/`, `knowledge/fixtures/` (D).
-- Freezes: P0 freeze Sun 02:00 (nothing merges into the P0 path), product feature freeze 04:00 (bugs and rehearsal only; the isolated Fetch exception is the only feature work).
+- Built and checked in the Even simulator. **Not yet verified on the physical glasses:** handshape legibility, image send time and gesture mapping need the `/probe.html` test and a real run.
+- No AI runs in the app yet; the AI part (Claude turning any sentence into ASL order, and speech input) is the next step. The version before it is tagged `pre-ai`.
+- Facial grammar is only a text cue; the cards show the dominant hand's shape only, and two-handed signs describe the other hand in text.
+- About 2,200 rarer signs only have template instructions; some Wiktionary descriptions may describe a different variant than the ASL-LEX drawing.
+- The Even Hub app is still named `GhostBuild` in `g2/app.json`.
