@@ -56,3 +56,4 @@ tmp/
 *.zip
 .worktrees/
 knowledge/drafts/
+knowledge/requests/
