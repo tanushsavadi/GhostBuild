@@ -30,6 +30,9 @@ EvidenceLabel = Literal[
     "AUTHORED PROJECT SPEC",
     "AI-EXTRACTED · HUMAN-REVIEWED",
     "AUTHORED DEMO METADATA",
+    "WEB TUTORIAL",
+    "VIDEO TUTORIAL",
+    "GITHUB SOURCE",
     "REPLAY",
     "SIMULATED",
 ]
@@ -241,8 +244,9 @@ class Source_(Strict):
 
 class Cite(Strict):
     source: str
-    loc: str
+    loc: str = Field(description="page/section, or a timestamp like t=00:12:34 for video")
     quote: Optional[str] = None
+    url: Optional[str] = Field(default=None, description="deep link (e.g. video &t=754s, repo file#L10)")
 
 
 class GuideView(Strict):
@@ -255,6 +259,7 @@ class GuideView(Strict):
     depicts: str
     fallback: Cue
     fov_note: Optional[str] = Field(default=None, description="what part of the Pi's fixed field of view this refers to")
+    reference_url: Optional[str] = Field(default=None, description="link to a source image/video frame this view should be recreated from by a human; never auto-used on the glasses")
 
 
 class Guide(Strict):

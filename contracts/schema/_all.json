@@ -132,6 +132,9 @@
             "AUTHORED PROJECT SPEC",
             "AI-EXTRACTED \u00b7 HUMAN-REVIEWED",
             "AUTHORED DEMO METADATA",
+            "WEB TUTORIAL",
+            "VIDEO TUTORIAL",
+            "GITHUB SOURCE",
             "REPLAY",
             "SIMULATED"
           ],
@@ -222,6 +225,7 @@
       "additionalProperties": false,
       "properties": {
         "loc": {
+          "description": "page/section, or a timestamp like t=00:12:34 for video",
           "title": "Loc",
           "type": "string"
         },
@@ -240,6 +244,19 @@
         "source": {
           "title": "Source",
           "type": "string"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "deep link (e.g. video &t=754s, repo file#L10)",
+          "title": "Url"
         }
       },
       "required": [
@@ -313,6 +330,9 @@
             "AUTHORED PROJECT SPEC",
             "AI-EXTRACTED \u00b7 HUMAN-REVIEWED",
             "AUTHORED DEMO METADATA",
+            "WEB TUTORIAL",
+            "VIDEO TUTORIAL",
+            "GITHUB SOURCE",
             "REPLAY",
             "SIMULATED"
           ],
@@ -693,11 +713,27 @@
             "AUTHORED PROJECT SPEC",
             "AI-EXTRACTED \u00b7 HUMAN-REVIEWED",
             "AUTHORED DEMO METADATA",
+            "WEB TUTORIAL",
+            "VIDEO TUTORIAL",
+            "GITHUB SOURCE",
             "REPLAY",
             "SIMULATED"
           ],
           "title": "Provenance",
           "type": "string"
+        },
+        "reference_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "link to a source image/video frame this view should be recreated from by a human; never auto-used on the glasses",
+          "title": "Reference Url"
         },
         "step_id": {
           "title": "Step Id",
@@ -995,6 +1031,9 @@
             "AUTHORED PROJECT SPEC",
             "AI-EXTRACTED \u00b7 HUMAN-REVIEWED",
             "AUTHORED DEMO METADATA",
+            "WEB TUTORIAL",
+            "VIDEO TUTORIAL",
+            "GITHUB SOURCE",
             "REPLAY",
             "SIMULATED"
           ],
@@ -1340,6 +1379,9 @@
             "AUTHORED PROJECT SPEC",
             "AI-EXTRACTED \u00b7 HUMAN-REVIEWED",
             "AUTHORED DEMO METADATA",
+            "WEB TUTORIAL",
+            "VIDEO TUTORIAL",
+            "GITHUB SOURCE",
             "REPLAY",
             "SIMULATED"
           ],

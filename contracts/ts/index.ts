@@ -50,8 +50,15 @@ export type Provenance =
   | "AUTHORED PROJECT SPEC"
   | "AI-EXTRACTED · HUMAN-REVIEWED"
   | "AUTHORED DEMO METADATA"
+  | "WEB TUTORIAL"
+  | "VIDEO TUTORIAL"
+  | "GITHUB SOURCE"
   | "REPLAY"
   | "SIMULATED";
+/**
+ * link to a source image/video frame this view should be recreated from by a human; never auto-used on the glasses
+ */
+export type ReferenceUrl = string | null;
 export type StepId = string;
 export type Title1 = string;
 export type View = "where" | "how" | "correct";
@@ -66,6 +73,9 @@ export type Provenance1 =
   | "AUTHORED PROJECT SPEC"
   | "AI-EXTRACTED · HUMAN-REVIEWED"
   | "AUTHORED DEMO METADATA"
+  | "WEB TUTORIAL"
+  | "VIDEO TUTORIAL"
+  | "GITHUB SOURCE"
   | "REPLAY"
   | "SIMULATED";
 export type File = string | null;
@@ -80,6 +90,9 @@ export type Kind =
   | "AUTHORED PROJECT SPEC"
   | "AI-EXTRACTED · HUMAN-REVIEWED"
   | "AUTHORED DEMO METADATA"
+  | "WEB TUTORIAL"
+  | "VIDEO TUTORIAL"
+  | "GITHUB SOURCE"
   | "REPLAY"
   | "SIMULATED";
 export type Title2 = string;
@@ -93,9 +106,16 @@ export type Tests = [Test, ...Test[]];
  * @minItems 1
  */
 export type Checks = [Check, ...Check[]];
+/**
+ * page/section, or a timestamp like t=00:12:34 for video
+ */
 export type Loc = string;
 export type Quote = string | null;
 export type Source = string;
+/**
+ * deep link (e.g. video &t=754s, repo file#L10)
+ */
+export type Url1 = string | null;
 export type Cites = Cite[];
 export type GuideId = string | null;
 export type When = Predicate[];
@@ -171,6 +191,9 @@ export type Provenance2 =
   | "AUTHORED PROJECT SPEC"
   | "AI-EXTRACTED · HUMAN-REVIEWED"
   | "AUTHORED DEMO METADATA"
+  | "WEB TUTORIAL"
+  | "VIDEO TUTORIAL"
+  | "GITHUB SOURCE"
   | "REPLAY"
   | "SIMULATED";
 export type Sha256 = string;
@@ -179,7 +202,7 @@ export type Title4 = string;
 /**
  * path on core, e.g. /guides/camera_lens/where.png (G2-ready 4-bit grey PNG)
  */
-export type Url1 = string;
+export type Url2 = string;
 export type View1 = "where" | "how" | "correct";
 export type W = number;
 /**
@@ -277,6 +300,9 @@ export type Label =
   | "AUTHORED PROJECT SPEC"
   | "AI-EXTRACTED · HUMAN-REVIEWED"
   | "AUTHORED DEMO METADATA"
+  | "WEB TUTORIAL"
+  | "VIDEO TUTORIAL"
+  | "GITHUB SOURCE"
   | "REPLAY"
   | "SIMULATED";
 export type Text1 = string;
@@ -370,6 +396,7 @@ export interface GuideView {
   image: Image;
   phone_image?: PhoneImage;
   provenance: Provenance;
+  reference_url?: ReferenceUrl;
   step_id: StepId;
   title: Title1;
   view: View;
@@ -418,6 +445,7 @@ export interface Cite {
   loc: Loc;
   quote?: Quote;
   source: Source;
+  url?: Url1;
 }
 /**
  * First message on every (re)connect. Core replies with the current frame. Welcome shows only when session_id is null/unknown.
@@ -530,7 +558,7 @@ export interface ImageRef {
   sha256: Sha256;
   step_id: StepId1;
   title: Title4;
-  url: Url1;
+  url: Url2;
   view: View1;
   w: W;
 }
