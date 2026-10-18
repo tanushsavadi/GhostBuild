@@ -13,7 +13,8 @@ export interface ControllerDeps {
   /** Local exit: shutDownPageContainer(1). Double press only. */
   exit: () => void
   surface: () => 'g2' | 'simulator'
-  /** Voice stub. Only ever called when the voice flag is on. */
+  /** Hold-to-ask capture (voice.ts). Only present when built with VITE_FLAG_VOICE=1; it then OWNS hold_start/hold_end
+   *  (sends them to core itself, after the consent gate), so the controller does not send holds directly. */
   voice?: { start: () => void; stop: () => void }
   viewOptions?: ViewOptions
   /** ms disconnected before the honest OFFLINE view replaces whatever is on screen. */
@@ -151,6 +152,11 @@ export class Controller {
       return
     }
     if (a.kind !== 'send') return
+    if (this.d.voice && (a.gesture === 'hold_start' || a.gesture === 'hold_end')) {
+      if (a.gesture === 'hold_start') this.d.voice.start()
+      else this.d.voice.stop()
+      return
+    }
     const input: G2Input = {
       type: 'g2_input',
       v: 2,
@@ -159,10 +165,6 @@ export class Controller {
       surface: this.d.surface(),
     }
     this.d.sendInput(input)
-    if (this.d.voice) {
-      if (a.gesture === 'hold_start') this.d.voice.start()
-      else if (a.gesture === 'hold_end') this.d.voice.stop()
-    }
   }
 
   dispose(): void {

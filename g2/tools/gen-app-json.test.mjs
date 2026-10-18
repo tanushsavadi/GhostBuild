@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildAppJson, origins } from './gen-app-json.mjs'
+import { MIC_DESC, buildAppJson, origins } from './gen-app-json.mjs'
 
 const base = { package_id: 'com.ghostbuild.ghostbuild', name: 'GhostBuild', permissions: [{ name: 'network', desc: 'x', whitelist: ['http://localhost:8787'] }] }
 
@@ -12,7 +12,16 @@ describe('gen-app-json', () => {
     expect(() => origins('ftp://x')).toThrow()
     expect(() => buildAppJson(base, '')).toThrow(/no backend/)
   })
-  it('never adds a microphone permission', () => {
+  it('adds g2-microphone ONLY for a voice build (and never phone-microphone)', () => {
+    const on = buildAppJson(base, 'http://h:8787', { voice: true })
+    expect(on.permissions.map((p) => p.name)).toEqual(['network', 'g2-microphone'])
+    expect(on.permissions[1].desc).toBe(MIC_DESC)
+    expect(MIC_DESC.length).toBeGreaterThanOrEqual(1)
+    expect(MIC_DESC.length).toBeLessThanOrEqual(300)
+    expect(buildAppJson(base, 'http://h:8787', { voice: false }).permissions.map((p) => p.name)).toEqual(['network'])
+    expect(on.permissions.some((p) => p.name === 'phone-microphone')).toBe(false)
+  })
+  it('never adds a microphone permission by default', () => {
     const j = buildAppJson(base, 'http://h:8787')
     expect(j.permissions.map((p) => p.name)).toEqual(['network'])
     expect(j.permissions[0].whitelist).toContain('http://h:8787')

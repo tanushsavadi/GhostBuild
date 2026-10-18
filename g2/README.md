@@ -137,14 +137,44 @@ VITE_BACKEND_URL=http://<laptop-ip>:8787 npm run pack:lan   # build + app.local.
 `GB_BACKEND_URLS`) into the git-ignored `app.local.json`, adding the matching `ws://` / `wss://` origin. The same variable becomes
 the plugin's default backend at build time. For a Tailscale Funnel fallback, use `https://<host>.ts.net` (core sends CORS `*`).
 
-The only permission is `network`. **No microphone permission is declared** (docs: unused permissions are flagged at review). To
-enable voice later: set `VITE_FLAG_VOICE=1`, add `{"name":"g2-microphone","desc":"..."}` to the permissions array (the generator
-has a comment marking the spot), implement `voice.ts` (`audioControl(true, AudioInputSource.Glasses)` only after the startup page
-succeeded, start on `hold_start`, stop on `hold_end`), then re-run the permission-denied QA.
+A default build declares only `network` (no microphone; docs: unused permissions are flagged at review). A **voice build**
+(`VITE_FLAG_VOICE=1 VITE_BACKEND_URL=... npm run pack:lan`) makes `tools/gen-app-json.mjs` also declare `g2-microphone` (name verified in
+the Packaging doc; `desc` is 1-300 chars). See "Voice (optional)" below.
 
 `make g2-pack` runs `npm run build && evenhub pack app.json dist -o ghostbuild.ehpk --sdk-ver 0.0.16 -c`. The flags are valid for CLI
 0.1.14, but (1) `-c` needs `evenhub login` (otherwise `Not authenticated ... Failed to check package ID availability`, exit 1), and
 (2) it packs the committed `app.json`, i.e. a `localhost` whitelist that is useless on a phone. Use `npm run pack:lan` for a device build.
+
+## Voice (optional, flagged; hold-to-ask)
+
+Off by default in both halves: plugin `VITE_FLAG_VOICE=1` AND core `python -m ghostbuild_core --voice` (or `GB_VOICE=1`; `/health` then
+shows `"voice":"on"`; the STT key `CARTESIA_API_KEY` lives only in core's environment, never in g2/). With either side off, long press
+behaves as before (core ignores `hold_start`/`hold_end`) and touch/menu/phone-text paths are unchanged.
+
+Flow (`src/voice.ts`, `core/ghostbuild_core/voice.py`): LONG_PRESS -> `hold_start` (core shows `LISTENING`) -> open `WS /ws/voice`,
+`{"type":"start","consent":true}` -> `bridge.audioControl(true, AudioInputSource.Glasses)` -> `audioEvent.audioPcm` (16 kHz s16le mono,
+docs: device-apis) sent as binary in ~100 ms (3200 byte) batches -> LONG_PRESS_RELEASE (or 10 s cap) -> `audioControl(false)`,
+`{"type":"end"}`, `hold_end` (core shows `THINKING`, then the answer, or `DIDN'T CATCH THAT` after 8 s). Any failure
+(`audioControl` false/throw, no PCM within 1.5 s, socket lost, `FOREGROUND_EXIT`, transport down, server `unavailable`) closes the mic,
+sends `{"type":"abort"}` + `hold_end`, and core shows `VOICE UNAVAILABLE / USE TOUCH`. The mic is never opened outside a deliberate long
+press. Output stays on the HUD (the glasses have no speaker). While voice is active the controller hands hold gestures to `voice.ts`,
+which sends `hold_start`/`hold_end` itself (after the consent gate); the stub server (`tools/stub-server.mjs`) has no `/ws/voice`.
+
+Consent: the first hold sends `{"start","consent":false}`; no mic opens and no `hold_start` is sent; core shows `HOLD TO TALK / AUDIO SENT
+TO SERVER`. A hold within 8 s of that screen stores `gb.voice_consent=1` (SDK storage + localStorage mirror) and records; the stored value is
+sent as `consent` on every later start, and core drops audio from a start without it.
+
+### Voice device test (human; NOT verified: needs the physical G2 + a Cartesia key)
+- [ ] Build with `VITE_FLAG_VOICE=1`, run core with `--voice` and `CARTESIA_API_KEY` set; `curl :8787/health` shows `"voice":"on"`; the packed manifest lists `g2-microphone`.
+- [ ] First long press: `HOLD TO TALK / AUDIO SENT TO SERVER`, mic stays off (glasses mic indicator, if any, does not light). Second long press: `LISTENING`.
+- [ ] Does the OS claim the long press (docs: tap-then-hold opens the OS contextual menu)? If `hold_start` never reaches core, record exactly which gesture sequence works.
+- [ ] "where is it" -> WHERE picture; "how do I fix it" -> HOW; "what should it look like" -> CORRECT; "show the next picture"; "why does it matter" (expect `NOT IN MY CARD / SEE PHONE` for long card text, full text under phone events); "what if that didn't work".
+- [ ] At the FIX/BUILD menu: "my camera view is black" -> `FIX: ...` task; "set up the station" -> BUILD task; "build a rocket" -> `NOT SUPPORTED YET`.
+- [ ] Healthy + "is it fixed" -> `ALL TESTS PASSING / LIVE` only while measurements pass; it never clears a fault.
+- [ ] Hold in silence 2 s: `VOICE UNAVAILABLE / USE TOUCH` (no PCM within 1.5 s). Unplug core network mid-hold: mic closes (plugin offline view), no stuck `LISTENING`.
+- [ ] Background the app while holding: mic closes (`FOREGROUND_EXIT`). Check PCM frame size/rate on a real run (docs do not state chunk size; the plugin re-batches to 3200 bytes).
+- [ ] Core log has `voice_transcript` lines (text only) and no audio files anywhere under `logs/`.
+- Fallback if the OS claims long press on real glasses: the alternative would be a phone-side push-to-talk control using `AudioInputSource.Phone` (permission `phone-microphone`) on the `/phone` page. That is out of scope here; touch and phone-text goal entry remain the supported paths.
 
 ## Physical-device checklist (human; none of this is verified yet)
 
