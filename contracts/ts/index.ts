@@ -198,7 +198,7 @@ export type Ok = boolean;
 export type PiAgeMs = number | null;
 export type PiLastSeq = number | null;
 export type PiLink = "up" | "stale" | "down";
-export type Source1 = ("pi_live" | "replay" | "simulated") | null;
+export type Source1 = ("pi_live" | "replay" | "simulated" | "manual") | null;
 export type UptimeS = number;
 export type Voice = "off" | "on";
 export type CueId = string | null;
@@ -247,7 +247,7 @@ export type Seq = number;
  * current session; the plugin stores it and sends it in G2Hello on reconnect so the welcome never repeats
  */
 export type SessionId3 = string | null;
-export type Source2 = "pi_live" | "replay" | "simulated";
+export type Source2 = "pi_live" | "replay" | "simulated" | "manual";
 /**
  * true if backed by data older than the staleness limit; plugin shows ERROR instead
  */
@@ -315,7 +315,7 @@ export type Ms = number;
  * monotonic per device boot; core drops seq <= last
  */
 export type Seq1 = number;
-export type Source3 = "pi_live" | "replay" | "simulated";
+export type Source3 = "pi_live" | "replay" | "simulated" | "manual";
 export type V6 = 2;
 export type CardId2 = string;
 export type Check2 = number | null;
@@ -359,7 +359,7 @@ export type Goal = ("fix" | "build") | null;
 export type Id5 = string;
 export type Phase = "welcome" | "menu" | "task";
 export type WelcomeShown = boolean;
-export type Source4 = ("pi_live" | "replay" | "simulated") | null;
+export type Source4 = ("pi_live" | "replay" | "simulated" | "manual") | null;
 export type StepId4 = string | null;
 export type Test1 = string | null;
 export type V7 = 2;

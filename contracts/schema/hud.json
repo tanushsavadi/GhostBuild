@@ -280,7 +280,8 @@
       "enum": [
         "pi_live",
         "replay",
-        "simulated"
+        "simulated",
+        "manual"
       ],
       "title": "Source",
       "type": "string"

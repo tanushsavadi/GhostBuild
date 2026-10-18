@@ -19,7 +19,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 SCHEMA_VERSION = 2
 
-Source = Literal["pi_live", "replay", "simulated"]
+Source = Literal["pi_live", "replay", "simulated", "manual"]  # manual = no telemetry involved (wearer-confirmed playbook steps)
 EvidenceLabel = Literal[
     "MEASURED LIVE",
     "INFERRED",

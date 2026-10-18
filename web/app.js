@@ -192,7 +192,7 @@
     if (hud && hud.mode !== 'quiet') {
       var ctr = L.counterText(hud); if (ctr) tp.push(ctr);
       if (hud.image && hud.image.count > 1) tp.push((ctr ? 'PIC ' : '') + (hud.image.index + 1) + '/' + hud.image.count);
-      if (hud.source && hud.source !== 'pi_live') tp.push(String(hud.source).toUpperCase());
+      if (hud.source && hud.source !== 'pi_live' && hud.source !== 'manual') tp.push(String(hud.source).toUpperCase());
     }
     memo(tagEl, tp.join('  '), function () { tagEl.hidden = !tp.length; tagEl.textContent = tp.join('  '); });
     memo(meta, key + f.ok, function () {
@@ -356,7 +356,7 @@
       if (nConf + nVer >= list.length && list.length) head.appendChild(h('div', { class: 'res supported compact' },
         h('div', { class: 'st', text: 'ALL STEPS MARKED DONE' }),
         h('div', { text: nConf + ' confirmed by you (HUMAN CONFIRMED), ' + nVer + ' by measured evidence. A step you confirmed is your word, not a check by GhostBuild.' })));
-      var notLive = st.hud && st.hud.source && st.hud.source !== 'pi_live' ? String(st.hud.source).toUpperCase() : null;
+      var notLive = st.hud && st.hud.source && st.hud.source !== 'pi_live' && st.hud.source !== 'manual' ? String(st.hud.source).toUpperCase() : null;
       list.forEach(function (stp, i) {
         var stat = L.stepStatus(stp, pb), isCur = i === idx;
         var badge = stat.kind === 'confirmed' ? h('span', { class: 'lbl l-HUMAN', text: 'HUMAN CONFIRMED' })

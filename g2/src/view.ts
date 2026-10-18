@@ -48,7 +48,7 @@ export function offlineView(opts: ViewOptions = DEFAULT_VIEW_OPTIONS): TextView 
 }
 
 export function sourceTag(source: HudFrame['source']): string {
-  return source === 'pi_live' ? '' : source.toUpperCase()
+  return source === 'pi_live' || source === 'manual' ? '' : source.toUpperCase()
 }
 
 function joinTag(...parts: string[]): string {
