@@ -9,7 +9,7 @@ import {
   OsEventTypeList,
 } from '@evenrealities/even_hub_sdk'
 
-// Step 0 probe (docs/SIGN_COACH_PLAN.md): can a wearer name ASL-LEX handshapes
+// Step 0 probe (docs/OPEN_PALM_PLAN.md): can a wearer name ASL-LEX handshapes
 // on the real lens, and how long does each image send take?
 // Tap 1 reveals the handshape name, tap 2 shows the next card. Double-tap exits.
 

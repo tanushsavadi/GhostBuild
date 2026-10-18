@@ -1,6 +1,6 @@
 # GhostBuild — START HERE
 
-> **Branch `test_sim` is Sign Coach: read [`README.md`](README.md) and [`docs/SIGN_COACH_PLAN.md`](docs/SIGN_COACH_PLAN.md).** Everything below is the historical GhostBuild onboarding.
+> **Branch `test_sim` is Open Palm: read [`README.md`](README.md) and [`docs/OPEN_PALM_PLAN.md`](docs/OPEN_PALM_PLAN.md).** Everything below is the historical GhostBuild onboarding.
 
 ## Read these first
 

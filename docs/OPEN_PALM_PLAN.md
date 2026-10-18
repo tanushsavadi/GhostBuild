@@ -1,4 +1,4 @@
-# Sign coach — plan (authoritative on branch test_sim, 2026-10-17)
+# Open Palm — plan (authoritative on branch test_sim, 2026-10-17)
 
 ## Product
 A hearing person wearing Even G2 wants to talk to a Deaf person. They say an English phrase; the glasses show one card per sign: the ASL-LEX handshape image (pixelated to the lens) and two short lines on location and movement. They sign it. Hands stay free and eyes stay on the other person, which a phone cannot offer.
@@ -36,7 +36,7 @@ Cut order if behind: the AI part of step 5, then step 4 (typing still works).
 
 ## Run
 From `g2/`: `npm install` (then `npm rebuild @evenrealities/evenhub-simulator` if `npm run simulate` is not found), `npm run dev`, then either `npm run simulate` or `npx evenhub qr --url http://<laptop-wifi-ip>:5173`.
-- `/` is the sign coach; `/?phrase=Thank%20you` starts a phrase on load; `/?style=thin|bold|bold96` picks the drawing style (default bold).
+- `/` is the app; `/?phrase=Thank%20you` starts a phrase on load; `/?style=thin|bold|bold96` picks the drawing style (default bold).
 - `/probe.html` is the step 0 handshape test.
 - Handshape PNGs: `uv run tools/build_handshapes.py --all` (writes `g2/public/handshapes/`). Vocabulary: `uv run tools/build_deck.py` (writes `g2/src/asllex.json`).
 - Windows: the phone can only reach the dev server if port 5173 is allowed inbound (the venue network is Public).

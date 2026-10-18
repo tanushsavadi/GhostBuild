@@ -1,10 +1,10 @@
-# Sign Coach for Even G2
+# Open Palm for Even G2
 
 **Say what you want to tell a Deaf person; the glasses show you how to sign it, one sign at a time.**
 
-You can't hold a phone and sign at the same time: signing needs both hands, and eye contact matters. Sign Coach puts the instructions in your field of view on Even Realities G2 glasses, so your hands stay free and your eyes stay on the person you're talking to.
+You can't hold a phone and sign at the same time: signing needs both hands, and eye contact matters. Open Palm puts the instructions in your field of view on Even Realities G2 glasses, so your hands stay free and your eyes stay on the person you're talking to.
 
-> Branch `test_sim`. This repository started as GhostBuild; the other files under `docs/` describe that earlier project and are historical. The plan for this project is [`docs/SIGN_COACH_PLAN.md`](docs/SIGN_COACH_PLAN.md).
+> Branch `test_sim`. This repository started as GhostBuild; the other files under `docs/` describe that earlier project and are historical. The plan for this project is [`docs/OPEN_PALM_PLAN.md`](docs/OPEN_PALM_PLAN.md).
 
 ---
 
@@ -73,7 +73,7 @@ npm run simulate
 **Windows:** the phone can only reach the dev server if inbound port 5173 is allowed. In an administrator PowerShell:
 
 ```powershell
-New-NetFirewallRule -DisplayName "Sign coach dev 5173" -Direction Inbound -Protocol TCP -LocalPort 5173 -Action Allow -Profile Any
+New-NetFirewallRule -DisplayName "Open Palm dev 5173" -Direction Inbound -Protocol TCP -LocalPort 5173 -Action Allow -Profile Any
 ```
 
 Test it by opening `http://<laptop-ip>:5173` in the phone's browser first.
@@ -82,7 +82,7 @@ Test it by opening `http://<laptop-ip>:5173` in the phone's browser first.
 
 | URL | Does |
 |---|---|
-| `/` | Sign Coach |
+| `/` | Open Palm |
 | `/?phrase=How%20are%20you` | Starts that sentence on load (demos, testing) |
 | `/?style=thin` | Handshape drawing style: `bold` (default), `thin`, `bold96` |
 | `/probe.html` | Handshape legibility test: shows each drawing in 3 styles and the image send time |
@@ -182,7 +182,7 @@ g2/                     Even G2 plugin (Vite + TypeScript, SDK 0.0.16)
   src/top.json          generated: the 100 most-used signs
   src/checked.json      signs a person marked right (REF-CHECKED)
 tools/                  data builders (run with uv)
-docs/SIGN_COACH_PLAN.md plan, steps and decisions
+docs/OPEN_PALM_PLAN.md plan, steps and decisions
 CLAUDE.md               rules for AI coding agents on this branch
 ```
 
@@ -192,4 +192,4 @@ CLAUDE.md               rules for AI coding agents on this branch
 - No AI runs in the app yet; the AI part (Claude turning any sentence into ASL order, and speech input) is the next step. The version before it is tagged `pre-ai`.
 - Facial grammar is only a text cue; the cards show the dominant hand's shape only, and two-handed signs describe the other hand in text.
 - About 2,200 rarer signs only have template instructions; some Wiktionary descriptions may describe a different variant than the ASL-LEX drawing.
-- The Even Hub app is still named `GhostBuild` in `g2/app.json`.
+- Even Hub app: `Open Palm` (`com.openpalm.openpalm`), not yet uploaded.

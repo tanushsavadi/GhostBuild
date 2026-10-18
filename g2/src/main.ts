@@ -11,9 +11,9 @@ import {
 import { cardsFor, cardForWord, CREDIT, type Card } from './matcher'
 import top from './top.json'
 
-// Sign coach: a phrase becomes a sequence of cards (handshape image + how-to
+// Open Palm: a phrase becomes a sequence of cards (handshape image + how-to
 // lines). Tap = next card, double-tap = exit. The phrase comes from the phone
-// page below; speech is added later (docs/SIGN_COACH_PLAN.md step 4).
+// page below; speech is added later (docs/OPEN_PALM_PLAN.md step 4).
 
 const DEMO_PHRASES = ['Hello, nice to meet you', 'My name is Abdul', 'Thank you']
 // Handshape drawing style; switch after the step 0 lens test (?style=thin|bold|bold96).
@@ -87,7 +87,7 @@ await bridge.createStartUpPageContainer(
         xPosition: 176, yPosition: 16, width: 392, height: 256,
         borderWidth: 0, borderColor: 5, paddingLength: 4,
         containerID: INFO.id, containerName: INFO.name,
-        content: 'SIGN COACH\nType or pick a phrase\non the phone.',
+        content: 'OPEN PALM\nType or pick a phrase\non the phone.',
         isEventCapture: 1,
       }),
     ],
@@ -124,7 +124,7 @@ function paginate(text: string, max = 190): string[] {
 
 function lensText(): string {
   const card = cards[index]
-  if (!card) return 'SIGN COACH\nType or pick a phrase\non the phone.'
+  if (!card) return 'OPEN PALM\nType or pick a phrase\non the phone.'
   if (detailPage >= 0 && card.detail) {
     const pages = paginate(card.detail.text)
     const last = detailPage >= pages.length - 1
