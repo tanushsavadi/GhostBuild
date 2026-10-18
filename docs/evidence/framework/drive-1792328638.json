@@ -1,0 +1,114 @@
+[
+ {
+  "said": "My MacBook screen suddenly turned green",
+  "took_s": 3.27,
+  "assistant": "Let's work through it together. I'll start with safe checks of your display and color settings, which don't change anything permanent, and we'll go from there.",
+  "decision": "START_GUIDE"
+ },
+ {
+  "shot": "mac-01-task-start",
+  "mode": "intervene",
+  "cue": {
+   "line1": "FIX: MAC SCREEN LOOKS",
+   "line2": "ANY TAP: FIRST QUESTION"
+  },
+  "menu": null,
+  "phase": "task",
+  "card": "mac_display_colors",
+  "step": "q_which_display",
+  "observations": []
+ },
+ {
+  "shot": "mac-02-question-menu",
+  "mode": "menu",
+  "cue": {
+   "line1": "WHICH SCREEN IS WRONG?",
+   "line2": "BUILT-IN, EXTERNAL, BOTH"
+  },
+  "menu": {
+   "prompt": "WHICH SCREEN IS WRONG?",
+   "options": [
+    "BUILT-IN SCREEN",
+    "EXTERNAL DISPLAY",
+    "BOTH"
+   ],
+   "selected": 0
+  },
+  "phase": "task",
+  "card": "mac_display_colors",
+  "step": "q_which_display",
+  "observations": []
+ },
+ {
+  "shot": "mac-03-highlight-external",
+  "mode": "menu",
+  "cue": {
+   "line1": "WHICH SCREEN IS WRONG?",
+   "line2": "BUILT-IN, EXTERNAL, BOTH"
+  },
+  "menu": {
+   "prompt": "WHICH SCREEN IS WRONG?",
+   "options": [
+    "BUILT-IN SCREEN",
+    "EXTERNAL DISPLAY",
+    "BOTH"
+   ],
+   "selected": 1
+  },
+  "phase": "task",
+  "card": "mac_display_colors",
+  "step": "q_which_display",
+  "observations": []
+ },
+ {
+  "shot": "mac-04-external-branch",
+  "mode": "step",
+  "cue": {
+   "line1": "UNPLUG THE MONITOR",
+   "line2": "THEN PLUG IT BACK IN"
+  },
+  "menu": null,
+  "phase": "task",
+  "card": "mac_display_colors",
+  "step": "reconnect_external",
+  "observations": [
+   "Wrong colors on an external display only"
+  ]
+ },
+ {
+  "said": "what should it look like when this works?",
+  "took_s": 2.87,
+  "assistant": "When the reconnect works, the external display should show your desktop with normal colors again. Whites look white, not green or tinted, and photos and skin tones look natural, the same as they normally do. The guide doesn't describe the exact result, so this comes from general knowledge. Unplug the display from your Mac and plug it back in, or put the Mac to sleep and wake it. If the colors are still wrong afterward, the next step is to check the cable and adapter.",
+  "decision": "EXPLAIN"
+ },
+ {
+  "shot": "mac-05-answer",
+  "mode": "ask",
+  "cue": {
+   "line1": "NORMAL COLORS, NO TINT",
+   "line2": "WHITES LOOK WHITE AGAIN"
+  },
+  "menu": null,
+  "phase": "task",
+  "card": "mac_display_colors",
+  "step": "reconnect_external",
+  "observations": [
+   "Wrong colors on an external display only"
+  ]
+ },
+ {
+  "shot": "mac-06-back-to-step",
+  "mode": "step",
+  "cue": {
+   "line1": "UNPLUG THE MONITOR",
+   "line2": "THEN PLUG IT BACK IN"
+  },
+  "menu": null,
+  "phase": "task",
+  "card": "mac_display_colors",
+  "step": "reconnect_external",
+  "observations": [
+   "Wrong colors on an external display only"
+  ]
+ }
+]

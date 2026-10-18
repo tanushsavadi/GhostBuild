@@ -21,7 +21,9 @@ from contracts.models import (
     State,
 )
 
+from . import intent as intent_mod
 from .clock import Clock, as_clock
+from .cache import AppCache
 from .cards import load_cards
 from .engine import Engine
 from .hud import Hud
@@ -53,7 +55,9 @@ class Runtime:
         if not cards:
             raise ValueError("Runtime needs at least one valid Repair Card")
         self.clock = as_clock(clock)
-        self.cards = cards
+        self.cache = AppCache(Path(log_dir) / "reuse-cache.json" if log_dir is not None else None)
+        self.cards = list(cards)
+        self.discovery = None
         self.require_device_link = require_device_link  # the real server sets it: a fault card starts only while its device reports
         self.asset_root = Path(asset_root) if asset_root is not None else Path.cwd()
         self.force_source = force_source
@@ -67,20 +71,27 @@ class Runtime:
         self.engine = self._make_engine(self._default_card())
         self.research_runs: Any = None  # ResearchRuns, attached by mount_research_runs when the server is built
         self.live = LiveResearch(self)
+        for cached_card, review in self.cache.saved_guides():
+            if all(c.card_id != cached_card.card_id for c in self.cards):
+                self.cards.append(cached_card)
+                if review:
+                    self.live.cards[cached_card.card_id] = review
         self.assistant = Assistant(self, brain if brain is not None else brain_from_env())
         self.sim = None  # set below when simulating; startable_cards() reads it while sessions load
         self.voice = None  # optional VoiceService (voice.py), attached by its constructor; None = voice off (read while sessions load)
         sess_path = Path(log_dir) / "sessions.json" if log_dir is not None else None
         self.sessions = SessionManager(
-            self.hud, self.clock, lambda: self.cards, self._set_card, sess_path,
+            self.hud, self.clock, lambda: self.all_cards(), self._set_card, sess_path,
             record=lambda kind, **d: self.elog.write(kind, **d),
             refine=self._refine_unsupported,
             startable=self.startable_cards,
             voice_on=lambda: self.voice is not None,
             research_progress=lambda: self.live.progress(),
             on_convo_cancel=lambda sid: self.assistant.cancel(sid),
+            recover=self.live.recover_draft,
         )
         self.sessions.restore()
+        self.assistant.resume_question(self.sessions.active_id)  # an interview interrupted by a restart asks its open question again
         self.hud.session_id = self._sid()
         if simulate:
             from .simulate import SimPi
@@ -110,6 +121,8 @@ class Runtime:
         A card with only `tests` runs the original fault Engine, unchanged.
         """
         sid = self.sessions.active_id
+        if hasattr(self, "assistant"):
+            self.assistant.bind_card(card, sid)
         if card.steps:
             same = self.playbook is not None and self.playbook.card.card_id == card.card_id and self._pb_sid == sid
             if same and not fresh:
@@ -124,6 +137,8 @@ class Runtime:
                 on_progress=lambda d, sid=sid: self.sessions.set_progress(sid, d),
             )
             self.playbook._save()
+            if progress is None or not progress.get("confirmed"):
+                self._answer_from_conversation(sid)
             if fresh:
                 self.playbook.reveal()  # first step now, not after the HUD throttle
             return
@@ -180,8 +195,26 @@ class Runtime:
     def active_card(self) -> Card:
         return self.playbook.card if self.playbook is not None else self.engine.card
 
+    def _answer_from_conversation(self, sid: Optional[str]) -> None:
+        """A guide that opens with a question the person already answered in conversation does not ask it again."""
+        task = self.assistant.tasks.get(sid or "") if hasattr(self, "assistant") else None
+        pb = self.playbook
+        if task is None or pb is None:
+            return
+        said = [t for t in task.observations if t.strip()][-8:]
+        for _ in range(3):
+            if pb.step.kind != "question" or pb.done:
+                return
+            choice = next((c for c in (pb.match_choice(t) for t in reversed(said)) if c), None)
+            if choice is None:
+                return
+            pb.choose(choice, via="earlier answer")
+
     def card_by_id(self, card_id: str) -> Optional[Card]:
-        return next((c for c in self.cards if c.card_id == card_id), None)
+        return next((c for c in self.all_cards() if c.card_id == card_id), None)
+
+    def all_cards(self) -> list[Card]:
+        return self.cards + (list(self.discovery.cards.values()) if self.discovery is not None else [])
 
     # ------------------------------------------------------------------ inputs
     def ingest(self, obs: Observation) -> bool:
@@ -206,6 +239,8 @@ class Runtime:
         elif self.playbook is not None and self.sessions.flash_showing() and self.sessions.active is not None and self.sessions.active.phase == "task":
             self.sessions.dismiss_flash()  # the task-start cue hides the first step: a gesture only reveals it, never acts on it
             self.playbook.reveal()
+        elif self.discovery is not None and self.discovery.handle_input(gi):
+            pass
         elif not self.sessions.handle_input(gi):
             if self.playbook is not None:
                 self.playbook.handle_input(gi)
@@ -217,6 +252,8 @@ class Runtime:
     def hello(self, h: G2Hello) -> HudFrame:
         self.elog.write("input", hello=h.model_dump(mode="json"))
         self.sessions.hello(h)
+        if self.discovery is not None:
+            self.discovery.refresh()
         self.hud.session_id = self._sid()
         self.hud.sync()
         return self.hud.current
@@ -227,13 +264,16 @@ class Runtime:
         if not self.require_device_link:
             return list(self.cards)
         link_up = self.sim is not None or self.engine.link_status() == "up"
-        return [c for c in self.cards if c.steps or link_up]
+        return [c for c in self.cards if (c.steps or link_up) and not (
+            self.discovery is not None and self.discovery.requires_identification(c))]
 
     def _sid(self) -> Optional[str]:
         sid = self.sessions.view().id
         return None if sid == "none" else sid
 
     def tick(self) -> None:
+        if self.discovery is not None:
+            self.discovery.pump()
         self.live.pump()
         self.assistant.pump()
         self.sessions.tick()
@@ -245,6 +285,14 @@ class Runtime:
 
     def resolve_goal(self, req: GoalRequest) -> Optional[GoalResolution]:
         """A spoken or typed request. With an assistant it is first talked through (questions, experience); otherwise resolved directly."""
+        if req.session_id == self.session().id and req.text:
+            self.assistant.observe_goal(req)
+        if self.discovery is not None and self.discovery.wants(req):
+            return self.discovery.submit(req)
+        if self.discovery is not None and self.discovery.state(req.session_id).phase != "idle":
+            self.discovery.cancel(req.session_id)
+        if self._reuse_goal(req):
+            return self._reuse_resolution(req)
         if self.assistant.wants_goal(req):
             self.elog.write("input", goal=req.model_dump(mode="json"), via_assistant=True)
             res = self.assistant.submit_goal(req)
@@ -255,9 +303,58 @@ class Runtime:
     def resolve_goal_direct(self, req: GoalRequest) -> Optional[GoalResolution]:
         """The deterministic resolver (cards, then live research). Also the fallback whenever the assistant cannot help."""
         self.elog.write("input", goal=req.model_dump(mode="json"))
+        if self._reuse_goal(req):
+            return self._reuse_resolution(req)
         res = self.sessions.apply_goal(req)
+        if res is not None and res.status == "supported" and res.card_id and req.text:
+            card = self.card_by_id(res.card_id)
+            if card is not None:
+                self.cache.remember_guide(req.text, req.mode, card, self.live.cards.get(card.card_id))
         self.hud.sync()
         return res
+
+    def _reuse_goal(self, req: GoalRequest) -> bool:
+        if req.session_id != self.session().id or not req.text or req.via not in ("phone_text", "voice"):
+            return False
+        intake = self.assistant.intakes.get(req.session_id)
+        if intake is not None and intake.active:
+            return False  # the person's answer belongs to the current conversation
+        saved = self.cache.guide(req.text, req.mode)
+        if saved is None:
+            saved = self.live.cached_guide(req.text, req.mode)
+        if saved is None:
+            return False
+        card, review = saved
+        current = next((c for c in self.cards if c.card_id == card.card_id), None)
+        card = current or card
+        task = self.assistant.tasks.get(req.session_id)
+        if task is not None and (task.critical_unknowns or task.confirmation_pending):
+            return False
+        if self.discovery is not None and self.discovery.requires_identification(card):
+            return False
+        if not card.steps and card not in self.startable_cards():
+            return False
+        if current is None:
+            self.cards.append(card)
+            if review:
+                self.live.cards[card.card_id] = review
+        sess = self.sessions.active
+        if sess is None:
+            return False
+        self.assistant.cancel(req.session_id)
+        sess.phase = "menu"
+        self.sessions.start_card(req.session_id, card, echo=False)
+        self.cache.remember_guide(req.text, req.mode, card, review)
+        self.live.last = {"cached": True, "goal": req.text, "card_id": card.card_id, "ok": True}
+        self.elog.write("cache", kind_name="guide", card_id=card.card_id, hit=True)
+        return True
+
+    def _reuse_resolution(self, req: GoalRequest) -> GoalResolution:
+        card = self.active_card
+        return GoalResolution(session_id=req.session_id, status="supported", mode=card.goal_mode,
+            card_id=card.card_id, task_title=card.title, cue=Cue(line1="SAVED GUIDE READY", line2="NO NEW RESEARCH"),
+            detail=f"Using the saved guide: {card.title}. No new research was needed." +
+                (" AI-researched, not human-reviewed." if card.card_id in self.live.cards else ""))
 
     def _refine_unsupported(self, req: GoalRequest, res: GoalResolution) -> GoalResolution:
         """Free-text goal with no card: save it for async research and say QUEUED only if it really was saved."""
@@ -302,6 +399,44 @@ class Runtime:
         if self.playbook is None:
             return None
         self.elog.write("input", ask=text[:300])
+        from .assistant.adaptive import identity_correction, task_switch
+        if task_switch(text) or identity_correction(text):
+            sid = self.session().id
+            task = self.assistant.tasks.get(sid)
+            if identity_correction(text) and self.discovery is not None and self.discovery.state(sid).selected is not None:
+                self.assistant.observe_goal(GoalRequest(session_id=sid, mode="build", via="phone_text", text=text))
+                self.discovery.correct(sid, text)
+                return AskResult(intent="goal", answered=True, cue=Cue(line1="CHECK PRODUCT AGAIN", line2="PICK THE MATCHING PHOTO"), text="Let's identify the correct product before continuing. Your earlier progress is kept.", detail="", label="DETERMINISTIC", step_id="", card_id="")
+            if self.playbook is not None:
+                self.playbook.detach()
+                self.playbook, self._pb_sid = None, None
+            sess = self.sessions.active
+            sess.phase = "menu"
+            self.sessions.clear_convo(sid)
+            if identity_correction(text) and task:
+                self.assistant.cancel(sid)
+                self.assistant.intakes.pop(sid, None)
+                task.phase = "intake"
+                task.critical_unknowns = ["Confirm the corrected identity or applicability before continuing"]
+                req_text = task.goal + ". Correction: " + text
+            else:
+                req_text = text
+            res = self.resolve_goal(GoalRequest(session_id=sid, mode=intent_mod.infer_goal_mode(req_text), via="phone_text", text=req_text))
+            return AskResult(intent="goal", answered=False, pending=bool(res and res.conversing), cue=res.cue if res else Cue(line1="WHAT DO YOU NEED?",line2=""), text=res.detail if res else "Tell me the new task.", detail="", label="DETERMINISTIC",step_id="",card_id="")
+        if intent_mod.returns_to_step(text):
+            self.assistant.dismiss(self.session().id, self.playbook.card.card_id, self.playbook.step.id)
+        choice = self.playbook.match_choice(text)  # an answer to the current diagnostic question: deterministic, no model
+        if choice is not None:
+            st = self.playbook.step
+            picked = next(c for c in st.choices if c.id == choice)
+            self.playbook.choose(choice, via="voice/text")
+            res = AskResult(intent="choice", answered=True, cue=self.hud.current.cue or Cue(line1="NOTED", line2=""),
+                            text=f"Noted: {picked.records or picked.label.capitalize()}.", detail="", label="HUMAN CONFIRMED",
+                            step_id=st.id, card_id=self.playbook.card.card_id)
+            self.assistant.record_guide_answer(text, res)
+            self.hud.sync()
+            return res
+
         where = self.assistant.route(text, self.playbook)  # commands and the card's own FAQ stay deterministic; real questions go to the assistant
         if where == "assistant":
             res = self.assistant.submit_question(text)
@@ -309,6 +444,8 @@ class Runtime:
             res = self.assistant.recall_note(text)
         else:
             res = self.playbook.ask(text)
+            if res.intent not in ("next","back","goto","picture","status","repeat"):
+                self.assistant.record_guide_answer(text,res)
         self.hud.sync()
         return res
 
@@ -371,4 +508,7 @@ class Runtime:
         return self.sessions.view()
 
     def close(self) -> None:
+        self.assistant.close()
+        if self.discovery is not None:
+            self.discovery.close()
         self.elog.close()

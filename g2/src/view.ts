@@ -5,6 +5,8 @@ export interface ViewOptions {
   /** Approximate characters that fit a line; used to centre by space padding (no text-align on G2). */
   centerCols: number
   glyphTier: GlyphTier
+  /** A dim reminder beside the step counter; disable with VITE_FLAG_HELP_HINT=0. */
+  askHint?: boolean
 }
 
 /**
@@ -117,14 +119,22 @@ export function frameToView(frame: HudFrame, opts: ViewOptions = DEFAULT_VIEW_OP
     // fall through to the cue fallback
   }
 
+  if (frame.answer) {
+    const a = frame.answer
+    const origin = a.grounding === 'guide' ? 'FROM GUIDE' : a.grounding === 'general' ? 'GENERAL' : a.grounding === 'unsure' ? 'NOT SURE' : 'GUIDE'
+    return textView(a.text.split('\n').map(l => sanitizeLine(l, opts.glyphTier)),
+      joinTag(`ANSWER ${a.index + 1}/${a.count}`, origin, 'PRESS: BACK'))
+  }
+
   let lines = cueLines(frame, opts)
   if (lines.length === 0) lines = [centerLine('NO CUE TEXT', opts.centerCols)]
-  const fallback = textView(lines, joinTag(counter, tag))
+  const hint = counter && opts.askHint !== false && import.meta.env.VITE_FLAG_HELP_HINT !== '0' ? 'ASK ANYTIME' : ''
+  const fallback = textView(lines, joinTag(counter, tag, hint))
 
   if (frame.mode === 'visual' && frame.image) {
     const img: ImageRef = frame.image
     const idx = img.count > 1 ? `${counter ? 'PIC ' : ''}${img.index + 1}/${img.count}` : ''
-    const t = joinTag(counter, idx, tag)
+    const t = joinTag(counter, idx, tag, hint)
     return {
       kind: 'image',
       text: lines.join('\n'),

@@ -12,12 +12,14 @@ Everything on the glasses goes through hud.py (layer "engine"). Cue text is card
 from __future__ import annotations
 
 import logging
+import os
 from collections import deque
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any, Callable, Optional
 
 from contracts.models import (
+    AnswerPage,
     Card,
     Cue,
     Evidence,
@@ -27,6 +29,7 @@ from contracts.models import (
     GuideView,
     HudFrame,
     ImageRef,
+    Menu,
     Observation,
     PlaybookState,
     Source,
@@ -36,6 +39,7 @@ from contracts.models import (
 
 from . import intent as intent_mod
 from .clock import Clock, as_clock
+from .presentation import instruction
 from .engine import Engine, _describe, eval_all, measured_label, resolve_path
 from .hud import Hud, Screen
 
@@ -44,6 +48,7 @@ log = logging.getLogger("ghostbuild.playbook")
 GUARD_MS = 600  # a swipe-down this soon after a step frame appears is a bounce, not a confirmation (long enough to have seen it)
 VERIFIED_TTL_MS = 2000
 UNCERTAIN_TTL_MS = 2000
+HAZARD_CONFIRM_MS = 5000  # a hazard step's second swipe must follow within this window
 ASK_TTL_MS = 4000
 DONE_TTL_MS = 4000
 COMPLETE_STATUS_TTL_MS = 3000
@@ -62,6 +67,7 @@ class _Flash:
     end: int
     kind: str  # verified | done | uncertain | ask | status
     consumes_input: bool = False  # a gesture dismisses it and does nothing else (the wearer has not seen the step yet)
+    pending: bool = False  # THINKING: a press here means "never mind", so the late answer stays on the phone only
 
 
 @dataclass
@@ -74,6 +80,7 @@ class AskResult:
     label: EvidenceLabel
     step_id: str
     card_id: str
+    cached: bool = False
     pending: bool = False  # an assistant answer is on its way (shown on the glasses and the phone when it arrives)
 
     def as_json(self) -> dict[str, Any]:
@@ -87,6 +94,7 @@ class AskResult:
             "card_id": self.card_id,
             "step_id": self.step_id,
             "pending": self.pending,
+            "cached": self.cached,
         }
 
 
@@ -126,6 +134,14 @@ class PlaybookEngine:
         self.done = False
         self.view_idx: Optional[int] = None  # None = no picture open
         self._flashes: list[_Flash] = []
+        self.answer_data: Optional[dict] = None
+        self.answer_index = 0
+        self.pending_dismissed = False  # the wearer pressed past THINKING; the assistant must not pop its answer up
+        # branching guides: the route actually taken (for "back"), what the person reported at question steps, the highlighted answer
+        self.path: list[int] = []
+        self.observations: list[dict] = []
+        self.choice_idx = 0
+        self._hazard_armed: Optional[tuple[str, int]] = None
         # measured-step tracking
         self.last_obs: Optional[Observation] = None
         self._last_rx: Optional[int] = None
@@ -168,6 +184,7 @@ class PlaybookEngine:
             step_id=self.step.id,
             confirmed=list(self.confirmed),
             verified=list(self.verified),
+            observations=[o["text"] for o in self.observations],
         )
 
     def progress(self) -> dict:
@@ -177,6 +194,10 @@ class PlaybookEngine:
             "confirmed": list(self.confirmed),
             "verified": list(self.verified),
             "done": self.done,
+            "answer": self.answer_data,
+            "answer_index": self.answer_index,
+            "path": list(self.path),
+            "observations": list(self.observations),
         }
 
     def help_view(self) -> Optional[str]:
@@ -203,6 +224,12 @@ class PlaybookEngine:
         self.verified = [i for i in progress.get("verified", []) if i in ids]
         self.index = max(0, min(int(progress.get("step_index", 0)), self.count - 1))
         self.done = bool(progress.get("done", False))
+        self.path = [i for i in progress.get("path", []) if isinstance(i, int) and 0 <= i < self.count][-200:]
+        self.observations = [o for o in progress.get("observations", []) if isinstance(o, dict) and o.get("step") in ids][-60:]
+        saved = progress.get("answer")
+        if isinstance(saved, dict) and saved.get("step_id") == self.step.id and isinstance(saved.get("text"), str):
+            self.answer_data = saved
+            self.answer_index = max(0, int(progress.get("answer_index", 0)))
 
     def _save(self) -> None:
         if self.on_progress is not None:
@@ -313,7 +340,30 @@ class PlaybookEngine:
             return None
         now = self.clock.now_ms()
         before = self.hud.current.seq
+        if self.answer_data is not None and not self._answer_owned():
+            self.answer_data = None  # an answer for another step (evidence moved on) never traps gestures
+            self._save()
+        if self.answer_data is not None:
+            if gi.gesture == "press":
+                self.dismiss_ask()
+            else:
+                from .answer import pages
+                count = len(pages(self.answer_data["text"]))
+                self.answer_index = max(0, min(count - 1, self.answer_index + (1 if gi.gesture == "swipe_down" else -1)))
+                self._save()
+                self._refresh(immediate=True)
+            return self._emitted_since(before)
+        if (self.step.kind == "question" and not self.done and self.view_idx is None and not from_ask
+                and self._active_flash(now) is None):
+            self._question_input(gi.gesture, now)
+            self._refresh(immediate=True)
+            return self._emitted_since(before)
         fl = self._active_flash(now)
+        if fl is not None and fl.pending and gi.gesture == "press" and not from_ask:
+            self._flashes.remove(fl)
+            self.pending_dismissed = True
+            self._refresh(immediate=True)
+            return self._emitted_since(before)
         if fl is not None and fl.consumes_input and not from_ask:
             self._flashes.remove(fl)  # dismiss only; the wearer has not seen the step yet
             self._refresh(immediate=True)
@@ -335,7 +385,8 @@ class PlaybookEngine:
             self.view_idx = self.view_idx + 1 if g is not None and self.view_idx + 1 < len(g.views) else None
             return
         if g is not None:
-            self.view_idx = 0
+            automatic = self._default_view(g)
+            self.view_idx = min(automatic + 1, len(g.views) - 1) if automatic is not None else 0
             return
         st = self.step
         if st.where is not None:
@@ -358,6 +409,15 @@ class PlaybookEngine:
             return
         if not from_ask and not was_picture and not self._step_settled(now):
             return  # accidental-input guard: no frame
+        armed = self._hazard_armed is not None and self._hazard_armed[0] == st.id and now - self._hazard_armed[1] <= HAZARD_CONFIRM_MS
+        if st.risk == "hazard" and not armed:
+            # a consequential step needs a second, deliberate confirmation
+            self._hazard_armed = (st.id, now)
+            cue = Cue(line1="SAFETY STEP: DONE IT?", line2="SWIPE AGAIN TO CONFIRM")
+            self._flash(Screen.uncertain(cue, ttl_ms=HAZARD_CONFIRM_MS), HAZARD_CONFIRM_MS, "uncertain", now=now)
+            self._event(f"step {st.id}: hazard step needs a second confirmation", "DETERMINISTIC", {"step": st.id})
+            return
+        self._hazard_armed = None
         self.confirmed.append(st.id)
         self._tried.clear()
         self._event(f"step {st.id} confirmed by wearer", "HUMAN CONFIRMED", {"step": st.id})
@@ -367,7 +427,6 @@ class PlaybookEngine:
         g = self._guide()
         if self.done:
             self.done = False  # a mistaken last swipe: reopen the final step; confirmations are kept
-            self.index = self.count - 1
             self._flashes = []
             self._reset_hold()
             self._save()
@@ -375,20 +434,112 @@ class PlaybookEngine:
         if self.view_idx is not None:
             self.view_idx = None  # swipe up from a picture = back to the step it belongs to
             return
-        if self.index > 0:
+        if self.path:
+            self.index = self.path.pop()  # back along the route actually taken (branching guides)
+            self.choice_idx = 0
+            self._reset_hold()
+            self._save()
+        elif self.index > 0:
             self.index -= 1
             self._reset_hold()
             self._save()
 
+    def _answer_owned(self) -> bool:
+        return self.answer_data is not None and not self.done and self.answer_data.get("step_id") == self.step.id
+
     def _after_step_done(self, now: int) -> None:
         """The current step is complete (confirmed / verified / already was): go to the next one or finish."""
+        self.answer_data = None  # the answer belonged to the finished step; the phone conversation keeps it
         self.view_idx = None
         self._reset_hold()
-        if self.index + 1 < self.count:
-            self.index += 1
+        st = self.step
+        if st.kind in ("outcome", "stop"):
+            self._finish(now)
+        elif st.next:
+            self._go(self._index_of(st.next))
+        elif self.index + 1 < self.count:
+            self._go(self.index + 1)
         else:
             self._finish(now)
         self._save()
+
+    # ------------------------------------------------------------------ branching guides
+    def _index_of(self, step_id: str) -> int:
+        return next(i for i, s in enumerate(self.card.steps) if s.id == step_id)
+
+    def _go(self, index: int) -> None:
+        if index != self.index:
+            self.path.append(self.index)
+            self.path = self.path[-200:]
+        self.index = index
+        self.choice_idx = 0
+        self.view_idx = None
+
+    def _question_input(self, gesture: str, now: int) -> None:
+        """A question step is a small menu: swipe moves the highlight, press answers. Swipe up at the top goes back."""
+        n = len(self.step.choices)
+        if gesture == "press":
+            self.choose(self.step.choices[min(self.choice_idx, n - 1)].id, via="g2")
+        elif gesture == "swipe_down":
+            self.choice_idx = (self.choice_idx + 1) % n
+        elif self.choice_idx > 0:
+            self.choice_idx -= 1
+        else:
+            self._swipe_up(now, False)
+
+    def choose(self, choice_id: str, via: str = "phone") -> bool:
+        """Answer the current question step. Records what the person reported (HUMAN CONFIRMED, never measured) and follows it."""
+        st = self.step
+        choice = next((c for c in st.choices if c.id == choice_id), None) if st.kind == "question" and not self.done else None
+        if choice is None:
+            return False
+        text = choice.records or choice.label.capitalize()
+        self.observations = [o for o in self.observations if o["step"] != st.id] + [{"step": st.id, "choice": choice.id, "text": text}]
+        if st.id not in self.confirmed:
+            self.confirmed.append(st.id)
+        self._tried.clear()
+        self._event(f"step {st.id}: person reported \"{text}\" ({via})", "HUMAN CONFIRMED", {"step": st.id, "choice": choice.id})
+        self.answer_data = None
+        self._go(self._index_of(choice.next))
+        self._save()
+        self._refresh(immediate=True)
+        return True
+
+    def match_choice(self, text: str) -> Optional[str]:
+        """Deterministic: which answer of the current question step does this utterance give? None when unclear."""
+        st = self.step
+        if st.kind != "question" or self.done:
+            return None
+        t = " " + " ".join(intent_mod.normalize(text).split()) + " "
+        from .discovery.attrs import pick_ordinal
+
+        def hits_in(t: str) -> list[str]:
+            out = []
+            for c in st.choices:
+                phrases = [p.lower() for p in c.say] + [c.label.lower()]
+                if any(" " + " ".join(intent_mod.normalize(p).split()) + " " in t for p in phrases if p.strip()):
+                    out.append(c.id)
+            return out
+
+        hits = hits_in(t)
+        if len(hits) == 1:
+            return hits[0]
+        if len(hits) > 1:
+            # "only the external monitor, the laptop screen looks fine": a clause that rules something out does not answer
+            import re
+
+            clauses = [intent_mod.normalize(c) for c in re.split(r"[,;.]|\bbut\b|\band\b|\bwhile\b|\bthough\b", text.lower())]
+            keep = [c for c in clauses if not re.search(r"\b(fine|ok|okay|works?|working|normal|good|right|not|isn t|isnt|no problem)\b", c)]
+            narrowed = hits_in(" " + " ".join(" ".join(keep).split()) + " ")
+            if len(narrowed) == 1:
+                return narrowed[0]
+            # naming several things together is the "both / all of them" answer, when the question offers one
+            combined = [c.id for c in st.choices if c.id in hits and re.search(r"\b(both|all)\b", " ".join(c.say + [c.label]).lower())
+                        and re.search(r"\b(both|all)\b", t)]
+            if len(combined) == 1:
+                return combined[0]
+        ordinal = pick_ordinal(text, len(st.choices)) if not hits and len(t.split()) <= 4 else None  # "the second one"
+        return st.choices[ordinal].id if ordinal is not None else None
 
     def _finish(self, now: int) -> None:
         self.done = True
@@ -398,9 +549,12 @@ class PlaybookEngine:
             screen = Screen.verified(Cue(line1="● PLAYBOOK VERIFIED", line2="EVERY STEP CHECKED"), ttl_ms=DONE_TTL_MS, cue_id=f"{self.card.card_id}/done", immediate=True)
             if self.last_obs is not None:
                 screen = replace(screen, source=self.last_obs.source)  # driven by the last observation
+        elif self.step.kind == "stop":
+            screen = Screen.intervene(Cue(line1="STOPPED SAFELY HERE", line2="NEXT STEPS ON YOUR PHONE"), cue_id=f"{self.card.card_id}/done", ttl_ms=DONE_TTL_MS, immediate=True)
         else:
             line2 = "YOU CONFIRMED EACH" if measured == 0 else "SOME CHECKED, SOME BY YOU"
-            screen = Screen.intervene(Cue(line1="✓ ALL STEPS DONE", line2=line2), cue_id=f"{self.card.card_id}/done", ttl_ms=DONE_TTL_MS, immediate=True)
+            line1 = "✓ GUIDE FINISHED" if self.step.kind == "outcome" else "✓ ALL STEPS DONE"
+            screen = Screen.intervene(Cue(line1=line1, line2=line2), cue_id=f"{self.card.card_id}/done", ttl_ms=DONE_TTL_MS, immediate=True)
         self._flash(screen, DONE_TTL_MS, "done", consumes_input=True, now=now)
         self._event(f"playbook {self.card.card_id} complete", "DETERMINISTIC", {"measured_steps": measured, "steps": len(steps)})
 
@@ -449,14 +603,33 @@ class PlaybookEngine:
                 return g
         return None
 
+    def _default_view(self, guide):
+        if os.getenv("GB_STEP_IMAGES","1")=="0" or not self.card.step_image:
+            return None
+        return next((i for i,v in enumerate(guide.views) if v.view==self.card.step_image),None)
+
     def _compute_screen(self, now: int) -> Screen:
         fl = self._active_flash(now)
         if fl is not None:
             return fl.screen
+        if self.answer_data is not None and self._answer_owned():
+            from .answer import pages
+            data = self.answer_data
+            chunks = pages(data["text"])
+            self.answer_index = min(self.answer_index, len(chunks) - 1)
+            page = AnswerPage(text=chunks[self.answer_index], index=self.answer_index, count=len(chunks),
+                              grounding=data["grounding"], label=data["label"])
+            return Screen(mode="ask", cue=Cue.model_validate(data["cue"]), answer=page, step=self._step_ref(), immediate=True)
         if self.done:
             return Screen.quiet()
         st = self.step
         cue_id = f"{self.card.card_id}/{st.id}"
+        if st.kind == "question" and self.view_idx is None:
+            q = instruction(st)
+            self.choice_idx = min(self.choice_idx, len(st.choices) - 1)
+            return Screen(mode="menu", cue=Cue(line1=q.line1, line2=q.line2 or "SWIPE · PRESS TO ANSWER"),
+                          menu=Menu(prompt=q.line1[:24], options=[c.label[:26] for c in st.choices], selected=self.choice_idx),
+                          step=self._step_ref(), cue_id=cue_id, immediate=True)
         g = self._guide()
         if self.view_idx is not None and g is not None:
             idx = min(self.view_idx, len(g.views) - 1)
@@ -468,7 +641,12 @@ class PlaybookEngine:
             nxt = g.views[idx + 1].view.upper() if idx + 1 < len(g.views) else None
             cue = Cue(line1=f"{view.title}: {g.title}".upper()[:24], line2=(f"PRESS FOR {nxt}" if nxt else "PRESS TO GO BACK")[:26])
             return Screen.visual(cue, ref, cue_id=cue_id, step=self._step_ref())
-        return Screen.step_screen(st.cue, self._step_ref(), cue_id=cue_id)
+        automatic = self._default_view(g) if g is not None else None
+        if automatic is not None:
+            ref=self._image_ref(g,automatic,g.views[automatic])
+            if ref is not None:
+                return Screen.visual(instruction(st),ref,cue_id=cue_id,step=self._step_ref())
+        return Screen.step_screen(instruction(st), self._step_ref(), cue_id=cue_id)
 
     def _refresh(self, immediate: bool = False) -> None:
         now = self.clock.now_ms()
@@ -482,7 +660,7 @@ class PlaybookEngine:
 
     def _on_frame(self, frame: HudFrame) -> None:
         """Hud subscriber: remember when the current step frame actually reached the glasses (for the accidental-input guard)."""
-        if frame.mode == "step" and frame.step is not None and frame.step.step_id == self.step.id:
+        if (frame.mode == "step" or (frame.mode=="visual" and self.view_idx is None)) and frame.step is not None and frame.step.step_id == self.step.id:
             key = (frame.step.index, frame.step.confirmed)
             if key != self._shown_key:
                 self._shown_key = key
@@ -535,6 +713,11 @@ class PlaybookEngine:
         intent = intent_mod.classify_playbook(text, st.faq)
         if intent in ("where", "why", "how", "correct") and not self._question_matches_step(text):
             intent = "unknown"
+        if intent_mod.returns_to_step(text):
+            self.dismiss_ask()
+            return AskResult(intent="return", answered=True, cue=self.step.cue, text="Back to the same step.", detail="", label="DETERMINISTIC", step_id=self.step.id, card_id=self.card.card_id)
+        # A deliberate voice command can leave the answer page; a page swipe never can.
+        self.answer_data = None
         self._event(f'ask "{text[:120]}" -> {intent}', "INFERRED", {"intent": intent, "step": st.id})
         # Visual requests reveal reviewed card assets, never advance progress.
         if intent in ("where", "how", "correct"):
@@ -548,6 +731,20 @@ class PlaybookEngine:
                 cue = view.fallback
                 return AskResult(intent=intent, answered=True, cue=cue, text=_cue_text(cue), detail=view.depicts,
                                  label=view.provenance, step_id=st.id, card_id=self.card.card_id)
+        if intent == "picture" and any(w in text.lower() for w in ("closer", "zoom", "bigger", "enlarge")):
+            guide = self._guide()
+            target = next((i for i, v in enumerate(guide.views) if v.view == "how"), 0) if guide else None
+            if target is not None:
+                self.view_idx = target
+                self._flashes = []
+                self._refresh(immediate=True)
+                view = guide.views[target]
+                return AskResult(intent="picture", answered=True, cue=view.fallback, text=_cue_text(view.fallback), detail=view.depicts,
+                                 label=view.provenance, step_id=st.id, card_id=self.card.card_id)
+        if intent == "goto":
+            return self._ask_goto(text, now)
+        if intent == "parts":
+            return self._ask_parts(now)
         cue: Optional[Cue] = None
         detail = ""
         label: EvidenceLabel = self.card.provenance
@@ -575,9 +772,67 @@ class PlaybookEngine:
         body = _cue_text(cue)
         if answered:
             self._event(f"answer ({intent}): {body}" + (f" | {detail}" if detail else ""), label, {"step": st.id})
-        self._flash(Screen.ask(cue, ttl_ms=ASK_TTL_MS), ASK_TTL_MS, "ask", now=now)
-        self._refresh(immediate=True)
+        self.show_answer(body + (". " + detail if detail else ""), cue=cue, grounding="guide" if answered else "unsure", label=label)
         return AskResult(intent=intent, answered=answered, cue=cue, text=body, detail=detail, label=label, step_id=st.id, card_id=self.card.card_id)
+
+    def _ask_goto(self, text: str, now: int) -> AskResult:
+        """'show me step 14': jump to that step. Navigation only: nothing is confirmed, earlier confirmations are kept."""
+        n = intent_mod.goto_number(text) or 0
+        if not 1 <= n <= self.count:
+            cue = Cue(line1=f"ONLY {self.count} STEPS", line2="TRY A STEP NUMBER")
+            self._flash(Screen.ask(cue, ttl_ms=ASK_TTL_MS), ASK_TTL_MS, "ask", now=now)
+            self._refresh(immediate=True)
+            return AskResult(intent="goto", answered=False, cue=cue, text=f"This guide has {self.count} steps; there is no step {n}.", detail="",
+                             label="DETERMINISTIC", step_id=self.step.id, card_id=self.card.card_id)
+        self.done = False
+        self.index = n - 1
+        self.view_idx = None
+        self._flashes = []
+        self._tried.clear()
+        self._reset_hold()
+        self._save()
+        self._event(f"jumped to step {n} of {self.count} at the wearer's request (nothing confirmed)", "DETERMINISTIC", {"step": self.step.id})
+        self._refresh(immediate=True)
+        st = self.step
+        cue = Cue(line1=f"STEP {n} OF {self.count}", line2=st.title.upper()[:26])
+        return AskResult(intent="goto", answered=True, cue=cue, text=f"Step {n} of {self.count}: {st.title}", detail=st.detail, label="DETERMINISTIC",
+                         step_id=st.id, card_id=self.card.card_id)
+
+    def _ask_parts(self, now: int) -> AskResult:
+        """'which fastener do I use': the parts the source prints for this step, plus the parts closeup when the guide has one."""
+        st = self.step
+        use = [p for p in st.parts if not p.avoid]
+        avoid = [p for p in st.parts if p.avoid]
+        if not st.parts:
+            cue = Cue(line1="NO PARTS LISTED", line2="SEE THE PICTURE" if self._guide() is not None else "SEE PHONE")
+            self._event("parts asked: this step prints no parts", "DETERMINISTIC", {"step": st.id})
+            self._flash(Screen.ask(cue, ttl_ms=ASK_TTL_MS), ASK_TTL_MS, "ask", now=now)
+            self._refresh(immediate=True)
+            return AskResult(intent="parts", answered=False, cue=cue, text="The manual prints no parts or fasteners for this step.", detail="",
+                             label="DETERMINISTIC", step_id=st.id, card_id=self.card.card_id)
+
+        def one(p) -> str:
+            core = f"{p.qty}x {p.name} {p.id}".replace("  ", " ").strip() if p.qty else f"{p.name} {p.id}".strip()
+            return core
+
+        text = "Use " + "; ".join(one(p) for p in use) if use else "No fasteners to add in this step"
+        if avoid:
+            text += ". Do not use " + "; ".join(f"{p.name} {p.id}".strip() for p in avoid) + " here (the manual crosses it out)"
+        detail = " ".join(p.note for p in st.parts if p.note)
+        short = ", ".join((f"{p.qty}X " if p.qty else "") + p.id for p in use)
+        cue = intent_mod.wrap_two_lines("USE " + short) if use else None
+        if cue is None:
+            cue = Cue(line1=(f"USE {use[0].id}" if use else "NO NEW PARTS")[:24], line2="SEE PHONE LIST" if len(use) > 1 else "")
+        guide = self._guide()
+        target = next((i for i, v in enumerate(guide.views) if v.view == "how"), 0) if guide else None
+        self._event(f"parts: {text}", self.card.provenance, {"step": st.id, "parts": ",".join(p.id for p in st.parts)})
+        if guide is not None and target is not None:
+            self.view_idx = target  # the closeup of the parts and fasteners, from the manual
+            self._flashes = []
+        else:
+            self._flash(Screen.ask(cue, ttl_ms=ASK_TTL_MS), ASK_TTL_MS, "ask", now=now)
+        self._refresh(immediate=True)
+        return AskResult(intent="parts", answered=True, cue=cue, text=text, detail=detail, label=self.card.provenance, step_id=st.id, card_id=self.card.card_id)
 
     def _next_check(self, label: EvidenceLabel) -> tuple[Optional[Cue], str, EvidenceLabel]:
         """The next untried CHECK for 'that did not work'. Order: the current step's checks (card order = most likely first), then the
@@ -635,13 +890,37 @@ class PlaybookEngine:
                 out.append(_cue_text(st.troubleshoot[i].action))
         return out
 
-    def show_ask(self, cue: Cue, ttl_ms: int = ASK_TTL_MS, *, after_previous: bool = False) -> None:
-        """Show a short answer on the glasses for a while, then return to the step (the same overlay the deterministic answers use)."""
+    def show_ask(self, cue: Cue, ttl_ms: int = ASK_TTL_MS, *, after_previous: bool = False, pending: bool = False) -> None:
+        """Show a short status on the glasses for a while, then return to the step. A new status replaces an older answer page."""
         now = self.clock.now_ms()
         if not after_previous:
             self._flashes = [f for f in self._flashes if f.consumes_input]
+        if self.answer_data is not None:
+            self.answer_data = None
+            self._save()
+        if pending:
+            self.pending_dismissed = False
         start = max([now] + [f.end for f in self._flashes if f.kind == "ask"]) if after_previous else now
-        self._flashes.append(_Flash(Screen.ask(cue, ttl_ms=ttl_ms), start, start + ttl_ms, "ask"))
+        self._flashes.append(_Flash(Screen.ask(cue, ttl_ms=ttl_ms), start, start + ttl_ms, "ask", pending=pending))
+        self._refresh(immediate=True)
+
+    def show_answer(self, text: str, *, cue: Cue, grounding="guide", label="INFERRED") -> None:
+        """A full answer, paged on the glasses, open until the wearer returns. GB_ANSWER_PAGES=0 restores the short timed cue."""
+        if os.getenv("GB_ANSWER_PAGES", "1") == "0":
+            self.show_ask(cue)
+            return
+        self._flashes = [f for f in self._flashes if f.kind != "ask"]
+        self.answer_data = {"text": text, "cue": cue.model_dump(), "grounding": grounding,
+                            "label": label, "step_id": self.step.id}
+        self.answer_index = 0
+        self._save()
+        self._refresh(immediate=True)
+
+    def dismiss_ask(self) -> None:
+        """Dismiss only the transient answer, keeping the same step and diagram."""
+        self._flashes = [f for f in self._flashes if f.kind != "ask"]
+        self.answer_data = None
+        self._save()
         self._refresh(immediate=True)
 
     def note_ai_answer(self, question: str, grounding: str) -> None:

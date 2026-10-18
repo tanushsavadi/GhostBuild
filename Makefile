@@ -40,7 +40,7 @@ lint-generic:      ## no domain terms in core source or the contract source (05 
 	@echo "lint-generic: ok"
 
 test: contracts lint-generic check-secrets
-	@for t in contracts/tests core/tests pi/tests knowledge/tests assets/tests; do \
+	@for t in contracts/tests core/tests pi/tests knowledge/tests assets/tests integrations/ikea/tests; do \
 	  [ -d $$t ] && { echo "== pytest $$t"; $(PY) -m pytest -q $$t || exit 1; } || true; done
 	@for d in g2; do [ -f $$d/package.json ] && { echo "== $$d"; (cd $$d && npx tsc --noEmit && npx vitest run --passWithNoTests) || exit 1; } || true; done
 

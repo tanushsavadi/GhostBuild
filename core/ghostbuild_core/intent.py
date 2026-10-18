@@ -195,12 +195,25 @@ def answer(intent: Intent, ctx: Ctx) -> Reply:
 
 
 # --------------------------------------------------------------------------- playbook follow-ups (/ask and the voice lane)
-PbIntent = Literal["where", "how", "correct", "repeat", "why", "faq", "troubleshoot", "next", "back", "picture", "status", "unknown"]
+PbIntent = Literal["where", "how", "correct", "repeat", "why", "faq", "troubleshoot", "next", "back", "picture", "status", "goto", "parts", "unknown"]
 
 NOT_IN_PLAYBOOK = Cue(line1="NOT IN MY PLAYBOOK", line2="SEE PHONE")
 
 _PB_STATUS = re.compile(r"\b(which|what) step\b|\bwhere am i\b|\bprogress\b|\bhow many (steps?|left)\b|\bstatus\b|\bam i done\b|\bsteps? (left|remaining)\b")
-_PB_PICTURE = re.compile(r"\b(show|see|open|display)\b.*\b(picture|photo|image|diagram|pic|view)\b|\bpicture\b|\bphoto\b|\bdiagram\b")
+_PB_PICTURE = re.compile(
+    r"\b(show|see|open|display)\b.*\b(picture|photo|image|diagram|pic|view)\b|\bpicture\b|\bphoto\b|\bdiagram\b|"
+    r"\bcloser (?:look|view)\b|\blook closer\b|\bzoom\b|\benlarge\b|\bbigger\b"
+)
+# "show me step 14", "go to step 14", "step 14": navigate to a numbered step (never confirms anything)
+_PB_GOTO = re.compile(r"\bstep (?:number |no |num )?(\d{1,3})\b")
+_PART_WORDS = (
+    r"fasteners?|screws?|bolts?|dowels?|cam ?locks?|cam ?bolts?|pins?|nuts?|washers?|hinges?|brackets?|hardware|parts?|"
+    r"components?|connectors?|nails?|clips?|plugs?|caps?|covers?|legs?|feet|wires?|resistors?|capacitors?"
+)
+_PB_PARTS = re.compile(
+    rf"\b(?:which|what)\b[^.?!]*\b(?:{_PART_WORDS})\b|\bhow many\b[^.?!]*\b(?:{_PART_WORDS})\b|"
+    r"\bwhat (?:do i|should i|will i|would i) (?:need|use)\b|\bwhat (?:is|are) (?:needed|required)\b"
+)
 _PB_NEXT = re.compile(
     r"^(?:(?:ok|okay|please) )?(?:next(?: step)?|done|finished|continue|go on|move on|forward|all done|"
     r"(?:i've|i have|i am|i'm|im) (?:done|finished)(?: (?:that|this|with this|with that))?)"
@@ -255,6 +268,12 @@ def faq_best(text: str, faqs: list) -> Optional[tuple[int, float]]:
     return (best[0], best[2]) if best else None
 
 
+def goto_number(text: str) -> Optional[int]:
+    """The step number in 'show me step 14', else None. 'step by step' and 'next step' carry no number."""
+    m = _PB_GOTO.search(normalize(text))
+    return int(m.group(1)) if m else None
+
+
 def classify_playbook(text: str, faqs: list) -> PbIntent:
     t = normalize(text)
     if not t:
@@ -265,6 +284,8 @@ def classify_playbook(text: str, faqs: list) -> PbIntent:
         return "status"
     if _PB_TROUBLE.search(t):
         return "troubleshoot"
+    if goto_number(t) is not None and not _PB_NEXT.search(t):
+        return "goto"
     if _PB_NEXT.search(t):
         return "next"
     if _PB_BACK.search(t):
@@ -273,6 +294,8 @@ def classify_playbook(text: str, faqs: list) -> PbIntent:
         return "repeat"
     if _PB_CORRECT.search(t):
         return "correct"
+    if _PB_PARTS.search(t):
+        return "parts"
     if _PB_HOW.search(t):
         return "how"
     if _PB_PICTURE.search(t):
@@ -282,3 +305,11 @@ def classify_playbook(text: str, faqs: list) -> PbIntent:
     if _PB_WHY.search(t):
         return "why"
     return "unknown"
+
+
+def returns_to_step(text: str) -> bool:
+    """'back to my step', 'take me back to the step', 'return to the instructions' (never 'go back' = previous step, never a picture request)."""
+    return bool(re.search(
+        r"\b(?:(?:go |take me |bring me |get me )?back to|return to|resume|show me)\s+(?:my |the )?(?:main |current )?(?:step|instructions?|guide)\b"
+        r"(?!\s*(?:\d|number|picture|photo|image|diagram|pic))",
+        normalize(text)))

@@ -67,7 +67,7 @@ def _prefix(mode: str) -> str:
 def task_cue(card: Card, mode: str) -> Cue:
     pre = _prefix(mode)
     if card.steps:
-        line2 = "SWIPE DOWN WHEN DONE"
+        line2 = "ANY TAP: FIRST QUESTION" if card.steps[0].kind == "question" else "SWIPE DOWN WHEN DONE"
     else:
         line2 = "WATCHING NOW" if mode == "fix" else "FOLLOW THE CUES"
     return Cue(line1=pre + short_title(card.title, 24 - len(pre)), line2=line2)

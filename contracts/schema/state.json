@@ -545,6 +545,14 @@
           "title": "Confirmed",
           "type": "array"
         },
+        "observations": {
+          "description": "what the person reported at question steps (HUMAN CONFIRMED, not measured)",
+          "items": {
+            "type": "string"
+          },
+          "title": "Observations",
+          "type": "array"
+        },
         "step_count": {
           "minimum": 1,
           "title": "Step Count",

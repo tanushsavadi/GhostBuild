@@ -1,0 +1,65 @@
+[
+ {
+  "said": ":I have a flat tire on my bicycle. How do I fix it?",
+  "took_s": 3.27,
+  "assistant": "Let's get that fixed. I'll walk you through a guide from our library for fixing a flat bike tire, one step at a time. Before you begin, shift to the smallest rear cog if it's the back wheel, and have tire levers and a spare tube or patch kit nearby.",
+  "decision": "START_GUIDE"
+ },
+ {
+  "said": ":it's completely flat, I'm not sure what kind of tire it is",
+  "took_s": 0.01,
+  "assistant": "Let's get that fixed. I'll walk you through a guide from our library for fixing a flat bike tire, one step at a time. Before you begin, shift to the smallest rear cog if it's the back wheel, and have tire levers and a spare tube or patch kit nearby.",
+  "decision": "START_GUIDE"
+ },
+ {
+  "shot": "bike-01-start",
+  "mode": "visual",
+  "cue": {
+   "line1": "LOOK AT TIRE AND RIM",
+   "line2": "FIND 'TUBELESS READY' TEXT"
+  },
+  "menu": null,
+  "phase": "task",
+  "card": "bike_flat_tire",
+  "step": "check_tubeless_signs",
+  "observations": [
+   "tire type unknown"
+  ]
+ },
+ {
+  "shot": "bike-02-after-tap",
+  "mode": "visual",
+  "cue": {
+   "line1": "LOOK FOR TUBELESS SIGNS:",
+   "line2": "PRESS TO GO BACK"
+  },
+  "menu": null,
+  "phase": "task",
+  "card": "bike_flat_tire",
+  "step": "check_tubeless_signs",
+  "observations": [
+   "tire type unknown"
+  ]
+ },
+ {
+  "said": "show me a picture",
+  "took_s": 0.01,
+  "assistant": "Let's get that fixed. I'll walk you through a guide from our library for fixing a flat bike tire, one step at a time. Before you begin, shift to the smallest rear cog if it's the back wheel, and have tire levers and a spare tube or patch kit nearby.",
+  "decision": "START_GUIDE"
+ },
+ {
+  "shot": "bike-03-picture",
+  "mode": "visual",
+  "cue": {
+   "line1": "LOOK AT TIRE AND RIM",
+   "line2": "FIND 'TUBELESS READY' TEXT"
+  },
+  "menu": null,
+  "phase": "task",
+  "card": "bike_flat_tire",
+  "step": "check_tubeless_signs",
+  "observations": [
+   "tire type unknown"
+  ]
+ }
+]

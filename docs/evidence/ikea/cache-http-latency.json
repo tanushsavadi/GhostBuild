@@ -1,0 +1,19 @@
+{
+  "scope": "Local HTTP POST /session/goal to cached shortlist, including G2 thumbnail composition and persistence; live search disabled. Not physical BLE latency.",
+  "samples": 10,
+  "ms": [
+    14.109124999999999,
+    9.546166,
+    9.254999999999995,
+    8.611249999999998,
+    7.978916999999996,
+    9.498000000000005,
+    8.903999999999996,
+    9.540458000000001,
+    8.752082999999999,
+    8.283292000000017
+  ],
+  "minMs": 7.978916999999996,
+  "medianMs": 9.079499999999996,
+  "maxMs": 14.109124999999999
+}

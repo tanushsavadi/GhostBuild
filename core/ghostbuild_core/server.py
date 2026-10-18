@@ -44,8 +44,16 @@ class AskBody(BaseModel):
 class PhoneAction(BaseModel):
     model_config = ConfigDict(extra="forbid")
     session_id: str = Field(min_length=1, max_length=64)
-    action: str = Field(pattern="^(press|previous|confirm|next_view)$")
+    action: str = Field(pattern="^(press|previous|confirm|next_view|answer_next|answer_previous|choose)$")
     seq_seen: int = Field(ge=0)
+    choice: Optional[str] = Field(default=None, max_length=40, description="for choose: the answer id of the current question step")
+
+
+class StepHelpBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    session_id: str = Field(min_length=1,max_length=64)
+    card_id: str = Field(min_length=1,max_length=120)
+    step_id: str = Field(min_length=1,max_length=120)
 
 
 class SpeakBody(BaseModel):
@@ -112,6 +120,18 @@ def create_app(
     app = FastAPI(title="GhostBuild core", lifespan=lifespan)
     app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
     app.state.runtime = runtime
+    from .discovery.api import mount_discovery
+    mount_discovery(app, runtime)
+
+    @app.get("/cache/status")
+    async def cache_status():
+        return runtime.cache.status()
+
+    @app.post("/assistant/dismiss")
+    async def dismiss_answer(body: StepHelpBody):
+        if not runtime.assistant.dismiss(body.session_id, body.card_id, body.step_id):
+            raise HTTPException(409,"The step changed; refresh before returning.")
+        return _json(runtime.hud.current)
 
     # ------------------------------------------------------------------ Pi -> core
     @app.post("/observation", status_code=204)
@@ -259,14 +279,23 @@ def create_app(
         if body.seq_seen != runtime.hud.current.seq:
             raise HTTPException(409, "display changed; review the current step before acting")
         pb = runtime.playbook
+        if body.action == "choose":
+            if pb is None or not body.choice or not pb.choose(body.choice, via="phone"):
+                raise HTTPException(409, "that answer is not available on the current step")
+            runtime.hud.sync()
+            return _json(runtime.hud.current)
         if body.action == "confirm":
             if pb is None or pb.done or pb.view_idx is not None or pb.step.verify is not None:
                 raise HTTPException(409, "only a visible manual step can be confirmed")
-            if runtime.hud.current.mode != "step":
+            if runtime.hud.current.mode not in ("step", "visual"):
                 raise HTTPException(409, "return to the step before confirming")
             if not pb._step_settled(runtime.clock.now_ms()):
                 raise HTTPException(409, "read the current step before confirming")
             gesture = "swipe_down"
+        elif body.action in ("answer_next", "answer_previous"):
+            if pb is None or pb.answer_data is None:
+                raise HTTPException(409, "No answer page open")
+            gesture = "swipe_down" if body.action == "answer_next" else "swipe_up"
         elif body.action == "next_view":
             if pb is None or pb.view_idx is None:
                 raise HTTPException(409, "open a picture first")
@@ -320,7 +349,7 @@ def create_app(
     async def get_guide(guide_id: str, view: str) -> Response:
         if view.endswith(".phone"):
             return await get_phone_guide(guide_id, view[:-6])
-        for card in runtime.cards:
+        for card in runtime.all_cards():
             for g in card.guides:
                 if g.id != guide_id:
                     continue
@@ -335,7 +364,7 @@ def create_app(
 
     @app.get("/guides/{guide_id}/{view}.phone.png")
     async def get_phone_guide(guide_id: str, view: str) -> Response:
-        for card in runtime.cards:
+        for card in runtime.all_cards():
             for guide in card.guides:
                 if guide.id == guide_id:
                     for item in guide.views:
@@ -349,7 +378,7 @@ def create_app(
 
     @app.get("/guides/{guide_id}/manifest.json")
     async def get_manifest(guide_id: str) -> Response:
-        guide = next((g for c in runtime.cards for g in c.guides if g.id == guide_id), None)
+        guide = next((g for c in runtime.all_cards() for g in c.guides if g.id == guide_id), None)
         if guide is None:
             raise HTTPException(404, "no such guide")
         root = runtime.asset_root.resolve()

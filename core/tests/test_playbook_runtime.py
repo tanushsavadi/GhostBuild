@@ -410,8 +410,10 @@ def test_ask_intents_answer_from_card_text_only(tmp_path):
         assert j["intent"] == "where" and j["answer"] == {"line1": "WHERE 1 IS", "line2": "ON THE LEFT"}
         assert j["text"] == "WHERE 1 IS ON THE LEFT"
         f = cur(rt)
-        assert f.mode == "ask" and f.cue.line1 == "WHERE 1 IS" and f.ttl_ms == 4000
+        assert f.mode == "ask" and f.cue.line1 == "WHERE 1 IS" and f.ttl_ms is None and f.answer is not None
         settle(rt, 4100)
+        assert cur(rt).mode == "ask"  # the answer stays until the wearer returns
+        rt.handle_input(gi("press"))
         assert cur(rt).mode == "step" and cur(rt).step.step_id == "s1"
         j = ask("why do I do this")
         assert j["intent"] == "why" and j["answer"]["line1"] == "WHY 1: SAFETY"
@@ -433,6 +435,9 @@ def test_ask_intents_answer_from_card_text_only(tmp_path):
         assert j["label"] == "DETERMINISTIC" and j["step_id"] == "s1" and j["card_id"] == rt.active_card.card_id
         assert cur(rt).mode == "ask"
         settle(rt, 4100)
+        assert rt.state().playbook.confirmed == ["s0"]  # reading answers never confirmed s1
+        rt.handle_input(gi("press"))  # back to the step, then a deliberate confirm
+        assert cur(rt).mode == "step" and rt.state().playbook.confirmed == ["s0"]
         # a step without that content never invents it
         confirm(rt)  # s2: no troubleshoot entry of its own; the confirmed step s1's check is the only candidate
         j = ask("what if it didn't work")

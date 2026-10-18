@@ -64,7 +64,9 @@
   }
   /** How a step gets completed, shown next to a pending step. */
   function stepRule(step) {
-    return step.verify ? 'completes only on measured evidence' : 'you confirm it (swipe down on the glasses)';
+    if (step.kind === 'question') return 'you answer it (pick on the glasses, tap below, or say it)';
+    if (step.kind === 'stop') return 'stop here safely; the next steps are below';
+    return step.verify ? 'completes only on measured evidence' : step.risk === 'hazard' ? 'you confirm it twice (swipe down, then again)' : 'you confirm it (swipe down on the glasses)';
   }
 
   /** The glasses' small counter, mirrored: 1-based `n/m`, a bullet for a measured step, OK when confirmed. */
@@ -111,6 +113,7 @@
     if (a !== null && a !== undefined && (typeof a !== 'object' || typeof a.line1 !== 'string')) return { ok: false, error: 'core answered /ask with an unexpected answer shape' };
     var result = { ok: true, answer: a ? { line1: a.line1, line2: typeof a.line2 === 'string' ? a.line2 : '' } : null, text: j.text, intent: typeof j.intent === 'string' ? j.intent : 'unknown' };
     if (typeof j.label === 'string') result.label = j.label;
+    ['pending', 'cached', 'card_id', 'step_id'].forEach(function (k) { if (j[k] !== undefined) result[k] = j[k]; });
     return result;
   }
   function askError(status, body) {

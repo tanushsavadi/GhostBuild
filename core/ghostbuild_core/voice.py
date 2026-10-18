@@ -211,7 +211,7 @@ class VoiceService:
         self._reply(intent, text)
 
     def _cards(self):
-        return self.rt.cards
+        return self.rt.all_cards()
 
     def _goal_requests(self, text: str, sid: str) -> list[GoalRequest]:
         first = intent_mod.infer_goal_mode(text)

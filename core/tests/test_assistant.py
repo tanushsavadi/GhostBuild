@@ -102,6 +102,17 @@ def test_router_keeps_commands_and_faq_deterministic_and_sends_real_questions_to
     assert all(route(t, pb, assistant_available=False) == "deterministic" for t in real)  # no brain: exactly today's behaviour
 
 
+def test_parts_selection_and_parts_explanation_are_different_questions(tmp_path):
+    from contracts.models import Part
+    rt = boot(tmp_path)
+    to_step(rt)
+    rt.playbook.step.parts = [Part(id="123456", name="cam lock", qty=8)]
+    assert route("Which fastener do I use?", rt.playbook, assistant_available=True) == "deterministic"
+    for question in ["What does a cam lock engage with?", "What is a cam lock?", "How does a cam lock work?"]:
+        assert route(question, rt.playbook, assistant_available=True) == "assistant"
+    rt.close()
+
+
 # ------------------------------------------------------------------ step conversation
 def test_a_real_question_gets_an_answer_a_cue_and_a_note_on_that_step(tmp_path):
     brain = FakeBrain(step=[step_reply()])
@@ -188,7 +199,7 @@ def test_intake_asks_then_starts_a_ready_guide_and_remembers_the_person(tmp_path
     settle(rt)
     assert rt.hud.current.cue.line1 == "EXPERIENCE WITH THIS?" and rt.session().phase == "menu"  # the question stays on the glasses until answered
     state = rt.assistant.state()
-    assert state["intake"] == {"active": True, "asked": 1, "max": 3} and state["messages"][-1]["quick_replies"] == ["First time", "Done it before"]
+    assert state["intake"] == {"active": True, "asked": 1, "max": None} and state["messages"][-1]["quick_replies"] == ["First time", "Done it before"]
     ask_goal(rt, "first time, I have a Raspberry Pi 4")  # the answer (voice or tapped chip) continues the same conversation
     settle(rt)
     assert rt.session().phase == "task" and rt.playbook.card.card_id == "servo" and rt.hud.current.mode == "intervene"
@@ -197,16 +208,17 @@ def test_intake_asks_then_starts_a_ready_guide_and_remembers_the_person(tmp_path
     assert rt.assistant.intakes[rt.session().id].active is False
 
 
-def test_intake_never_asks_more_than_three_questions(tmp_path):
-    ask = IntakeReply(action="ask", say="One more thing?", cue1="ONE MORE THING?", cue2="")
-    brain = FakeBrain(intake=[ask, ask, ask, ask])  # a chatty model
-    rt = boot(tmp_path, brain)
+def test_intake_repeated_question_stops_without_starting_a_generic_guide(tmp_path):
+    ask = IntakeReply(action="ask", say="Which exact model?", question_key="model", critical_unknowns=["Exact model"])
+    rt = boot(tmp_path, FakeBrain(intake=[ask, ask]))
     ask_goal(rt, "tighten a loose cabinet hinge")
-    for answer in ("a", "b", "c"):
-        settle(rt)
-        ask_goal(rt, answer)
     settle(rt)
-    assert rt.assistant.intakes[rt.session().id].asked == 3 and rt.assistant.intakes[rt.session().id].active is False  # the 4th 'ask' became 'start'
+    ask_goal(rt, "I do not know")
+    settle(rt)
+    assert rt.playbook is None and rt.session().phase == "menu"
+    task = rt.assistant.tasks[rt.session().id]
+    assert task.decisions[-1]["decision"] == "ESCALATE_OR_STOP"
+    assert task.unnecessary_questions == 1
 
 
 def test_intake_can_decline_something_out_of_scope(tmp_path):
@@ -244,5 +256,5 @@ def test_g2_menu_picks_bypass_the_assistant(tmp_path):
 
 def test_intake_prompt_forbids_assuming_and_judging_and_asks_for_experience():
     p = prompts.INTAKE_SYSTEM
-    assert "NEVER assume" in p and "Do NOT judge, approve or correct" in p and "experience" in p and "At most 3 questions" in p
+    assert "MINIMUM SUFFICIENT CONTEXT" in p and "experience" in p and "NO fixed question cap" in p and "critical" in p
     assert "library_id" in prompts.intake_context([card_with_content()], Profile(), 0) and "servo" in prompts.intake_context([card_with_content()], Profile(), 0)

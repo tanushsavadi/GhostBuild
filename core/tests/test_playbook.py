@@ -334,11 +334,14 @@ def test_overlay_returns_to_the_step_exactly_after_its_ttl():
     r.wait(100)
     assert r.cur.mode == "step" and r.cur.step.index == 1
     f = r.pb.ask("where")
-    assert r.cur.mode == "ask" and r.cur.ttl_ms == 4000
-    r.wait(3900)
+    # an answer page has no TTL: it stays until the wearer explicitly returns
+    assert r.cur.mode == "ask" and r.cur.ttl_ms is None and r.cur.answer is not None
+    r.wait(60_000)
     assert r.cur.mode == "ask"
-    r.wait(100)
-    assert r.cur.mode == "step"
+    r.send("swipe_down")  # reading gesture: pages the answer, never confirms the measured step
+    assert r.cur.mode == "ask" and r.pb.index == 1 and r.pb.confirmed == ["s0"]
+    r.send("press")
+    assert r.cur.mode == "step" and r.cur.step.index == 1 and r.pb.confirmed == ["s0"]
 
 
 # ------------------------------------------------------------------ frame source

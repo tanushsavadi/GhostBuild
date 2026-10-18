@@ -1,0 +1,261 @@
+{
+  "scope": "Second live Anthropic web_search request through ProductDiscoveryService; official-page GET and PDF HEAD validation. No CREAO run.",
+  "query": "Help me assemble an IKEA black metal glass-door cabinet",
+  "cached_path": {
+    "samples": 10,
+    "min_ms": 5.321,
+    "median_ms": 5.804,
+    "max_ms": 62.631,
+    "source": "Verified pre-index plus runtime cache from the earlier query; no provider call on cached samples"
+  },
+  "initial_return_ms": 4.181,
+  "live_wall_ms": 11725.47,
+  "state": {
+    "session_id": "s-105a18df",
+    "phase": "choosing",
+    "source": "ikea",
+    "source_label": "IKEA",
+    "query": "black cabinet with drawer with cabinet with glass",
+    "attrs": {
+      "category": "cabinet",
+      "color": "black",
+      "features": {
+        "drawer": true,
+        "cabinet": true,
+        "glass": true
+      },
+      "name_hint": null,
+      "words": [
+        "white",
+        "ikea",
+        "desk",
+        "drawer",
+        "cabinet",
+        "black",
+        "metal",
+        "glass-door"
+      ]
+    },
+    "candidates": [
+      {
+        "record": {
+          "source": "ikea",
+          "article": "00520519",
+          "article_display": "005.205.19",
+          "name": "BL\u00c5LIDEN",
+          "type_name": "glass-door cabinet",
+          "color": "black",
+          "size": "133/4x125/8x591/2\"",
+          "description": "Storage can be just as much about reflecting who you are as organizing all of your things. In this modern version of a classic glass-door cabinet, you can display the things you love the most.",
+          "evidence": [
+            "A BL\u00c5LIDEN black glass-door display cabinet with four glass shelves. It has a modern, sleek design perfect for showcasing items.",
+            "Modern glass-door display cabinet, BL\u00c5LIDEN, fits into corner, collectibles, integrated lighting.",
+            "Illustration with measurements for the product: BL\u00c5LIDEN."
+          ],
+          "manual_evidence": [],
+          "image_url": "https://www.ikea.com/us/en/images/products/blaliden-glass-door-cabinet-black__1186283_pe898753_s5.jpg",
+          "local_image": "knowledge/products/ikea/cache/images/00520519.jpg",
+          "product_url": "https://www.ikea.com/us/en/p/blaliden-glass-door-cabinet-black-00520519/",
+          "manual_url": "https://www.ikea.com/us/en/assembly_instructions/blaliden-glass-door-cabinet-black__AA-2344862-5-100.pdf",
+          "manual_verified": true,
+          "manual_cached": false,
+          "verified_at": 1792320133415,
+          "how": "live_search"
+        },
+        "rank": 1,
+        "score": 10.017,
+        "matched": [
+          "cabinet",
+          "black",
+          "glass"
+        ],
+        "unverified": [
+          "drawer"
+        ],
+        "conflicts": [],
+        "origin": "Live official-site search; page read 2026-10-18"
+      },
+      {
+        "record": {
+          "source": "ikea",
+          "article": "00300664",
+          "article_display": "003.006.64",
+          "name": "BRIMNES",
+          "type_name": "cabinet with doors",
+          "color": "glass/black",
+          "size": "303/4x373/8\"",
+          "description": "A neat cabinet with glass doors that keep your favourite items free from dust. The adjustable glass shelves allow you to customise the storage to your needs. Behind the panel doors you can keep your belongings hidden and free from dust.",
+          "evidence": [
+            "A black BRIMNES storage cabinet with glass doors, featuring adjustable shelves.",
+            "BRIMNES Cabinet with doors, glass/black, 30 3/4x37 3/8 \""
+          ],
+          "manual_evidence": [],
+          "image_url": "https://www.ikea.com/us/en/images/products/brimnes-cabinet-with-doors-glass-black__0621549_pe689983_s5.jpg",
+          "local_image": "knowledge/products/ikea/cache/images/00300664.jpg",
+          "product_url": "https://www.ikea.com/us/en/p/brimnes-cabinet-with-doors-glass-black-00300664/",
+          "manual_url": "https://www.ikea.com/us/en/assembly_instructions/brimnes-cabinet-with-doors-glass-black__AA-1358461-10-2.pdf",
+          "manual_verified": true,
+          "manual_cached": false,
+          "verified_at": 1792320133416,
+          "how": "live_search"
+        },
+        "rank": 2,
+        "score": 10.017,
+        "matched": [
+          "cabinet",
+          "black",
+          "glass"
+        ],
+        "unverified": [
+          "drawer"
+        ],
+        "conflicts": [],
+        "origin": "Live official-site search; page read 2026-10-18"
+      },
+      {
+        "record": {
+          "source": "ikea",
+          "article": "10409871",
+          "article_display": "104.098.71",
+          "name": "BRIMNES",
+          "type_name": "glass-door cabinet",
+          "color": "black",
+          "size": "31 1/2x74 3/4\"",
+          "description": ". Perfect for showing personal things like photos, antique toy cars or miniature tea sets while also protecting them from dust. The BRIMNES series covers most storage needs in one coordinated look.",
+          "evidence": [
+            "A black BRIMNES glass-door cabinet with adjustable shelves, suitable for displaying and protecting items.",
+            "BRIMNES Glass-door cabinet, black, 31 1/2x74 3/4 \""
+          ],
+          "manual_evidence": [],
+          "image_url": "https://www.ikea.com/us/en/images/products/brimnes-glass-door-cabinet-black__0601743_pe681617_s5.jpg",
+          "local_image": "knowledge/products/ikea/cache/images/10409871.jpg",
+          "product_url": "https://www.ikea.com/us/en/p/brimnes-glass-door-cabinet-black-10409871/",
+          "manual_url": "https://www.ikea.com/us/en/assembly_instructions/brimnes-glass-door-cabinet-black__AA-2061084-8-2.pdf",
+          "manual_verified": true,
+          "manual_cached": false,
+          "verified_at": 1792320133416,
+          "how": "live_search"
+        },
+        "rank": 3,
+        "score": 10.017,
+        "matched": [
+          "cabinet",
+          "black",
+          "glass"
+        ],
+        "unverified": [
+          "drawer"
+        ],
+        "conflicts": [],
+        "origin": "Live official-site search; page read 2026-10-18"
+      },
+      {
+        "record": {
+          "source": "ikea",
+          "article": "60616689",
+          "article_display": "606.166.89",
+          "name": "BL\u00c5LIDEN",
+          "type_name": "glass-door cabinet",
+          "color": "black",
+          "size": "35x32x151 cm",
+          "description": "Storage can be just as much about reflecting who you are as organising all of your things. In this modern version of a classic glass-door cabinet, you can display the things you love the most.",
+          "evidence": [
+            "Black BL\u00c5LIDEN glass-door cabinet with three glass shelves, displaying items safely and stylishly.",
+            "BL\u00c5LIDEN glass-door cabinet, modern & tall, corner fit, glass display, lighting.",
+            "Compromise. Black BL\u00c5LIDEN cabinet attaches to wall securely, wire management, and guards glass with sturdy edges.",
+            "Illustration with measurements for the product: BL\u00c5LIDEN."
+          ],
+          "manual_evidence": [],
+          "image_url": "https://www.ikea.com/au/en/images/products/blaliden-glass-door-cabinet-black__1186283_pe898753_s5.jpg",
+          "local_image": "knowledge/products/ikea/cache/images/60616689.jpg",
+          "product_url": "https://www.ikea.com/au/en/p/blaliden-glass-door-cabinet-black-60616689/",
+          "manual_url": "https://www.ikea.com/au/en/assembly_instructions/blaliden-glass-door-cabinet-black__AA-2587944-2-100.pdf",
+          "manual_verified": true,
+          "manual_cached": false,
+          "verified_at": 1792320133417,
+          "how": "live_search"
+        },
+        "rank": 4,
+        "score": 10.016,
+        "matched": [
+          "cabinet",
+          "black",
+          "glass"
+        ],
+        "unverified": [
+          "drawer"
+        ],
+        "conflicts": [],
+        "origin": "Live official-site search; page read 2026-10-18"
+      },
+      {
+        "record": {
+          "source": "ikea",
+          "article": "00529261",
+          "article_display": "005.292.61",
+          "name": "HAVSTA",
+          "type_name": "glass-door cabinet",
+          "color": "black",
+          "size": "317/8x133/4x483/8\"",
+          "description": "Carefully designed details in solid pine with a brushed surface adds a rustic feel and charm to your home. Add a plinth to create a standalone \u2013 or mount this on top of a 18\u00bd\" deep cabinet.",
+          "evidence": [
+            "A black HAVSTA cabinet with glass doors, made of pine, standing on a white plinth.",
+            "Modern living room with black HAVSTA bookcases, sleek furniture, and patterned rug.",
+            "HAVSTA wooden plinth, natural finish, rectangular, fits HAVSTA series.",
+            "Illustration with measurements for the product: HAVSTA."
+          ],
+          "manual_evidence": [],
+          "image_url": "https://www.ikea.com/us/en/images/products/havsta-glass-door-cabinet-black__1294516_pe935489_s5.jpg",
+          "local_image": "knowledge/products/ikea/cache/images/00529261.jpg",
+          "product_url": "https://www.ikea.com/us/en/p/havsta-glass-door-cabinet-black-00529261/",
+          "manual_url": "https://www.ikea.com/us/en/assembly_instructions/havsta-glass-door-cabinet-black__AA-2389452-2-100.pdf",
+          "manual_verified": true,
+          "manual_cached": false,
+          "verified_at": 1792320134465,
+          "how": "live_search"
+        },
+        "rank": 5,
+        "score": 10.016,
+        "matched": [
+          "cabinet",
+          "black",
+          "glass"
+        ],
+        "unverified": [
+          "drawer"
+        ],
+        "conflicts": [],
+        "origin": "Live official-site search; page read 2026-10-18"
+      }
+    ],
+    "page": 0,
+    "focus": null,
+    "question": null,
+    "pending": null,
+    "selected": null,
+    "config_question": null,
+    "config": {},
+    "card_id": null,
+    "notice": "",
+    "search_mode": "live",
+    "live_state": "done",
+    "timings": {
+      "total_ms": 11675,
+      "exact_ms": null,
+      "cache_ms": 3,
+      "search_ms": 9127,
+      "validate_ms": 2529,
+      "provider": "anthropic web_search (claude-opus-5-5, web_search_20250305, allowed_domains=ikea.com)"
+    },
+    "seen": [],
+    "message": "Which one matches yours? Pick a photo, say its number or name, or describe more.",
+    "updated_ms": 11789
+  },
+  "new_articles": [
+    "00520519",
+    "10409871",
+    "00300664",
+    "60616689",
+    "00529261"
+  ]
+}

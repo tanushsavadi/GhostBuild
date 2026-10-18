@@ -1,0 +1,32 @@
+{
+ "catalog": {
+  "median_ms": 2.19,
+  "min_ms": 1.93,
+  "max_ms": 2.54,
+  "n": 10
+ },
+ "state": {
+  "median_ms": 0.98,
+  "min_ms": 0.94,
+  "max_ms": 1.06,
+  "n": 10
+ },
+ "guide_image_g2": {
+  "median_ms": 1.29,
+  "min_ms": 0.9,
+  "max_ms": 2.28,
+  "n": 10
+ },
+ "guide_image_phone": {
+  "median_ms": 1.28,
+  "min_ms": 0.98,
+  "max_ms": 1.46,
+  "n": 10
+ },
+ "deterministic_ask_where": {
+  "median_ms": 1.55,
+  "min_ms": 1.28,
+  "max_ms": 1.78,
+  "n": 10
+ }
+}

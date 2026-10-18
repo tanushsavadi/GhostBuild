@@ -96,19 +96,43 @@
     socket.send(JSON.stringify({type:'end'})); phase = 'thinking'; text('Thinking · tap Cancel to stop.'); refresh();
     replyTimer = setTimeout(function () { abort('reply_timeout'); text('Voice timed out. Please use text or try again.'); },12000);
   }
-  async function speak(s) {
-    if (!$('tts-enabled').checked || !available.tts || phase !== 'idle' || !s) return;
-    stopPlayback(); var gen = speechGeneration; speechFetch = new AbortController();
+  // Full answers are spoken in sentence-sized parts (the backend takes <=500 chars per request), at most 4 parts;
+  // any new input, mute, or a newer answer bumps speechGeneration and stops the rest.
+  function speechParts(s) {
+    var t = String(s || '').replace(/\s+/g,' ').trim(), out = [];
+    while (t && out.length < 4) {
+      if (t.length <= 480) { out.push(t); break; }
+      var cut = t.lastIndexOf('. ',480); if (cut < 160) cut = t.lastIndexOf(' ',480); if (cut < 1) cut = 479;
+      out.push(t.slice(0,cut + 1).trim()); t = t.slice(cut + 1).trim();
+    }
+    return out;
+  }
+  function releasePlayer() {
+    if (player) { player.pause(); player.src = ''; player = null; }
+    if (audioUrl) URL.revokeObjectURL(audioUrl); audioUrl = null;
+  }
+  async function speakPart(part, gen) {
+    speechFetch = new AbortController();
     var timer = setTimeout(function () { if (gen === speechGeneration && speechFetch) speechFetch.abort(); },12000);
     try {
-      var response = await fetch(core + '/voice/speak',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:String(s).slice(0,500),consent:true}),signal:speechFetch.signal});
+      var response = await fetch(core + '/voice/speak',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:part,consent:true}),signal:speechFetch.signal});
       if (!response.ok) throw new Error();
-      var blob = await response.blob(); if (gen !== speechGeneration || !$('tts-enabled').checked) return;
+      var blob = await response.blob(); if (gen !== speechGeneration || !$('tts-enabled').checked) return false;
       audioUrl = URL.createObjectURL(blob); player = new Audio(audioUrl); player.volume = Number($('tts-volume').value);
-      player.onended = function () { if (gen === speechGeneration) stopPlayback(); };
-      await player.play();
-    } catch (_) { if (gen === speechGeneration) text('Spoken reply unavailable or blocked by browser. Read the answer above.'); }
+      var ended = new Promise(function (resolve) { player.onended = resolve; player.onerror = resolve; });
+      await player.play(); await ended;
+      if (gen !== speechGeneration) return false;
+      releasePlayer(); return true;
+    } catch (_) { if (gen === speechGeneration) text('Spoken reply unavailable or blocked by browser. Read the answer above.'); return false; }
     finally { clearTimeout(timer); }
+  }
+  async function speak(s) {
+    if (!$('tts-enabled').checked || !available.tts || phase !== 'idle' || !s) return;
+    stopPlayback(); var gen = speechGeneration, parts = speechParts(s);
+    for (var i = 0; i < parts.length; i++) {
+      if (gen !== speechGeneration || !$('tts-enabled').checked) return;
+      if (!(await speakPart(parts[i], gen))) return;
+    }
   }
   $('ptt').addEventListener('click',function () { if (phase === 'idle') start(); else if (phase === 'listening') finish(); else { abort('user_cancel'); text('Microphone off.'); } });
   $('voice-consent').addEventListener('change',function () { if (!$('voice-consent').checked) { abort('consent_revoked'); text('Microphone off.'); } refresh(); });

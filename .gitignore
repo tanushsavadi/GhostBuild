@@ -67,3 +67,6 @@ knowledge/live/
 
 # Runtime product lookups and downloaded source PDFs
 knowledge/products/ikea/cache/
+
+# Screenshots that embed third-party guide photos stay local (licensing)
+docs/evidence/framework/bike-*.png

@@ -78,6 +78,10 @@ export type Provenance1 =
   | "GITHUB SOURCE"
   | "REPLAY"
   | "SIMULATED";
+/**
+ * who checked this card against its sources, how, and when
+ */
+export type Review = string | null;
 export type File = string | null;
 export type Id2 = string;
 export type Kind =
@@ -103,6 +107,29 @@ export type Sources = Source_[];
  */
 export type StepImage = ("where" | "how" | "correct") | null;
 /**
+ * answers for a question step
+ *
+ * @maxItems 4
+ */
+export type Choices = [] | [Choice] | [Choice, Choice] | [Choice, Choice, Choice] | [Choice, Choice, Choice, Choice];
+export type Id3 = string;
+/**
+ * glasses option text, ALL CAPS
+ */
+export type Label = string;
+/**
+ * step id to continue with
+ */
+export type Next = string;
+/**
+ * the observation this answer records, in plain words
+ */
+export type Records = string;
+/**
+ * lowercase phrases a person might say for this answer
+ */
+export type Say = string[];
+/**
  * page/section, or a timestamp like t=00:12:34 for video
  */
 export type Loc = string;
@@ -121,12 +148,24 @@ export type Cites = Cite[];
  */
 export type Detail = string;
 /**
+ * how the person can tell this step worked, from the source
+ */
+export type Expected = string;
+/**
  * how a confused beginner would ASK it out loud, lowercase, e.g. 'which leg is longer'
  */
 export type Q = string;
 export type Faq = Faq1[];
 export type GuideId = string | null;
-export type Id3 = string;
+export type Id4 = string;
+/**
+ * question = diagnostic choice; outcome = a branch result; stop = stop safely / get professional help
+ */
+export type Kind1 = "action" | "question" | "outcome" | "stop";
+/**
+ * step id after this action (branching guides); default is the following step
+ */
+export type Next1 = string | null;
 /**
  * the source explicitly marks this part as NOT for this step
  */
@@ -134,7 +173,7 @@ export type Avoid = boolean;
 /**
  * the part number as printed, e.g. 101344
  */
-export type Id4 = string;
+export type Id5 = string;
 /**
  * short common name; descriptive, never a brand claim
  */
@@ -152,7 +191,15 @@ export type Qty = number | null;
  */
 export type Parts = Part[];
 export type Requires = string[];
+/**
+ * hazard = deliberate double confirmation before it can be marked done
+ */
+export type Risk = "low" | "caution" | "hazard";
 export type Title3 = string;
+/**
+ * tools/materials this step needs, as the source names them
+ */
+export type Tools = string[];
 export type Cites1 = Cite[];
 export type GuideId1 = string | null;
 export type When = Predicate[];
@@ -168,6 +215,7 @@ export type Warnings = string[];
  * a playbook: ordered steps navigated by the wearer; tests (fault mode) and steps may coexist
  */
 export type Steps = Step[];
+export type TaskKind = ("assembly" | "diagnosis" | "repair" | "configuration" | "identification") | null;
 /**
  * @minItems 1
  */
@@ -179,7 +227,7 @@ export type FailAfterMs = number;
  * @minItems 1
  */
 export type FailWhen = [Predicate, ...Predicate[]];
-export type Id5 = string;
+export type Id6 = string;
 /**
  * gentle PRESS FOR PICTURE offer; once per fault
  */
@@ -240,7 +288,7 @@ export type Voice = "off" | "on";
 export type Count = number;
 export type Grounding = "guide" | "general" | "unsure" | "deterministic";
 export type Index = number;
-export type Label =
+export type Label1 =
   | "MEASURED LIVE"
   | "INFERRED"
   | "COMMANDED"
@@ -379,7 +427,7 @@ export type Engine = "NO_LINK" | "HEALTHY" | "FAULT" | "EXHAUSTED" | "AWAIT_FUNC
  * core epoch ms
  */
 export type At1 = number;
-export type Label1 =
+export type Label2 =
   | "MEASURED LIVE"
   | "INFERRED"
   | "COMMANDED"
@@ -402,6 +450,10 @@ export type CardId3 = string;
  * HUMAN CONFIRMED step ids
  */
 export type Confirmed1 = string[];
+/**
+ * what the person reported at question steps (HUMAN CONFIRMED, not measured)
+ */
+export type Observations = string[];
 export type StepCount = number;
 export type StepId3 = string;
 export type StepIndex = number;
@@ -411,7 +463,7 @@ export type StepIndex = number;
 export type Verified = string[];
 export type CardId4 = string | null;
 export type Goal = ("fix" | "build") | null;
-export type Id6 = string;
+export type Id7 = string;
 export type Phase = "welcome" | "menu" | "task";
 export type WelcomeShown = boolean;
 export type Source4 = ("pi_live" | "replay" | "simulated" | "manual") | null;
@@ -441,9 +493,11 @@ export interface Card {
   goal_mode?: GoalMode;
   guides?: Guides;
   provenance: Provenance1;
+  review?: Review;
   sources: Sources;
   step_image?: StepImage;
   steps?: Steps;
+  task_kind?: TaskKind;
   tests?: Tests;
   title: Title4;
   v?: V;
@@ -520,24 +574,44 @@ export interface Source_ {
  * via the `definition` "Step".
  */
 export interface Step {
+  choices?: Choices;
   cites?: Cites;
   cue: Cue1;
   detail?: Detail;
+  expected?: Expected;
   faq?: Faq;
   guide_id?: GuideId;
-  id: Id3;
+  id: Id4;
   /**
    * authored plain-language action and method for the main step; exact identifiers stay in parts/detail. Legacy cue is the fallback; preserve safety quantities/values.
    */
   instruction?: Cue | null;
+  kind?: Kind1;
+  next?: Next1;
   parts?: Parts;
   requires?: Requires;
+  risk?: Risk;
   title: Title3;
+  tools?: Tools;
   troubleshoot?: Troubleshoot;
   verify?: StepVerify | null;
   warnings?: Warnings;
   where?: Cue | null;
   why?: Cue | null;
+}
+/**
+ * One answer to a diagnostic question step. Choosing it records what the person reported (HUMAN CONFIRMED observation,
+ * never a measurement) and moves to `next`.
+ *
+ * This interface was referenced by `GhostBuildContracts`'s JSON-Schema
+ * via the `definition` "Choice".
+ */
+export interface Choice {
+  id: Id3;
+  label: Label;
+  next: Next;
+  records?: Records;
+  say?: Say;
 }
 /**
  * This interface was referenced by `GhostBuildContracts`'s JSON-Schema
@@ -572,7 +646,7 @@ export interface Faq1 {
  */
 export interface Part {
   avoid?: Avoid;
-  id: Id4;
+  id: Id5;
   name?: Name;
   note?: Note;
   qty?: Qty;
@@ -615,7 +689,7 @@ export interface Test {
   fact: Cue;
   fail_after_ms: FailAfterMs;
   fail_when: FailWhen;
-  id: Id5;
+  id: Id6;
   offer_help_after_ms?: OfferHelpAfterMs;
   ok: Cue;
   pass_after_ms: PassAfterMs;
@@ -738,7 +812,7 @@ export interface AnswerPage {
   count: Count;
   grounding?: Grounding;
   index: Index;
-  label?: Label;
+  label?: Label1;
   text: Text1;
 }
 /**
@@ -853,7 +927,7 @@ export interface State {
 export interface Evidence {
   at: At1;
   evidence?: Evidence1;
-  label: Label1;
+  label: Label2;
   text: Text2;
 }
 export interface Evidence1 {
@@ -866,6 +940,7 @@ export interface Evidence1 {
 export interface PlaybookState {
   card_id: CardId3;
   confirmed?: Confirmed1;
+  observations?: Observations;
   step_count: StepCount;
   step_id: StepId3;
   step_index: StepIndex;
@@ -878,7 +953,7 @@ export interface PlaybookState {
 export interface Session {
   card_id?: CardId4;
   goal?: Goal;
-  id: Id6;
+  id: Id7;
   phase: Phase;
   welcome_shown?: WelcomeShown;
 }

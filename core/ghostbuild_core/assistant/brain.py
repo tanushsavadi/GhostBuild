@@ -12,13 +12,14 @@ from typing import Optional, Protocol, TypeVar
 
 from pydantic import BaseModel
 
-from .schemas import IntakeReply, StepReply
+from .schemas import IntakeReply, IntakeWire, StepReply, StepWire
 
 log = logging.getLogger("ghostbuild.assistant.brain")
 T = TypeVar("T", bound=BaseModel)
 
 DEFAULT_MODEL = "claude-opus-5-5"  # measured: the only model that got electrical-safety answers right; override with GB_BRAIN_MODEL (e.g. claude-haiku-5-5 is ~2x faster, less reliable)
 TIMEOUT_S = 20.0
+MAX_TOKENS = 1600  # the adaptive reply schema (facts with quotes, unknowns, decision) outgrew 900; a cut-off reply is a BrainError
 
 
 class BrainError(Exception):
@@ -51,7 +52,7 @@ class AnthropicBrain:
         return self._client
 
     def _parse(self, system: str, messages: list[dict], model_cls: type[T], fast: bool):
-        kw = dict(model=self.model, max_tokens=900, system=system, messages=messages, output_format=model_cls, output_config={"effort": self.effort})
+        kw = dict(model=self.model, max_tokens=MAX_TOKENS, system=system, messages=messages, output_format=model_cls, output_config={"effort": self.effort})
         if fast:  # Opus fast mode (research preview): same model, ~2.5x output speed (measured 1-2 s vs 5-6 s per turn)
             return self.client.beta.messages.parse(speed="fast", betas=["fast-mode-2026-02-01"], **kw)
         return self.client.messages.parse(**kw)
@@ -73,16 +74,25 @@ class AnthropicBrain:
         self.last_ms = int((time.monotonic() - started) * 1000)
         if getattr(resp, "stop_reason", "") == "refusal":
             raise BrainError("refused")
+        if getattr(resp, "stop_reason", "") == "max_tokens":
+            raise BrainError("truncated")
         out = getattr(resp, "parsed_output", None)
         if out is None:
             raise BrainError("no structured output")
         return out
 
     def intake(self, system: str, messages: list[dict]) -> IntakeReply:
-        return self._call(system, messages, IntakeReply)
+        return self._convert(self._call(system, messages, IntakeWire))
 
     def step(self, system: str, messages: list[dict]) -> StepReply:
-        return self._call(system, messages, StepReply)
+        return self._convert(self._call(system, messages, StepWire))
+
+    @staticmethod
+    def _convert(wire):
+        try:
+            return wire.reply()
+        except ValueError:
+            raise BrainError("bad structured output") from None
 
 
 class FakeBrain:

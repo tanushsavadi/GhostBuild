@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 from contracts.models import G2Input
@@ -11,6 +13,11 @@ from ghostbuild_core.runtime import Runtime
 
 REPO = Path(__file__).resolve().parents[2]
 
+
+
+@pytest.fixture(autouse=True)
+def _hand_authored_catalog(monkeypatch):
+    monkeypatch.setenv("GB_COMPILED_CARDS", "0")  # this file checks the hand-authored catalogue's chooser
 
 def rig(**kw) -> tuple[Runtime, ManualClock]:
     clock = ManualClock()

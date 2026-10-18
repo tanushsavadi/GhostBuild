@@ -15,6 +15,7 @@ from test_research_runs import MockCreao, gi, world, wait_status  # noqa: F401  
 @pytest.fixture
 def live(world, monkeypatch):
     monkeypatch.setenv("GB_LIVE_RESEARCH", "1")
+    monkeypatch.setenv("GB_RESEARCH_ENGINE", "creao")  # these tests drive the CREAO engine through its mock
     rt = world.rt
     rt.hello(G2Hello(client_id="g2-1", session_id=None))
     rt.clock.advance(2600)
@@ -130,8 +131,7 @@ def test_the_same_request_again_needs_no_new_run_in_memory_or_after_a_restart(li
     rt.clock.advance(2600)
     rt.tick()
     res = ask(c, MOCK_A_REQUEST)
-    assert res.cue.line1 == "RESEARCHING"
-    settle_live(c)
+    assert res.cue.line1 == "SAVED GUIDE READY"
     assert len(c.mock.posts) == 1 and rt.session().phase == "task" and rt.live.started == 1
 
 
@@ -203,11 +203,16 @@ def test_a_clarified_request_reaches_research_with_the_persons_context(live):
     from ghostbuild_core.assistant.brain import FakeBrain
     from ghostbuild_core.assistant.schemas import IntakeReply, Profile
 
+    from ghostbuild_core.assistant.adaptive import TaskFact
+
     c, rt = live, live.rt
+    said = "fix my bike tyre, it's a normal inner tube, not tubeless"
     rt.assistant.attach(FakeBrain(intake=[IntakeReply(
         action="start", say="Got it. I will write it for a first-timer.", goal=MOCK_A_REQUEST,
+        context_sufficient=True,  # the person already said which tyre setup it is
+        facts=[TaskFact(field="configuration", value="inner tube, not tubeless", origin="user", quote="normal inner tube, not tubeless")],
         profile=Profile(experience="first_time", facts=["Raspberry Pi 4", "has a breadboard"]))]))
-    res = ask(c, "fix my bike tyre")  # goes through the assistant first
+    res = ask(c, said)  # goes through the assistant first
     assert res.conversing
     end = time.time() + 5
     while time.time() < end and not c.mock.posts:
@@ -215,6 +220,29 @@ def test_a_clarified_request_reaches_research_with_the_persons_context(live):
         time.sleep(0.02)
     sent = c.mock.posts[0]["inputs"]["goal"]
     assert "Who this guide is for" in sent and "first-timer" in sent and "Raspberry Pi 4" in sent and "has a breadboard" in sent
-    assert "fix my bike tyre" in sent  # the person's own words travel too
+    assert said in sent  # the person's own words travel too
+    task = rt.assistant.tasks[rt.session().id]
+    assert any(f.origin == "user" and f.field == "configuration" for f in task.facts)
     settle_live(c)
     assert rt.session().phase == "task"
+
+
+def test_a_critical_unknown_blocks_research_and_asks_instead(live):
+    """The model wants to start, but says the tyre setup is unknown: nothing is sent to research; one question is asked."""
+    from ghostbuild_core.assistant.brain import FakeBrain
+    from ghostbuild_core.assistant.schemas import IntakeReply
+
+    c, rt = live, live.rt
+    rt.assistant.attach(FakeBrain(intake=[IntakeReply(
+        action="start", say="Is it an inner tube or a tubeless tyre?", goal=MOCK_A_REQUEST, context_sufficient=True,
+        critical_unknowns=["inner tube or tubeless"], question_key="tyre setup",
+        cue1="TUBE OR TUBELESS?", quick_replies=["Inner tube", "Tubeless", "Not sure"])]))
+    assert ask(c, "fix my bike tyre").conversing
+    end = time.time() + 1.5
+    while time.time() < end:
+        rt.tick()
+        time.sleep(0.02)
+    assert c.mock.posts == [] and rt.live.active is None
+    task = rt.assistant.tasks[rt.session().id]
+    assert task.decisions[-1]["decision"] == "ASK_QUESTION" and task.pending_question.startswith("Is it an inner tube")
+    assert rt.session().phase == "menu"

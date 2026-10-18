@@ -13,7 +13,7 @@ import logging
 from dataclasses import dataclass, replace
 from typing import Callable, Optional
 
-from contracts.models import Cue, HudFrame, ImageRef, Menu, Source, StepRef
+from contracts.models import AnswerPage, Cue, HudFrame, ImageRef, Menu, Source, StepRef
 
 from .clock import Clock, as_clock
 
@@ -41,6 +41,7 @@ class Screen:
     immediate: bool = False
     stale: bool = False
     source: Optional[Source] = None  # per-screen override; None = the Hud's current source (set from observations). Playbook screens use "manual".
+    answer: Optional[AnswerPage] = None
 
     # ---- constructors -----------------------------------------------------
     @staticmethod
@@ -106,7 +107,8 @@ def _frame_key(f: HudFrame) -> FrameKey:
         menu = (f.menu.prompt, tuple(f.menu.options), f.menu.selected)
     cue = (f.cue.line1, f.cue.line2) if f.cue else None
     st = (f.step.index, f.step.count, f.step.step_id, f.step.check, f.step.confirmed) if f.step else None
-    return (f.mode, cue, img, menu, st, f.source, f.stale)
+    answer = f.answer.model_dump_json() if f.answer else None
+    return (f.mode, cue, img, menu, st, f.source, f.stale, answer)
 
 
 class Hud:
@@ -191,6 +193,7 @@ class Hud:
                 source=s.source or self.source,
                 session_id=self.session_id,
                 stale=s.stale,
+                answer=s.answer,
             )
         except Exception:  # a malformed screen is a bug; never take the HUD down
             log.exception("invalid HUD screen dropped: %r", s)

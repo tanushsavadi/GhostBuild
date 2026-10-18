@@ -22,7 +22,7 @@ CONVERSATIONAL = frozenset(
 )
 
 _NOTES = re.compile(r"\b(what did you (say|tell)|remind me|what was that|say that again|repeat (that|the (tip|note|advice))|your (tip|note|advice) (again|for this))\b")
-_PURE = frozenset(("next", "back", "status", "picture", "repeat"))
+_PURE = frozenset(("next", "back", "status", "picture", "repeat", "goto"))
 
 
 class _Playbook(Protocol):  # the slice of PlaybookEngine the router needs
@@ -42,11 +42,17 @@ def route(text: str, pb: _Playbook, *, assistant_available: bool, has_notes: boo
     if not assistant_available:
         return "deterministic"
     t = intent_mod.normalize(text)
+    if intent_mod.returns_to_step(text):
+        return "deterministic"
     if has_notes and _NOTES.search(t):
         return "notes"
     intent = intent_mod.classify_playbook(text, pb.step.faq)
     if intent in _PURE or intent == "faq":
         return "deterministic"
+    if intent == "parts":  # printed identifiers/quantities answer selection; explanations need an answer
+        if re.search(r"\b(?:what does|how does|how do|why|explain|what is (?:a|an))\b", t):
+            return "assistant"
+        return "deterministic" if pb.step.parts else "assistant"
     if intent == "troubleshoot":
         return "deterministic" if pb.checks_remaining() > 0 else "assistant"
     if not pb.specific_terms(text):  # "where is that", "show me how", "why do I do this"

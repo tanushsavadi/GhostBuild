@@ -125,6 +125,10 @@ describe('playbook step frames', () => {
   })
   it('the fixture frame (index 1 of 3) reads 2/3 with its simulated source tag', () => {
     const v = frameToView(example('hud_step'), O) as { tag: string }
+    expect(v.tag).toBe('2/3  SIMULATED  ASK ANYTIME')
+  })
+  it('the ask hint can be hidden without removing counter or evidence labels', () => {
+    const v = frameToView(example('hud_step'), { ...O, askHint: false }) as {tag: string}
     expect(v.tag).toBe('2/3  SIMULATED')
   })
   it('manual step has no measured marker; measured step gets a bullet; confirmed adds a check (folded to OK)', () => {
@@ -152,8 +156,8 @@ describe('playbook step frames', () => {
     expect(v.kind).toBe('image')
     if (v.kind !== 'image') return
     expect(v.text).toContain('WHERE: CAMERA LENS')
-    expect(v.tag).toBe('3/8  PIC 1/3')
-    expect(v.fallback.tag).toBe('3/8')
+    expect(v.tag).toBe('3/8  PIC 1/3  ASK ANYTIME')
+    expect(v.fallback.tag).toBe('3/8  ASK ANYTIME')
   })
   it('visual frame without a step keeps the plain picture index', () => {
     expect((frameToView(example('hud_visual'), O) as { tag: string }).tag).toBe('1/3')

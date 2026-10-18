@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="dark"><meta name="theme-color" content="#0b1110">
+<link rel="icon" href="data:,">
 <title>GhostBuild — build with confidence</title>
 <script>if (!/\/$|\.html$/.test(location.pathname)) location.replace(location.pathname + '/' + location.search + location.hash);</script>
 <link rel="stylesheet" href="style.css">
@@ -16,7 +17,7 @@
 <section id="banners" aria-live="polite" aria-label="Connection notices"></section>
 <div class="workspace-heading"><div><p class="eyebrow">HANDS BUSY. MIND CLEAR.</p><h1 id="workspace-title">A little guidance.<br>A lot more confidence.</h1><p id="workspace-subtitle">One clear step, the right picture, and help when you need it.</p></div><button id="new-task" class="ghost" type="button" hidden>Change task</button></div>
 <main class="grid">
-<div class="col">
+<div class="col primary-col">
   <section class="card area-goal" aria-labelledby="h-goal">
     <p class="eyebrow">LET’S GET STARTED</p><h2 id="h-goal">What do you need help with?</h2>
     <form id="goal-form" autocomplete="off">
@@ -35,12 +36,13 @@
     </div>
     <div class="ready-guides"><p class="eyebrow">OR PICK A READY GUIDE</p><div id="task-catalog" class="catalog"><p class="meta">Loading reviewed guides…</p></div></div>
   </section>
-  <section id="sec-chat" class="card area-chat" aria-labelledby="h-chat" hidden>
-    <div class="card-head"><h2 id="h-chat">Conversation</h2><span id="chat-typing" class="chat-typing" hidden><i></i><i></i><i></i><span class="sr">Thinking</span></span></div>
-    <div id="chat-log" class="chat-log" aria-live="polite"></div>
-    <div id="chat-chips" class="chat-chips"></div>
-    <form id="chat-form" class="chat-form" autocomplete="off"><label class="sr" for="chat-input">Message</label><input id="chat-input" type="text" maxlength="300" placeholder="Say or type what you need…"><button type="submit">Send</button></form>
+  <section id="sec-discovery" class="card area-discovery" aria-labelledby="h-discovery" hidden>
+    <p class="eyebrow">LET’S FIND YOUR GUIDE</p><h2 id="h-discovery">Which product do you have?</h2>
+    <div id="discovery-content" aria-live="polite"></div><p id="discovery-error" role="alert"></p>
+    <form id="discovery-form" autocomplete="off"><label class="field" for="discovery-input">Describe more, select by name, or enter an article number / link</label><input id="discovery-input" maxlength="300" required><button type="submit">Continue</button></form>
+    <div id="discovery-actions"><button type="button" id="discovery-cancel" class="ghost">Back to my request</button></div>
   </section>
+
   <section class="card area-mirror" aria-labelledby="h-mirror">
     <div class="card-head"><h2 id="h-mirror">In your line of sight</h2><span id="src-badge" class="src src-none">NO SOURCE</span></div>
     <div id="g2" class="g2" role="img" aria-label="Mirror of the current glasses display"><div id="g2-inner" class="g2-inner"></div><div id="g2-tag" class="g2-tag" hidden></div><div id="g2-veil" class="g2-veil" hidden></div></div>
@@ -49,13 +51,21 @@
     <details class="diagnostics"><summary>Display details</summary><div id="g2-meta" class="meta"></div></details>
   </section>
   <section id="sec-playbook" class="card area-playbook" aria-labelledby="h-playbook" hidden>
-    <div class="card-head"><h2 id="h-playbook">Your next move</h2><span id="pb-count" class="pill pill-warn"></span></div>
+    <div class="card-head"><h2 id="h-playbook" tabindex="-1">Your next move</h2><span id="pb-count" class="pill pill-warn"></span></div>
+    <button id="ask-anytime-link" class="step-invitation" type="button">Ask anytime — I’ll keep your place.</button>
     <div id="pb-head"></div><div id="pb-current"></div><details class="all-steps"><summary>See all steps & progress</summary><ol id="pb-steps" class="pb-steps"></ol></details>
   </section>
+
+  <section class="card area-guide" aria-labelledby="h-guide"><p class="eyebrow">THE RIGHT PICTURE, RIGHT HERE</p><h2 id="h-guide">A closer look</h2><div id="guide-note" class="meta"></div><div id="guide" class="guide-list"></div>
+    <details class="source-details"><summary>Grounded in these sources</summary><div id="sources-prov" class="meta"></div><ul id="sources" class="sources"></ul></details>
+  </section>
+</div>
+<div class="col secondary-col" role="complementary" aria-label="Your assistant">
   <section class="card area-ask" aria-labelledby="h-ask">
-    <p class="eyebrow">A SPECIALIST AT YOUR SIDE</p><h2 id="h-ask">Let’s work through it.</h2>
+    <p class="eyebrow">A SPECIALIST AT YOUR SIDE</p><h2 id="h-ask">A question about this step?</h2>
+    <p id="help-context" class="help-context"></p><p id="help-status" class="meta" role="status"></p>
     <div class="quick-questions"><button type="button" data-question="Where is that?">Where is that?</button><button type="button" data-question="Why does this matter?">Why?</button><button type="button" data-question="That didn't work">I’m stuck</button></div>
-    <form id="ask-form" autocomplete="off"><label class="field" for="ask-text">Ask about your current step</label><textarea id="ask-text" rows="2" maxlength="200" placeholder="Can you explain this more simply?" required></textarea><button id="ask-send" type="submit">Ask GhostBuild</button><div id="ask-hint" class="meta"></div></form><div id="ask-result" aria-live="polite"></div>
+    <form id="ask-form" autocomplete="off"><label class="field" for="ask-text">Ask about your current step</label><textarea id="ask-text" rows="2" maxlength="200" placeholder="Can you explain this more simply?" required></textarea><button id="ask-send" type="submit">Ask GhostBuild</button><div id="ask-hint" class="meta"></div></form><div id="ask-result" aria-live="polite"></div><button id="help-return" type="button" class="ghost" hidden>Back to my step</button>
     <details class="audio-settings"><summary>Voice & spoken replies <span id="audio-badge">Off</span></summary>
       <p id="voice-notice" class="meta">Optional audio is processed by ElevenLabs. GhostBuild does not retain recordings. Touch and text always work.</p>
       <label class="checkline"><input id="voice-consent" type="checkbox"> I agree to send microphone audio to ElevenLabs</label>
@@ -65,11 +75,13 @@
       <button id="audio-stop" class="ghost" type="button">Mute & stop audio</button><p id="voice-status" class="meta" role="status">Checking optional audio…</p>
     </details>
   </section>
-</div>
-<div class="col secondary-col">
-  <section class="card area-guide" aria-labelledby="h-guide"><p class="eyebrow">THE RIGHT PICTURE, RIGHT HERE</p><h2 id="h-guide">A closer look</h2><div id="guide-note" class="meta"></div><div id="guide" class="guide-list"></div>
-    <details class="source-details"><summary>Grounded in these sources</summary><div id="sources-prov" class="meta"></div><ul id="sources" class="sources"></ul></details>
+  <section id="sec-chat" class="card area-chat" aria-labelledby="h-chat" hidden>
+    <div class="card-head"><h2 id="h-chat">Conversation</h2><span id="chat-typing" class="chat-typing" hidden><i></i><i></i><i></i><span class="sr">Thinking</span></span></div>
+    <div id="chat-log" class="chat-log" aria-live="polite"></div>
+    <div id="chat-chips" class="chat-chips"></div>
+    <form id="chat-form" class="chat-form" autocomplete="off"><label class="sr" for="chat-input">Message</label><input id="chat-input" type="text" maxlength="300" placeholder="Say or type what you need…"><button type="submit">Send</button></form>
   </section>
+
   <details class="card area-research" aria-labelledby="h-research">
     <summary id="h-research">Research a new task</summary>
     <p class="meta lead">For something GhostBuild has no playbook for. The request is only saved for later; nothing becomes available now, and a human reviews any result before it can reach the glasses.</p>
@@ -119,5 +131,5 @@
   <details class="card area-time" aria-labelledby="h-time"><summary id="h-time">Progress & evidence</summary><ol id="timeline" class="timeline"></ol></details>
 </div></main>
 <footer class="foot">Quiet intelligence, revealed when you need it.<span>G2 has no camera or speaker. Manual progress is confirmed by you.</span></footer>
-<script src="logic.js"></script><script src="app.js"></script><script src="audio-utils.js"></script><script src="audio.js"></script><script src="assistant.js"></script>
+<script src="logic.js"></script><script src="app.js"></script><script src="audio-utils.js"></script><script src="audio.js"></script><script src="step-help.js"></script><script src="assistant.js"></script><script src="discovery.js"></script>
 </body></html>

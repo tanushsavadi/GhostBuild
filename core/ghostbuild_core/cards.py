@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import logging
 from pathlib import Path
 
@@ -17,7 +18,9 @@ def load_cards(directory: Path | str) -> list[Card]:
     if not d.is_dir():
         log.warning("cards directory %s does not exist", d)
         return cards
-    for p in sorted(d.glob("*.json")):
+    # Compiled guides (knowledge/compiled/<id>/card.json, a sibling of the cards directory) use the same contract.
+    compiled = sorted((d.parent / "compiled").glob("*/card.json")) if os.getenv("GB_COMPILED_CARDS", "1") != "0" else []
+    for p in sorted(d.glob("*.json")) + compiled:
         try:
             raw = json.loads(p.read_text())
         except Exception as exc:

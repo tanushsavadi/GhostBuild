@@ -1,0 +1,73 @@
+[
+ {
+  "said": ":it's completely flat, I'm not sure what kind of tire it is",
+  "took_s": 4.87,
+  "assistant": "Thanks, a completely flat tire fits my tested inner tube guide, so let's start it. You don't need to know the tire type yet. Most bikes use an inner tube, and it becomes obvious once the tire is open. If you find no tube inside, or see liquid sealant, tell me and we'll stop and change course.",
+  "decision": "START_GUIDE"
+ },
+ {
+  "shot": "bike-01-start",
+  "mode": "intervene",
+  "cue": {
+   "line1": "FIX: FIX A FLAT",
+   "line2": "ANY TAP: FIRST QUESTION"
+  },
+  "menu": null,
+  "phase": "task",
+  "card": "bike_flat_tire",
+  "step": "stop_unsure",
+  "observations": [
+   "Person does not know the tire type"
+  ]
+ },
+ {
+  "shot": "bike-02-question",
+  "mode": "step",
+  "cue": {
+   "line1": "CHECK TIRE TYPE FIRST",
+   "line2": "ASK SHOP OR BIKE MAKER"
+  },
+  "menu": null,
+  "phase": "task",
+  "card": "bike_flat_tire",
+  "step": "stop_unsure",
+  "observations": [
+   "Person does not know the tire type"
+  ]
+ },
+ {
+  "shot": "bike-03-not-sure",
+  "mode": "intervene",
+  "cue": {
+   "line1": "WHAT DO YOU NEED?",
+   "line2": "TYPE ON YOUR PHONE"
+  },
+  "menu": null,
+  "phase": "menu",
+  "card": "bike_flat_tire",
+  "step": null,
+  "observations": null
+ },
+ {
+  "shot": "bike-04-identify-picture",
+  "mode": "menu",
+  "cue": {
+   "line1": "PICK A TASK",
+   "line2": "SWIPE \u00b7 PRESS"
+  },
+  "menu": {
+   "prompt": "PICK A TASK",
+   "options": [
+    "FIX A FLAT BICYCLE TIRE",
+    "FOLD A PAPER CUP",
+    "LIGHT AN LED",
+    "MORE ON PHONE"
+   ],
+   "selected": 0
+  },
+  "phase": "menu",
+  "card": "bike_flat_tire",
+  "step": null,
+  "observations": null
+ }
+]

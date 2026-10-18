@@ -38,6 +38,8 @@ def main(argv: list[str] | None = None) -> int:
     from .server import create_app
 
     rt = Runtime(cards, log_dir=args.log_dir, asset_root=Path(args.root), simulate=args.simulate, require_device_link=True)
+    from integrations.product_discovery import attach_discovery
+    attach_discovery(rt)
     from .voice import VoiceService, voice_enabled_from_env
 
     if args.voice or voice_enabled_from_env():

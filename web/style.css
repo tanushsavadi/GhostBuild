@@ -275,3 +275,45 @@ body.has-task:not(.goal-open) .area-goal{display:none}body:not(.has-task) .area-
 .step-notes h4{margin:0 0 6px;font:600 12px ui-monospace,Menlo,monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--g2)}
 .step-notes .note+.note{margin-top:8px;padding-top:8px;border-top:1px solid var(--line)}.step-notes .nt{font-weight:600}
 @media (prefers-reduced-motion:reduce){.chat-typing i{animation:none}}
+
+/* Product matches share the companion's existing cards and typography. */
+.product-grid,.config-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:16px 0}
+.product-card{border:1px solid var(--line,#ddd);border-radius:14px;padding:14px;min-width:0;background:var(--paper,#fff)}
+.product-photo{width:100%;height:180px;object-fit:contain;background:#fff;border-radius:8px}
+.product-card h3{margin:12px 0 6px}.product-card p{margin:7px 0}.product-card button{width:100%;margin:12px 0}.product-card a{display:block;font-size:12px}
+.product-chip{display:inline-block;font-size:11px;padding:4px 7px;background:#e5eee5;color:#244e2a;border-radius:8px;margin:2px}.product-chip.unknown{background:#eee9df;color:#655f53}
+.config-grid button{padding:12px}.config-photo{width:100%;display:block;background:#fff;margin-bottom:10px}.area-discovery input{width:100%;margin:8px 0 12px}.area-discovery form{margin:16px 0}.area-discovery[hidden]{display:none}
+@media(max-width:520px){.product-grid{grid-template-columns:1fr}.config-grid{gap:8px}.product-photo{height:210px}}
+
+/* Keep instructions and source art steady while the adjacent conversation grows. */
+[hidden]{display:none!important}
+.step-invitation{display:inline-block;width:auto;margin:0 0 16px;padding:0;border:0;background:transparent;color:var(--dim);font:inherit;font-size:14px;text-align:left;text-decoration:underline;text-underline-offset:4px;cursor:pointer}
+.step-invitation:hover,.step-invitation:focus-visible{color:var(--accent)}
+.help-context{margin:10px 0 6px;font-weight:600;font-size:15px;color:var(--text)}
+#help-status.thinking{color:var(--accent)}
+#help-status.thinking::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;background:currentColor;animation:live-pulse 1s ease-in-out infinite}
+#help-return{margin-top:12px}.area-chat .chat-log{max-height:360px}.area-guide .gv img{max-height:540px;object-fit:contain;width:100%;background:#fff}
+@media(min-width:900px){
+ .grid{grid-template-columns:minmax(0,1.35fr) minmax(320px,.9fr)}
+ .primary-col>.area-goal,.primary-col>.area-discovery{order:0}
+ .primary-col>.area-playbook{order:1}.primary-col>.area-guide{order:2}.primary-col>.area-mirror{order:3}
+ .secondary-col>.area-ask{order:0}.secondary-col>.area-chat{order:1}.secondary-col>.area-research{order:2}.secondary-col>.area-task{order:3}.secondary-col>.area-time{order:4}
+ body.has-task .secondary-col{position:sticky;top:100px;max-height:calc(100vh - 115px);overflow-y:auto;scrollbar-width:thin;padding-bottom:6px}
+}
+@media(max-width:899px){
+ .area-goal,.area-discovery{order:0}.area-playbook{order:1}.area-guide{order:2}.area-ask{order:3}.area-chat{order:4}.area-mirror{order:5}.area-research{order:6}.area-task{order:7}.area-time{order:8}
+ body:not(.has-task) .area-chat{order:1}.secondary-col{position:static}
+}
+@media(prefers-reduced-motion:reduce){#help-status.thinking::before{animation:none}}
+
+/* Once selected, the current step takes the first position in the workspace. */
+body.has-task .primary-col>.area-discovery.discovery-ready{order:4}
+@media(max-width:899px){body.has-task .area-discovery.discovery-ready{order:9}}
+
+/* Same five 38-character lines the glasses show, sized to the mirror so it never runs into the footer at phone width. */
+.g2-answer{white-space:pre-line;font-size:3.5cqw;line-height:1.3;text-align:left;overflow-wrap:anywhere;margin-bottom:6cqw}
+
+/* Branching guides: answers to a diagnostic question, and the expected result of a step. */
+.choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0 6px}.choice-grid button{padding:12px;font-weight:600}
+.expected{margin:10px 0;padding:10px 12px;border-left:3px solid var(--accent);background:color-mix(in srgb,var(--accent) 8%,transparent);border-radius:6px}
+@media(max-width:520px){.choice-grid{grid-template-columns:1fr}}

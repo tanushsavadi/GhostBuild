@@ -1,0 +1,516 @@
+{
+  "v": 2,
+  "card_id": "prusa_mk4_not_extruding",
+  "title": "Prusa MK4 not extruding",
+  "provenance": "MANUFACTURER DOC",
+  "sources": [
+    {
+      "id": "src0",
+      "kind": "MANUFACTURER DOC",
+      "title": "Clogged nozzle (CORE One, CORE One L, XL, MK4/S, MK3.9/S) | Prusa Knowledge BasePrusaPrusaPrusa",
+      "url": "https://help.prusa3d.com/article/clogged-nozzle-core-one-core-one-l-xl-mk4-s-mk3-9-s_411823"
+    },
+    {
+      "id": "src2",
+      "kind": "MANUFACTURER DOC",
+      "title": "Cold pull #26702 (MK4S) #13702 (MK4) #28702 (MK3.9S) #21702… | Prusa Knowledge BasePrusaPrusaPrusa",
+      "url": "https://help.prusa3d.com/article/cold-pull-26702-mk4s-13702-mk4-28702-mk3-9s-21702-mk3-9-23702-mk3-5-28702-mk3-5s-17702-xl_445071"
+    }
+  ],
+  "steps": [
+    {
+      "id": "symptom",
+      "title": "What do you notice?",
+      "cue": {
+        "line1": "LISTEN AND LOOK",
+        "line2": "CLICKING, GAPS OR NOTHING?"
+      },
+      "detail": "Check if there are clicking noises from the extruder. A loud clicking noise most likely suggests the nozzle is clogged or deformed. A light clicking noise can most likely point to the gearing. Visible gaps, missing layers, or filament curling up and sticking to the nozzle point to a partial clog.",
+      "warnings": [],
+      "kind": "question",
+      "next": null,
+      "expected": "",
+      "tools": [],
+      "risk": "low",
+      "guide_id": null,
+      "choices": [
+        {
+          "id": "c_loud",
+          "label": "LOUD CLICKING",
+          "say": [
+            "loud clicking",
+            "it clicks loudly",
+            "extruder is skipping"
+          ],
+          "next": "unload_first",
+          "records": "Loud clicking from the extruder"
+        },
+        {
+          "id": "c_light",
+          "label": "LIGHT CLICKING",
+          "say": [
+            "light clicking",
+            "quiet clicking",
+            "soft ticking"
+          ],
+          "next": "clean_gears",
+          "records": "Light clicking from the extruder"
+        },
+        {
+          "id": "c_partial",
+          "label": "GAPS OR CURLING",
+          "say": [
+            "gaps in the print",
+            "missing layers",
+            "filament curls up",
+            "some filament comes out"
+          ],
+          "next": "cold_pull",
+          "records": "Partial extrusion with gaps or curling"
+        },
+        {
+          "id": "c_nothing",
+          "label": "NOTHING COMES OUT",
+          "say": [
+            "nothing comes out",
+            "no filament at all",
+            "no sound nothing"
+          ],
+          "next": "visual_check",
+          "records": "No filament coming out, no clear clicking"
+        }
+      ],
+      "cites": [
+        {
+          "source": "src0",
+          "loc": "quoted passage",
+          "quote": "Check if there are clicking noises from the extruder",
+          "url": "https://help.prusa3d.com/article/clogged-nozzle-core-one-core-one-l-xl-mk4-s-mk3-9-s_411823"
+        }
+      ]
+    },
+    {
+      "id": "visual_check",
+      "title": "Visual check",
+      "cue": {
+        "line1": "WATCH FILAMENT LOAD",
+        "line2": "PAST GEAR? OUT OF NOZZLE?"
+      },
+      "detail": "Is the filament reaching the nozzle? Check if the filament goes past the Nextruder gear. Is the filament coming out of the nozzle? Pay attention when loading the filament.",
+      "warnings": [],
+      "kind": "action",
+      "next": null,
+      "expected": "",
+      "tools": [],
+      "risk": "low",
+      "guide_id": null,
+      "choices": [],
+      "cites": [
+        {
+          "source": "src0",
+          "loc": "quoted passage",
+          "quote": "Check if the filament goes past the Nextruder gear.",
+          "url": "https://help.prusa3d.com/article/clogged-nozzle-core-one-core-one-l-xl-mk4-s-mk3-9-s_411823"
+        }
+      ]
+    },
+    {
+      "id": "unload_first",
+      "title": "Unload and raise extruder",
+      "cue": {
+        "line1": "UNLOAD THE FILAMENT",
+        "line2": "THEN MOVE EXTRUDER UP"
+      },
+      "detail": "Before you start fixing the printer, try unloading the filament and removing it completely. If you are unable to do it, it might indicate a more serious problem. Also, move the extruder upwards from LCD Menu -> Settings -> Move Axis -> Z-axis or by long-pressing the LCD rotative controller for better access to the clogged parts.",
+      "warnings": [],
+      "kind": "action",
+      "next": null,
+      "expected": "",
+      "tools": [],
+      "risk": "low",
+      "guide_id": null,
+      "choices": [],
+      "cites": [
+        {
+          "source": "src0",
+          "loc": "quoted passage",
+          "quote": "Before you start fixing the printer, try unloading the filament and removing it completely.",
+          "url": "https://help.prusa3d.com/article/clogged-nozzle-core-one-core-one-l-xl-mk4-s-mk3-9-s_411823"
+        }
+      ]
+    },
+    {
+      "id": "q_broke",
+      "title": "Filament stuck in tube?",
+      "cue": {
+        "line1": "DID FILAMENT BREAK OFF?",
+        "line2": "LOOK AT TOP OF NOZZLE TUBE"
+      },
+      "detail": "If the filament broke off, observe the area next to the gearbox and top of the nozzle tube, to assess whether there is filament sticking out of the tube. If it is there, consider skipping to the Pull out filament with pliers technique.",
+      "warnings": [],
+      "kind": "question",
+      "next": null,
+      "expected": "",
+      "tools": [],
+      "risk": "low",
+      "guide_id": null,
+      "choices": [
+        {
+          "id": "c_visible",
+          "label": "FILAMENT STICKING OUT",
+          "say": [
+            "i can see filament",
+            "filament sticking out",
+            "it broke off inside"
+          ],
+          "next": "pliers",
+          "records": "Broken filament visible at top of nozzle tube"
+        },
+        {
+          "id": "c_not_visible",
+          "label": "NO FILAMENT VISIBLE",
+          "say": [
+            "nothing visible",
+            "it unloaded fine",
+            "no filament in tube"
+          ],
+          "next": "push_filament",
+          "records": "No filament sticking out of the nozzle tube"
+        }
+      ],
+      "cites": [
+        {
+          "source": "src0",
+          "loc": "quoted passage",
+          "quote": "observe the area next to the gearbox and top of the nozzle tube",
+          "url": "https://help.prusa3d.com/article/clogged-nozzle-core-one-core-one-l-xl-mk4-s-mk3-9-s_411823"
+        }
+      ]
+    },
+    {
+      "id": "pliers",
+      "title": "Pull out with pliers",
+      "cue": {
+        "line1": "HEAT NOZZLE TO 280 °C",
+        "line2": "PULL FILAMENT UP W/ PLIERS"
+      },
+      "detail": "Heat the nozzle only using the printer's menu. While the hotend is heated to 280 °C, firmly grab the filament with needle-nose pliers. Slowly drag/feed the filament upwards, bit by bit, through the top of the extruder body, until it is completely removed from the nozzle tube. If successful, a cold pull afterwards is recommended.",
+      "warnings": [
+        "Hotend is at 280 °C - do not touch hot parts.",
+        "Heat the nozzle only using the printer's menu, not an external heating source, as this can cause damage."
+      ],
+      "kind": "action",
+      "next": "cold_pull",
+      "expected": "The filament is completely removed from the nozzle tube.",
+      "tools": [
+        "needle-nose pliers"
+      ],
+      "risk": "hazard",
+      "guide_id": null,
+      "choices": [],
+      "cites": [
+        {
+          "source": "src0",
+          "loc": "quoted passage",
+          "quote": "Slowly drag/feed the filament upwards, bit by bit, through the top of the extruder body",
+          "url": "https://help.prusa3d.com/article/clogged-nozzle-core-one-core-one-l-xl-mk4-s-mk3-9-s_411823"
+        }
+      ]
+    },
+    {
+      "id": "push_filament",
+      "title": "Push new filament through",
+      "cue": {
+        "line1": "HEAT NOZZLE, WAIT 2 MIN",
+        "line2": "PUSH IN 40 CM OF PLA"
+      },
+      "detail": "Access the top of the Nextruder, removing any fittings. Prepare about 40 cm of PLA. Go to LCD Menu -> Control -> Temperature -> Nozzle and set 260 °C if you used PLA, or 280 °C for higher-temperature materials such as PETG or ASA. After it reaches temperature, wait 2 minutes, checking whether filament starts flowing or dripping out. Push new filament into the Nextruder.",
+      "warnings": [
+        "Nozzle is at 260-280 °C - do not touch it.",
+        "Heat the nozzle only using the printer's menu, not an external heating source, as this can cause damage."
+      ],
+      "kind": "action",
+      "next": null,
+      "expected": "Filament starts flowing out of the nozzle.",
+      "tools": [
+        "about 40 cm of PLA filament"
+      ],
+      "risk": "hazard",
+      "guide_id": null,
+      "choices": [],
+      "cites": [
+        {
+          "source": "src0",
+          "loc": "quoted passage",
+          "quote": "Set the nozzle temperature to 260 °C if you have been using PLA or to 280 °C if you have been using higher-temperature materials",
+          "url": "https://help.prusa3d.com/article/clogged-nozzle-core-one-core-one-l-xl-mk4-s-mk3-9-s_411823"
+        }
+      ]
+    },
+    {
+      "id": "q_flow",
+      "title": "Does filament flow?",
+      "cue": {
+        "line1": "IS FILAMENT FLOWING",
+        "line2": "OUT OF THE NOZZLE NOW?"
+      },
+      "detail": "If filament flows after these steps, the clog might have been cleared. Attempt some filament loading or test prints to confirm this.",
+      "warnings": [],
+      "kind": "question",
+      "next": null,
+      "expected": "",
+      "tools": [],
+      "risk": "low",
+      "guide_id": null,
+      "choices": [
+        {
+          "id": "c_flows",
+          "label": "YES, IT FLOWS",
+          "say": [
+            "yes it flows",
+            "filament is coming out",
+            "it's dripping"
+          ],
+          "next": "cold_pull",
+          "records": "Flow reestablished after pushing filament"
+        },
+        {
+          "id": "c_no_flow",
+          "label": "NO FLOW",
+          "say": [
+            "no",
+            "still nothing",
+            "still blocked"
+          ],
+          "next": "nozzle_replace",
+          "records": "Flow not reestablished after pushing filament"
+        }
+      ],
+      "cites": [
+        {
+          "source": "src0",
+          "loc": "quoted passage",
+          "quote": "If filament flows after steps 5 and 6, the clog might have been cleared.",
+          "url": "https://help.prusa3d.com/article/clogged-nozzle-core-one-core-one-l-xl-mk4-s-mk3-9-s_411823"
+        }
+      ]
+    },
+    {
+      "id": "nozzle_replace",
+      "title": "Nozzle may need replacing",
+      "cue": {
+        "line1": "STOP HERE",
+        "line2": "NOZZLE LIKELY NEEDS SWAP"
+      },
+      "detail": "If filament flow is not reestablished with these steps, most likely the nozzle needs to be replaced, with the blockage being further up from the nozzle tip. Prusa still recommends attempting the automatic cold pull, though it is unlikely to work in this case. Let the printer cool before handling the nozzle.",
+      "warnings": [
+        "Let the hotend cool down before touching it."
+      ],
+      "kind": "stop",
+      "next": null,
+      "expected": "",
+      "tools": [],
+      "risk": "caution",
+      "guide_id": null,
+      "choices": [],
+      "cites": [
+        {
+          "source": "src0",
+          "loc": "quoted passage",
+          "quote": "most likely the nozzle needs to be replaced, with the blockage being further up from the nozzle tip",
+          "url": "https://help.prusa3d.com/article/clogged-nozzle-core-one-core-one-l-xl-mk4-s-mk3-9-s_411823"
+        }
+      ]
+    },
+    {
+      "id": "cold_pull",
+      "title": "Automatic cold pull",
+      "cue": {
+        "line1": "RUN COLD PULL FROM MENU",
+        "line2": "CONTROL > COLD PULL, PLA"
+      },
+      "detail": "Have at least 30 cm of PLA. Navigate to LCD Menu -> Control -> Cold Pull (automatic from firmware 6.0.0 on MK4/S). Choose to unload the current filament (recommended if not PLA), Load PLA filament, or continue with loaded filament (only if PLA). The printer cools to 36 °C, heats to 80 °C and unloads automatically. Finish by pulling the filament upwards by hand; if stuck, open the idler lever. Repeat until the tip comes out clean.",
+      "warnings": [
+        "The nozzle heats during this procedure - do not touch it.",
+        "Pull straight upwards, not sideways, or the filament can break inside."
+      ],
+      "kind": "action",
+      "next": null,
+      "expected": "A clean tip shows the imprint of the nozzle and no mixed colour or dark marks.",
+      "tools": [
+        "at least 30 cm of PLA filament"
+      ],
+      "risk": "hazard",
+      "guide_id": "prusa_mk4_not_extruding_cold_pull",
+      "choices": [],
+      "cites": [
+        {
+          "source": "src2",
+          "loc": "quoted passage",
+          "quote": "Then, navigate to LCD Menu -> Control -> Cold Pull.",
+          "url": "https://help.prusa3d.com/article/cold-pull-26702-mk4s-13702-mk4-28702-mk3-9s-21702-mk3-9-23702-mk3-5-28702-mk3-5s-17702-xl_445071"
+        }
+      ]
+    },
+    {
+      "id": "done",
+      "title": "Confirm with a test print",
+      "cue": {
+        "line1": "LOAD FILAMENT AND",
+        "line2": "RUN A TEST PRINT"
+      },
+      "detail": "The clog might have been cleared. Attempt some filament loading or test prints to confirm this. You might want to repeat the cold pull several times until the filament comes out clean.",
+      "warnings": [],
+      "kind": "outcome",
+      "next": null,
+      "expected": "Filament extrudes consistently.",
+      "tools": [],
+      "risk": "low",
+      "guide_id": null,
+      "choices": [],
+      "cites": [
+        {
+          "source": "src0",
+          "loc": "quoted passage",
+          "quote": "Attempt some filament loading or test prints to confirm this.",
+          "url": "https://help.prusa3d.com/article/clogged-nozzle-core-one-core-one-l-xl-mk4-s-mk3-9-s_411823"
+        }
+      ]
+    },
+    {
+      "id": "clean_gears",
+      "title": "Clean the feeding gear",
+      "cue": {
+        "line1": "OPEN IDLER, CLEAN GEAR",
+        "line2": "AIR, BRASS BRUSH OR PICK"
+      },
+      "detail": "Filament debris can form in the grooves of the feeding gear, causing insufficient extrusion. Access the extruder by lifting the Idler Nut, then moving the Idle Shaft. Blow away the dirt with compressed air, or use a brass brush or an ordinary toothpick. Use the access hole on the side of the extruder. If the idler tension screws were touched, their tips must be aligned with the front surface of the Idler Nut.",
+      "warnings": [],
+      "kind": "action",
+      "next": null,
+      "expected": "",
+      "tools": [
+        "compressed air",
+        "brass brush",
+        "toothpick"
+      ],
+      "risk": "caution",
+      "guide_id": null,
+      "choices": [],
+      "cites": [
+        {
+          "source": "src0",
+          "loc": "quoted passage",
+          "quote": "You can blow away the dirt with compressed air, or use a brass brush or an ordinary toothpick.",
+          "url": "https://help.prusa3d.com/article/clogged-nozzle-core-one-core-one-l-xl-mk4-s-mk3-9-s_411823"
+        }
+      ]
+    },
+    {
+      "id": "motor_check",
+      "title": "Check the Nextruder motor",
+      "cue": {
+        "line1": "PRINTER COLD AND OFF",
+        "line2": "TURN MOTOR SHAFT BY HAND"
+      },
+      "detail": "This involves taking the gearbox apart. Ensure the printer is cold and switched off, and that you have the PG-assembly-adapter. Remove the PG-case together with the PG-ring, gearbox, and main plate in one piece. Manually rotate the Nextruder motor shaft with your fingers. When reassembling, reassemble the block, then perform the gearbox alignment.",
+      "warnings": [
+        "Ensure the printer is cold and switched off first."
+      ],
+      "kind": "action",
+      "next": null,
+      "expected": "The shaft rotates relatively smoothly, with a slight but uniform resistance.",
+      "tools": [
+        "PG-assembly-adapter"
+      ],
+      "risk": "caution",
+      "guide_id": null,
+      "choices": [],
+      "cites": [
+        {
+          "source": "src0",
+          "loc": "quoted passage",
+          "quote": "Ensure the printer is cold and switched off, and that you have the PG-assembly-adapter before continuing with the following procedure.",
+          "url": "https://help.prusa3d.com/article/clogged-nozzle-core-one-core-one-l-xl-mk4-s-mk3-9-s_411823"
+        }
+      ]
+    },
+    {
+      "id": "motor_result",
+      "title": "Motor resistance result",
+      "cue": {
+        "line1": "HARSH OR GRINDING FEEL?",
+        "line2": "GEARBOX OR MOTOR ISSUE"
+      },
+      "detail": "If you feel harsh resistance, catching, or a grinding sensation, there may be debris stuck deep within the gearbox teeth, a worn-out gear, or a mechanical fault within the motor. After reassembly, perform the gearbox alignment from the dedicated article.",
+      "warnings": [],
+      "kind": "outcome",
+      "next": null,
+      "expected": "",
+      "tools": [],
+      "risk": "low",
+      "guide_id": null,
+      "choices": [],
+      "cites": [
+        {
+          "source": "src0",
+          "loc": "quoted passage",
+          "quote": "there may be debris stuck deep within the gearbox teeth, a worn-out gear, or a mechanical fault within the motor",
+          "url": "https://help.prusa3d.com/article/clogged-nozzle-core-one-core-one-l-xl-mk4-s-mk3-9-s_411823"
+        }
+      ]
+    }
+  ],
+  "guides": [
+    {
+      "id": "prusa_mk4_not_extruding_cold_pull",
+      "title": "Automatic cold pull",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "prusa_mk4_not_extruding_cold_pull.where",
+          "title": "AUTOMATIC COLD PULL",
+          "image": "knowledge/live/compiled/guides/prusa_mk4_not_extruding_cold_pull/where.png",
+          "phone_image": "knowledge/live/compiled/guides/prusa_mk4_not_extruding_cold_pull/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Printer screen showing the Cold Pull filament check with Unload, Load, Continue and Abort buttons. Source picture from Cold pull #26702 (MK4S) #13702 (MK4) #28702 (MK3.9S) #21702… | Prusa Knowledge BasePrusaPrusaPrusa (cropped and highlighted by AI vision); a real reference, not your hardware.",
+          "fallback": {
+            "line1": "RUN COLD PULL FROM MENU",
+            "line2": "PICTURE ON YOUR PHONE"
+          },
+          "fov_note": null,
+          "reference_url": "https://help.prusa3d.com/article/cold-pull-26702-mk4s-13702-mk4-28702-mk3-9s-21702-mk3-9-23702-mk3-5-28702-mk3-5s-17702-xl_445071"
+        },
+        {
+          "view": "correct",
+          "step_id": "prusa_mk4_not_extruding_cold_pull.correct",
+          "title": "RESULT",
+          "image": "knowledge/live/compiled/guides/prusa_mk4_not_extruding_cold_pull/correct.png",
+          "phone_image": "knowledge/live/compiled/guides/prusa_mk4_not_extruding_cold_pull/correct.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "A pink filament strand with a shaped cold-pull tip at its end, the result of a cold pull. Source picture from Cold pull #26702 (MK4S) #13702 (MK4) #28702 (MK3.9S) #21702… | Prusa Knowledge BasePrusaPrusaPrusa (cropped and highlighted by AI vision); a real reference, not your hardware.",
+          "fallback": {
+            "line1": "RUN COLD PULL FROM MENU",
+            "line2": "PICTURE ON YOUR PHONE"
+          },
+          "fov_note": null,
+          "reference_url": "https://help.prusa3d.com/article/cold-pull-26702-mk4s-13702-mk4-28702-mk3-9s-21702-mk3-9-23702-mk3-5-28702-mk3-5s-17702-xl_445071"
+        }
+      ]
+    }
+  ],
+  "goal_mode": "fix",
+  "step_image": "where",
+  "aliases": [
+    "extruder clicking mk4",
+    "mk4 not extruding",
+    "mk4 under extrusion gaps",
+    "nextruder clicking noise",
+    "no filament coming out of nozzle",
+    "prusa mk4 clogged nozzle",
+    "prusa mk4 not extruding: clicking, gaps or clog",
+    "unclog prusa mk4 nozzle"
+  ],
+  "task_kind": "diagnosis",
+  "review": "AI-compiled from the cited pages; every step's quote checked verbatim by code; not human-reviewed. Claude review 2026-10-18: removed a CORE One gearbox photo from the MK4 motor check (different model and action). Title shortened for the glasses (was: Prusa MK4 not extruding: clicking, gaps or clog)."
+}

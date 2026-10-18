@@ -12,7 +12,7 @@
     'state_playbook_manual', 'state_playbook_measured', 'state_playbook_completed', 'state_playbook_unsupported'];
   var L = window.GBLogic;
   var dev = { force: null, no404: false };               // fixture-mode switches: force 'unreachable' | 'stale'; no404 = /ask and /research answer 404
-  var S = { live: null, state: null, okAt: 0, err: null, skew: 0, card: null, cardErr: null, cardFor: null, manifests: {}, goalBusy: false, askBusy: false, resBusy: false, catalog: [], guideView: null, actionBusy: false, connecting: false };
+  var S = { live: null, state: null, okAt: 0, err: null, skew: 0, card: null, cardErr: null, cardFor: null, manifests: {}, guideFor: null, lastGuideView: null, goalBusy: false, askBusy: false, resBusy: false, catalog: [], guideView: null, actionBusy: false, connecting: false };
 
   var $ = function (id) { return document.getElementById(id); };
   function h(tag, attrs) {
@@ -50,16 +50,21 @@
   }
 
   // ------------------------------------------------------------------ polling
-  function poll() {
+  var stateRequest = 0;
+  function refreshState() {
+    var request = ++stateRequest;
     var p = (FIXTURE && dev.force === 'unreachable') ? Promise.reject(new Error('simulated outage (dev bar)')) : getJson('/state');
-    p.then(function (r) {
+    return p.then(function (r) {
+      if (request !== stateRequest) return;
       if (!r.json || typeof r.json !== 'object' || !r.json.session) throw new Error('GET /state returned an unexpected body');
       S.state = r.json; S.err = null;
       if (!FIXTURE && r.json.session.id === "none" && !S.connecting) { S.connecting = true; postJson("/session/connect", {}).then(function () { S.connecting = false; }); }
       if (!(FIXTURE && dev.force === 'stale')) S.okAt = Date.now();
       if (!isNaN(r.date) && !FIXTURE) S.skew = r.date - Date.now();
       loadCardIfNeeded();
-    }).catch(function (e) { S.err = e.message; }).then(function () { tick(true); setTimeout(poll, POLL_MS); });
+    }).catch(function (e) { if (request === stateRequest) S.err = e.message; }).then(function () { tick(true); });
+  }
+  function poll() { refreshState().then(function () { setTimeout(poll, POLL_MS); });
   }
   function loadCardIfNeeded() {
     var id = S.state && S.state.card_id;
@@ -177,6 +182,10 @@
         hud.menu.options.forEach(function (o, i) { inner.appendChild(h('div', { class: 'opt', text: (i === hud.menu.selected ? '> ' : '  ') + o })); });
         return;
       }
+      if (hud.answer) {
+        inner.appendChild(h('div', {class:'g2-answer',text:hud.answer.text}));
+        return;
+      }
       if (hud.mode === 'visual' && hud.image) {
         inner.classList.add('g2-vis');
         var box = h('div', { class: 'g2-img' });
@@ -192,10 +201,13 @@
     var tp = [];
     if (hud && hud.mode !== 'quiet') {
       var ctr = L.counterText(hud); if (ctr) tp.push(ctr);
+      if (hud.answer) tp.push('ANSWER '+(hud.answer.index+1)+'/'+hud.answer.count+' · PRESS: BACK');
       if (hud.image && hud.image.count > 1) tp.push((ctr ? 'PIC ' : '') + (hud.image.index + 1) + '/' + hud.image.count);
       if (hud.source && hud.source !== 'pi_live' && hud.source !== 'manual') tp.push(String(hud.source).toUpperCase());
     }
     memo(tagEl, tp.join('  '), function () { tagEl.hidden = !tp.length; tagEl.textContent = tp.join('  '); });
+    var note = document.querySelector('.area-mirror .gesture-note');
+    if (note) note.textContent = hud && hud.answer ? 'Swipe to read the answer · Press to return to your step · Double press exits G2' : 'Press for a picture · Swipe to explore · Double press exits G2';
     memo(meta, key + f.ok, function () {
       clear(meta); if (!hud) return;
       meta.appendChild(h('span', { text: 'seq ' + hud.seq + ' · mode ' + hud.mode + (hud.cue_id ? ' · ' + hud.cue_id : '') + (hud.ttl_ms ? ' · clears in ' + sec(hud.ttl_ms) : '') }));
@@ -268,9 +280,13 @@
   function renderGuides(force) {
     var box = $('guide'), note = $('guide-note'), st = S.state;
     var a = activeGuide();
-    var shown = st && st.hud && st.hud.image ? st.hud.image.view : null;
+    var owner = a && a.guide ? a.guide.id + '/' + (a.step && a.step.id || '') : null;
+    if (S.guideFor !== owner) { S.guideFor = owner; S.guideView = null; S.lastGuideView = null; }
+    var shown = st && st.hud && st.hud.image && a && a.guide && st.hud.image.guide_id === a.guide.id ? st.hud.image.view : null;
+    if (shown) S.lastGuideView = shown;
+    var selectedView = S.guideView || S.lastGuideView || (a && a.guide && a.guide.views[0].view);
     var mf = a && a.guide ? S.manifests[a.guide.id] : undefined;
-    var key = JSON.stringify([a && a.guide, a && a.active, a && a.stepNo, shown, S.cardErr, mf, S.guideView]);
+    var key = JSON.stringify([a && a.guide, a && a.active, a && a.stepNo, selectedView, S.cardErr, mf]);
     if (a && a.guide && S.manifests[a.guide.id] === undefined) loadManifest(a.guide.id);
     memo(box, key, function () {
       clear(box); clear(note);
@@ -281,7 +297,7 @@
       else note.textContent = a.active ? 'Active check ' + (st.check + 1) + ': ' + a.check.action.line1 + ' / ' + a.check.action.line2 + '. ' + a.check.why
         : 'No active fault: showing "' + a.guide.title + '" for reference only.';
       if (!a || !a.guide) return;
-      var selected = S.guideView || shown || a.guide.views[0].view;
+      var selected = selectedView;
       if (!a.guide.views.some(function (v) { return v.view === selected; })) selected = a.guide.views[0].view;
       var tabs = h('div', { class: 'guide-tabs', role: 'tablist', 'aria-label': 'Guide pictures' });
       a.guide.views.forEach(function (v) {
@@ -300,13 +316,14 @@
         box.appendChild(h('div', { class: 'gv' + (shown === v.view ? ' cur' : '') }, img,
           h('div', { class: 'gv-b' },
             h('div', { class: 'gv-t' }, v.title, lbl(v.provenance), m && m.placeholder ? h('span', { class: 'lbl l-PLACEHOLDER', text: 'PLACEHOLDER SCHEMATIC, NOT RIG PHOTO' }) : null,
-              shown === v.view ? h('span', { class: 'lbl l-INFERRED', text: 'ON GLASSES NOW' }) : null),
+              h('span', { class: 'lbl l-INFERRED on-glasses', text: 'ON GLASSES NOW', hidden: shown !== v.view })),
             h('div', { class: 'gv-d', text: v.depicts }),
             v.fov_note ? h('div', { class: 'gv-d', text: 'Field of view: ' + v.fov_note }) : null,
             h('div', { class: 'gv-d', text: 'Glasses text fallback: ' + v.fallback.line1 + (v.fallback.line2 ? ' / ' + v.fallback.line2 : '') }),
             cap, mf === false ? h('div', { class: 'gv-d', text: 'placeholder status unknown (manifest not served)' }) : null)));
       });
     });
+    Array.prototype.forEach.call(box.querySelectorAll('.on-glasses'), function (badge) { badge.hidden = !shown || shown !== selectedView; });
     renderSources(a);
   }
   // Sources: kind badge + link, and every cite of the card (location, quote, deep link). Video cites show their timestamp.
@@ -347,7 +364,7 @@
   function renderPlaybook() {
     var sec_ = $('sec-playbook'), c = S.card, st = S.state, pb = st && st.playbook;
     var show = !!(pb && st);
-    var key = JSON.stringify([show, S.assistant && S.assistant.notes, S.live && S.live.unreviewed_cards, pb, c && c.card_id, c && c.steps, c && c.sources, S.cardErr, fresh().ok, st && st.hud && st.hud.step]);
+    var key = JSON.stringify([show, S.live && S.live.unreviewed_cards, pb, c && c.card_id, c && c.steps, c && c.sources, S.cardErr, fresh().ok]);
     memo(sec_, key, function () {
       sec_.hidden = !show; if (!show) return;
       var head = $('pb-head'), ol = $('pb-steps'), cur = $('pb-current'), cnt = $('pb-count');
@@ -367,8 +384,11 @@
         h('div', { class: 'st', text: 'ALL STEPS MARKED DONE' }),
         h('div', { text: nConf + ' confirmed by you (HUMAN CONFIRMED), ' + nVer + ' by measured evidence. A step you confirmed is your word, not a check by GhostBuild.' })));
       var notLive = st.hud && st.hud.source && st.hud.source !== 'pi_live' && st.hud.source !== 'manual' ? String(st.hud.source).toUpperCase() : null;
+      var branching = list.some(function (x) { return x.kind === 'question'; });
+      if (branching && (pb.observations || []).length) head.appendChild(h('div', { class: 'meta' }, h('b', { text: 'What you reported: ' }), pb.observations.join(' · '), ' ', lbl('HUMAN CONFIRMED')));
       list.forEach(function (stp, i) {
         var stat = L.stepStatus(stp, pb), isCur = i === idx;
+        if (branching && !isCur && stat.kind === 'pending') return;  // a branching guide lists the route taken, not every branch
         var badge = stat.kind === 'confirmed' ? h('span', { class: 'lbl l-HUMAN', text: 'HUMAN CONFIRMED' })
           : stat.kind === 'measured' ? h('span', { class: 'lbl l-MEASURED', text: 'MEASURED' + (notLive ? ' · ' + notLive : '') })
           : h('span', { class: 'lbl l-PENDING', text: 'pending' });
@@ -380,12 +400,30 @@
       });
       var stp = list[idx]; if (!stp) return;
       var by = {}; (c.sources || []).forEach(function (x) { by[x.id] = x; });
-      cur.appendChild(h('h3', { text: 'Step ' + (idx + 1) + ': ' + stp.title }));
-      cur.appendChild(h('div', { class: 'cue' }, stp.cue.line1, stp.cue.line2 ? h('br') : null, stp.cue.line2 || null));
+      var primary = stp.instruction || stp.cue;
+      cur.appendChild(h('h3', { text: 'Step ' + (idx + 1) + ': ' + (stp.instruction ? stp.instruction.line1 : stp.title) }));
+      cur.appendChild(h('div', { class: 'cue' }, primary.line1, primary.line2 ? h('br') : null, primary.line2 || null));
       cur.appendChild(h('div', { class: 'meta', text: 'Completion: ' + L.stepRule(stp) + '.' }));
-      var notes_ = stepNotes(c, stp); if (notes_) cur.appendChild(notes_);
+      // Questions and notes stay in the adjacent step conversation, preserving this workspace.
       cur.appendChild(h('p', { class: 'detail', text: stp.detail || 'The card has no longer explanation for this step.' }));
+      if (stp.kind === 'question' && (stp.choices || []).length) {
+        var qb = h('div', { class: 'choice-grid' });
+        stp.choices.forEach(function (ch) {
+          var b = h('button', { type: 'button', class: 'secondary', text: ch.label });
+          b.disabled = !!FIXTURE;  // this panel re-renders only when the step changes: check connection at click time
+          b.addEventListener('click', function () { if (fresh().ok && !S.actionBusy) sendAction('choose', ch.id); });
+          qb.appendChild(b);
+        });
+        cur.appendChild(qb);
+        cur.appendChild(h('div', { class: 'meta', text: 'Or just say it. Your answer chooses the next check; it is recorded as what you reported, not as a measurement.' }));
+      }
+      if (stp.risk === 'hazard') cur.appendChild(h('div', { class: 'warn' }, h('b', { text: 'SAFETY STEP ' }), 'GhostBuild asks you to confirm this one twice. Follow the warning below exactly.'));
       (stp.warnings || []).forEach(function (w) { cur.appendChild(h('div', { class: 'warn' }, h('b', { text: 'WARNING ' }), w)); });
+      if ((stp.tools || []).length) cur.appendChild(h('div', { class: 'meta' }, h('b', { text: 'You need: ' }), stp.tools.join(', ')));
+      if (stp.expected) cur.appendChild(h('div', { class: 'expected' }, h('b', { text: 'How you know it worked: ' }), stp.expected));
+      if ((stp.cites || []).length) cur.appendChild(h('ul', { class: 'cites' }, stp.cites.map(function (ct) {
+        var src = by[ct.source]; return citeRow({ where: src ? src.title : ct.source, loc: ct.loc, quote: ct.quote, url: ct.url || (src && src.url) }, false);
+      })));
       var wy = h('dl', { class: 'kv wy' });
       if (stp.why) { wy.appendChild(h('dt', { text: 'Why' })); wy.appendChild(h('dd', { text: cueText(stp.why) })); }
       if (stp.where) { wy.appendChild(h('dt', { text: 'Where' })); wy.appendChild(h('dd', { text: cueText(stp.where) })); }
@@ -405,7 +443,7 @@
         });
         cur.appendChild(tl);
       }
-      cur.appendChild(h('div', { class: 'meta', text: stp.guide_id ? 'Pictures for this step are under "Guide pictures".' : 'This step has no guide pictures.' }));
+      cur.appendChild(h('div', { class: 'meta', text: stp.guide_id ? 'The picture for this step is directly below.' : 'This step has no guide pictures.' }));
     });
   }
 
@@ -484,11 +522,12 @@
     memo(hint, t, function () { hint.textContent = t; });
   }
   function showAsk(r, note) {
-    if (r.pending) { var pb_ = $('ask-result'); clear(pb_); pb_.appendChild(h('div', { class: 'res ambiguous' }, h('div', { class: 'st', text: 'THINKING' }), h('p', { class: 'detail', text: 'Your answer appears here, in the Conversation panel, and on your glasses in a moment.' }))); window.dispatchEvent(new Event('ghostbuild:asked')); return; }
+    if (r.pending) { var pb_ = $('ask-result'); clear(pb_); pb_.appendChild(h('div', { class: 'res ambiguous' }, h('div', { class: 'st', text: 'THINKING' }), h('p', { class: 'detail', text: 'Your answer will appear here. The step and its picture stay in place.' }))); window.dispatchEvent(new Event('ghostbuild:asked')); return; }
     if (['where', 'how', 'correct'].indexOf(r.intent) >= 0) S.guideView = r.intent;
+    if (['parts', 'picture', 'goto'].indexOf(r.intent) >= 0) S.guideView = null;
     var box = $('ask-result'); clear(box);
     var el = h('div', { class: 'res ' + (r.answer ? 'supported' : 'ambiguous') },
-      h('div', { class: 'st', text: 'INTENT: ' + String(r.intent).toUpperCase() }),
+      h('div', { class: 'st', text: r.cached ? 'SAVED ANSWER' : 'YOUR ANSWER' }),
       h('p', { class: 'detail', text: r.text }));
     if (r.answer) { el.appendChild(h('div', { class: 'meta', text: 'On your glasses' })); el.appendChild(h('div', { class: 'cue' }, r.answer.line1, r.answer.line2 ? h('br') : null, r.answer.line2 || null)); }
     else el.appendChild(h('div', { class: 'meta', text: 'No short cue was returned, so this is phone text only.' }));
@@ -524,7 +563,10 @@
       if (!r.ok) return showAskError(L.askError(r.status, r.text));
       var n = L.normalizeAsk(r.json);
       if (!n.ok) return showAskError(n.error);
-      showAsk(n, FIXTURE ? 'FIXTURE RESPONSE: no backend was contacted.' : null);
+      return (FIXTURE ? Promise.resolve() : refreshState()).then(function () {
+        showAsk(n, FIXTURE ? 'FIXTURE RESPONSE: no backend was contacted.' : null);
+        if (!n.pending) window.dispatchEvent(new Event('ghostbuild:asked'));
+      });
     }).then(function () { S.askBusy = false; renderAskHint(); });
   });
 
@@ -739,21 +781,30 @@
         btn.disabled = !fresh().ok || S.actionBusy || enabled === false || !!FIXTURE;
         btn.addEventListener('click', function () { sendAction(action); }); box.appendChild(btn);
       }
+      if (hud.answer) {
+        add('answer_previous','Previous answer page','secondary',hud.answer.index>0);
+        add('answer_next','Next answer page','secondary',hud.answer.index+1<hud.answer.count);
+        add('press','Back to my step','secondary');
+        return;
+      }
+      if (hud.mode === 'menu' && pb) { add('previous', 'Back', 'secondary'); box.appendChild(h('p', {class:'meta', text:'Answer the question above (buttons in the step), on the glasses (swipe, press) or by voice.'})); return; }
       add('previous', 'Back', 'secondary');
-      add('press', hud.mode === 'visual' ? 'Back to step' : 'Show picture / return', 'secondary');
-      if (hud.mode === 'visual') add('next_view', 'Next picture', 'secondary');
-      if (pb && hud.mode === 'step') add('confirm', 'I completed this step', 'confirm', hud.step && hud.step.check === 'manual');
+      var explicitPicture = !!(st && st.help_view);
+      add(explicitPicture ? 'previous' : 'press', explicitPicture ? 'Back to step' : 'Show parts / picture', 'secondary');
+      if (hud.mode === 'visual' && explicitPicture) add('next_view', 'Next picture', 'secondary');
+      if (pb && (hud.mode === 'step' || (hud.mode === 'visual' && !explicitPicture))) add('confirm', 'I completed this step', 'confirm', hud.step && hud.step.check === 'manual');
       if (pb && hud.step && hud.step.check === 'measured') box.appendChild(h('p', {class:'meta', text:'Waiting for measured evidence. A tap or spoken command cannot complete this check.'}));
     });
   }
-  function sendAction(action) {
+  function sendAction(action, choice) {
     if (!sessionReady() || S.actionBusy) return;
     window.dispatchEvent(new Event('ghostbuild:input'));
     S.actionBusy = true; renderWorkspace();
     var body = {session_id:S.state.session.id, seq_seen:S.state.hud.seq, action:action};
+    if (choice) body.choice = choice;
     postJson('/session/action', body).then(function (r) {
-      $('control-result').textContent = r.ok ? (action === 'confirm' ? 'Step confirmed by you.' : 'Updated.') : r.status === 0 ? 'Connection lost. Try again when connected.' : L.detailOf ? L.detailOf(r.text) : 'Display changed. Review the current step and try again.';
-      if (r.ok && r.json) { S.state.hud = r.json; if (r.json.image) S.guideView = r.json.image.view; }
+      $('control-result').textContent = r.ok ? (action === 'confirm' ? 'Step confirmed by you.' : action === 'choose' ? 'Noted. Moving to the check that fits.' : 'Updated.') : r.status === 0 ? 'Connection lost. Try again when connected.' : L.detailOf ? L.detailOf(r.text) : 'Display changed. Review the current step and try again.';
+      if (r.ok && r.json) { S.state.hud = r.json; if (r.json.image) S.guideView = r.json.image.view; return refreshState(); }
     }).finally(function () { S.actionBusy = false; renderWorkspace(); });
   }
   $('new-task').addEventListener('click', function () { window.dispatchEvent(new Event('ghostbuild:input')); document.body.classList.add('goal-open'); $('h-goal').scrollIntoView({behavior:'smooth', block:'center'}); $('goal-text').focus(); });
@@ -775,6 +826,17 @@
     if (!box.children.length) box.appendChild(h('p',{class:'meta',text:'No prepared guide yet. Describe your task above and it can be researched.'}));
   }
   window.addEventListener('ghostbuild:assistant', function (e) { S.assistant = e.detail; tick(true); });
+  var helpPanelKey = '';
+  window.addEventListener('ghostbuild:step-help', function (e) {
+    var d=e.detail, current=d.current, key=JSON.stringify(d);
+    if (!current || key===helpPanelKey) return;
+    helpPanelKey=key;
+    if (d.pending) { showAsk({pending:true}); return; }
+    if (d.message) {
+      var box=$('ask-result');clear(box);
+      box.appendChild(h('div',{class:'res supported'}, h('div',{class:'st',text:d.message.cached?'SAVED ANSWER':'YOUR ANSWER'}), h('p',{class:'detail',text:d.message.text}), h('div',{class:'meta',text:d.message.grounding==='guide'?'From the guide':d.message.grounding==='general'?'General knowledge · check the manual':'Check the source'})));
+    } else clear($('ask-result'));
+  });
   function stepNotes(card, stp) {
     var list = window.GBAssistant ? window.GBAssistant.notesFor(card.card_id, stp.id) : [];
     if (!list.length) return null;
@@ -808,5 +870,6 @@
   pollLive();
   loadCatalog();
   function tick(poll) { renderWorkspace(); renderStatus(); renderMirror(); renderTask(); renderPlaybook(); renderTimeline(); renderGuides(); renderGoalHint(); renderAskHint(); renderResearchHint(); }
+  window.GBWorkspace = {refresh:refreshState};
   devbar(); tick(); poll(); setInterval(tick, 500);
 })();

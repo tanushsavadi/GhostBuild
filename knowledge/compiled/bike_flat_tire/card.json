@@ -1,0 +1,768 @@
+{
+  "v": 2,
+  "card_id": "bike_flat_tire",
+  "title": "Fix a Flat Bike Tire",
+  "provenance": "WEB TUTORIAL",
+  "sources": [
+    {
+      "id": "src0",
+      "kind": "WEB TUTORIAL",
+      "title": "Tire and Tube Removal and Installation | Park Tool",
+      "url": "https://www.parktool.com/en-us/blog/repair-help/tire-and-tube-removal-and-installation"
+    },
+    {
+      "id": "src1",
+      "kind": "WEB TUTORIAL",
+      "title": "How to Patch a Tire and Tube | Park Tool",
+      "url": "https://www.parktool.com/en-us/blog/repair-help/inner-tube-repair"
+    },
+    {
+      "id": "src2",
+      "kind": "WEB TUTORIAL",
+      "title": "Tubeless Tire Compatibility | Park Tool",
+      "url": "https://www.parktool.com/en-us/blog/repair-help/tubeless-tire-compatibility"
+    }
+  ],
+  "steps": [
+    {
+      "id": "q_tube_type",
+      "title": "Tube or tubeless?",
+      "cue": {
+        "line1": "INNER TUBE OR TUBELESS?",
+        "line2": "CHECK YOUR TIRE TYPE"
+      },
+      "detail": "These instructions only apply to traditional tire-body-and-inner-tube setups. Decide whether your tire has an inner tube inside or is a tubeless setup.",
+      "warnings": [],
+      "kind": "question",
+      "next": null,
+      "expected": "",
+      "tools": [],
+      "risk": "low",
+      "guide_id": null,
+      "choices": [
+        {
+          "id": "c_tube",
+          "label": "INNER TUBE",
+          "say": [
+            "inner tube",
+            "it has a tube",
+            "tube",
+            "regular tire"
+          ],
+          "next": "q_valve",
+          "records": "tire uses an inner tube"
+        },
+        {
+          "id": "c_tubeless",
+          "label": "TUBELESS",
+          "say": [
+            "tubeless",
+            "no tube",
+            "tubeless tire"
+          ],
+          "next": "stop_tubeless",
+          "records": "tire is tubeless"
+        },
+        {
+          "id": "c_notsure",
+          "label": "NOT SURE",
+          "say": [
+            "not sure",
+            "i don't know",
+            "how do i tell"
+          ],
+          "next": "check_tubeless_signs",
+          "records": "tire type unknown"
+        }
+      ],
+      "cites": [
+        {
+          "source": "src1",
+          "loc": "quoted passage",
+          "quote": "Note that these instructions only apply to traditional tire-body-and-inner-tube setups.",
+          "url": "https://www.parktool.com/en-us/blog/repair-help/inner-tube-repair"
+        }
+      ]
+    },
+    {
+      "id": "check_tubeless_signs",
+      "title": "Look for tubeless signs",
+      "cue": {
+        "line1": "LOOK AT TIRE AND RIM",
+        "line2": "FIND 'TUBELESS READY' TEXT"
+      },
+      "detail": "Manufacturers use terms such as \"tubeless ready\" or \"tubeless compatible\" for tubeless parts. Check the tire sidewall and the rim label for this wording. A tubeless ready tire bead is generally square instead of rounded, and a tubeless ready rim has a hooked sidewall. Tubeless valves have a threaded shaft with a nut pulling the head tight against the inside of the wheel, and tubeless tires usually contain liquid sealant instead of a tube.",
+      "warnings": [],
+      "kind": "action",
+      "next": "q_tube_type",
+      "expected": "You can see tubeless wording, or an inner tube inside the tire.",
+      "tools": [],
+      "risk": "low",
+      "guide_id": "bike_flat_tire_check_tubeless_signs",
+      "choices": [],
+      "cites": [
+        {
+          "source": "src2",
+          "loc": "quoted passage",
+          "quote": "Manufacturers use terms such as “tubeless ready” or “tubeless compatible” for components mean to be tubeless.",
+          "url": "https://www.parktool.com/en-us/blog/repair-help/tubeless-tire-compatibility"
+        }
+      ]
+    },
+    {
+      "id": "stop_tubeless",
+      "title": "Tubeless: stop here",
+      "cue": {
+        "line1": "STOP: TUBELESS TIRE",
+        "line2": "STICK-ON PATCH WON'T WORK"
+      },
+      "detail": "Tubeless tire bodies cannot be patched with stick-on patches — use a plug tool such as the Park Tool TPT-1. This guide covers inner tube tires only. See Park Tool's tubeless articles or a bike shop.",
+      "warnings": [
+        "Do not use stick-on patches on tubeless tires."
+      ],
+      "kind": "stop",
+      "next": null,
+      "expected": "",
+      "tools": [
+        "plug tool (e.g. Park Tool TPT-1)"
+      ],
+      "risk": "low",
+      "guide_id": null,
+      "choices": [],
+      "cites": [
+        {
+          "source": "src1",
+          "loc": "quoted passage",
+          "quote": "Tubeless tire bodies cannot be patched with stick-on patches — use a plug tool such as the Park Tool TPT-1.",
+          "url": "https://www.parktool.com/en-us/blog/repair-help/inner-tube-repair"
+        }
+      ]
+    },
+    {
+      "id": "q_valve",
+      "title": "Which valve type?",
+      "cue": {
+        "line1": "WHICH VALVE TYPE?",
+        "line2": "LOOK AT THE VALVE TIP"
+      },
+      "detail": "Remove the wheel from the bike first (see Wheel Removal and Installation). Three common valve types: Schrader (about 8mm wide, spring plunger inside, like a car valve), Presta (thinner, about 6mm, small locknut at the top), Woods/Dunlop. Fully threaded valve shafts may have a locking nut next to the rim; loosen and remove it before deflating.",
+      "warnings": [],
+      "kind": "question",
+      "next": null,
+      "expected": "",
+      "tools": [],
+      "risk": "low",
+      "guide_id": "bike_flat_tire_q_valve",
+      "choices": [
+        {
+          "id": "c_presta",
+          "label": "PRESTA (THIN, LOCKNUT)",
+          "say": [
+            "presta",
+            "thin valve",
+            "french valve"
+          ],
+          "next": "deflate_presta",
+          "records": "Presta valve"
+        },
+        {
+          "id": "c_schrader",
+          "label": "SCHRADER (CAR TYPE)",
+          "say": [
+            "schrader",
+            "car valve",
+            "american valve"
+          ],
+          "next": "deflate_schrader",
+          "records": "Schrader valve"
+        },
+        {
+          "id": "c_dunlop",
+          "label": "DUNLOP / WOODS",
+          "say": [
+            "dunlop",
+            "woods valve",
+            "dutch valve"
+          ],
+          "next": "deflate_dunlop",
+          "records": "Dunlop valve"
+        }
+      ],
+      "cites": [
+        {
+          "source": "src0",
+          "loc": "quoted passage",
+          "quote": "There are three common types of valve stems on bicycles: Schrader (“American” type), Presta (“French” type) and Woods (also known as “Dunlop”).",
+          "url": "https://www.parktool.com/en-us/blog/repair-help/tire-and-tube-removal-and-installation"
+        }
+      ]
+    },
+    {
+      "id": "deflate_presta",
+      "title": "Deflate Presta valve",
+      "cue": {
+        "line1": "LET ALL AIR OUT",
+        "line2": "UNSCREW TIP NUT, PRESS"
+      },
+      "detail": "To deflate a Presta valve, unthread the locknut at the tip of the valve stem and press. Deflate the tire completely; even a small amount of air left makes the tire harder to remove. Press downward on the wheel while depressing the valve.",
+      "warnings": [],
+      "kind": "action",
+      "next": "remove_tire",
+      "expected": "Tire is completely flat.",
+      "tools": [],
+      "risk": "low",
+      "guide_id": "bike_flat_tire_deflate_presta",
+      "choices": [],
+      "cites": [
+        {
+          "source": "src0",
+          "loc": "quoted passage",
+          "quote": "To deflate a Presta valve, unthread the locknut at the tip of the valve stem and press",
+          "url": "https://www.parktool.com/en-us/blog/repair-help/tire-and-tube-removal-and-installation"
+        }
+      ]
+    },
+    {
+      "id": "deflate_schrader",
+      "title": "Deflate Schrader valve",
+      "cue": {
+        "line1": "LET ALL AIR OUT",
+        "line2": "PRESS PIN WITH HEX KEY"
+      },
+      "detail": "Use a small tool such as a hex wrench to depress the plunger inside a Schrader valve. Deflate the tire completely; press downward on the wheel while depressing the valve.",
+      "warnings": [],
+      "kind": "action",
+      "next": "remove_tire",
+      "expected": "Tire is completely flat.",
+      "tools": [
+        "hex wrench or small tool"
+      ],
+      "risk": "low",
+      "guide_id": "bike_flat_tire_deflate_schrader",
+      "choices": [],
+      "cites": [
+        {
+          "source": "src0",
+          "loc": "quoted passage",
+          "quote": "use a small tool such as a hex wrench to depress the plunger inside a Schrader valve",
+          "url": "https://www.parktool.com/en-us/blog/repair-help/tire-and-tube-removal-and-installation"
+        }
+      ]
+    },
+    {
+      "id": "deflate_dunlop",
+      "title": "Deflate Dunlop valve",
+      "cue": {
+        "line1": "LET ALL AIR OUT",
+        "line2": "LOOSEN CAP, PULL TIP OUT"
+      },
+      "detail": "On a Dunlop valve, unthread the cap a few turns, then pull outward on the tip of the valve. Deflate the tire completely; press downward on the wheel while doing so.",
+      "warnings": [],
+      "kind": "action",
+      "next": null,
+      "expected": "Tire is completely flat.",
+      "tools": [],
+      "risk": "low",
+      "guide_id": "bike_flat_tire_deflate_dunlop",
+      "choices": [],
+      "cites": [
+        {
+          "source": "src0",
+          "loc": "quoted passage",
+          "quote": "On a Dunlop valve, unthread the cap a few turns, then pull outward on the tip of the valve",
+          "url": "https://www.parktool.com/en-us/blog/repair-help/tire-and-tube-removal-and-installation"
+        }
+      ]
+    },
+    {
+      "id": "remove_tire",
+      "title": "Remove tire and tube",
+      "cue": {
+        "line1": "TAKE TIRE AND TUBE OFF",
+        "line2": "USE 2 TIRE LEVERS"
+      },
+      "detail": "Push both beads toward the rim center to loosen them. Engage one tire lever under the bead, a second lever 1-2 in (25-50mm) away, and pull both toward the spokes. Move one lever 2 in (5cm) along and repeat until the bead loosens, then slide the lever around. Starting opposite the valve, pull the tube out, lift the valve from the hole. Remove the second bead to take the tire fully off.",
+      "warnings": [
+        "Do not use a screwdriver, knife, or other sharp object, which might damage tire or tube."
+      ],
+      "kind": "action",
+      "next": null,
+      "expected": "Tire and tube are completely off the rim.",
+      "tools": [
+        "tire levers"
+      ],
+      "risk": "caution",
+      "guide_id": "bike_flat_tire_remove_tire",
+      "choices": [],
+      "cites": [
+        {
+          "source": "src0",
+          "loc": "quoted passage",
+          "quote": "Starting opposite the valve, pull inner tube from tire. Lift valve from valve hole and remove tube from wheel.",
+          "url": "https://www.parktool.com/en-us/blog/repair-help/tire-and-tube-removal-and-installation"
+        }
+      ]
+    },
+    {
+      "id": "find_hole",
+      "title": "Find the hole in tube",
+      "cue": {
+        "line1": "FIND THE HOLE",
+        "line2": "PUMP TUBE, FEEL OR LISTEN"
+      },
+      "detail": "If possible, inflate the tube to twice its normal width. Hold it near your lips or ear to feel or hear air escaping, moving around the whole tube. If that fails, submerge it in water and watch for bubbles. Mark the hole with four pen marks, one on each side, not close to the hole. The hole type hints at the cause: single small hole = thorn/wire/nail; double slits = rim pinch; hole on inside edge = rim problem; cut at valve = misaligned tube or low pressure.",
+      "warnings": [],
+      "kind": "action",
+      "next": null,
+      "expected": "You see bubbles or feel/hear air at one spot.",
+      "tools": [
+        "pump",
+        "marking pen",
+        "water (optional)"
+      ],
+      "risk": "low",
+      "guide_id": "bike_flat_tire_find_hole",
+      "choices": [],
+      "cites": [
+        {
+          "source": "src0",
+          "loc": "quoted passage",
+          "quote": "Inspect for air leaks by holding tube close to the sensitive skin of lips or by holding tube near your ear to hear air escaping.",
+          "url": "https://www.parktool.com/en-us/blog/repair-help/tire-and-tube-removal-and-installation"
+        }
+      ]
+    },
+    {
+      "id": "inspect_tire_rim",
+      "title": "Find cause in tire/rim",
+      "cue": {
+        "line1": "CHECK TIRE AND RIM",
+        "line2": "FIND NAIL, GLASS, THORN"
+      },
+      "detail": "Inspect outside of the tread for nails, glass, thorns; squeeze cuts to look inside. Wipe the inside of the casing with a rag, then carefully feel inside with fingers. Check sidewall and bead for damage. Inspect the rim cavity: rim strip torn or off-center, sharp corners, protruding spokes. Remove any object found. A damaged casing means the tire should be replaced.",
+      "warnings": [
+        "Feel inside the casing carefully; glass or wire may still be embedded."
+      ],
+      "kind": "action",
+      "next": null,
+      "expected": "No objects left in the tire; rim strip intact and centered.",
+      "tools": [
+        "rag"
+      ],
+      "risk": "caution",
+      "guide_id": "bike_flat_tire_inspect_tire_rim",
+      "choices": [],
+      "cites": [
+        {
+          "source": "src0",
+          "loc": "quoted passage",
+          "quote": "Wipe inside of casing with a rag, and then carefully feel inside with fingers.",
+          "url": "https://www.parktool.com/en-us/blog/repair-help/tire-and-tube-removal-and-installation"
+        }
+      ]
+    },
+    {
+      "id": "q_repair",
+      "title": "Patch or new tube?",
+      "cue": {
+        "line1": "PATCH OR NEW TUBE?",
+        "line2": "SMALL HOLE CAN BE PATCHED"
+      },
+      "detail": "Simply replacing the punctured tube with a new tube is always the safest and most reliable procedure. A small hole can sometimes be repaired. Large holes, blowouts and long cuts are usually not repairable. When in doubt, replace the tube.",
+      "warnings": [],
+      "kind": "question",
+      "next": null,
+      "expected": "",
+      "tools": [],
+      "risk": "low",
+      "guide_id": null,
+      "choices": [
+        {
+          "id": "c_patch",
+          "label": "PATCH SMALL HOLE",
+          "say": [
+            "patch it",
+            "small hole",
+            "patch"
+          ],
+          "next": "patch_tube",
+          "records": "patching the tube"
+        },
+        {
+          "id": "c_new",
+          "label": "USE NEW TUBE",
+          "say": [
+            "new tube",
+            "replace tube",
+            "big hole",
+            "not sure"
+          ],
+          "next": "install_tube",
+          "records": "replacing the tube"
+        }
+      ],
+      "cites": [
+        {
+          "source": "src0",
+          "loc": "quoted passage",
+          "quote": "When in doubt, replace the tube.",
+          "url": "https://www.parktool.com/en-us/blog/repair-help/tire-and-tube-removal-and-installation"
+        }
+      ]
+    },
+    {
+      "id": "patch_tube",
+      "title": "Patch the tube",
+      "cue": {
+        "line1": "PATCH THE HOLE",
+        "line2": "SAND LIGHTLY, PRESS PATCH"
+      },
+      "detail": "Lightly sand the area around the hole (no heavy pressure). If possible clean with a rag and alcohol and let dry. Pre-glued patch: peel from backing, touch only edges, center it on the hole, press firmly and roll between thumbs and fingers. A pre-glued patch is a temporary fix; replace the tube soon. For a vulcanizing (VP-1) patch, spread a thin glue layer, let it dry, then apply and hold over a minute.",
+      "warnings": [
+        "DO NOT test the patch by inflating the tube while outside of the mounted tire."
+      ],
+      "kind": "action",
+      "next": null,
+      "expected": "All patch edges look stuck to the tube.",
+      "tools": [
+        "patch kit",
+        "sandpaper",
+        "rag",
+        "alcohol"
+      ],
+      "risk": "low",
+      "guide_id": "bike_flat_tire_patch_tube",
+      "choices": [],
+      "cites": [
+        {
+          "source": "src1",
+          "loc": "quoted passage",
+          "quote": "Center the patch to the hole and lay the patch on the tube.",
+          "url": "https://www.parktool.com/en-us/blog/repair-help/inner-tube-repair"
+        }
+      ]
+    },
+    {
+      "id": "install_tube",
+      "title": "Put tube and tire back",
+      "cue": {
+        "line1": "FIT TUBE AND TIRE",
+        "line2": "VALVE STRAIGHT, BY HAND"
+      },
+      "detail": "Note any direction arrows on the tire. Inflate tube just enough to hold its shape and put it in the tire, valve next to the pressure label. Put valve through rim hole pointing straight to the hub. Work one bead on by hand, tuck the tube into the rim, then the second bead. Use a tire lever only as a last resort, carefully. Check both sides for tube sticking out.",
+      "warnings": [
+        "Use caution when using tire levers to avoid pinching inner tube.",
+        "A crooked valve can lead to a flat tire later."
+      ],
+      "kind": "action",
+      "next": null,
+      "expected": "Beads seated both sides, no tube visible.",
+      "tools": [
+        "tire levers (last resort)"
+      ],
+      "risk": "caution",
+      "guide_id": "bike_flat_tire_install_tube",
+      "choices": [],
+      "cites": [
+        {
+          "source": "src0",
+          "loc": "quoted passage",
+          "quote": "Lower tire and valve into rim valve hole and align valve so it is pointing straight toward hub.",
+          "url": "https://www.parktool.com/en-us/blog/repair-help/tire-and-tube-removal-and-installation"
+        }
+      ]
+    },
+    {
+      "id": "inflate_tire",
+      "title": "Inflate and check",
+      "cue": {
+        "line1": "PUMP UP AND CHECK",
+        "line2": "LINE EVEN ABOVE RIM"
+      },
+      "detail": "Inflate to low pressure and check the molding line above the bead on both sides; it should run evenly above the rim. If it bulges up, deflate immediately and reseat. If stuck low, soapy water can help (not grease or oil). Inflate to full pressure and check with a gauge. Refit the valve lock nut finger tight. Then reinstall the wheel.",
+      "warnings": [
+        "Bulging bead line: deflate immediately and reseat tire.",
+        "Use care not to blow the tire off the rim."
+      ],
+      "kind": "outcome",
+      "next": null,
+      "expected": "Molding line runs consistently above the rim on both sides; tire holds full pressure.",
+      "tools": [
+        "pump",
+        "pressure gauge"
+      ],
+      "risk": "caution",
+      "guide_id": "bike_flat_tire_inflate_tire",
+      "choices": [],
+      "cites": [
+        {
+          "source": "src0",
+          "loc": "quoted passage",
+          "quote": "Look for small molding line above bead. This line should run consistently above rim.",
+          "url": "https://www.parktool.com/en-us/blog/repair-help/tire-and-tube-removal-and-installation"
+        }
+      ]
+    }
+  ],
+  "guides": [
+    {
+      "id": "bike_flat_tire_check_tubeless_signs",
+      "title": "Look for tubeless signs",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "bike_flat_tire_check_tubeless_signs.where",
+          "title": "LOOK FOR TUBELESS SIGNS",
+          "image": "knowledge/live/compiled/guides/bike_flat_tire_check_tubeless_signs/where.png",
+          "phone_image": "knowledge/live/compiled/guides/bike_flat_tire_check_tubeless_signs/where.phone.png",
+          "provenance": "WEB TUTORIAL",
+          "depicts": "Close-up of a WTB rim showing a valve hole with a TCS (tubeless compatible system) logo and rim spec label, with a spoke and blue nipple. Source picture from Tubeless Tire Compatibility | Park Tool (cropped and highlighted by AI vision); a real reference, not your hardware.",
+          "fallback": {
+            "line1": "LOOK AT TIRE AND RIM",
+            "line2": "PICTURE ON YOUR PHONE"
+          },
+          "fov_note": null,
+          "reference_url": "https://www.parktool.com/en-us/blog/repair-help/tubeless-tire-compatibility"
+        }
+      ]
+    },
+    {
+      "id": "bike_flat_tire_q_valve",
+      "title": "Which valve type?",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "bike_flat_tire_q_valve.where",
+          "title": "WHICH VALVE TYPE?",
+          "image": "knowledge/live/compiled/guides/bike_flat_tire_q_valve/where.png",
+          "phone_image": "knowledge/live/compiled/guides/bike_flat_tire_q_valve/where.phone.png",
+          "provenance": "WEB TUTORIAL",
+          "depicts": "Source picture from Tire and Tube Removal and Installation | Park Tool (whole picture); a real reference, not your hardware.",
+          "fallback": {
+            "line1": "WHICH VALVE TYPE?",
+            "line2": "PICTURE ON YOUR PHONE"
+          },
+          "fov_note": null,
+          "reference_url": "https://www.parktool.com/en-us/blog/repair-help/tire-and-tube-removal-and-installation"
+        }
+      ]
+    },
+    {
+      "id": "bike_flat_tire_deflate_presta",
+      "title": "Deflate Presta valve",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "bike_flat_tire_deflate_presta.where",
+          "title": "DEFLATE PRESTA VALVE",
+          "image": "knowledge/live/compiled/guides/bike_flat_tire_deflate_presta/where.png",
+          "phone_image": "knowledge/live/compiled/guides/bike_flat_tire_deflate_presta/where.phone.png",
+          "provenance": "WEB TUTORIAL",
+          "depicts": "A finger pressing the unthreaded locknut tip of a brass Presta valve on a bicycle rim. Source picture from Tire and Tube Removal and Installation | Park Tool (cropped and highlighted by AI vision); a real reference, not your hardware.",
+          "fallback": {
+            "line1": "LET ALL AIR OUT",
+            "line2": "PICTURE ON YOUR PHONE"
+          },
+          "fov_note": null,
+          "reference_url": "https://www.parktool.com/en-us/blog/repair-help/tire-and-tube-removal-and-installation"
+        }
+      ]
+    },
+    {
+      "id": "bike_flat_tire_deflate_schrader",
+      "title": "Deflate Schrader valve",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "bike_flat_tire_deflate_schrader.where",
+          "title": "DEFLATE SCHRADER VALVE",
+          "image": "knowledge/live/compiled/guides/bike_flat_tire_deflate_schrader/where.png",
+          "phone_image": "knowledge/live/compiled/guides/bike_flat_tire_deflate_schrader/where.phone.png",
+          "provenance": "WEB TUTORIAL",
+          "depicts": "A hand holds a blue folding multi-tool with a hex key pressed into the brass Schrader valve on a bicycle rim. Source picture from Tire and Tube Removal and Installation | Park Tool (cropped and highlighted by AI vision); a real reference, not your hardware.",
+          "fallback": {
+            "line1": "LET ALL AIR OUT",
+            "line2": "PICTURE ON YOUR PHONE"
+          },
+          "fov_note": null,
+          "reference_url": "https://www.parktool.com/en-us/blog/repair-help/tire-and-tube-removal-and-installation"
+        }
+      ]
+    },
+    {
+      "id": "bike_flat_tire_deflate_dunlop",
+      "title": "Deflate Dunlop valve",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "bike_flat_tire_deflate_dunlop.where",
+          "title": "DEFLATE DUNLOP VALVE",
+          "image": "knowledge/live/compiled/guides/bike_flat_tire_deflate_dunlop/where.png",
+          "phone_image": "knowledge/live/compiled/guides/bike_flat_tire_deflate_dunlop/where.phone.png",
+          "provenance": "WEB TUTORIAL",
+          "depicts": "Fingers gripping and unthreading the knurled cap of a Dunlop valve on a bicycle wheel rim. Source picture from Tire and Tube Removal and Installation | Park Tool (cropped and highlighted by AI vision); a real reference, not your hardware.",
+          "fallback": {
+            "line1": "LET ALL AIR OUT",
+            "line2": "PICTURE ON YOUR PHONE"
+          },
+          "fov_note": null,
+          "reference_url": "https://www.parktool.com/en-us/blog/repair-help/tire-and-tube-removal-and-installation"
+        }
+      ]
+    },
+    {
+      "id": "bike_flat_tire_remove_tire",
+      "title": "Remove tire and tube",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "bike_flat_tire_remove_tire.where",
+          "title": "REMOVE TIRE AND TUBE",
+          "image": "knowledge/live/compiled/guides/bike_flat_tire_remove_tire/where.png",
+          "phone_image": "knowledge/live/compiled/guides/bike_flat_tire_remove_tire/where.phone.png",
+          "provenance": "WEB TUTORIAL",
+          "depicts": "Hands insert a blue tire lever under the bead of a knobby mountain bike tire on a spoked wheel near the valve. Source picture from Tire and Tube Removal and Installation | Park Tool (cropped and highlighted by AI vision); a real reference, not your hardware.",
+          "fallback": {
+            "line1": "TAKE TIRE AND TUBE OFF",
+            "line2": "PICTURE ON YOUR PHONE"
+          },
+          "fov_note": null,
+          "reference_url": "https://www.parktool.com/en-us/blog/repair-help/tire-and-tube-removal-and-installation"
+        }
+      ]
+    },
+    {
+      "id": "bike_flat_tire_find_hole",
+      "title": "Find the hole in tube",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "bike_flat_tire_find_hole.where",
+          "title": "FIND THE HOLE IN TUBE",
+          "image": "knowledge/live/compiled/guides/bike_flat_tire_find_hole/where.png",
+          "phone_image": "knowledge/live/compiled/guides/bike_flat_tire_find_hole/where.phone.png",
+          "provenance": "WEB TUTORIAL",
+          "depicts": "A mechanic holds an inflated inner tube next to his ear, listening for hissing air from a leak. Source picture from Tire and Tube Removal and Installation | Park Tool (cropped and highlighted by AI vision); a real reference, not your hardware.",
+          "fallback": {
+            "line1": "FIND THE HOLE",
+            "line2": "PICTURE ON YOUR PHONE"
+          },
+          "fov_note": null,
+          "reference_url": "https://www.parktool.com/en-us/blog/repair-help/tire-and-tube-removal-and-installation"
+        },
+        {
+          "view": "correct",
+          "step_id": "bike_flat_tire_find_hole.correct",
+          "title": "RESULT",
+          "image": "knowledge/live/compiled/guides/bike_flat_tire_find_hole/correct.png",
+          "phone_image": "knowledge/live/compiled/guides/bike_flat_tire_find_hole/correct.phone.png",
+          "provenance": "WEB TUTORIAL",
+          "depicts": "Hands marking a bicycle inner tube with a marker, with a circled hole surrounded by four pen marks. Source picture from Tire and Tube Removal and Installation | Park Tool (cropped and highlighted by AI vision); a real reference, not your hardware.",
+          "fallback": {
+            "line1": "FIND THE HOLE",
+            "line2": "PICTURE ON YOUR PHONE"
+          },
+          "fov_note": null,
+          "reference_url": "https://www.parktool.com/en-us/blog/repair-help/tire-and-tube-removal-and-installation"
+        }
+      ]
+    },
+    {
+      "id": "bike_flat_tire_inspect_tire_rim",
+      "title": "Find cause in tire/rim",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "bike_flat_tire_inspect_tire_rim.where",
+          "title": "FIND CAUSE IN TIRE/RIM",
+          "image": "knowledge/live/compiled/guides/bike_flat_tire_inspect_tire_rim/where.png",
+          "phone_image": "knowledge/live/compiled/guides/bike_flat_tire_inspect_tire_rim/where.phone.png",
+          "provenance": "WEB TUTORIAL",
+          "depicts": "Needle-nose pliers about to pull a small thorn embedded in a knobby bike tire tread. Source picture from Tire and Tube Removal and Installation | Park Tool (cropped and highlighted by AI vision); a real reference, not your hardware.",
+          "fallback": {
+            "line1": "CHECK TIRE AND RIM",
+            "line2": "PICTURE ON YOUR PHONE"
+          },
+          "fov_note": null,
+          "reference_url": "https://www.parktool.com/en-us/blog/repair-help/tire-and-tube-removal-and-installation"
+        }
+      ]
+    },
+    {
+      "id": "bike_flat_tire_patch_tube",
+      "title": "Patch the tube",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "bike_flat_tire_patch_tube.where",
+          "title": "PATCH THE TUBE",
+          "image": "knowledge/live/compiled/guides/bike_flat_tire_patch_tube/where.png",
+          "phone_image": "knowledge/live/compiled/guides/bike_flat_tire_patch_tube/where.phone.png",
+          "provenance": "WEB TUTORIAL",
+          "depicts": "Fingers pressing a pre-glued patch onto a black inner tube on a wooden bench, with the peeled instruction backing lying nearby. Source picture from How to Patch a Tire and Tube | Park Tool (cropped and highlighted by AI vision); a real reference, not your hardware.",
+          "fallback": {
+            "line1": "PATCH THE HOLE",
+            "line2": "PICTURE ON YOUR PHONE"
+          },
+          "fov_note": null,
+          "reference_url": "https://www.parktool.com/en-us/blog/repair-help/inner-tube-repair"
+        }
+      ]
+    },
+    {
+      "id": "bike_flat_tire_install_tube",
+      "title": "Put tube and tire back",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "bike_flat_tire_install_tube.where",
+          "title": "PUT TUBE AND TIRE BACK",
+          "image": "knowledge/live/compiled/guides/bike_flat_tire_install_tube/where.png",
+          "phone_image": "knowledge/live/compiled/guides/bike_flat_tire_install_tube/where.phone.png",
+          "provenance": "WEB TUTORIAL",
+          "depicts": "A Schrader-style tube valve poking through the rim hole between spokes, tilted rather than pointing straight at the hub. Source picture from Tire and Tube Removal and Installation | Park Tool (cropped and highlighted by AI vision); a real reference, not your hardware.",
+          "fallback": {
+            "line1": "FIT TUBE AND TIRE",
+            "line2": "PICTURE ON YOUR PHONE"
+          },
+          "fov_note": null,
+          "reference_url": "https://www.parktool.com/en-us/blog/repair-help/tire-and-tube-removal-and-installation"
+        }
+      ]
+    },
+    {
+      "id": "bike_flat_tire_inflate_tire",
+      "title": "Inflate and check",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "bike_flat_tire_inflate_tire.where",
+          "title": "INFLATE AND CHECK",
+          "image": "knowledge/live/compiled/guides/bike_flat_tire_inflate_tire/where.png",
+          "phone_image": "knowledge/live/compiled/guides/bike_flat_tire_inflate_tire/where.phone.png",
+          "provenance": "WEB TUTORIAL",
+          "depicts": "Close-up of a knobby bicycle tire seated on an aluminum rim, showing the sidewall pressure markings and the bead molding line just above the rim edge. Source picture from Tire and Tube Removal and Installation | Park Tool (cropped and highlighted by AI vision); a real reference, not your hardware.",
+          "fallback": {
+            "line1": "PUMP UP AND CHECK",
+            "line2": "PICTURE ON YOUR PHONE"
+          },
+          "fov_note": null,
+          "reference_url": "https://www.parktool.com/en-us/blog/repair-help/tire-and-tube-removal-and-installation"
+        }
+      ]
+    }
+  ],
+  "goal_mode": "fix",
+  "step_image": "where",
+  "aliases": [
+    "bicycle puncture repair",
+    "change a bike tube",
+    "fix a flat bike tire",
+    "flat tire on my bike",
+    "patch a bicycle tube",
+    "repair bike tire puncture",
+    "replace bike inner tube"
+  ],
+  "task_kind": "repair",
+  "review": "AI-compiled from the cited pages; every step's quote checked verbatim by code; not human-reviewed."
+}

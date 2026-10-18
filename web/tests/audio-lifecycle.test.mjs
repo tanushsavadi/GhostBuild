@@ -27,7 +27,7 @@ class Events {
   emit(type, detail) {this.dispatchEvent({type, detail});}
 }
 
-async function browser({permissionPending = false, sessionPending = false} = {}) {
+async function browser({permissionPending = false, sessionPending = false, tts = false} = {}) {
   const elements = Object.fromEntries(['ptt', 'voice-status', 'voice-consent', 'tts-enabled', 'tts-volume', 'audio-stop', 'audio-badge'].map(id => {
     const element = new Events();
     Object.assign(element, {checked:false, disabled:false, textContent:'', value:'0.8', classList:{toggle(){}}});
@@ -60,8 +60,16 @@ async function browser({permissionPending = false, sessionPending = false} = {})
     }
   }
   window.AudioContext = FakeContext;
+  const players = [];
+  class FakeAudio {
+    constructor(src) {this.src = src; this.volume = 1; this.paused = false; players.push(this);}
+    play() {return Promise.resolve();}
+    pause() {this.paused = true;}
+    end() {this.onended?.();}
+  }
+  class FakeURL extends URL {static createObjectURL() {return 'blob:test';} static revokeObjectURL() {}}
   const sandbox = {
-    window, document, location:{search:'', origin:'https://phone.test'}, URL, URLSearchParams,
+    window, document, location:{search:'', origin:'https://phone.test'}, URL:FakeURL, URLSearchParams, Audio:FakeAudio,
     AbortController, Uint8Array, DataView, Number, JSON,
     CustomEvent:class {constructor(type, init = {}) {this.type = type; this.detail = init.detail;}},
     WebSocket:FakeSocket,
@@ -70,7 +78,8 @@ async function browser({permissionPending = false, sessionPending = false} = {})
     clearTimeout(id) {timers.delete(id);},
     fetch(url, options = {}) {
       calls.push({url, options});
-      if (url.endsWith('/voice/status')) return Promise.resolve({ok:true, json:async () => ({stt:true, tts:false})});
+      if (url.endsWith('/voice/status')) return Promise.resolve({ok:true, json:async () => ({stt:true, tts})});
+      if (url.endsWith('/voice/speak')) return Promise.resolve({ok:true, blob:async () => ({})});
       if (url.endsWith('/session')) {
         if (!sessionPending) return Promise.resolve({ok:true, json:async () => ({id:'session-test'})});
         options.signal.addEventListener('abort', () => session.reject(new Error('aborted')), {once:true});
@@ -102,7 +111,7 @@ async function browser({permissionPending = false, sessionPending = false} = {})
   function feed(samples = new Float32Array(2048).fill(0.25)) {
     contexts.at(-1).processors.at(-1).onaudioprocess({inputBuffer:{getChannelData:() => samples}});
   }
-  return {elements, document, window, permission, stream, track, calls, sockets, contexts, timers, advance, start, listen, feed,
+  return {elements, document, window, permission, stream, track, calls, sockets, contexts, timers, advance, start, listen, feed, players,
     micCalls:() => micCalls, pcm16:window.GBAudio.pcm16};
 }
 
@@ -206,4 +215,31 @@ test('PCM conversion clamps finite values, writes little endian, resamples and r
   assert.deepEqual(decode(b.pcm16(new Float32Array([1, 1, 1, -1, -1, -1]), 48000)), [32767, -32768]);
   assert.equal(b.pcm16(new Float32Array(441), 44100).length, 320);
   for (const rate of [8000, NaN, Infinity, 0]) assert.equal(b.pcm16(new Float32Array([1]), rate).length, 0);
+});
+
+
+test('a long spoken answer is read in full in sentence parts, and new input stops the rest', async () => {
+  const b = await browser({tts:true});
+  b.elements['tts-enabled'].checked = true;
+  const sentence = 'Turn the round lock a quarter turn until it bites into the bolt head. ';
+  const answer = sentence.repeat(20).trim(); // ~1400 characters
+  b.window.emit('ghostbuild:answer', {text:answer});
+  const spoken = [];
+  for (let i = 0; i < 6; i++) {
+    await flush(); await flush();
+    const speaks = b.calls.filter(call => call.url.endsWith('/voice/speak'));
+    if (speaks.length > spoken.length) spoken.push(JSON.parse(speaks.at(-1).options.body).text);
+    b.players.at(-1)?.end();
+  }
+  assert.ok(spoken.length >= 3 && spoken.length <= 4);
+  assert.ok(spoken.every(part => part.length <= 480));
+  assert.equal(spoken.join(' '), answer); // nothing cut off (under the 4-part bound)
+
+  b.window.emit('ghostbuild:answer', {text:answer});
+  await flush(); await flush();
+  const before = b.calls.filter(call => call.url.endsWith('/voice/speak')).length;
+  b.window.emit('ghostbuild:input', {});
+  b.players.at(-1)?.end();
+  for (let i = 0; i < 4; i++) await flush();
+  assert.equal(b.calls.filter(call => call.url.endsWith('/voice/speak')).length, before); // stopped after typing
 });

@@ -9,7 +9,7 @@ import json
 import logging
 import os
 import secrets
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Callable, Optional
 
@@ -56,12 +56,16 @@ class SessionManager:
         voice_on: Optional[Callable[[], bool]] = None,
         research_progress: Optional[Callable[[], Optional[dict]]] = None,
         on_convo_cancel: Optional[Callable[[str], None]] = None,
+        recover: Optional[Callable[[str], Optional[Card]]] = None,
     ) -> None:
         self.hud = hud
+        self._recover = recover or (lambda card_id: None)  # a persisted card not in the catalogue (e.g. a researched draft)
+        self._unrestored: Optional[tuple[str, str]] = None  # (session, card) whose card could not be loaded at restore
         self.clock = clock
         self._cards = cards
         self._research_progress = research_progress or (lambda: None)
         self._on_convo_cancel = on_convo_cancel or (lambda sid: None)
+        self._discovery: Optional[tuple[str, Screen]] = None
         self._convo: Optional[dict] = None  # an assistant conversation in progress on the glasses: {sid, cue}
         self._voice_on = voice_on or (lambda: False)  # when spoken goals are available the first screen says so
         self._startable = startable or cards  # cards that can START a task now (a fault card needs its device reporting); _cards resolves running ones
@@ -137,10 +141,18 @@ class SessionManager:
     def restore(self) -> None:
         """After a backend restart: put the active session's UI/engine card back."""
         s = self.active
-        if s is not None and s.phase == "task" and s.card_id:
-            card = self._card(s.card_id)
+        if s is not None and s.card_id and (s.phase == "task" or self._unrestored == (s.id, s.card_id)):
+            card = self._card(s.card_id) or self._recover(s.card_id)
             if card is not None:
+                self._unrestored = None
+                s.phase = "task"
                 self._on_task(card)
+            else:
+                # The card is not loadable (yet: an adapter may attach it and restore again). Show the menu rather than
+                # falling through to another engine; nothing is persisted, so a later restore can still resume it.
+                self._record("session", event="restore_missing_card", card_id=s.card_id)
+                self._unrestored = (s.id, s.card_id)
+                s.phase = "menu"
         self._render()
 
     # ------------------------------------------------------------------ views
@@ -361,6 +373,12 @@ class SessionManager:
         if changed:
             self._render()
 
+    def show_discovery(self, sid: str, screen: Optional[Screen]) -> None:
+        self._discovery = (sid, replace(screen, source="manual")) if screen is not None else None
+        self._flash = None
+        self._awake_at = self.clock.now_ms()
+        self._render()
+
     def show_convo(self, sid: str, cue: Cue) -> None:
         """Put the assistant's question (or THINKING) on the glasses for this session's front screen."""
         self._convo = {"sid": sid, "cue": cue}
@@ -450,6 +468,8 @@ class SessionManager:
             screen = self._flash[0]
         elif s is not None and s.phase == "welcome":
             screen = Screen.welcome(Cue(line1="GHOSTBUILD", line2="VOICE VIA ELEVENLABS" if self._voice_on() else "HANDS BUSY. MIND CLEAR."), WELCOME_MS)
+        elif s is not None and s.phase == "menu" and self._discovery is not None and self._discovery[0] == s.id:
+            screen = self._discovery[1]
         elif s is not None and s.phase == "menu" and self._research is not None and self._research["sid"] == s.id and REST_RESEARCH_MS > 0 and now - self._awake_at >= REST_RESEARCH_MS:
             screen = Screen.quiet()  # still researching, but the display rests; completion or a gesture wakes it
         elif s is not None and s.phase == "menu" and self._research is not None and self._research["sid"] == s.id:

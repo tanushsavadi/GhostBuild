@@ -44,6 +44,51 @@
       "title": "Check",
       "type": "object"
     },
+    "Choice": {
+      "additionalProperties": false,
+      "description": "One answer to a diagnostic question step. Choosing it records what the person reported (HUMAN CONFIRMED observation,\nnever a measurement) and moves to `next`.",
+      "properties": {
+        "id": {
+          "maxLength": 40,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "description": "glasses option text, ALL CAPS",
+          "maxLength": 26,
+          "title": "Label",
+          "type": "string"
+        },
+        "next": {
+          "description": "step id to continue with",
+          "title": "Next",
+          "type": "string"
+        },
+        "records": {
+          "default": "",
+          "description": "the observation this answer records, in plain words",
+          "maxLength": 160,
+          "title": "Records",
+          "type": "string"
+        },
+        "say": {
+          "description": "lowercase phrases a person might say for this answer",
+          "items": {
+            "type": "string"
+          },
+          "title": "Say",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "next"
+      ],
+      "title": "Choice",
+      "type": "object"
+    },
     "Cite": {
       "additionalProperties": false,
       "properties": {
@@ -486,6 +531,15 @@
     "Step": {
       "additionalProperties": false,
       "properties": {
+        "choices": {
+          "description": "answers for a question step",
+          "items": {
+            "$ref": "#/$defs/Choice"
+          },
+          "maxItems": 4,
+          "title": "Choices",
+          "type": "array"
+        },
         "cites": {
           "description": "where in a source this step comes from (e.g. manual page); phone shows the link",
           "items": {
@@ -503,6 +557,13 @@
           "description": "phone-only full explanation",
           "maxLength": 600,
           "title": "Detail",
+          "type": "string"
+        },
+        "expected": {
+          "default": "",
+          "description": "how the person can tell this step worked, from the source",
+          "maxLength": 300,
+          "title": "Expected",
           "type": "string"
         },
         "faq": {
@@ -540,6 +601,31 @@
           "default": null,
           "description": "authored plain-language action and method for the main step; exact identifiers stay in parts/detail. Legacy cue is the fallback; preserve safety quantities/values."
         },
+        "kind": {
+          "default": "action",
+          "description": "question = diagnostic choice; outcome = a branch result; stop = stop safely / get professional help",
+          "enum": [
+            "action",
+            "question",
+            "outcome",
+            "stop"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "next": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "step id after this action (branching guides); default is the following step",
+          "title": "Next"
+        },
         "parts": {
           "description": "parts/fasteners this step uses, as the source prints them (assembly manuals, parts lists)",
           "items": {
@@ -555,10 +641,29 @@
           "title": "Requires",
           "type": "array"
         },
+        "risk": {
+          "default": "low",
+          "description": "hazard = deliberate double confirmation before it can be marked done",
+          "enum": [
+            "low",
+            "caution",
+            "hazard"
+          ],
+          "title": "Risk",
+          "type": "string"
+        },
         "title": {
           "maxLength": 28,
           "title": "Title",
           "type": "string"
+        },
+        "tools": {
+          "description": "tools/materials this step needs, as the source names them",
+          "items": {
+            "type": "string"
+          },
+          "title": "Tools",
+          "type": "array"
         },
         "troubleshoot": {
           "items": {
@@ -769,6 +874,20 @@
       "title": "Provenance",
       "type": "string"
     },
+    "review": {
+      "anyOf": [
+        {
+          "maxLength": 400,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "who checked this card against its sources, how, and when",
+      "title": "Review"
+    },
     "sources": {
       "items": {
         "$ref": "#/$defs/Source_"
@@ -801,6 +920,25 @@
       },
       "title": "Steps",
       "type": "array"
+    },
+    "task_kind": {
+      "anyOf": [
+        {
+          "enum": [
+            "assembly",
+            "diagnosis",
+            "repair",
+            "configuration",
+            "identification"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Task Kind"
     },
     "tests": {
       "items": {

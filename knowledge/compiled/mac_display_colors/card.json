@@ -1,0 +1,516 @@
+{
+  "v": 2,
+  "card_id": "mac_display_colors",
+  "title": "Mac screen colors wrong",
+  "provenance": "MANUFACTURER DOC",
+  "sources": [
+    {
+      "id": "src0",
+      "kind": "MANUFACTURER DOC",
+      "title": "If your Mac display doesn’t look right - Apple Support",
+      "url": "https://support.apple.com/guide/mac-help/if-your-display-doesnt-look-right-mchlp2906/12.0/mac/12.0"
+    },
+    {
+      "id": "src1",
+      "kind": "MANUFACTURER DOC",
+      "title": "Change Display settings for accessibility on Mac - Apple Support",
+      "url": "https://support.apple.com/guide/mac-help/change-display-settings-for-accessibility-unac089/mac"
+    },
+    {
+      "id": "src2",
+      "kind": "MANUFACTURER DOC",
+      "title": "Change your Mac display’s color profile - Apple Support",
+      "url": "https://support.apple.com/guide/mac-help/change-your-displays-color-profile-mchlf3ddc60d/mac"
+    },
+    {
+      "id": "src3",
+      "kind": "MANUFACTURER DOC",
+      "title": "If your Mac doesn’t recognize an external display - Apple Support",
+      "url": "https://support.apple.com/guide/mac-help/mac-recognize-external-display-mchla25b377d/14.0/mac/14.0"
+    },
+    {
+      "id": "src4",
+      "kind": "MANUFACTURER DOC",
+      "title": "Start up your Mac in safe mode - Apple Support",
+      "url": "https://support.apple.com/guide/mac-help/start-up-your-mac-in-safe-mode-mh21245/mac"
+    },
+    {
+      "id": "src5",
+      "kind": "MANUFACTURER DOC",
+      "title": "Use Apple Diagnostics to test your Mac - Apple Support",
+      "url": "https://support.apple.com/en-us/102550"
+    }
+  ],
+  "steps": [
+    {
+      "id": "q_which_display",
+      "title": "Which screen is affected?",
+      "cue": {
+        "line1": "WHICH SCREEN IS WRONG?",
+        "line2": "BUILT-IN, EXTERNAL, BOTH"
+      },
+      "detail": "Decide whether the wrong colors appear on the Mac's built-in display, on an external display connected to the Mac, or on both. For an external display, start by checking its connection; otherwise go straight to the color settings checks.",
+      "warnings": [],
+      "kind": "question",
+      "next": null,
+      "expected": "",
+      "tools": [],
+      "risk": "low",
+      "guide_id": null,
+      "choices": [
+        {
+          "id": "c_builtin",
+          "label": "BUILT-IN SCREEN",
+          "say": [
+            "built-in",
+            "the laptop screen",
+            "the mac screen",
+            "internal display"
+          ],
+          "next": "check_color_filters",
+          "records": "Wrong colors on the built-in display only"
+        },
+        {
+          "id": "c_external",
+          "label": "EXTERNAL DISPLAY",
+          "say": [
+            "external",
+            "the monitor",
+            "second screen",
+            "external display"
+          ],
+          "next": "reconnect_external",
+          "records": "Wrong colors on an external display only"
+        },
+        {
+          "id": "c_both",
+          "label": "BOTH",
+          "say": [
+            "both",
+            "all screens",
+            "both of them"
+          ],
+          "next": "check_color_filters",
+          "records": "Wrong colors on both built-in and external displays"
+        }
+      ],
+      "cites": [
+        {
+          "source": "src0",
+          "loc": "quoted passage",
+          "quote": "try one or more of these suggestions",
+          "url": "https://support.apple.com/guide/mac-help/if-your-display-doesnt-look-right-mchlp2906/12.0/mac/12.0"
+        }
+      ]
+    },
+    {
+      "id": "reconnect_external",
+      "title": "Reconnect external display",
+      "cue": {
+        "line1": "UNPLUG THE MONITOR",
+        "line2": "THEN PLUG IT BACK IN"
+      },
+      "detail": "Unplug the display from your Mac, then plug it back in. You can also put your Mac to sleep and then wake it.",
+      "warnings": [],
+      "kind": "action",
+      "next": null,
+      "expected": "",
+      "tools": [],
+      "risk": "low",
+      "guide_id": null,
+      "choices": [],
+      "cites": [
+        {
+          "source": "src3",
+          "loc": "quoted passage",
+          "quote": "Unplug the display from your Mac, then plug it back in.",
+          "url": "https://support.apple.com/guide/mac-help/mac-recognize-external-display-mchla25b377d/14.0/mac/14.0"
+        }
+      ]
+    },
+    {
+      "id": "check_cable_adapter",
+      "title": "Check cable and adapter",
+      "cue": {
+        "line1": "CHECK CABLE AND ADAPTER",
+        "line2": "SECURE, CORRECT PORT"
+      },
+      "detail": "Make sure the cable is securely connected to the correct port, that you are using the correct cable for your display, and the correct adapter if one is needed. Good quality cables and adapters are recommended. To check which displays your Mac supports: Apple menu > System Settings, then Help in the menu bar > [your Mac's name] Specifications > Display Support or Video Support. For a third-party display, follow the manufacturer's connection guidelines.",
+      "warnings": [],
+      "kind": "action",
+      "next": null,
+      "expected": "",
+      "tools": [
+        "display cable",
+        "adapter (if used)"
+      ],
+      "risk": "low",
+      "guide_id": "mac_display_colors_check_cable_adapter",
+      "choices": [],
+      "cites": [
+        {
+          "source": "src3",
+          "loc": "quoted passage",
+          "quote": "Make sure the cable you are using is securely connected to the correct port.",
+          "url": "https://support.apple.com/guide/mac-help/mac-recognize-external-display-mchla25b377d/14.0/mac/14.0"
+        }
+      ]
+    },
+    {
+      "id": "check_color_filters",
+      "title": "Check color filters",
+      "cue": {
+        "line1": "CHECK COLOR FILTERS",
+        "line2": "ACCESSIBILITY > DISPLAY"
+      },
+      "detail": "Choose Apple menu > System Settings, click Accessibility in the sidebar, then click Display (you may need to scroll down). Look at Color Filters: filters such as Grayscale, Red/Green, Green/Red, Blue/Yellow or Color Tint change display colors. Also check Invert colors. If one is on and you did not intend it, turn it off. Note: Accessibility Shortcuts can quickly turn Color Filters and Invert Colors on or off.",
+      "warnings": [],
+      "kind": "action",
+      "next": null,
+      "expected": "",
+      "tools": [],
+      "risk": "low",
+      "guide_id": "mac_display_colors_check_color_filters",
+      "choices": [],
+      "cites": [
+        {
+          "source": "src1",
+          "loc": "quoted passage",
+          "quote": "Adjust display colors using the selected filter type.",
+          "url": "https://support.apple.com/guide/mac-help/change-display-settings-for-accessibility-unac089/mac"
+        }
+      ]
+    },
+    {
+      "id": "check_color_profile",
+      "title": "Check color profile",
+      "cue": {
+        "line1": "CHECK COLOR PROFILE",
+        "line2": "SETTINGS > DISPLAYS"
+      },
+      "detail": "Choose Apple menu > System Settings, then click Displays in the sidebar. Click the pop-up menu next to Color profile and choose the profile designed for your display (your Mac selects the recommended profile by default). Some models (Apple Pro Display XDR, Apple Studio Display XDR, Apple Studio Display, 14-inch or 16-inch MacBook Pro 2021 or later) use built-in reference modes instead. If that doesn't work, you can try calibrating the display.",
+      "warnings": [],
+      "kind": "action",
+      "next": null,
+      "expected": "",
+      "tools": [],
+      "risk": "low",
+      "guide_id": "mac_display_colors_check_color_profile",
+      "choices": [],
+      "cites": [
+        {
+          "source": "src2",
+          "loc": "quoted passage",
+          "quote": "then choose the profile you want to use",
+          "url": "https://support.apple.com/guide/mac-help/change-your-displays-color-profile-mchlf3ddc60d/mac"
+        }
+      ]
+    },
+    {
+      "id": "q_colors_fixed",
+      "title": "Colors look right now?",
+      "cue": {
+        "line1": "COLORS LOOK RIGHT NOW?",
+        "line2": ""
+      },
+      "detail": "After the checks so far, look at the screen again. Do the colors look normal?",
+      "warnings": [],
+      "kind": "question",
+      "next": null,
+      "expected": "",
+      "tools": [],
+      "risk": "low",
+      "guide_id": null,
+      "choices": [
+        {
+          "id": "c_fixed_yes",
+          "label": "YES, LOOKS NORMAL",
+          "say": [
+            "yes",
+            "looks normal",
+            "fixed",
+            "colors are fine"
+          ],
+          "next": "out_fixed",
+          "records": "Colors normal after settings/connection checks"
+        },
+        {
+          "id": "c_fixed_no",
+          "label": "NO, STILL WRONG",
+          "say": [
+            "no",
+            "still green",
+            "still wrong",
+            "not fixed"
+          ],
+          "next": "safe_mode",
+          "records": "Colors still wrong after settings/connection checks"
+        }
+      ],
+      "cites": [
+        {
+          "source": "src0",
+          "loc": "quoted passage",
+          "quote": "If the colors don’t look right: Try using the display profile designed for your display.",
+          "url": "https://support.apple.com/guide/mac-help/if-your-display-doesnt-look-right-mchlp2906/12.0/mac/12.0"
+        }
+      ]
+    },
+    {
+      "id": "out_fixed",
+      "title": "Colors restored",
+      "cue": {
+        "line1": "COLORS LOOK RIGHT",
+        "line2": "YOU ARE DONE"
+      },
+      "detail": "The colors look right after one of the checks. This suggests the issue was related to the setting or connection you just changed. Keep that setting as it is.",
+      "warnings": [],
+      "kind": "outcome",
+      "next": null,
+      "expected": "",
+      "tools": [],
+      "risk": "low",
+      "guide_id": null,
+      "choices": [],
+      "cites": [
+        {
+          "source": "src0",
+          "loc": "quoted passage",
+          "quote": "try one or more of these suggestions",
+          "url": "https://support.apple.com/guide/mac-help/if-your-display-doesnt-look-right-mchlp2906/12.0/mac/12.0"
+        }
+      ]
+    },
+    {
+      "id": "safe_mode",
+      "title": "Start up in safe mode",
+      "cue": {
+        "line1": "RESTART IN SAFE MODE",
+        "line2": "HOLD SHIFT AT STARTUP"
+      },
+      "detail": "Check your Mac type in Apple menu > About This Mac (Chip = Apple silicon, Processor = Intel). Apple silicon: Apple menu > Shut Down, wait until the screen is black and lights are off, press and hold the power button until \"Loading startup options\" appears, then press and hold Shift and click Continue in Safe Mode. Intel: turn on or restart, then immediately press and hold Shift until the login window appears; you might need to log in again.",
+      "warnings": [],
+      "kind": "action",
+      "next": null,
+      "expected": "\"Safe Boot\" appears in the menu bar at the login window. In System Information > Software, Boot Mode shows Safe.",
+      "tools": [],
+      "risk": "low",
+      "guide_id": null,
+      "choices": [],
+      "cites": [
+        {
+          "source": "src4",
+          "loc": "quoted passage",
+          "quote": "Press and hold the Shift key, then click Continue in Safe Mode.",
+          "url": "https://support.apple.com/guide/mac-help/start-up-your-mac-in-safe-mode-mh21245/mac"
+        }
+      ]
+    },
+    {
+      "id": "q_safe_result",
+      "title": "Colors right in safe mode?",
+      "cue": {
+        "line1": "COLORS OK IN SAFE MODE?",
+        "line2": ""
+      },
+      "detail": "While the Mac is in safe mode, look at the affected display. Do the colors look normal?",
+      "warnings": [],
+      "kind": "question",
+      "next": null,
+      "expected": "",
+      "tools": [],
+      "risk": "low",
+      "guide_id": null,
+      "choices": [
+        {
+          "id": "c_safe_ok",
+          "label": "YES, NORMAL IN SAFE MODE",
+          "say": [
+            "yes",
+            "normal in safe mode",
+            "looks fine now"
+          ],
+          "next": "out_startup_software",
+          "records": "Colors normal in safe mode"
+        },
+        {
+          "id": "c_safe_bad",
+          "label": "NO, STILL WRONG",
+          "say": [
+            "no",
+            "still wrong",
+            "still green"
+          ],
+          "next": "run_diagnostics",
+          "records": "Colors still wrong in safe mode"
+        }
+      ],
+      "cites": [
+        {
+          "source": "src4",
+          "loc": "quoted passage",
+          "quote": "can help you identify whether issues you’re experiencing are caused by software that loads as your Mac starts up.",
+          "url": "https://support.apple.com/guide/mac-help/start-up-your-mac-in-safe-mode-mh21245/mac"
+        }
+      ]
+    },
+    {
+      "id": "out_startup_software",
+      "title": "Startup software suspected",
+      "cue": {
+        "line1": "OK IN SAFE MODE",
+        "line2": "MAY BE STARTUP SOFTWARE"
+      },
+      "detail": "Colors look normal in safe mode. This suggests the issue may involve software that loads as your Mac starts up, though it does not confirm a cause. The sources do not describe how to find or remove that software.",
+      "warnings": [],
+      "kind": "outcome",
+      "next": null,
+      "expected": "",
+      "tools": [],
+      "risk": "low",
+      "guide_id": null,
+      "choices": [],
+      "cites": [
+        {
+          "source": "src4",
+          "loc": "quoted passage",
+          "quote": "Starting up your Mac in safe mode can help you identify whether issues you’re experiencing are caused by software that loads as your Mac starts up.",
+          "url": "https://support.apple.com/guide/mac-help/start-up-your-mac-in-safe-mode-mh21245/mac"
+        }
+      ]
+    },
+    {
+      "id": "run_diagnostics",
+      "title": "Run Apple Diagnostics",
+      "cue": {
+        "line1": "RUN APPLE DIAGNOSTICS",
+        "line2": "FOLLOW ON-SCREEN STEPS"
+      },
+      "detail": "Install the latest macOS updates if you can. Shut down. Disconnect all external devices except keyboard, mouse, display, Ethernet and AC power. Place the Mac on a hard, flat, stable surface with good ventilation. Apple silicon: press and hold the power button until Options appears, release, then press and hold Command-D until it restarts. Intel: turn on and immediately hold D (or Option-D) until a progress bar or language choice appears. Follow the onscreen instructions; in macOS Tahoe 26 and later choose the built-in display diagnostic.",
+      "warnings": [
+        "Keep the Mac on a hard, flat, stable surface with good ventilation."
+      ],
+      "kind": "action",
+      "next": null,
+      "expected": "When testing is complete, Apple Diagnostics shows the results, possibly with reference codes.",
+      "tools": [],
+      "risk": "caution",
+      "guide_id": null,
+      "choices": [],
+      "cites": [
+        {
+          "source": "src5",
+          "loc": "quoted passage",
+          "quote": "you can use Apple Diagnostics to help determine which hardware component might be at fault.",
+          "url": "https://support.apple.com/en-us/102550"
+        }
+      ]
+    },
+    {
+      "id": "stop_contact_apple",
+      "title": "Contact Apple service",
+      "cue": {
+        "line1": "STOP: CONTACT APPLE",
+        "line2": "NOTE THE REFERENCE CODE"
+      },
+      "detail": "If you can't resolve the issue, you might need service. If you have an Apple display and can't correct the problem, contact an Apple Authorized Service Provider. Provide any reference code from Apple Diagnostics when taking your Mac to an Apple Authorized Service Provider, Apple Store, or Independent Repair Provider. Don't attempt to repair the display yourself, because any damage you cause is not covered under your warranty.",
+      "warnings": [
+        "Don't attempt to repair the display yourself; damage you cause is not covered under your warranty."
+      ],
+      "kind": "stop",
+      "next": null,
+      "expected": "",
+      "tools": [],
+      "risk": "hazard",
+      "guide_id": null,
+      "choices": [],
+      "cites": [
+        {
+          "source": "src0",
+          "loc": "quoted passage",
+          "quote": "contact an Apple Authorized Service Provider for more help",
+          "url": "https://support.apple.com/guide/mac-help/if-your-display-doesnt-look-right-mchlp2906/12.0/mac/12.0"
+        }
+      ]
+    }
+  ],
+  "guides": [
+    {
+      "id": "mac_display_colors_check_color_profile",
+      "title": "Check color profile",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "mac_display_colors_check_color_profile.where",
+          "title": "WHERE TO CLICK",
+          "image": "knowledge/live/compiled/guides/mac_display_colors_check_color_profile/where.png",
+          "phone_image": "knowledge/live/compiled/guides/mac_display_colors_check_color_profile/where.phone.png",
+          "provenance": "DETERMINISTIC",
+          "depicts": "GhostBuild drawing of the path the source names (Apple menu > System Settings > Displays). Not a screenshot.",
+          "fallback": {
+            "line1": "SYSTEM SETTINGS > DISPLA",
+            "line2": "PATH ON YOUR PHONE"
+          },
+          "fov_note": null,
+          "reference_url": "https://support.apple.com/guide/mac-help/change-your-displays-color-profile-mchlf3ddc60d/mac"
+        }
+      ]
+    },
+    {
+      "id": "mac_display_colors_check_color_filters",
+      "title": "Check color filters",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "mac_display_colors_check_color_filters.where",
+          "title": "WHERE TO CLICK",
+          "image": "knowledge/live/compiled/guides/mac_display_colors_check_color_filters/where.png",
+          "phone_image": "knowledge/live/compiled/guides/mac_display_colors_check_color_filters/where.phone.png",
+          "provenance": "DETERMINISTIC",
+          "depicts": "GhostBuild drawing of the path the source names (Apple menu > System Settings > Accessibility). Not a screenshot.",
+          "fallback": {
+            "line1": "SYSTEM SETTINGS > ACCESS",
+            "line2": "PATH ON YOUR PHONE"
+          },
+          "fov_note": null,
+          "reference_url": "https://support.apple.com/guide/mac-help/change-display-settings-for-accessibility-unac089/mac"
+        }
+      ]
+    },
+    {
+      "id": "mac_display_colors_check_cable_adapter",
+      "title": "Check cable and adapter",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "mac_display_colors_check_cable_adapter.where",
+          "title": "WHERE TO CLICK",
+          "image": "knowledge/live/compiled/guides/mac_display_colors_check_cable_adapter/where.png",
+          "phone_image": "knowledge/live/compiled/guides/mac_display_colors_check_cable_adapter/where.phone.png",
+          "provenance": "DETERMINISTIC",
+          "depicts": "GhostBuild drawing of the path the source names (Apple menu > System Settings). Not a screenshot.",
+          "fallback": {
+            "line1": "APPLE MENU > SYSTEM SETT",
+            "line2": "PATH ON YOUR PHONE"
+          },
+          "fov_note": null,
+          "reference_url": "https://support.apple.com/guide/mac-help/mac-recognize-external-display-mchla25b377d/14.0/mac/14.0"
+        }
+      ]
+    }
+  ],
+  "goal_mode": "fix",
+  "step_image": "where",
+  "aliases": [
+    "external monitor wrong colors mac",
+    "green tint on mac screen",
+    "mac colors look weird",
+    "mac display color off",
+    "mac display wrong colors",
+    "mac screen looks green or shows wrong colors",
+    "mac screen turned green",
+    "macbook screen color problem"
+  ],
+  "task_kind": "diagnosis",
+  "review": "AI-compiled from the cited pages; every step's quote checked verbatim by code; not human-reviewed. Claude review 2026-10-18: colour-filter step uses the menu-path drawing instead of an Apple-logo icon. Software steps use GhostBuild menu-path drawings of the source's own words. Safe-mode step: no picture (its path mixes two different screens). Title shortened for the glasses (was: Mac screen looks "
+}

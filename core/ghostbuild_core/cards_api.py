@@ -58,7 +58,7 @@ def mount_cards_api(app: FastAPI, runtime) -> None:
     async def get_card_by_id(card_id: str) -> Response:
         if not CARD_ID.match(card_id):
             raise HTTPException(status_code=404, detail="unknown card")
-        card = next((c for c in runtime.cards if c.card_id == card_id), None)
+        card = next((c for c in runtime.all_cards() if c.card_id == card_id), None)
         if card is None:
             raise HTTPException(status_code=404, detail="unknown card")
         return Response(content=card.model_dump_json(), media_type="application/json")

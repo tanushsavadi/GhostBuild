@@ -1224,7 +1224,7 @@
         }
       ],
       "instruction": {
-        "line1": "FIT SHELF SUPPORT PINS",
+        "line1": "FIT 8 SHELF SUPPORT PINS",
         "line2": "REST BOTH SHELVES ON THEM"
       }
     },
@@ -1302,7 +1302,7 @@
       ],
       "instruction": {
         "line1": "COVER THE CABLE HOLE",
-        "line2": "PRESS IN THE ROUND CAPS"
+        "line2": "PRESS IN 4 ROUND CAPS"
       }
     }
   ],

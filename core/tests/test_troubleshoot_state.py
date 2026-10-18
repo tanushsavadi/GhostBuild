@@ -44,7 +44,12 @@ def test_current_step_first_and_tried_list_resets_when_a_step_is_confirmed():
     assert ask(r).cue.line1 == "CHECK PIN 9"
     assert ask(r).cue.line1 == "CHECK LED DIRECTION"
     r.wait(2000)
+    r.send("swipe_down")  # reading the answer: pages it, never confirms the step
+    assert r.pb.index == 1 and r.pb.confirmed == ["s0"]
+    r.send("press")  # back to the step
+    r.wait(2000)
     r.send("swipe_down")  # progress: a new situation, suggestions start over
+    assert r.pb.index == 2 and r.pb.confirmed == ["s0", "s1"]
     r.wait(2000)
     again = ask(r)  # now on step 2 (no checks of its own): the confirmed step 1's checks come back from the top
     assert again.cue.line1 == "CHECK PIN 11" and "which you already confirmed" in again.detail

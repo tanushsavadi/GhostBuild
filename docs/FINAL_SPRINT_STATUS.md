@@ -1,5 +1,54 @@
 # Final sprint status
 
+## Latest: adaptive assistant finished by Claude Opus 5.5 (05:35 PDT) — operator :8787 reloaded
+
+Takeover of [CLAUDE_ADAPTIVE_TAKEOVER.md](CLAUDE_ADAPTIVE_TAKEOVER.md). Nothing committed or pushed by Claude (note: four commits at 05:05 on this branch were made outside this session). Evidence: `docs/evidence/adaptive/`.
+
+| Capability | Label | Evidence |
+|---|---|---|
+| Full suite | PASS | `make test`: core 651, Pi 77, knowledge 257, assets 41, IKEA 82, G2 208 (+ `npm run build`), contracts 9 schemas / 22 Py + 22 TS examples, lint-generic, secret scan (824 files); web `node --test` 29; `git diff --check` clean |
+| Four handoff failures | FIXED | Three were obsolete 4 s answer-TTL expectations → now sticky answer + explicit press return (measured-step uncertain TTL asserts kept); research fixture now supplies the tyre setup and `context_sufficient`; new test: a critical unknown blocks research |
+| Full G2 answer pages | SIMULATOR + BROWSER VERIFIED | Official simulator: 4 pages ending "END OF ANSWER", swipes page and clamp at the end, press returns to step 14 with the same diagram, nothing confirmed; press during THINKING returns to the step and the late answer goes to the phone only. Chromium: same paging/return via phone buttons and typed "take me back to my step"; 390 px mobile, no overflow (mirror text overflow fixed). Answers came from a labelled delayed FakeBrain QA harness |
+| Vague "building a white IKEA desk" → photo → manual | SIMULATOR + BROWSER VERIFIED | Real photo shortlist (MICKE/ALEX/IDANÄS), enlarge → choose → cabinet side (remembered if known) → official manual step 1/35 with diagram. Two MICKE sizes exist, so "It's the MICKE" asks which photo/article. Assistant never consulted for identity (FakeBrain calls = 0) |
+| Conversation traces A–H | SCRIPTED (orchestration only) | `core/tests/test_conversation_traces.py`, `integrations/ikea/tests/test_conversation_ikea.py`; FakeBrain plays the model |
+| Live model intake/step quality | LIVE (bounded) | `docs/evidence/adaptive/live-intake-eval.json`: 6 Anthropic requests, 1.9–4.3 s each (fast mode). One targeted question per turn, critical unknowns listed, "I don't know" got a practical check, step-14 explanation grounded in the manual card (3 G2 pages, step unconfirmed). Small sample, not a benchmark |
+| Structured-output schema | FIXED (was broken live) | The enlarged reply models were rejected by the API (`400 Schema is too complex` after ~35 s). The model now fills flat all-required wire shapes (`IntakeWire`/`StepWire`) converted to the existing replies; `max_tokens` 1600; `max_tokens` stop = BrainError |
+| Operator :8787 reload | DONE | Same command, log dir `logs/bench-0445`, `.env` config, stdout `/private/tmp/gb-core-8787.log`; backup `logs/backup-bench-0445-0532`. `/discovery/state` 200. The persisted unidentified CREAO desk draft now reopens as the real MICKE photo shortlist (previously a restart would have shown PI LINK LOST) |
+| Paid calls this session | COUNTED | CREAO 0, ElevenLabs 0. Anthropic: 6 successful eval requests + 1 diagnostic success; the first eval and diagnostics hit the schema error (5 brain calls with fast→standard fallback and SDK retries, plus 2 diagnostic attempts; ≤22 failed HTTP requests); 1 web_search request (11.0 s, ikea.com) at operator startup. 0 since |
+| Physical G2 / microphone / BLE | NOT RUN | Simulator/browser only |
+| Authored MICKE human wording | PENDING HUMAN | Consistency pass restored two dropped quantities (step 33 "FIT 8 SHELF SUPPORT PINS", step 35 "PRESS IN 4 ROUND CAPS"). Steps 3/14/19/22/27 all read "ROUND METAL LOCKS" for three different lock IDs; exact IDs/warnings remain in PARTS/detail. Human PDF spot-check still required |
+
+New flag: `GB_ANSWER_PAGES=0` restores the old short timed answer cue. Operator `.env` still has `GB_CREAO=1`, `GB_LIVE_RESEARCH=1` (max 3): any unfamiliar non-product request in a demo can start a paid CREAO run.
+
+## Latest follow-up: fast reuse + same-step conversation
+
+See [FLUID_ASSISTANT_REPORT.md](FLUID_ASSISTANT_REPORT.md). Generic completed-guide/product/grounded-answer caches now persist; saved matches do not force a new search. Phone instructions + diagram stay left, step-owned questions right; a small “Ask anytime — I’ll keep your place” link focuses input. G2 shows ASK ANYTIME beside the counter and displays each MICKE diagram automatically. Late answers remain on their original step.
+
+Verification: `make test` passed (core 628, Pi 77, knowledge 257, assets 41, IKEA 79, G2 208); web 28. Official simulator 11/11, real Chromium desktop/mobile and offline recovery checked. Q&A orchestration used a labelled mock harness; zero new paid calls. Cached HTTP median 9.81 ms (10 samples). Physical hardware and the human MICKE text spot-check remain pending. All work stays uncommitted; no operator-service or agent-configuration changes.
+
+## Latest: IKEA discovery completion (2026-10-18, Codex takeover)
+
+All work remains uncommitted in `codex/final-sprint`; nothing pushed. See `docs/IKEA_DISCOVERY_REPORT.md` and `docs/IKEA_DISCOVERY_RUNBOOK.md` for full proof and exact interactions. Existing operator services and G2 package were preserved; isolated ports were used for verification.
+
+| Capability | Label | Evidence |
+|---|---|---|
+| Generic product discovery inside existing request flow | CACHED / ENGINE TESTED | Exact article/URL first, cached ranking second, asynchronous official-site search third; remembered product/configuration and reconnect/restart |
+| Phone shortlist | BROWSER VERIFIED | Five actual product photographs with names, colour/size/article, verified-manual badges and honest cache dates; 390 px mobile viewport, no overflow |
+| G2 shortlist photographs (user's clarification) | SIMULATOR VERIFIED | Three numbered product photo thumbnails with names/highlight, then two on page 2; enlarged-photo confirmation, text fallback; existing SDK renderer unchanged |
+| MICKE left/right manuals | CACHED / VALIDATED | Two 35-step cards; 62 guide sets; part-number/printed-quantity cross-check; exact manual crops; step 35's genuine per-configuration difference preserved |
+| Exact demo utterance script | ENGINE TESTED | Description → MICKE → left → step 14 → eight 103430, avoid 110126 → closeup → confirmed step 15; no earlier steps confirmed by jump |
+| Live product retrieval | LIVE VERIFIED | Anthropic web_search_20250305, claude-opus-5-5, ikea.com only; 2 new requests, 0 CREAO calls. Black glass-door description → 5 real validated candidates + PDF checks in 11.675 s; red-cabinet query honestly no-match in 14.309 s |
+| Cached latency | MEASURED | Local HTTP 10 samples: 7.98–14.11 ms, median 9.08 ms; separate mobile first-five-photo render 385 ms (one sample). Not physical BLE timing |
+| Complete suite | PASS | Core 617, Pi 77, knowledge 257, assets 41, IKEA 76, G2 207, web 24; contracts, generic lint and secret scan pass |
+| Official simulator + actual core | SIMULATOR VERIFIED | 11/11 product/guide/gesture checks, actual SDK photo/manual image sends, zero console errors |
+| Uncached-manual research | MOCK TESTED ONLY | Existing CREAO wiring accepts official doc URLs; GB_DISCOVERY_RESEARCH=0 by default; do not run live without new authorization |
+| Authored MICKE step text | PENDING HUMAN | Human still needs to spot-check verbs/text against the official PDF |
+| Physical G2 / on-glasses voice | NOT RUN | Simulator/browser evidence does not establish hardware legibility, BLE latency, or microphone capture |
+
+`GB_DISCOVERY=1` enables this feature (default on when index exists); `GB_DISCOVERY_LIVE=0` is the reliable offline demo. Restart the operator backend from the updated worktree when ready to demonstrate. The welcome flow is unchanged, and manual completion remains HUMAN CONFIRMED.
+
+---
+
 Updated Sun 2026-10-18 ~01:10 PDT by Claude Opus 5.5 (took over from Codex at its 00:05 usage-limit stop). Deadline Sun 12:00 PDT; Devpost by 10:30, final Beta QA 11:00.
 
 ## Where the work is
@@ -37,7 +86,7 @@ Updated Sun 2026-10-18 ~01:10 PDT by Claude Opus 5.5 (took over from Codex at it
 - Tests: core 519, knowledge 257, assets 41, g2 184, web 18.
 
 ## Quiet intelligence (03:45 PDT, operator design principle)
-- Screens that only wait for the wearer rest (go dark): the front prompt after 20 s, the research wait after 10 s (env `GB_REST_PROMPT_S`, `GB_REST_RESEARCH_S`). A gesture wakes it (the first gesture only wakes, never acts), a hold to speak wakes it, and a finished guide / failure / answer always wakes it. Steps, answers (4 s auto-dismiss) and pictures-on-press unchanged. Core 525 tests; not yet felt on the glasses.
+- Screens that only wait for the wearer rest (go dark): the front prompt after 20 s, the research wait after 10 s (env `GB_REST_PROMPT_S`, `GB_REST_RESEARCH_S`). A gesture wakes it (the first gesture only wakes, never acts), a hold to speak wakes it, and a finished guide / failure / answer always wakes it. Steps, answers (then 4 s auto-dismiss; now full pages until an explicit return, see the top) and pictures-on-press unchanged. Core 525 tests; not yet felt on the glasses.
 - Research wait: estimated progress bar + time left (glasses `●●●○○○○○○○ ABOUT 40S`, phone determinate bar + stages), labelled as an estimate; learns from real run durations. Fast-mode research measured 105 s vs 295 s.
 - Conversational intake (Claude brain) NOT built yet: needs `ANTHROPIC_API_KEY` (none present; ElevenLabs key lacks convai).
 

@@ -242,6 +242,7 @@ class Session(Strict):
 
 class PlaybookState(Strict):
     card_id: str
+    observations: list[str] = Field(default_factory=list, description="what the person reported at question steps (HUMAN CONFIRMED, not measured)")
     step_index: int = Field(ge=0)
     step_count: int = Field(ge=1)
     step_id: str
@@ -359,6 +360,17 @@ class Part(Strict):
     avoid: bool = Field(default=False, description="the source explicitly marks this part as NOT for this step")
 
 
+class Choice(Strict):
+    """One answer to a diagnostic question step. Choosing it records what the person reported (HUMAN CONFIRMED observation,
+    never a measurement) and moves to `next`."""
+
+    id: str = Field(min_length=1, max_length=40)
+    label: str = Field(max_length=26, description="glasses option text, ALL CAPS")
+    say: list[str] = Field(default_factory=list, description="lowercase phrases a person might say for this answer")
+    next: str = Field(description="step id to continue with")
+    records: str = Field(default="", max_length=160, description="the observation this answer records, in plain words")
+
+
 class Step(Strict):
     id: str
     title: str = Field(max_length=28)
@@ -375,6 +387,12 @@ class Step(Strict):
     instruction: Optional[Cue] = Field(default=None, description="authored plain-language action and method for the main step; exact identifiers stay in parts/detail. Legacy cue is the fallback; preserve safety quantities/values.")
     parts: list[Part] = Field(default_factory=list, description="parts/fasteners this step uses, as the source prints them (assembly manuals, parts lists)")
     cites: list[Cite] = Field(default_factory=list, description="where in a source this step comes from (e.g. manual page); phone shows the link")
+    kind: Literal["action", "question", "outcome", "stop"] = Field(default="action", description="question = diagnostic choice; outcome = a branch result; stop = stop safely / get professional help")
+    choices: list[Choice] = Field(default_factory=list, max_length=4, description="answers for a question step")
+    next: Optional[str] = Field(default=None, description="step id after this action (branching guides); default is the following step")
+    expected: str = Field(default="", max_length=300, description="how the person can tell this step worked, from the source")
+    tools: list[str] = Field(default_factory=list, description="tools/materials this step needs, as the source names them")
+    risk: Literal["low", "caution", "hazard"] = Field(default="low", description="hazard = deliberate double confirmation before it can be marked done")
 
 
 class Card(Strict):
@@ -390,6 +408,8 @@ class Card(Strict):
     goal_mode: GoalMode = Field(default="fix", description="fix = repair/diagnose; build = guided supported setup")
     step_image: Optional[GuideViewName] = Field(default=None, description="show this authored guide view with each step by default; navigation and evidence rules are unchanged")
     aliases: list[str] = Field(default_factory=list, description="lowercase phrases the deterministic goal resolver matches, e.g. 'camera', 'inspection station'")
+    task_kind: Optional[Literal["assembly", "diagnosis", "repair", "configuration", "identification"]] = None
+    review: Optional[str] = Field(default=None, max_length=400, description="who checked this card against its sources, how, and when")
 
     @model_validator(mode="after")
     def _has_content(self) -> "Card":
@@ -398,6 +418,13 @@ class Card(Strict):
         ids = [st.id for st in self.steps]
         if len(ids) != len(set(ids)):
             raise ValueError("step ids must be unique")
+        known = set(ids)
+        for st in self.steps:
+            targets = [c.next for c in st.choices] + ([st.next] if st.next else [])
+            if any(t not in known for t in targets):
+                raise ValueError(f"step {st.id} points to an unknown step")
+            if st.kind == "question" and len(st.choices) < 2:
+                raise ValueError(f"question step {st.id} needs at least two choices")
         return self
 
 
