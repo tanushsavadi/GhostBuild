@@ -30,6 +30,12 @@ Updated Sun 2026-10-18 ~01:10 PDT by Claude Opus 5.5 (took over from Codex at it
 - Physical G2 evidence from the operator log: welcome, task list, press-to-start, swipes and picture requests reached core on real glasses (first step-through of paper_cup). Pain points found there: 1.5 s swipe dead zone, swipes meaning different things inside pictures, blank dead end after completion.
 - Now: swipe down = next step (confirms a manual step; refuses a measured one), swipe up = back, press = picture button (WHERE -> HOW -> CORRECT -> back). Swipe from a picture: up = back to its step, down = confirm + next. First step shows immediately (no title card). Any gesture skips the welcome. After "ALL STEPS DONE" the next press/swipe-down opens the task list. Settle guard 600 ms (was 1500). Core 509 tests; still NOT re-tested on the glasses.
 
+## Live research (03:10 PDT, on operator request)
+- An unmatched spoken/typed request now researches live instead of "QUEUED FOR RESEARCH": glasses show `RESEARCHING m:ss / <task>` (5 s steps), the phone shows a thinking panel, then the guide starts by itself with `AI RESEARCHED, UNREVIEWED`. Phone banner: AI-RESEARCHED · NOT HUMAN-REVIEWED. Opt-in `GB_LIVE_RESEARCH=1` (now set in `.env`), cap `GB_LIVE_RESEARCH_MAX=3` per server start, one at a time, >=2 words, same request is served from the finished draft for free.
+- LIVE VERIFIED (1 real CREAO run, push button on a Raspberry Pi, run r-fb9f9298): thinking screen ticked 0:00-5:00, run ~5 min, card auto-started (6 steps, 5 sources). The agent drew a PNG diagram; picture pipeline (SVG or PNG -> 288x144 G2 image + phone image, labelled AI-generated diagram, not a photo) verified OFFLINE on that real artifact and in tests, not yet re-run live end to end.
+- Deliberate change to the earlier rule that only reviewed cards reach the glasses: these cards pass the same validator but are not human-reviewed; they stay drafts on disk and in memory only until a human approves.
+- Tests: core 519, knowledge 257, assets 41, g2 184, web 18.
+
 ## Not done / blocked
 - Physical G2 image + gesture + reconnect test (operator). Voice on G2 needs a voice-build `.ehpk` (`VITE_FLAG_VOICE=1`, declares g2-microphone) and a real device test.
 - Human approval of the LED card (above). Hero hardware (Pi / breadboard / LED / 330 ohm) availability unconfirmed with the operator.
