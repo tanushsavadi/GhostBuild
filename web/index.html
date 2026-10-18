@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>GhostBuild phone</title>
+<script>
+// Served by core at /phone: relative asset URLs need the trailing slash, so normalise /phone -> /phone/.
+if (!/\/$|\.html$/.test(location.pathname)) location.replace(location.pathname + '/' + location.search + location.hash);
+</script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">GHOSTBUILD <span>phone</span></div>
+  <div id="link-chip" class="chip chip-wait" role="status">connecting...</div>
+</header>
+<div id="devbar" class="devbar" hidden></div>
+<section id="banners" aria-live="polite"></section>
+
+<main class="grid">
+<div class="col">
+  <section class="card area-mirror" aria-labelledby="h-mirror">
+    <div class="card-head">
+      <h2 id="h-mirror">Glasses mirror</h2>
+      <span id="src-badge" class="src src-none">NO SOURCE</span>
+    </div>
+    <div id="g2" class="g2" role="img" aria-label="Mirror of the current glasses display">
+      <div id="g2-inner" class="g2-inner"></div>
+      <div id="g2-veil" class="g2-veil" hidden></div>
+    </div>
+    <div id="g2-meta" class="meta"></div>
+  </section>
+
+  <section class="card area-task" aria-labelledby="h-task">
+    <h2 id="h-task">Task and health</h2>
+    <dl id="task" class="kv"></dl>
+  </section>
+
+  <section class="card area-goal" aria-labelledby="h-goal">
+    <h2 id="h-goal">Set a goal (no glasses needed)</h2>
+    <form id="goal-form" autocomplete="off">
+      <div class="seg" role="radiogroup" aria-label="Goal mode">
+        <label><input type="radio" name="mode" value="fix" checked><span>FIX</span></label>
+        <label><input type="radio" name="mode" value="build"><span>BUILD</span></label>
+      </div>
+      <label class="field">What do you want to do?
+        <textarea id="goal-text" rows="2" maxlength="300" placeholder="e.g. my camera view is black"></textarea>
+      </label>
+      <button id="goal-send" type="submit">Send goal</button>
+      <div id="goal-hint" class="meta"></div>
+    </form>
+    <div id="goal-result" aria-live="polite"></div>
+  </section>
+</div>
+<div class="col">
+  <section class="card area-guide" aria-labelledby="h-guide">
+    <h2 id="h-guide">Guide pictures</h2>
+    <div id="guide-note" class="meta"></div>
+    <div id="guide" class="guide-list"></div>
+    <h3>Sources</h3>
+    <ul id="sources" class="sources"></ul>
+  </section>
+
+  <section class="card area-time" aria-labelledby="h-time">
+    <h2 id="h-time">Evidence timeline</h2>
+    <ol id="timeline" class="timeline"></ol>
+  </section>
+
+</div>
+</main>
+<footer class="foot">Polls GET /state at 1 Hz. Nothing here is a repair confirmation; evidence labels say where each fact came from.</footer>
+<script src="app.js"></script>
+</body>
+</html>

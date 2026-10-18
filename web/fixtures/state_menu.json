@@ -1,0 +1,51 @@
+{
+  "v": 2,
+  "engine": "NO_LINK",
+  "card_id": "camera_lens",
+  "test": null,
+  "step_id": null,
+  "check": null,
+  "help_view": null,
+  "source": "pi_live",
+  "health": {
+    "ok": true,
+    "uptime_s": 120.5,
+    "pi_link": "up",
+    "pi_last_seq": 813,
+    "pi_age_ms": 90,
+    "source": "pi_live",
+    "camera": "ok",
+    "g2_clients": 1
+  },
+  "hud": {
+    "type": "hud",
+    "v": 2,
+    "seq": 2,
+    "mode": "menu",
+    "cue": {
+      "line1": "BUILD OR FIX?",
+      "line2": "PRESS TO CHOOSE"
+    },
+    "image": null,
+    "menu": {
+      "prompt": "BUILD OR FIX?",
+      "options": [
+        "FIX",
+        "BUILD"
+      ],
+      "selected": 0
+    },
+    "cue_id": null,
+    "ttl_ms": null,
+    "source": "pi_live",
+    "stale": false
+  },
+  "events": [],
+  "session": {
+    "id": "s-1",
+    "phase": "menu",
+    "goal": null,
+    "card_id": null,
+    "welcome_shown": true
+  }
+}

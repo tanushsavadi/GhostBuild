@@ -1,0 +1,99 @@
+{
+  "v": 2,
+  "engine": "FAULT",
+  "card_id": "camera_lens",
+  "test": "camera_view",
+  "step_id": "camera_lens.where",
+  "check": 0,
+  "help_view": "where",
+  "source": "pi_live",
+  "health": {
+    "ok": true,
+    "uptime_s": 120.5,
+    "pi_link": "up",
+    "pi_last_seq": 813,
+    "pi_age_ms": 90,
+    "source": "pi_live",
+    "camera": "ok",
+    "g2_clients": 1
+  },
+  "hud": {
+    "type": "hud",
+    "v": 2,
+    "seq": 11,
+    "mode": "visual",
+    "cue": {
+      "line1": "WHERE: CAMERA LENS",
+      "line2": "SWIPE FOR HOW"
+    },
+    "image": {
+      "guide_id": "camera_lens",
+      "view": "where",
+      "index": 0,
+      "count": 3,
+      "title": "WHERE",
+      "url": "/guides/camera_lens/where.png",
+      "w": 288,
+      "h": 144,
+      "sha256": "120659bd88330c745721221c315785363760ef353fd6160e600c31651abdb8a5",
+      "provenance": "AUTHORED DEMO METADATA",
+      "step_id": "camera_lens.where"
+    },
+    "menu": null,
+    "cue_id": "camera_view/0",
+    "ttl_ms": null,
+    "source": "pi_live",
+    "stale": false
+  },
+  "events": [
+    {
+      "at": 1792283000000,
+      "text": "frames flowing: seq 810, luma 112.4, contrast 41.8",
+      "label": "MEASURED LIVE",
+      "evidence": {
+        "mean_luma": 112.4,
+        "luma_std": 41.8
+      }
+    },
+    {
+      "at": 1792283005200,
+      "text": "mean luma 6.2, contrast 1.1 for 1.5 s",
+      "label": "MEASURED LIVE",
+      "evidence": {
+        "mean_luma": 6.2,
+        "luma_std": 1.1
+      }
+    },
+    {
+      "at": 1792283005300,
+      "text": "view treated as blocked (luma<25 and contrast<8)",
+      "label": "INFERRED",
+      "evidence": {}
+    },
+    {
+      "at": 1792283005400,
+      "text": "cue shown: CAMERA VIEW LOST / CHECK CAMERA LENS",
+      "label": "DETERMINISTIC",
+      "evidence": {}
+    },
+    {
+      "at": 1792283009400,
+      "text": "help offered after 8 s, then requested on G2 (press)",
+      "label": "DETERMINISTIC",
+      "evidence": {}
+    },
+    {
+      "at": 1792283009450,
+      "text": "showing guide view WHERE (camera_lens.where)",
+      "label": "AUTHORED DEMO METADATA",
+      "evidence": {}
+    }
+  ],
+  "session": {
+    "id": "s-1",
+    "phase": "task",
+    "goal": "fix",
+    "card_id": "camera_lens",
+    "welcome_shown": true
+  }
+}
