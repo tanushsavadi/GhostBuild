@@ -38,15 +38,36 @@ $<HTMLFormElement>('form').onsubmit = e => {
   if (phraseInput.value.trim()) start(phraseInput.value)
 }
 
+// Built from text nodes: descriptions come from Wiktionary, so never as HTML.
+function el(tag: string, text = '', attrs: Record<string, string> = {}): HTMLElement {
+  const e = document.createElement(tag)
+  e.textContent = text
+  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v)
+  return e
+}
+
+function link(href: string, text: string): HTMLElement {
+  return el('a', text, { href, target: '_blank', rel: 'noopener' })
+}
+
 function showOnPhone(card: Card | undefined, n: number, total: number): void {
   if (!card) {
     phoneCard.textContent = 'No phrase yet.'
     return
   }
-  const video = card.video ? `<a href="${card.video}" target="_blank" rel="noopener">Reference video (ASL-LEX)</a>` : ''
-  phoneCard.innerHTML =
-    `<b>${card.title}</b> <span>${n}/${total}</span><br>${card.how[0]}<br>${card.how[1]}` +
-    `<br><small>${card.label}</small><br>${video}`
+  const parts: Node[] = [
+    el('b', card.title), document.createTextNode(` ${n}/${total}`), el('br'),
+    document.createTextNode(card.how[0]), el('br'),
+    document.createTextNode(card.how[1]), el('br'),
+    el('small', card.label),
+  ]
+  if (card.detail) {
+    const credit = el('small')
+    credit.append('Description: ', link(card.detail.url, 'Wiktionary'), ', CC BY-SA 4.0')
+    parts.push(el('p', card.detail.text), credit)
+  }
+  if (card.video) parts.push(el('br'), link(card.video, 'Reference video (ASL-LEX)'))
+  phoneCard.replaceChildren(...parts)
 }
 
 // ---- glasses ----------------------------------------------------------------
@@ -58,7 +79,7 @@ await bridge.createStartUpPageContainer(
     containerTotalNum: 2,
     textObject: [
       new TextContainerProperty({
-        xPosition: 176, yPosition: 40, width: 384, height: 208,
+        xPosition: 176, yPosition: 16, width: 392, height: 256,
         borderWidth: 0, borderColor: 5, paddingLength: 4,
         containerID: INFO.id, containerName: INFO.name,
         content: 'SIGN COACH\nType or pick a phrase\non the phone.',
@@ -76,10 +97,39 @@ await bridge.createStartUpPageContainer(
 
 let cards: Card[] = []
 let index = 0
+/** -1 = the short card; 0.. = a page of the card's full description. */
+let detailPage = -1
+
+// About 38 characters fit on a line and 9 lines in the text area; a page of
+// ~190 characters leaves room for the header and footer lines.
+function paginate(text: string, max = 190): string[] {
+  const pages: string[] = []
+  let page = ''
+  for (const word of text.split(' ')) {
+    if (page && page.length + word.length + 1 > max) {
+      pages.push(page)
+      page = word
+    } else {
+      page = page ? `${page} ${word}` : word
+    }
+  }
+  if (page) pages.push(page)
+  return pages
+}
 
 function lensText(): string {
   const card = cards[index]
   if (!card) return 'SIGN COACH\nType or pick a phrase\non the phone.'
+  if (detailPage >= 0 && card.detail) {
+    const pages = paginate(card.detail.text)
+    const last = detailPage >= pages.length - 1
+    return [
+      `${card.title} · HOW ${detailPage + 1}/${pages.length}`,
+      pages[Math.min(detailPage, pages.length - 1)],
+      '',
+      last ? '▲ BACK   TAP = NEXT SIGN' : '▼ MORE   ▲ BACK',
+    ].join('\n')
+  }
   const next = cards[index + 1]
   // About 36 characters fit on a line; long lines wrap, so drop the spacer.
   const long = card.how.some(line => line.length > 36)
@@ -88,7 +138,7 @@ function lensText(): string {
     card.how[0],
     card.how[1],
     ...(long ? [] : ['']),
-    card.label,
+    card.detail ? `${card.label} · ▼ HOW` : card.label,
     next ? `NEXT ${next.title.split('  ')[0]}` : 'LAST · TAP TO REPEAT',
   ].join('\n')
 }
@@ -144,6 +194,7 @@ async function render(): Promise<void> {
 function start(phrase: string): void {
   cards = cardsFor(phrase)
   index = 0
+  detailPage = -1
   version++
   void render()
 }
@@ -151,6 +202,26 @@ function start(phrase: string): void {
 function next(): void {
   if (!cards.length) return
   index = (index + 1) % cards.length
+  detailPage = -1
+  version++
+  void render()
+}
+
+/** Swipe down: open the full description, or its next page. */
+function more(): void {
+  const detail = cards[index]?.detail
+  if (!detail) return
+  const pages = paginate(detail.text).length
+  if (detailPage >= pages - 1) return
+  detailPage++
+  version++
+  void render()
+}
+
+/** Swipe up: previous description page, then back to the short card. */
+function back(): void {
+  if (detailPage < 0) return
+  detailPage--
   version++
   void render()
 }
@@ -171,4 +242,6 @@ bridge.onEvenHubEvent(event => {
     return
   }
   if (types.includes(OsEventTypeList.CLICK_EVENT)) next()
+  else if (types.includes(OsEventTypeList.SCROLL_BOTTOM_EVENT)) more()
+  else if (types.includes(OsEventTypeList.SCROLL_TOP_EVENT)) back()
 })

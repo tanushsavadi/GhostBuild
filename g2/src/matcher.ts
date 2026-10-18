@@ -1,10 +1,13 @@
 import deck from './deck.json'
 import asllex from './asllex.json'
+import wiktionary from './wiktionary.json'
 
 // Turns an English phrase into the cards to sign, in order. Words in deck.json
 // (hand-written lines) win; then every ASL-LEX 2.0 sign from asllex.json
 // (lines composed from its phonology coding, built by tools/build_deck.py);
-// anything else is fingerspelled. Pure, so it can be checked without glasses.
+// anything else is fingerspelled. Cards whose gloss Wiktionary describes also
+// carry that full description (tools/fetch_wiktionary.py, CC BY-SA 4.0).
+// Pure, so it can be checked without glasses.
 
 export type Status = 'REF-CHECKED' | 'UNCHECKED'
 
@@ -17,7 +20,11 @@ export interface Card {
   label: string
   /** Reference video for checking a sign (ASL-LEX), when there is one. */
   video?: string
+  /** Full step-by-step description from Wiktionary (CC BY-SA 4.0), when it has the sign. */
+  detail?: { text: string; url: string }
 }
+
+const descriptions = wiktionary as Record<string, { t: string; u: string }>
 
 interface Sign {
   gloss: string
@@ -86,7 +93,9 @@ export function tokenize(text: string): string[] {
 }
 
 function signCard(sign: Sign): Card {
+  const d = descriptions[sign.gloss]
   return {
+    detail: d ? { text: d.t, url: d.u } : undefined,
     kind: 'sign',
     title: sign.gloss,
     how: [sign.how[0], sign.how[1]],

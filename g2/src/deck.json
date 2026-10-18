@@ -1,5 +1,5 @@
 {
-  "credit": "Handshapes and sign data: ASL-LEX 2.0 (asl-lex.org), CC BY-NC 4.0; drawings served by aslcdi.website. Letters M and N: wpclipart.com, public domain (Wikimedia Commons).",
+  "credit": "Handshapes and sign data: ASL-LEX 2.0 (asl-lex.org), CC BY-NC 4.0; drawings served by aslcdi.website. Letters M and N: wpclipart.com, public domain (Wikimedia Commons). Full descriptions (swipe down): Wiktionary, CC BY-SA 4.0.",
   "drafted": "How-to lines drafted by AI (Claude) from each sign's ASL-LEX 2.0 phonology. A sign is REF-CHECKED only after a person compares it with the ASL-LEX video and changes status.",
   "signs": [
     {
@@ -127,5 +127,5 @@
     "y": { "handshape": "y", "how": "Thumb and pinky out" },
     "z": { "handshape": "1", "how": "Index finger, draw a Z" }
   },
-  "skip": ["is", "am", "are", "do", "does", "to", "the", "a", "an", "and", "it", "its", "it's", "i'm", "be", "of"]
+  "skip": ["is", "am", "are", "do", "does", "did", "to", "the", "a", "an", "and", "it", "its", "it's", "i'm", "be", "of"]
 }
