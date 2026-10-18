@@ -238,6 +238,8 @@ class ResearchRuns:
             self._update(run_id, creao_run_id=creao_id, status="running", share_url=creao.find_share_url(client.last_start_response))
             raw = client.poll(creao_id, interval=self.poll_interval, max_wait=self.max_wait,
                               on_update=lambda status, _raw: self._update(run_id, creao_status=status))
+            if creao.run_state(raw)[0] == "success" and hasattr(client, "attach_json_artifacts"):
+                raw = client.attach_json_artifacts(raw)  # the structured playbook is a JSON artifact, not inline text
             try:
                 creao.save_raw(creao_id, {"inputs": inputs, "start_response": client.last_start_response, "final": raw},
                                self.dir / "creao_raw", key=getattr(client, "_api_key", None))

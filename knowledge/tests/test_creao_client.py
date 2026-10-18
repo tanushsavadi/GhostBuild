@@ -30,10 +30,10 @@ def test_start_run_default_body_and_auth_header():
     c = client(handler)
     rid = c.start_run({"goal": "replace a bike tube", "doc_urls": ["https://a.example/x"], "device": "", "follow_up": None})
     req = seen["req"]
-    assert rid == "run_1" and req.method == "POST" and str(req.url) == "https://agent.creao.ai/api/v1/runs"
+    assert rid == "run_1" and req.method == "POST" and str(req.url) == f"https://agent.creao.ai/api/v1/apps/{creao.DEFAULT_APP_ID}/runs"
     assert req.headers["authorization"] == f"Bearer {KEY}"
     body = json.loads(req.content)
-    assert body == {"appId": creao.DEFAULT_APP_ID, "inputs": {"goal": "replace a bike tube\n\nResearch context:\nDocumentation URLs: https://a.example/x", "intent": "build"}}
+    assert body == {"inputs": {"goal": "replace a bike tube\n\nResearch context:\nDocumentation URLs: https://a.example/x", "intent": "build"}}
 
 
 @pytest.mark.parametrize("resp,expected", [({"run_id": "r2"}, "r2"), ({"runId": "r3"}, "r3"), ({"data": {"id": "r4"}}, "r4"), ({"id": 7}, "7")])
@@ -68,7 +68,7 @@ def test_env_overrides(monkeypatch):
     monkeypatch.setenv("CREAO_RUN_BODY", '{"a": "{app_id}", "g": "{goal}"}')
     c = CreaoClient()
     d = c.dry_run({"goal": "hi"})
-    assert d["url"] == "https://example.test/api/v1/runs" and d["body"] == {"a": "app-123", "g": "hi"} and "X-Key" in d["headers"]
+    assert d["url"] == "https://example.test/api/v1/apps/app-123/runs" and d["body"] == {"a": "app-123", "g": "hi"} and "X-Key" in d["headers"]
     assert KEY not in json.dumps(d) and KEY not in repr(c)
 
 
@@ -113,7 +113,7 @@ def test_poll_running_then_completed_with_tolerant_status():
     seen = []
 
     def handler(req):
-        assert req.method == "GET" and req.url.raw_path == b"/api/v1/runs/run%2F1"
+        assert req.method == "GET" and req.url.raw_path == f"/api/v1/apps/{creao.DEFAULT_APP_ID}/runs/run%2F1".encode()
         return httpx.Response(200, json=next(statuses))
 
     c = client(handler)
@@ -191,7 +191,7 @@ def test_cli_dry_run_prints_request_without_key(monkeypatch, capsys):
     monkeypatch.setenv("CREAO_API_KEY", KEY)
     assert creao.main(["probe", "--goal", "replace a tube", "--doc-url", "https://a.example", "--dry-run"]) == 0
     out = capsys.readouterr().out
-    assert "api/v1/runs" in out and "replace a tube" in out and KEY not in out and "<CREAO_API_KEY>" in out
+    assert "api/v1/apps/" in out and "replace a tube" in out and KEY not in out and "<CREAO_API_KEY>" in out
 
 
 def test_cli_probe_end_to_end_with_mock(monkeypatch, tmp_path, capsys):
@@ -234,7 +234,7 @@ def test_start_outcome_unknown_never_retries_a_possibly_paid_run(failure):
 
 def test_owner_confirmed_saved_form_contract():
     assert creao.default_body(creao.DEFAULT_APP_ID, {"goal": "build a box", "intent": "build"}) == {
-        "appId": creao.DEFAULT_APP_ID, "inputs": {"goal": "build a box", "intent": "build"}}
+        "inputs": {"goal": "build a box", "intent": "build"}}
     body = creao.default_body("app", {"goal": "fix a lid", "intent": "fix", "device": "a jar", "model": "small", "video_urls": ["https://example.org/video"], "follow_up": "no tools"})
     assert set(body["inputs"]) == {"goal", "intent"}
     assert "Model: small" in body["inputs"]["goal"] and "Follow-up: no tools" in body["inputs"]["goal"]
@@ -245,3 +245,50 @@ def test_share_url_preserves_actual_link_and_never_guesses():
     assert creao.find_share_url({"data": {"shareUrl": "https://agent.creao.ai/shared/run-123"}}) == "https://agent.creao.ai/shared/run-123"
     assert creao.find_share_url({"share_url": "javascript:alert(1)"}) is None
     assert creao.find_share_url({"share_url": "https://example.org/?token=" + KEY}) is None
+
+
+# --- artifacts: shape observed in the first real run (2026-10-18), mocked here ---------------------------------------------
+ART_URL = f"https://agent.creao.ai/api/v1/runs/r1/artifacts/download?artifactId=x%2Fy"
+SIGNED = "https://bucket.example.s3.amazonaws.com/x/y.json?X-Amz-Signature=abc"
+WORKFLOW = {"task_id": "t", "steps": [{"step_id": "s1", "title": "Do it", "g2_action_cue": "Do it."}]}
+
+
+def _run_with_artifacts():
+    return {"id": "r1", "status": "completed", "result": {"text": "{}", "chatText": "x", "artifacts": [
+        {"id": "a", "title": "x.py", "type": "text/plain", "url": ART_URL},
+        {"id": "b", "title": "wf", "type": "application/json", "url": ART_URL}]}}
+
+
+def test_json_artifact_downloaded_without_leaking_key_to_redirect_target():
+    calls = []
+
+    def handler(req: httpx.Request):
+        calls.append((str(req.url), req.headers.get("authorization")))
+        if req.url.host == "agent.creao.ai":
+            return httpx.Response(302, headers={"location": SIGNED})
+        return httpx.Response(200, json=WORKFLOW)
+
+    raw = client(handler).attach_json_artifacts(_run_with_artifacts())
+    arts = raw["result"]["artifacts"]
+    assert "content" not in arts[0] and arts[1]["content"] == WORKFLOW  # only application/json is fetched
+    assert len(calls) == 2 and calls[0][1] == f"Bearer {KEY}" and calls[1][1] is None and calls[1][0] == SIGNED
+
+
+def test_artifact_failures_are_recorded_not_raised_and_other_hosts_refused():
+    raw = _run_with_artifacts()
+    raw["result"]["artifacts"][1]["url"] = "https://evil.example/steal"
+    out = client(lambda r: pytest.fail("must not be requested")).attach_json_artifacts(raw)
+    assert "download_error" in out["result"]["artifacts"][1]
+    raw = _run_with_artifacts()
+    out = client(lambda r: httpx.Response(302, headers={"location": "http://plain.example/x"})).attach_json_artifacts(raw)
+    assert "not https" in out["result"]["artifacts"][1]["download_error"]
+    raw = _run_with_artifacts()
+    out = client(lambda r: httpx.Response(500, text=f"boom {KEY}")).attach_json_artifacts(raw)
+    assert KEY not in json.dumps(out)
+
+
+def test_extractor_finds_playbook_in_attached_artifact_content():
+    from knowledge import creao_normalize
+    raw = _run_with_artifacts()
+    raw["result"]["artifacts"][1]["content"] = WORKFLOW
+    assert creao_normalize.extract_payload(raw) == WORKFLOW

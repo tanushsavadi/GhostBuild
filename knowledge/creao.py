@@ -1,10 +1,11 @@
 """Tolerant client + CLI for the CREAO agent API (build time only; never on the HUD/cue path, never imported by core's cue code).
 
-STATUS: UNVERIFIED against the real API. The official endpoints (per the project owner) are
-    POST https://agent.creao.ai/api/v1/runs        start a run
-    GET  https://agent.creao.ai/api/v1/runs/{id}    read a run
-with a backend-only key `CREAO_API_KEY` (starts `capi_`). The owner-confirmed start contract is
-`{appId, inputs: {goal, intent}}` with Authorization: Bearer. Only those saved form fields are sent by default;
+STATUS: UNVERIFIED against a real response (documented contract only). The official app-scoped endpoints are
+    POST https://agent.creao.ai/api/v1/apps/{appId}/runs         start a run   (docs.creao.ai/developer-api/api-paths)
+    GET  https://agent.creao.ai/api/v1/apps/{appId}/runs/{id}    read a run
+with a backend-only key `CREAO_API_KEY` (starts `capi_`, scoped to one agent). The start body is
+`{inputs: {goal, intent}}` (the app id is in the URL) with Authorization: Bearer; poll statuses per the docs are
+pending|completed|failed|cancelled and the output text is `result.text` (`result.artifacts` lists files). Only those saved form fields are sent by default;
 optional context is appended to goal. Response status values and output locations remain tolerant until a real response
 is available (`python -m knowledge.creao probe`).
 This module has only ever talked to mock servers in tests.
@@ -35,7 +36,7 @@ from knowledge.validate import REPO_ROOT
 
 DEFAULT_APP_ID = "032b9dc5-2fc7-4b5d-af36-8efdbd2648ac"  # "GhostBuild Intelligence" (created by the project owner)
 DEFAULT_BASE_URL = "https://agent.creao.ai"
-DEFAULT_RUN_PATH = "/api/v1/runs"
+DEFAULT_RUN_PATH = "/api/v1/apps/{app_id}/runs"  # docs.creao.ai/developer-api/api-paths: app-scoped capi_ key, appId in the URL
 KEY_PATTERN = re.compile(r"capi_[A-Za-z0-9_\-]{4,}")
 RAW_DIR = REPO_ROOT / "knowledge" / "requests" / "creao_raw"
 
@@ -158,7 +159,7 @@ def default_body(app_id: str, inputs: dict) -> dict:
             context.append(f"{label}: {', '.join(map(str, value)) if isinstance(value, list) else value}")
     if context:
         goal += "\n\nResearch context:\n" + "\n".join(context)
-    return {"appId": app_id, "inputs": {"goal": goal, "intent": inputs.get("intent") or "build"}}
+    return {"inputs": {"goal": goal, "intent": inputs.get("intent") or "build"}}  # app id travels in the URL, not the body
 
 
 def render_template(template: Any, values: dict[str, Any]) -> Any:
@@ -206,7 +207,7 @@ class CreaoClient:
       base_url       CREAO_BASE_URL   (default https://agent.creao.ai)
       auth_header    CREAO_AUTH_HEADER (default Authorization)        auth_scheme  CREAO_AUTH_SCHEME (default Bearer; '' = raw key)
       body_template  CREAO_RUN_BODY   (JSON text with {app_id} {goal} {device} {model} {intent} {doc_urls} {video_urls} {follow_up})
-      run_path       CREAO_RUN_PATH   (default /api/v1/runs)
+      run_path       CREAO_RUN_PATH   (default /api/v1/apps/{app_id}/runs)
     `transport` is an httpx transport (tests inject httpx.MockTransport); `sleep` is injectable so tests do not wait.
     """
 
@@ -232,7 +233,8 @@ class CreaoClient:
         self.auth_header = auth_header or env.get("CREAO_AUTH_HEADER") or "Authorization"
         scheme = auth_scheme if auth_scheme is not None else env.get("CREAO_AUTH_SCHEME")
         self.auth_scheme = "Bearer" if scheme is None else scheme
-        self.run_path = "/" + (run_path or env.get("CREAO_RUN_PATH") or DEFAULT_RUN_PATH).strip("/")
+        raw_path = (run_path or env.get("CREAO_RUN_PATH") or DEFAULT_RUN_PATH).replace("{app_id}", quote(self.app_id, safe=""))
+        self.run_path = "/" + raw_path.strip("/")
         template = body_template if body_template is not None else env.get("CREAO_RUN_BODY")
         if isinstance(template, str) and template.strip():
             try:
@@ -345,6 +347,43 @@ class CreaoClient:
     def get_run(self, run_id: str) -> dict:
         resp = self._request("GET", f"{self.run_path}/{quote(str(run_id), safe='')}")
         return resp if isinstance(resp, dict) else {"_value": resp}
+
+    # ------------------------------------------------------------------ artifacts
+    def _download(self, url: str, max_bytes: int) -> bytes:
+        """GET one run artifact. The CREAO URL needs the key; it answers 302 to a signed storage URL, which must NOT receive the key."""
+        if not url.startswith(self.base_url + "/"):
+            raise CreaoError("artifact URL is not on the CREAO host; not fetched")
+        with httpx.Client(transport=self._transport, timeout=self.timeout, follow_redirects=False) as http:
+            resp = http.get(url, headers=self._headers())
+            if resp.status_code in (301, 302, 303, 307, 308):
+                target = resp.headers.get("location", "")
+                if not target.startswith("https://"):
+                    raise CreaoError("artifact redirect is not https; not followed")
+                resp = http.get(target, headers={"Accept": "*/*"})
+        if resp.status_code >= 400:
+            raise CreaoError(f"artifact download answered HTTP {resp.status_code}", status=resp.status_code)
+        if len(resp.content) > max_bytes:
+            raise CreaoError("artifact larger than the allowed size; not used")
+        return resp.content
+
+    def attach_json_artifacts(self, raw: Any, *, max_files: int = 3, max_bytes: int = 262_144) -> Any:
+        """Download the run's application/json artifacts (the structured playbook lives there, `result.text` is only metadata) and
+        embed each parsed value as `artifact["content"]` so the tolerant extractor can find it. Failures are recorded per artifact
+        as `artifact["download_error"]` (redacted); they never raise. Downloading is not a new run."""
+        result = raw.get("result") if isinstance(raw, dict) else None
+        arts = result.get("artifacts") if isinstance(result, dict) else None
+        if not isinstance(arts, list):
+            return raw
+        done = 0
+        for art in arts:
+            if done >= max_files or not isinstance(art, dict) or "json" not in str(art.get("type", "")).lower() or not isinstance(art.get("url"), str):
+                continue
+            done += 1
+            try:
+                art["content"] = json.loads(self._download(art["url"], max_bytes).decode("utf-8"))
+            except (CreaoError, ValueError, httpx.HTTPError) as exc:
+                art["download_error"] = redact(exc, self._api_key)[:200]
+        return raw
 
     def poll(
         self,
@@ -506,6 +545,8 @@ def main(argv: Optional[list[str]] = None) -> int:
         except CreaoError as exc:
             print(f"CREAO error: {redact(exc, client._api_key)}", file=sys.stderr)
             return 1
+        if run_state(final)[0] == "success":
+            final = client.attach_json_artifacts(final)
         document = {"inputs": inputs, "request_body": client.dry_run(inputs)["body"], "start_response": client.last_start_response, "final": final, "poll_count": len(updates)}
         path = save_raw(run_id, document, key=client._api_key)
         print(f"complete raw responses saved to {path} (gitignored)")

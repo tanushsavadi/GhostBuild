@@ -39,7 +39,7 @@ def gi(g):
 
 
 class MockCreao:
-    """Mock server: POST /api/v1/runs picks a canned run by goal; GET walks queued -> running -> completed."""
+    """Mock server: POST /api/v1/apps/{appId}/runs picks a canned run by goal; GET walks queued -> running -> completed."""
 
     def __init__(self, hold: threading.Event | None = None):
         self.canned = {MOCK_A_REQUEST: MOCK_A_ENVELOPE_RUN, MOCK_B_REQUEST: MOCK_B_FENCED_RUN, "tighten a loose cabinet hinge": VISUAL_ONLY}
@@ -57,7 +57,7 @@ class MockCreao:
         if req.method == "POST":
             body = json.loads(req.content)
             self.posts.append(body)
-            assert body["appId"] == "032b9dc5-2fc7-4b5d-af36-8efdbd2648ac"
+            assert req.url.path == "/api/v1/apps/032b9dc5-2fc7-4b5d-af36-8efdbd2648ac/runs" and "appId" not in body
             assert set(body["inputs"]) == {"goal", "intent"}
             goal = body["inputs"]["goal"].split("\n\nResearch context:")[0]
             rid = f"mock_{len(self.posts)}"
