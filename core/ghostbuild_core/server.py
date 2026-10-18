@@ -17,6 +17,7 @@ from pydantic import ValidationError
 
 from contracts.models import G2Hello, G2Input, GoalRequest, HudFrame, Observation
 
+from .cards_api import mount_cards_api
 from .runtime import Runtime
 
 log = logging.getLogger("ghostbuild.server")
@@ -230,6 +231,8 @@ def create_app(
                             raise HTTPException(status_code=404, detail="guide image missing")
                         return FileResponse(path, media_type="image/png")
         raise HTTPException(status_code=404, detail="no such guide view")
+
+    mount_cards_api(app, runtime)  # card import endpoints (build-time tooling; see cards_api.py)
 
     # ------------------------------------------------------------------ optional voice lane (only when --voice / GB_VOICE=1)
     if runtime.voice is not None:
