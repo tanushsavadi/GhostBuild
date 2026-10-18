@@ -11,6 +11,12 @@
                     qwen3.5:4b) -> cleaned ASL gloss order + face cue
                     -> {"signs": [{"gloss": "YOU", "spell": false}, ...],
                         "face": "brows down", "source": "AI · LOCAL", "ms": 2900}
+  POST /api/prepare {"scenario": "Lunch with Sam", "use_history": true} -> CREAO
+                    agent plans 10-12 sentences in ASL order (~1 min, background)
+                    -> {"job": "1"}; GET /api/prepare/1 -> status + phrasebook
+  GET  /api/phrasebook   the last prepared phrasebook
+  POST /api/history {"kind": "sentence"|"hard_sign", "text": ...}  opt-in, text only
+  DELETE /api/history    forget it all
   GET  /api/health  -> which keys/models are available (never the keys themselves)
 
 The plugin reaches this through the Vite dev server's /api proxy, so the phone
@@ -23,6 +29,7 @@ Run (from the repo root):  uv run tools/open_palm_server.py
 
 from __future__ import annotations
 
+import asyncio
 import importlib.util
 import json
 import os
@@ -163,6 +170,162 @@ async def stt(request: Request) -> dict:
     text = re.sub(r"\s+", " ", text).strip()
     print(f"[stt] {len(pcm) / 32000:.1f} s audio -> {len(text)} chars in {ms} ms")
     return {"text": text, "ms": ms}
+
+
+# ---- conversation prep (CREAO agent) and opt-in history ------------------------
+# A CREAO run takes ~45 s, so prep is a background job: POST starts it, the
+# phone polls GET. The result is cleaned like /api/translate and saved as the
+# phrasebook, which the phone uses instantly during the conversation.
+# History is text only, opt-in from the phone, kept in tmp/ on this laptop.
+
+CREAO_URL = "https://agent.creao.ai/api/v1/runs"
+DATA = ROOT / "tmp" / "open_palm"
+HISTORY = DATA / "history.jsonl"
+PHRASEBOOK = DATA / "phrasebook.json"
+jobs: dict[str, dict] = {}
+
+
+def creao_headers() -> dict:
+    key = os.environ.get("CREAO_API_KEY")
+    if not key:
+        raise HTTPException(503, "CREAO_API_KEY is not set in .env")
+    return {"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
+
+
+def history_summary(limit: int = 30) -> str:
+    if not HISTORY.exists():
+        return ""
+    rows = [json.loads(line) for line in HISTORY.read_text(encoding="utf-8").splitlines() if line.strip()]
+    sentences = [r["text"] for r in rows if r.get("kind") == "sentence"][-limit:]
+    hard = [r["text"] for r in rows if r.get("kind") == "hard_sign"]
+    hard = sorted(set(hard), key=lambda s: -hard.count(s))[:10]
+    parts = []
+    if sentences:
+        parts.append("HISTORY: " + " | ".join(dict.fromkeys(sentences)))
+    if hard:
+        parts.append("HARD SIGNS: " + ", ".join(hard))
+    return "\n".join(parts)
+
+
+def extract_json(text: str) -> dict | None:
+    """The agent's JSON, whether bare, wrapped in {"response": ...} or inside a code fence."""
+    for candidate in (text, re.sub(r"^```(?:json)?|```$", "", text.strip(), flags=re.M)):
+        try:
+            data = json.loads(candidate)
+        except (ValueError, TypeError):
+            match = re.search(r"\{.*\}", candidate or "", re.S)
+            if not match:
+                continue
+            try:
+                data = json.loads(match.group(0))
+            except ValueError:
+                continue
+        if isinstance(data, dict) and isinstance(data.get("response"), str):
+            return extract_json(data["response"])
+        if isinstance(data, dict):
+            return data
+    return None
+
+
+async def run_prep(job_id: str, scenario: str) -> None:
+    job = jobs[job_id]
+    app_id = os.environ.get("CREAO_PREP_APP_ID", "")
+    text = scenario + ("\n\n" + history_summary() if job["use_history"] else "")
+    # The field CREAO reads isn't documented; this combination reached the agent in testing.
+    body = {"appId": app_id, "input": text, "message": text, "prompt": text,
+            "inputs": {"details": text, "input": text}, "text": text}
+    t0 = time.perf_counter()
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            run = (await client.post(CREAO_URL, json=body, headers=creao_headers())).json()
+            run_id = run["id"]
+            while time.perf_counter() - t0 < 240:
+                await asyncio.sleep(3)
+                data = (await client.get(f"{CREAO_URL}/{run_id}", headers=creao_headers())).json()
+                if data.get("status") not in ("pending", "running", "queued", "in_progress"):
+                    break
+            if data.get("status") != "completed":
+                raise RuntimeError(f"run ended as {data.get('status')}")
+            result = data.get("result") or {}
+            plan = extract_json(result.get("text", "")) or extract_json(result.get("chatText", ""))
+            if not plan or "sentences" not in plan:  # the JSON may be in an attached file
+                for art in result.get("artifacts", []):
+                    if art.get("type") == "application/json":
+                        raw = (await client.get(art["url"], headers=creao_headers())).text
+                        plan = extract_json(raw)
+                        if plan and "sentences" in plan:
+                            break
+        if not plan or "sentences" not in plan:
+            raise RuntimeError("no sentences in the agent's answer")
+    except Exception as err:  # noqa: BLE001 - any failure is reported to the phone
+        job.update(status="failed", error=f"{type(err).__name__}: {str(err)[:160]}")
+        print(f"[prep] {job_id} failed: {job['error']}")
+        return
+    sentences = []
+    for s in plan.get("sentences", [])[:15]:
+        face = s.get("face", "") if s.get("face") in ("brows down", "brows up", "head shake") else ""
+        signs = clean(s.get("signs", []), face)
+        if s.get("english") and signs:
+            sentences.append({"english": str(s["english"])[:120], "signs": signs, "face": face})
+    book = {"title": str(plan.get("title") or scenario)[:80], "scenario": scenario, "sentences": sentences,
+            "practice": [str(p).upper() for p in plan.get("practice", [])][:6], "source": "AI · CREAO",
+            "ms": round((time.perf_counter() - t0) * 1000)}
+    DATA.mkdir(parents=True, exist_ok=True)
+    PHRASEBOOK.write_text(json.dumps(book, indent=1), encoding="utf-8")
+    job.update(status="done", phrasebook=book)
+    print(f"[prep] {job_id}: {len(sentences)} sentences in {book['ms']} ms")
+
+
+@app.post("/api/prepare")
+async def prepare(request: Request) -> dict:
+    payload = await request.json()
+    scenario = str(payload.get("scenario", "")).strip()[:500]
+    if not scenario:
+        raise HTTPException(400, "describe the conversation")
+    if not os.environ.get("CREAO_PREP_APP_ID"):
+        raise HTTPException(503, "CREAO_PREP_APP_ID is not set in .env")
+    creao_headers()
+    if any(j["status"] == "running" for j in jobs.values()):
+        raise HTTPException(429, "a prep run is already going")
+    job_id = f"{len(jobs) + 1}"
+    jobs[job_id] = {"status": "running", "started": time.time(), "use_history": bool(payload.get("use_history"))}
+    asyncio.create_task(run_prep(job_id, scenario))
+    return {"job": job_id}
+
+
+@app.get("/api/prepare/{job_id}")
+def prepare_status(job_id: str) -> dict:
+    job = jobs.get(job_id)
+    if not job:
+        raise HTTPException(404, "no such job")
+    return {**job, "elapsed_s": round(time.time() - job["started"])}
+
+
+@app.get("/api/phrasebook")
+def phrasebook() -> dict:
+    if PHRASEBOOK.exists():
+        return json.loads(PHRASEBOOK.read_text(encoding="utf-8"))
+    return {"title": "", "sentences": [], "practice": []}
+
+
+@app.post("/api/history")
+async def history(request: Request) -> dict:
+    """Opt-in from the phone: a signed sentence or a sign the user opened HOW for. Text only."""
+    payload = await request.json()
+    kind = payload.get("kind")
+    text = str(payload.get("text", "")).strip()[:200]
+    if kind not in ("sentence", "hard_sign") or not text:
+        raise HTTPException(400, "kind must be sentence or hard_sign")
+    DATA.mkdir(parents=True, exist_ok=True)
+    with HISTORY.open("a", encoding="utf-8") as f:
+        f.write(json.dumps({"kind": kind, "text": text, "at": int(time.time())}) + "\n")
+    return {"ok": True}
+
+
+@app.delete("/api/history")
+def forget() -> dict:
+    HISTORY.unlink(missing_ok=True)
+    return {"ok": True}
 
 
 if __name__ == "__main__":

@@ -23,6 +23,14 @@
       #demos { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
       #card { margin-top: 12px; padding: 12px; border-radius: 8px; background: #111; min-height: 96px; }
       #card a { color: #8fd18f; }
+      #prep { margin-top: 20px; padding-top: 12px; border-top: 1px solid #444; }
+      #prep h2 { font-size: 17px; margin: 0 0 8px; }
+      #prep textarea { width: 100%; box-sizing: border-box; font: inherit; padding: 10px; border-radius: 8px; border: 1px solid #555; background: #111; color: inherit; }
+      #prep label { display: block; margin: 8px 0; font-size: 14px; }
+      #prep > button { width: 100%; margin: 4px 0; }
+      #book button { display: block; width: 100%; text-align: left; margin: 4px 0; }
+      .muted { color: #999; font-size: 13px; }
+      .small { font-size: 13px; padding: 6px 10px; }
       #credit { font-size: 12px; color: #999; margin-top: 24px; }
     </style>
   </head>
@@ -36,6 +44,16 @@
       <button id="talk" class="talk">🎤 Hold to talk</button>
       <div id="demos"></div>
       <div id="card">No phrase yet.</div>
+      <section id="prep">
+        <h2>Prepare a conversation</h2>
+        <textarea id="scenario" rows="2" placeholder="e.g. Lunch with Sam, my Deaf coworker, on Monday"></textarea>
+        <label><input type="checkbox" id="usehist" /> Use what I signed before</label>
+        <button id="prepare">Prepare with CREAO (about a minute)</button>
+        <p id="prepstatus" class="muted"></p>
+        <div id="book"></div>
+        <label><input type="checkbox" id="remember" /> Remember my sentences (text only, stays on the laptop)</label>
+        <button id="forget" class="small">Forget my history</button>
+      </section>
       <p id="credit"></p>
     </main>
     <script type="module" src="/src/main.ts"></script>

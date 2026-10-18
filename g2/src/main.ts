@@ -226,7 +226,85 @@ const AI_ON = new URLSearchParams(location.search).get('ai') !== 'off'
 const AI_TIMEOUT_MS = 8000
 let request = 0
 
+// ---- conversation prep (CREAO) and opt-in history ------------------------------
+
+interface PreparedSentence { english: string; signs: AiSign[]; face: string }
+interface Phrasebook { title: string; sentences: PreparedSentence[]; practice: string[]; source?: string }
+
+const prepared = new Map<string, PreparedSentence>()
+const key = (text: string) => tokenize(text).join(' ')
+let book: Phrasebook = { title: '', sentences: [], practice: [] }
+
+const rememberBox = $<HTMLInputElement>('remember')
+try { rememberBox.checked = localStorage.getItem('open-palm-remember') === '1' } catch { /* storage blocked */ }
+rememberBox.onchange = () => { try { localStorage.setItem('open-palm-remember', rememberBox.checked ? '1' : '0') } catch { /* ok */ } }
+
+function remember(kind: 'sentence' | 'hard_sign', text: string): void {
+  if (!rememberBox.checked) return
+  void fetch('/api/history', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ kind, text }) }).catch(() => {})
+}
+
+function showBook(next: Phrasebook): void {
+  book = next
+  prepared.clear()
+  for (const s of book.sentences) prepared.set(key(s.english), s)
+  const list = $<HTMLDivElement>('book')
+  list.replaceChildren()
+  if (!book.sentences.length) return
+  list.append(el('b', `${book.title} (${book.sentences.length} sentences, ${book.source ?? 'AI · CREAO'})`))
+  for (const s of book.sentences) {
+    const b = el('button', s.english) as HTMLButtonElement
+    b.onclick = () => start(s.english)
+    list.append(b)
+  }
+  if (book.practice.length) {
+    const b = el('button', `Practice on glasses: ${book.practice.join(', ')}`) as HTMLButtonElement
+    b.onclick = () => show(cardsForAi(book.practice.map(gloss => ({ gloss, spell: false })), '', 'AI · CREAO'))
+    list.append(b)
+  }
+}
+
+void fetch('/api/phrasebook').then(r => r.ok ? r.json() : null).then(b => b && showBook(b)).catch(() => {})
+
+$<HTMLButtonElement>('forget').onclick = () => {
+  void fetch('/api/history', { method: 'DELETE' }).then(() => { $<HTMLParagraphElement>('prepstatus').textContent = 'History forgotten.' })
+}
+
+$<HTMLButtonElement>('prepare').onclick = async () => {
+  const scenario = $<HTMLTextAreaElement>('scenario').value.trim()
+  const statusLine = $<HTMLParagraphElement>('prepstatus')
+  if (!scenario) { statusLine.textContent = 'Describe the conversation first.'; return }
+  statusLine.textContent = 'CREAO is planning your conversation...'
+  try {
+    const res = await fetch('/api/prepare', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ scenario, use_history: $<HTMLInputElement>('usehist').checked }),
+    })
+    if (!res.ok) throw new Error(await res.text())
+    const { job } = await res.json() as { job: string }
+    for (;;) {
+      await new Promise(r => setTimeout(r, 3000))
+      const s = await (await fetch(`/api/prepare/${job}`)).json() as { status: string; elapsed_s: number; error?: string; phrasebook?: Phrasebook }
+      if (s.status === 'done' && s.phrasebook) {
+        statusLine.textContent = `Ready in ${s.elapsed_s} s. Say or tap any sentence below; it shows instantly.`
+        showBook(s.phrasebook)
+        return
+      }
+      if (s.status === 'failed') throw new Error(s.error)
+      statusLine.textContent = `CREAO is planning your conversation... ${s.elapsed_s} s`
+    }
+  } catch (err) {
+    statusLine.textContent = `Prep failed: ${String(err).slice(0, 160)}`
+  }
+}
+
 function start(phrase: string): void {
+  remember('sentence', phrase)
+  const ready = prepared.get(key(phrase))
+  if (ready) {
+    show(cardsForAi(ready.signs, ready.face, 'AI · CREAO'))
+    return
+  }
   const words = tokenize(phrase).length
   if (!AI_ON || words < 2 || isKnownSentence(phrase)) {
     show(cardsFor(phrase))
@@ -333,6 +411,7 @@ function more(): void {
   if (!detail) return
   const pages = paginate(detail.text).length
   if (detailPage >= pages - 1) return
+  if (detailPage < 0 && cards[index].kind === 'sign') remember('hard_sign', cards[index].title)
   detailPage++
   version++
   void render()
