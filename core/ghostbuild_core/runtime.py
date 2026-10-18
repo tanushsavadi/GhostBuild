@@ -73,6 +73,7 @@ class Runtime:
             refine=self._refine_unsupported,
             startable=self.startable_cards,
             voice_on=lambda: self.voice is not None,
+            research_progress=lambda: self.live.progress(),
         )
         self.sessions.restore()
         self.hud.session_id = self._sid()

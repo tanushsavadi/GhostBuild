@@ -53,7 +53,7 @@ def test_unmatched_request_shows_a_thinking_screen_then_starts_the_researched_gu
     rt.clock.advance(3000)  # the short acknowledgement flash passes; the thinking screen stays
     rt.tick()
     f = rt.hud.current
-    assert f.mode == "intervene" and f.cue.line1.startswith("RESEARCHING ") and "BICYCLE" in f.cue.line2  # elapsed + what it is about
+    assert f.mode == "intervene" and f.cue.line1.startswith("RESEARCHING ") and "●" in f.cue.line2 + "○"  # elapsed + a progress bar
     settle_live(c)  # the mock run completes; pump() starts the guide
     f = rt.hud.current
     assert rt.session().phase == "task" and f.mode == "intervene" and f.cue.line1.startswith("BUILD: ") and f.cue.line2 == "AI RESEARCHED, UNREVIEWED"
@@ -140,3 +140,33 @@ def test_researched_card_gets_a_readable_title(live):
     ask(c, MOCK_A_REQUEST)
     settle_live(c)
     assert rt.playbook.card.title[:1].isupper()
+
+
+def test_progress_is_an_honest_estimate_that_never_claims_done():
+    from ghostbuild_core.live_research import estimate
+
+    start, mid, late, way_late = estimate(0, 110), estimate(55, 110), estimate(110, 110), estimate(400, 110)
+    assert start["fraction"] == 0 and start["estimate"] is True and start["stage"] == 0
+    assert 0.5 < mid["fraction"] < 0.8 and late["fraction"] < 0.95 and way_late["fraction"] == 0.95  # never 100% before it finishes
+    assert not late["over"] and way_late["over"] and way_late["remaining_s"] == 0
+    assert [start["stage"], mid["stage"], way_late["stage"]] == sorted([start["stage"], mid["stage"], way_late["stage"]])
+
+
+def test_glasses_wait_screen_has_a_bar_and_a_time_left_and_the_phone_view_carries_the_same_estimate(live):
+    c, rt = live, live.rt
+    ask(c, MOCK_A_REQUEST)
+    rt.clock.advance(3000)
+    rt.tick()
+    f = rt.hud.current
+    assert f.cue.line1.startswith("RESEARCHING ") and "●" in f.cue.line2 + "○" and f.cue.line2.count("●") + f.cue.line2.count("○") == 10
+    assert "ABOUT" in f.cue.line2 or "ALMOST" in f.cue.line2 or "LONGER" in f.cue.line2
+    prog = c.get("/research/live").json()["active"]["progress"]
+    assert prog["estimate"] is True and 0 <= prog["fraction"] <= 0.95 and len(prog["stages"]) == 5
+    settle_live(c)
+
+
+def test_the_estimate_learns_from_real_run_durations(live):
+    c, rt = live, live.rt
+    assert rt.live.expected_s() == 110
+    rt.live.durations.extend([60.0, 80.0, 70.0])
+    assert rt.live.expected_s() == 70.0

@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import os
 import queue
 import time
@@ -28,7 +29,21 @@ log = logging.getLogger("ghostbuild.live_research")
 FLAG_ENV = "GB_LIVE_RESEARCH"
 MAX_ENV = "GB_LIVE_RESEARCH_MAX"
 FAST_ENV = "GB_LIVE_RESEARCH_FAST"  # default on: ask the agent for a lean, quick answer
+EXPECTED_ENV = "GB_LIVE_RESEARCH_EXPECTED_S"  # typical fast-mode run length until real runs teach us better (measured: 105 s)
+STAGES = ("Searching sources", "Reading and cross-checking", "Writing your steps", "Drawing a diagram", "Final checks")
 UNREVIEWED_NOTE = "AI-researched live; not reviewed by a human. Check the sources before relying on it."
+
+
+def estimate(elapsed_s: float, expected_s: float) -> dict:
+    """An ESTIMATE of progress for the wait screen (CREAO reports no percentage). It eases toward ~90% at the expected duration, never
+    reaches 100% until the run actually finishes, and says so when the run is taking longer than usual. Stages are a rough guide only."""
+    expected = max(30.0, float(expected_s))
+    frac = min(0.95, 1 - math.exp(-2.2 * max(0.0, elapsed_s) / expected))
+    remaining = max(0.0, expected - elapsed_s)
+    return {
+        "estimate": True, "fraction": round(frac, 3), "stage": min(len(STAGES) - 1, int(frac * len(STAGES))), "stages": list(STAGES),
+        "remaining_s": int(round(remaining / 5.0) * 5), "expected_s": int(expected), "over": elapsed_s > expected * 1.15,
+    }
 
 
 class LiveResearch:
@@ -40,6 +55,10 @@ class LiveResearch:
         self.last: Optional[dict] = None
         self.cards: dict[str, dict] = {}  # card_id -> {run_id, draft_id, goal}: loaded live, never human-reviewed
         self.started = 0
+        self.durations: list[float] = []  # how long finished live runs really took (seconds): the wait estimate learns from them
+
+    def _now(self) -> float:
+        return self.rt.clock.now_ms() / 1000.0  # the runtime clock: the glasses screen and the phone estimate always agree
 
     # ------------------------------------------------------------------ wiring
     def attach(self, runs: Any) -> None:
@@ -55,6 +74,17 @@ class LiveResearch:
             return max(0, int(os.environ.get(MAX_ENV, "3")))
         except ValueError:
             return 3
+
+    def expected_s(self) -> float:
+        base = float(os.environ.get(EXPECTED_ENV, "110") or 110)
+        if self.durations:
+            recent = sorted(self.durations[-3:])
+            return recent[len(recent) // 2]  # median of the last few real runs
+        return base
+
+    def progress(self) -> Optional[dict]:
+        act = self.active
+        return None if act is None else estimate(self._now() - act["started"], self.expected_s())
 
     # ------------------------------------------------------------------ start (main loop)
     def try_start(self, req: GoalRequest) -> bool:
@@ -76,7 +106,7 @@ class LiveResearch:
             log.info("live research not started: %s", exc.detail)
             return False
         self.started += 0 if cached_id else 1  # a cached run costs no credits and does not count against the cap
-        self.active = {"run_id": run_id, "session_id": req.session_id, "goal": text[:300], "mode": req.mode, "started": time.monotonic()}
+        self.active = {"run_id": run_id, "session_id": req.session_id, "goal": text[:300], "mode": req.mode, "started": self._now()}
         self.rt.sessions.begin_research(req.session_id, text)
         self.rt.elog.write("live_research", event="started", run_id=run_id, goal=text[:300])
         if (self.runs.get(run_id) or {}).get("status") == "draft_ready":  # an identical cached draft: no new run, load it now
@@ -105,7 +135,10 @@ class LiveResearch:
             if act is None or act["run_id"] != run_id:
                 continue
             self.active = None
+            took = self._now() - act["started"]
             rec = self.runs.get(run_id) or {}
+            if rec.get("status") == "draft_ready" and took > 20:  # a cached load is instant and teaches nothing
+                self.durations.append(took)
             ok = rec.get("status") == "draft_ready" and self._load(rec, act)
             self.last = {"run_id": run_id, "goal": act["goal"], "ok": bool(ok), "status": rec.get("status"), "at": time.time()}
             if not ok:
@@ -141,8 +174,9 @@ class LiveResearch:
         return {
             "enabled": self.enabled,
             "active": None if act is None else {
-                "run_id": act["run_id"], "goal": act["goal"], "elapsed_s": int(time.monotonic() - act["started"]),
+                "run_id": act["run_id"], "goal": act["goal"], "elapsed_s": int(self._now() - act["started"]),
                 "status": rec.get("status"), "creao_status": rec.get("creao_status"),
+                "progress": estimate(self._now() - act["started"], self.expected_s()),
             },
             "last": self.last,
             "unreviewed_cards": sorted(self.cards),

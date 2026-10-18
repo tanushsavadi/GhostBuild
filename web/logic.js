@@ -49,6 +49,15 @@
     if (confirmed) return { kind: 'confirmed', label: 'HUMAN CONFIRMED' };
     return { kind: 'pending', label: 'pending' };
   }
+  /** Wait text for the research panel, from the server's estimate (never presented as a measurement). */
+  function waitText(p) {
+    if (!p) return 'Working on it';
+    if (p.over) return 'Taking longer than usual. Still working';
+    var r = p.remaining_s || 0;
+    if (r <= 10) return 'Almost there';
+    if (r < 90) return 'About ' + r + ' seconds left';
+    return 'About ' + Math.round(r / 60) + ' minutes left';
+  }
   /** The words decide build vs fix; core retries the other mode if nothing matches, so this is only a hint. */
   function inferMode(text) {
     return /\b(fix|broken|black|dark|blank|not working|doesn't|does not|won't|wrong|lost|repair|problem|stuck|covered|dead|no picture|isn't|stopped)\b/i.test(String(text || '')) ? 'fix' : 'build';
@@ -216,7 +225,7 @@
   return {
     isPlaybookCard: isPlaybookCard, cardUsesTelemetry: cardUsesTelemetry, usesTelemetry: usesTelemetry,
     showPiHealth: showPiHealth, showPiBanners: showPiBanners, currentStepIndex: currentStepIndex,
-    stepStatus: stepStatus, stepRule: stepRule, inferMode: inferMode, counterText: counterText, collectCites: collectCites,
+    stepStatus: stepStatus, stepRule: stepRule, inferMode: inferMode, waitText: waitText, counterText: counterText, collectCites: collectCites,
     provenanceNote: provenanceNote, isTimestampLoc: isTimestampLoc,
     normalizeAsk: normalizeAsk, askError: askError, researchOutcome: researchOutcome, researchError: researchError,
     NOT_AVAILABLE: NOT_AVAILABLE,

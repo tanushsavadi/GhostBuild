@@ -28,8 +28,10 @@
     <div id="live-research" class="live" role="status" aria-live="polite" hidden>
       <div class="live-head"><span class="spin" aria-hidden="true"></span><strong>Researching your request</strong><span id="live-time" class="live-time">0:00</span></div>
       <p id="live-goal" class="live-goal"></p>
-      <div class="live-bar" aria-hidden="true"><i></i></div>
-      <p class="meta">GhostBuild is reading official docs and tutorials and drafting your steps and a diagram. This usually takes a few minutes. Your glasses show the same thinking screen, and the guide starts there on its own when it is ready.</p>
+      <div class="live-track" role="progressbar" aria-label="Estimated research progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="live-fill"></i></div>
+      <div class="live-meta"><span id="live-left">About 2 minutes left</span><span class="live-est">estimate</span></div>
+      <ol id="live-stages" class="live-stages" aria-hidden="true"></ol>
+      <p class="meta">GhostBuild is reading official docs and tutorials and drafting your steps and a diagram. The bar is an estimate from how long past runs took, not a measurement. Your glasses show the same wait, and the guide starts there on its own when it is ready.</p>
     </div>
     <div class="ready-guides"><p class="eyebrow">OR PICK A READY GUIDE</p><div id="task-catalog" class="catalog"><p class="meta">Loading reviewed guides…</p></div></div>
   </section>

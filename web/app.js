@@ -777,7 +777,16 @@
   function renderLive() {
     var box = $('live-research'), a = S.live && S.live.active;
     box.hidden = !a;
-    if (a) { $('live-time').textContent = fmtClock(a.elapsed_s || 0); $('live-goal').textContent = a.goal; }
+    if (!a) return;
+    var p = a.progress || null, pct = p ? Math.round(p.fraction * 100) : 0;
+    $('live-time').textContent = fmtClock(a.elapsed_s || 0); $('live-goal').textContent = a.goal;
+    $('live-fill').style.width = pct + '%';
+    box.querySelector('.live-track').setAttribute('aria-valuenow', String(pct));
+    $('live-left').textContent = L.waitText(p);
+    box.classList.toggle('over', !!(p && p.over));
+    var ol = $('live-stages');
+    if (p && ol.children.length !== p.stages.length) { clear(ol); p.stages.forEach(function (t) { ol.appendChild(h('li', { text: t })); }); }
+    if (p) Array.prototype.forEach.call(ol.children, function (li, i) { li.className = i < p.stage ? 'done' : i === p.stage ? 'now' : ''; });
   }
   function pollLive() {
     if (FIXTURE) return;

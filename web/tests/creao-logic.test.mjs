@@ -103,3 +103,11 @@ test('build vs fix is inferred from the words, never asked', () => {
   assert.equal(L.inferMode("the LED isn't lighting"), 'fix')
   assert.equal(L.inferMode(''), 'build')
 })
+
+test('wait text comes from the estimate and is honest when a run is slow', () => {
+  assert.equal(L.waitText(null), 'Working on it')
+  assert.equal(L.waitText({ remaining_s: 75, over: false }), 'About 75 seconds left')
+  assert.equal(L.waitText({ remaining_s: 120, over: false }), 'About 2 minutes left')
+  assert.equal(L.waitText({ remaining_s: 5, over: false }), 'Almost there')
+  assert.match(L.waitText({ remaining_s: 0, over: true }), /longer than usual/)
+})

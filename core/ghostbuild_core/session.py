@@ -49,10 +49,12 @@ class SessionManager:
         refine: Optional[Callable[[GoalRequest, GoalResolution], GoalResolution]] = None,
         startable: Optional[Callable[[], list[Card]]] = None,
         voice_on: Optional[Callable[[], bool]] = None,
+        research_progress: Optional[Callable[[], Optional[dict]]] = None,
     ) -> None:
         self.hud = hud
         self.clock = clock
         self._cards = cards
+        self._research_progress = research_progress or (lambda: None)
         self._voice_on = voice_on or (lambda: False)  # when spoken goals are available the first screen says so
         self._startable = startable or cards  # cards that can START a task now (a fault card needs its device reporting); _cards resolves running ones
         self._on_task = on_task
@@ -384,7 +386,15 @@ class SessionManager:
         elif s is not None and s.phase == "menu" and self._research is not None and self._research["sid"] == s.id:
             secs = max(0, (now - self._research["started_ms"]) // 1000) // 5 * 5  # 5 s steps: calm, and few BLE writes
             title = goal_mod.short_title(self._research["goal"], 26).upper()
-            screen = Screen.intervene(Cue(line1=f"RESEARCHING {secs // 60}:{secs % 60:02d}", line2=title), cue_id="research")
+            p = self._research_progress()
+            if p is None:
+                line2 = title
+            else:  # an estimate, drawn with the glasses' official ●/○ glyphs
+                n = round(p["fraction"] * 10)
+                rem = p["remaining_s"]
+                tail = "TAKING LONGER" if p["over"] else ("ALMOST THERE" if rem <= 10 else f"ABOUT {rem}S" if rem < 90 else f"ABOUT {round(rem / 60)} MIN")
+                line2 = "●" * n + "○" * (10 - n) + " " + tail
+            screen = Screen.intervene(Cue(line1=f"RESEARCHING {secs // 60}:{secs % 60:02d}", line2=line2), cue_id="research")
         elif s is not None and s.phase == "menu":
             ch = self._choice or (self._root_choice() if self._show_list else None)
             if ch is not None:

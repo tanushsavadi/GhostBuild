@@ -242,3 +242,16 @@ body.has-task:not(.goal-open) .area-goal{display:none}body:not(.has-task) .area-
 @keyframes live-slide{0%{transform:translateX(-120%)}100%{transform:translateX(300%)}}
 @keyframes live-spin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.live-bar i,.spin{animation:none}}
+
+.live-track{height:8px;border-radius:8px;background:rgba(255,255,255,.08);overflow:hidden;margin:2px 0 8px}
+.live-track i{display:block;height:100%;width:0;border-radius:8px;background:linear-gradient(90deg,var(--g2),#9ff0cb);transition:width .9s ease}
+.live.over .live-track i{background:linear-gradient(90deg,var(--amber),#fde68a);animation:live-pulse 1.4s ease-in-out infinite}
+.live-meta{display:flex;justify-content:space-between;align-items:baseline;font-size:14px;margin-bottom:10px}
+.live-est{font:600 11px ui-monospace,Menlo,monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted,#8a948e)}
+.live-stages{list-style:none;margin:0 0 10px;padding:0;display:flex;flex-direction:column;gap:6px}
+.live-stages li{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted,#8a948e)}
+.live-stages li::before{content:"";width:8px;height:8px;border-radius:50%;border:1.5px solid currentColor;flex:none}
+.live-stages li.done{color:var(--g2)}.live-stages li.done::before{background:currentColor}
+.live-stages li.now{color:inherit;font-weight:600}.live-stages li.now::before{border-color:var(--g2);background:var(--g2);animation:live-pulse 1.2s ease-in-out infinite}
+@keyframes live-pulse{50%{opacity:.45}}
+@media (prefers-reduced-motion:reduce){.live-track i{transition:none}.live.over .live-track i,.live-stages li.now::before{animation:none}}
