@@ -1,0 +1,731 @@
+{
+ "article": "80213074",
+ "manual": "AA-476615-12",
+ "steps": [
+  {
+   "n": 1,
+   "title": "Screw in 2 cam bolts",
+   "cue": [
+    "SCREW IN 2 CAM BOLTS",
+    "PART 118331"
+   ],
+   "detail": "Screw two cam bolts 118331 into the holes in the ends of the long piece, using a screwdriver. The picture at the top of the page shows the drawer that steps 1 to 8 build.",
+   "parts": [
+    {
+     "id": "118331",
+     "qty": 2,
+     "name": "cam bolt",
+     "note": null,
+     "avoid": false
+    }
+   ],
+   "warnings": []
+  },
+  {
+   "n": 2,
+   "title": "Fit 2 dowels, join the sides",
+   "cue": [
+    "FIT 2 DOWELS",
+    "PART 101344"
+   ],
+   "detail": "Press two wooden dowels 101344 into the holes shown, then join the two upright side pieces to the long piece.",
+   "parts": [
+    {
+     "id": "101344",
+     "qty": 2,
+     "name": "wooden dowel",
+     "note": null,
+     "avoid": false
+    }
+   ],
+   "warnings": []
+  },
+  {
+   "n": 3,
+   "title": "Fit 2 cam locks",
+   "cue": [
+    "FIT 2 CAM LOCKS",
+    "PART 103114 ONLY"
+   ],
+   "detail": "Press a cam lock 103114 into each side piece and turn it with a screwdriver as shown. The picture crosses out cam locks 110126 and 103430 for this step.",
+   "parts": [
+    {
+     "id": "103114",
+     "qty": 2,
+     "name": "cam lock",
+     "note": null,
+     "avoid": false
+    },
+    {
+     "id": "110126",
+     "qty": null,
+     "name": "cam lock",
+     "note": "crossed out in this step",
+     "avoid": true
+    },
+    {
+     "id": "103430",
+     "qty": null,
+     "name": "cam lock",
+     "note": "crossed out in this step",
+     "avoid": true
+    }
+   ],
+   "warnings": [
+    "Cam locks 110126 and 103430 are crossed out in this step: use only 103114."
+   ]
+  },
+  {
+   "n": 4,
+   "title": "Raise sides, slide in base",
+   "cue": [
+    "SWING SIDES UP, SLIDE",
+    "IN THE BASE PANEL"
+   ],
+   "detail": "Swing the side pieces up as the curved arrow shows, then slide the thin base panel in as the straight arrow shows. The close-up shows the panel's rough surface; match it to the manual's picture.",
+   "parts": [],
+   "warnings": []
+  },
+  {
+   "n": 5,
+   "title": "Fit the front panel",
+   "cue": [
+    "FIT THE FRONT PANEL",
+    "ONTO THE FRAME"
+   ],
+   "detail": "Swing the front panel up onto the frame as the arrow shows. The close-up shows the panel's edge seated in the groove.",
+   "parts": [],
+   "warnings": []
+  },
+  {
+   "n": 6,
+   "title": "Hammer in 2 bolts",
+   "cue": [
+    "HAMMER IN 2 BOLTS",
+    "PART 110519"
+   ],
+   "detail": "Tap two bolts 110519 into the holes shown with a hammer. The small picture at the corner shows where the hammer is used.",
+   "parts": [
+    {
+     "id": "110519",
+     "qty": 2,
+     "name": "hammer-in bolt",
+     "note": null,
+     "avoid": false
+    }
+   ],
+   "warnings": []
+  },
+  {
+   "n": 7,
+   "title": "Place the drawer runners",
+   "cue": [
+    "PLACE THE RUNNERS",
+    "ON THE DRAWER SIDES"
+   ],
+   "detail": "Lower the two drawer runners onto the sides of the drawer as the arrows show. The runners are the parts on manual page 4 (112482, 2x). No fasteners in this step.",
+   "parts": [],
+   "warnings": []
+  },
+  {
+   "n": 8,
+   "title": "Screw on the runners",
+   "cue": [
+    "SCREW ON THE RUNNERS",
+    "4X 100365"
+   ],
+   "detail": "Fix each runner with screws 100365 (4x in total). The picture crosses out screw 113287.",
+   "parts": [
+    {
+     "id": "100365",
+     "qty": 4,
+     "name": "small screw",
+     "note": null,
+     "avoid": false
+    },
+    {
+     "id": "113287",
+     "qty": null,
+     "name": "wide-head screw",
+     "note": "crossed out in this step",
+     "avoid": true
+    }
+   ],
+   "warnings": [
+    "Screw 113287 is crossed out in this step: use only 100365."
+   ]
+  },
+  {
+   "n": 9,
+   "title": "Fit 2 dowels",
+   "cue": [
+    "FIT 2 DOWELS",
+    "PART 101344"
+   ],
+   "detail": "Press two dowels 101344 into the narrow panel's edge as shown on the carpet. From this step the pages follow the side you chose for the cabinet.",
+   "parts": [
+    {
+     "id": "101344",
+     "qty": 2,
+     "name": "wooden dowel",
+     "note": null,
+     "avoid": false
+    }
+   ],
+   "warnings": []
+  },
+  {
+   "n": 10,
+   "title": "Fit 2 dowels in the rail",
+   "cue": [
+    "FIT 2 DOWELS IN RAIL",
+    "HOLE SIDE AS SHOWN"
+   ],
+   "detail": "Press two dowels 101344 into the ends of the rail. The two small pictures show which way the holes must face; the crossed-out one is the orientation to avoid.",
+   "parts": [
+    {
+     "id": "101344",
+     "qty": 2,
+     "name": "wooden dowel",
+     "note": null,
+     "avoid": false
+    }
+   ],
+   "warnings": [
+    "Check the two small pictures: the crossed-out hole orientation must not be used."
+   ]
+  },
+  {
+   "n": 11,
+   "title": "Screw in 8 cam bolts",
+   "cue": [
+    "SCREW IN 8 CAM BOLTS",
+    "PART 118331"
+   ],
+   "detail": "Screw eight cam bolts 118331 into the edges of the two panels as shown, using a screwdriver.",
+   "parts": [
+    {
+     "id": "118331",
+     "qty": 8,
+     "name": "cam bolt",
+     "note": null,
+     "avoid": false
+    }
+   ],
+   "warnings": []
+  },
+  {
+   "n": 12,
+   "title": "Screw runners onto panels",
+   "cue": [
+    "SCREW RUNNERS ON",
+    "USE SCREW 100365"
+   ],
+   "detail": "Fix one runner to each of the two panels with screws 100365. The picture crosses out screw 113287. The manual prints 1x for each runner and no screw count.",
+   "parts": [
+    {
+     "id": "100365",
+     "qty": null,
+     "name": "small screw",
+     "note": "quantity not printed in the manual",
+     "avoid": false
+    },
+    {
+     "id": "113287",
+     "qty": null,
+     "name": "wide-head screw",
+     "note": "crossed out in this step",
+     "avoid": true
+    }
+   ],
+   "warnings": [
+    "Screw 113287 is crossed out in this step: use only 100365."
+   ]
+  },
+  {
+   "n": 13,
+   "title": "Fit dowels, raise the sides",
+   "cue": [
+    "FIT 2 DOWELS",
+    "THEN RAISE THE SIDES"
+   ],
+   "detail": "Press two dowels 101344 into the rail ends, then raise the side panels as the arrows show.",
+   "parts": [
+    {
+     "id": "101344",
+     "qty": 2,
+     "name": "wooden dowel",
+     "note": null,
+     "avoid": false
+    }
+   ],
+   "warnings": []
+  },
+  {
+   "n": 14,
+   "title": "Fit 8 cam locks",
+   "cue": [
+    "FIT 8 CAM LOCKS",
+    "PART 103430 ONLY"
+   ],
+   "detail": "Press eight cam locks 103430 into the holes shown and turn each a quarter turn with a screwdriver. The picture crosses out cam lock 110126.",
+   "parts": [
+    {
+     "id": "103430",
+     "qty": 8,
+     "name": "cam lock",
+     "note": null,
+     "avoid": false
+    },
+    {
+     "id": "110126",
+     "qty": null,
+     "name": "cam lock",
+     "note": "crossed out in this step",
+     "avoid": true
+    }
+   ],
+   "warnings": [
+    "Cam lock 110126 is crossed out in this step: use only 103430."
+   ]
+  },
+  {
+   "n": 15,
+   "title": "Screw runner onto panel",
+   "cue": [
+    "SCREW RUNNER ON",
+    "USE SCREW 100365"
+   ],
+   "detail": "Fix the runner to the panel with screws 100365, as in step 12. The picture crosses out screw 113287.",
+   "parts": [
+    {
+     "id": "100365",
+     "qty": null,
+     "name": "small screw",
+     "note": "quantity not printed in the manual",
+     "avoid": false
+    },
+    {
+     "id": "113287",
+     "qty": null,
+     "name": "wide-head screw",
+     "note": "crossed out in this step",
+     "avoid": true
+    }
+   ],
+   "warnings": [
+    "Screw 113287 is crossed out in this step: use only 100365."
+   ]
+  },
+  {
+   "n": 16,
+   "title": "Fit 2 hinge plates",
+   "cue": [
+    "FIT 2 HINGE PLATES",
+    "109221, SCREW 113287"
+   ],
+   "detail": "Fix two hinge plates 109221 with screws 113287; the plate's A mark is shown in the close-up. The picture crosses out screw 100365 for this step.",
+   "parts": [
+    {
+     "id": "109221",
+     "qty": 2,
+     "name": "hinge plate",
+     "note": null,
+     "avoid": false
+    },
+    {
+     "id": "113287",
+     "qty": null,
+     "name": "wide-head screw",
+     "note": "quantity not printed in the manual",
+     "avoid": false
+    },
+    {
+     "id": "100365",
+     "qty": null,
+     "name": "small screw",
+     "note": "crossed out in this step",
+     "avoid": true
+    }
+   ],
+   "warnings": [
+    "Screw 100365 is crossed out in this step: use 113287."
+   ]
+  },
+  {
+   "n": 17,
+   "title": "Screw in 4 cam bolts",
+   "cue": [
+    "SCREW IN 4 CAM BOLTS",
+    "PART 118331"
+   ],
+   "detail": "Screw four cam bolts 118331 into the panel edges shown, using a screwdriver.",
+   "parts": [
+    {
+     "id": "118331",
+     "qty": 4,
+     "name": "cam bolt",
+     "note": null,
+     "avoid": false
+    }
+   ],
+   "warnings": []
+  },
+  {
+   "n": 18,
+   "title": "Slide in the back panel",
+   "cue": [
+    "SLIDE IN BACK PANEL",
+    "SEE ROUGH-SIDE NOTE"
+   ],
+   "detail": "Slide the thin back panel in as the arrow shows. The picture crosses out the rough, textured side: check which side the manual shows.",
+   "parts": [],
+   "warnings": [
+    "The rough, textured side is crossed out in the picture."
+   ]
+  },
+  {
+   "n": 19,
+   "title": "Fit 2 cam locks",
+   "cue": [
+    "FIT 2 CAM LOCKS",
+    "PART 110126"
+   ],
+   "detail": "Press two cam locks 110126 into the holes shown and turn each with a screwdriver.",
+   "parts": [
+    {
+     "id": "110126",
+     "qty": 2,
+     "name": "cam lock",
+     "note": null,
+     "avoid": false
+    }
+   ],
+   "warnings": []
+  },
+  {
+   "n": 20,
+   "title": "Fit 4 dowels",
+   "cue": [
+    "FIT 4 DOWELS",
+    "PART 101344"
+   ],
+   "detail": "Press four dowels 101344 into the edges of the small panel as shown. The close-up shows the panel's edge.",
+   "parts": [
+    {
+     "id": "101344",
+     "qty": 4,
+     "name": "wooden dowel",
+     "note": null,
+     "avoid": false
+    }
+   ],
+   "warnings": []
+  },
+  {
+   "n": 21,
+   "title": "Raise the side panel",
+   "cue": [
+    "RAISE THE SIDE PANEL",
+    "ONTO THE DOWELS"
+   ],
+   "detail": "Swing the side panel up as the arrow shows so its dowels enter their holes.",
+   "parts": [],
+   "warnings": []
+  },
+  {
+   "n": 22,
+   "title": "Fit 2 cam locks",
+   "cue": [
+    "FIT 2 CAM LOCKS",
+    "PART 110126"
+   ],
+   "detail": "Press two cam locks 110126 into the holes shown and turn each with a screwdriver.",
+   "parts": [
+    {
+     "id": "110126",
+     "qty": 2,
+     "name": "cam lock",
+     "note": null,
+     "avoid": false
+    }
+   ],
+   "warnings": []
+  },
+  {
+   "n": 23,
+   "title": "Fit 6 dowels",
+   "cue": [
+    "FIT 6 DOWELS",
+    "PART 101344"
+   ],
+   "detail": "Press six dowels 101344 into the holes shown along the panel edges.",
+   "parts": [
+    {
+     "id": "101344",
+     "qty": 6,
+     "name": "wooden dowel",
+     "note": null,
+     "avoid": false
+    }
+   ],
+   "warnings": []
+  },
+  {
+   "n": 24,
+   "title": "Bolt on the leg frame",
+   "cue": [
+    "BOLT ON THE LEG FRAME",
+    "3X 100086, HEX KEY"
+   ],
+   "detail": "Attach the metal leg frame with three long bolts 100086, turned with hex key 100092. The small picture at the top shows how the hex key 100092 fits into strip 121030.",
+   "parts": [
+    {
+     "id": "100086",
+     "qty": 3,
+     "name": "long bolt",
+     "note": null,
+     "avoid": false
+    },
+    {
+     "id": "100092",
+     "qty": 1,
+     "name": "hex key",
+     "note": null,
+     "avoid": false
+    },
+    {
+     "id": "121030",
+     "qty": 1,
+     "name": "tool strip",
+     "note": null,
+     "avoid": false
+    }
+   ],
+   "warnings": []
+  },
+  {
+   "n": 25,
+   "title": "Screw in 6 cam bolts",
+   "cue": [
+    "SCREW IN 6 CAM BOLTS",
+    "PART 118331"
+   ],
+   "detail": "Screw six cam bolts 118331 into the large panel lying on the carpet, using a screwdriver.",
+   "parts": [
+    {
+     "id": "118331",
+     "qty": 6,
+     "name": "cam bolt",
+     "note": null,
+     "avoid": false
+    }
+   ],
+   "warnings": []
+  },
+  {
+   "n": 26,
+   "title": "Join the frame and the panel",
+   "cue": [
+    "JOIN FRAME AND PANEL",
+    "AS THE ARROW SHOWS"
+   ],
+   "detail": "Move the assembled frame and the large panel together as the arrow shows, lining the cam bolts up with their holes.",
+   "parts": [],
+   "warnings": []
+  },
+  {
+   "n": 27,
+   "title": "Fit 6 cam locks",
+   "cue": [
+    "FIT 6 CAM LOCKS",
+    "PART 110126"
+   ],
+   "detail": "Press six cam locks 110126 into the holes shown and turn each with a screwdriver.",
+   "parts": [
+    {
+     "id": "110126",
+     "qty": 6,
+     "name": "cam lock",
+     "note": null,
+     "avoid": false
+    }
+   ],
+   "warnings": []
+  },
+  {
+   "n": 28,
+   "title": "Fit 4 plastic fittings",
+   "cue": [
+    "FIT 4 PLASTIC FITTINGS",
+    "PART 153549"
+   ],
+   "detail": "Push four plastic fittings 153549 into the holes shown, as the close-up pictures.",
+   "parts": [
+    {
+     "id": "153549",
+     "qty": 4,
+     "name": "plastic fitting",
+     "note": null,
+     "avoid": false
+    }
+   ],
+   "warnings": []
+  },
+  {
+   "n": 29,
+   "title": "Press in 2 hexagon covers",
+   "cue": [
+    "PRESS IN 2 HEX COVERS",
+    "PART 10081375"
+   ],
+   "detail": "Press the hexagon covers 10081375 into the holes of the leg frame, by hand. The picture crosses out the round covers 112519 and 121338 for this step.",
+   "parts": [
+    {
+     "id": "10081375",
+     "qty": 2,
+     "name": "hexagon cover",
+     "note": null,
+     "avoid": false
+    },
+    {
+     "id": "112519",
+     "qty": null,
+     "name": "round cover",
+     "note": "crossed out in this step",
+     "avoid": true
+    },
+    {
+     "id": "121338",
+     "qty": null,
+     "name": "round cover",
+     "note": "crossed out in this step",
+     "avoid": true
+    }
+   ],
+   "warnings": [
+    "The round covers 112519 and 121338 are crossed out in this step."
+   ]
+  },
+  {
+   "n": 30,
+   "title": "Hang the drawer",
+   "cue": [
+    "HANG THE DRAWER",
+    "ON ITS RUNNERS"
+   ],
+   "detail": "Tilt the drawer up and let its runners catch the rails as the arrow and the top close-up show, then slide it in.",
+   "parts": [],
+   "warnings": []
+  },
+  {
+   "n": 31,
+   "title": "Fit 2 hinges on the door",
+   "cue": [
+    "FIT 2 HINGES ON DOOR",
+    "109338, SCREW 100365"
+   ],
+   "detail": "Lay the door flat and fix two hinges 109338 with screws 100365, as the close-up shows.",
+   "parts": [
+    {
+     "id": "109338",
+     "qty": 2,
+     "name": "hinge",
+     "note": null,
+     "avoid": false
+    },
+    {
+     "id": "100365",
+     "qty": null,
+     "name": "small screw",
+     "note": "quantity not printed in the manual",
+     "avoid": false
+    }
+   ],
+   "warnings": []
+  },
+  {
+   "n": 32,
+   "title": "Hang the door",
+   "cue": [
+    "HANG THE DOOR",
+    "CLIP ON, TIGHTEN SCREW"
+   ],
+   "detail": "Clip each hinge onto its plate as the arrow shows, then tighten the hinge screw with a screwdriver. Manual page 40 shows how to adjust the door; it is the third picture for this step.",
+   "parts": [
+    {
+     "id": "109338",
+     "qty": 2,
+     "name": "hinge",
+     "note": "already fixed to the door in step 31",
+     "avoid": false
+    }
+   ],
+   "warnings": []
+  },
+  {
+   "n": 33,
+   "title": "Fit 8 shelf pins and shelves",
+   "cue": [
+    "FIT 8 SHELF PINS",
+    "PART 101514"
+   ],
+   "detail": "Push eight shelf pins 101514 into the holes and rest the two shelves on them, as the arrows show.",
+   "parts": [
+    {
+     "id": "101514",
+     "qty": 8,
+     "name": "shelf pin",
+     "note": null,
+     "avoid": false
+    }
+   ],
+   "warnings": []
+  },
+  {
+   "n": 34,
+   "title": "Stick on 2 bumpers",
+   "cue": [
+    "STICK ON 2 BUMPERS",
+    "PART 104663"
+   ],
+   "detail": "Stick two adhesive bumpers 104663 where the close-up shows.",
+   "parts": [
+    {
+     "id": "104663",
+     "qty": 2,
+     "name": "adhesive bumper",
+     "note": null,
+     "avoid": false
+    }
+   ],
+   "warnings": []
+  },
+  {
+   "n": 35,
+   "title": "Fit the grommet and covers",
+   "cue": [
+    "FIT GROMMET + 4 COVERS",
+    "121304 AND 112519"
+   ],
+   "detail": "Press the cable grommet into the hole in the top and the four round covers over the holes shown. The manual prints alternate numbers for these parts: grommet 121208, 121186 or 10060533; covers 121338 or 130521.",
+   "parts": [
+    {
+     "id": "121304",
+     "qty": 1,
+     "name": "cable grommet",
+     "note": "alternate numbers printed: 121208, 121186, 10060533",
+     "avoid": false
+    },
+    {
+     "id": "112519",
+     "qty": 4,
+     "name": "round cover",
+     "note": "alternate numbers printed: 121338, 130521",
+     "avoid": false
+    }
+   ],
+   "warnings": []
+  }
+ ]
+}

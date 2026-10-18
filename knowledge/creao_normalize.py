@@ -598,6 +598,14 @@ def _build_card(payload: dict, request: str, ctx: _Ctx, device: str, model: str,
             "id": sid, "title": step_title, "cue": cue, "detail": "", "why": None, "where": None, "warnings": [],
             "faq": [], "troubleshoot": [], "guide_id": None, "verify": None, "requires": [], "_action": action,
         }
+        # Optional authored human-facing copy is portable across products/tasks.
+        primary = d.get("display_instruction") or d.get("instruction_cue")
+        if isinstance(primary, dict) and primary.get("line1"):
+            from contracts.models import Cue
+            try:
+                step["instruction"] = Cue.model_validate(primary).model_dump()
+            except ValueError:
+                ctx.note(f"step {i + 1} plain-language cue was invalid; kept the original cue")
         # warnings / tips / safety
         for k in STEP_WARN_KEYS:
             for w in _as_list(d.get(k)):
