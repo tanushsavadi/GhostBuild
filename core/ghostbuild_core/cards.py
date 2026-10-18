@@ -23,7 +23,7 @@ def load_cards(directory: Path | str) -> list[Card]:
         except Exception as exc:
             log.warning("skipping %s: unreadable JSON (%s)", p, exc)
             continue
-        if not isinstance(raw, dict) or "card_id" not in raw or "tests" not in raw:
+        if not isinstance(raw, dict) or "card_id" not in raw or not ("tests" in raw or "steps" in raw):
             log.debug("skipping %s: not a Repair Card", p)
             continue
         try:

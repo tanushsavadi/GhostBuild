@@ -8,6 +8,7 @@ from typing import Callable, Optional
 
 from contracts.models import (
     Card,
+    Cue,
     G2Hello,
     G2Input,
     GoalRequest,
@@ -24,6 +25,8 @@ from .clock import Clock, as_clock
 from .engine import Engine
 from .hud import Hud
 from .log import EventLog
+from .playbook import AskResult, PlaybookEngine
+from .research import SAVED_DETAIL, ResearchQueue, SaveResult
 from .session import SessionManager
 
 log = logging.getLogger("ghostbuild.runtime")
@@ -51,11 +54,15 @@ class Runtime:
         self.elog = EventLog(log_dir, self.clock)
         self.hud = Hud(self.clock, source="simulated" if simulate and default_source == "pi_live" else default_source)
         self.hud.subscribe(lambda f: self.elog.write("frame", frame=f.model_dump(mode="json")))
+        self.playbook: Optional[PlaybookEngine] = None  # set while the active task is a playbook (Card.steps)
+        self._pb_sid: Optional[str] = None
+        self.research = ResearchQueue(self.asset_root, self.clock)
         self.engine = self._make_engine(self._default_card())
         sess_path = Path(log_dir) / "sessions.json" if log_dir is not None else None
         self.sessions = SessionManager(
             self.hud, self.clock, lambda: self.cards, self._set_card, sess_path,
             record=lambda kind, **d: self.elog.write(kind, **d),
+            refine=self._refine_unsupported,
         )
         self.sessions.restore()
         self.hud.session_id = self._sid()
@@ -75,16 +82,48 @@ class Runtime:
                 return c
         return self.cards[0]
 
-    def _make_engine(self, card: Card) -> Engine:
+    def _make_engine(self, card: Card, passive: bool = False) -> Engine:
         return Engine(
-            card, self.clock, hud=self.hud, asset_root=self.asset_root, force_source=self.force_source,
+            card, self.clock, hud=self.hud, asset_root=self.asset_root, force_source=self.force_source, passive=passive,
             on_event=lambda ev: self.elog.write("event", evidence=ev.model_dump(mode="json")),
         )
 
-    def _set_card(self, card: Card) -> None:
-        if self.engine.card.card_id != card.card_id:
+    def _set_card(self, card: Card, fresh: bool = False) -> None:
+        """Activate the task on the glasses.
+
+        A card with `steps` runs as a PLAYBOOK (PlaybookEngine). If it also has `tests`, the tests are ignored for now:
+        the fault Engine stays PASSIVE (keeps link/camera bookkeeping for /health but writes no HUD screen).
+        A card with only `tests` runs the original fault Engine, unchanged.
+        """
+        sid = self.sessions.active_id
+        if card.steps:
+            same = self.playbook is not None and self.playbook.card.card_id == card.card_id and self._pb_sid == sid
+            if same and not fresh:
+                return
+            if self.engine.card.card_id != card.card_id or not self.engine.passive:
+                self.engine = self._make_engine(card, passive=True)
+            progress = None if fresh else self.sessions.get_progress(sid)
+            self._pb_sid = sid
+            self.playbook = PlaybookEngine(
+                card, self.clock, hud=self.hud, asset_root=self.asset_root, force_source=self.force_source, progress=progress,
+                on_event=lambda ev: self.elog.write("event", evidence=ev.model_dump(mode="json")),
+                on_progress=lambda d, sid=sid: self.sessions.set_progress(sid, d),
+            )
+            self.playbook._save()
+            return
+        if self.playbook is not None:
+            self.playbook.detach()
+            self.playbook = None
+            self._pb_sid = None
             self.engine = self._make_engine(card)
             self.engine.tick()
+        elif self.engine.card.card_id != card.card_id or self.engine.passive:
+            self.engine = self._make_engine(card)
+            self.engine.tick()
+
+    @property
+    def active_card(self) -> Card:
+        return self.playbook.card if self.playbook is not None else self.engine.card
 
     def card_by_id(self, card_id: str) -> Optional[Card]:
         return next((c for c in self.cards if c.card_id == card_id), None)
@@ -92,6 +131,8 @@ class Runtime:
     # ------------------------------------------------------------------ inputs
     def ingest(self, obs: Observation) -> bool:
         ok = self.engine.ingest(obs)
+        if ok and self.playbook is not None:
+            self.playbook.ingest(obs)  # optional telemetry: only measured steps look at it
         self.elog.write("observation", accepted=ok, obs=obs.model_dump(mode="json"))
         return ok
 
@@ -99,8 +140,14 @@ class Runtime:
         self.elog.write("input", input=gi.model_dump(mode="json"))
         if self.voice is not None and gi.gesture in ("hold_start", "hold_end"):
             self.voice.on_hold(gi.gesture)
+        elif self.playbook is not None and self.sessions.flash_showing() and self.sessions.active is not None and self.sessions.active.phase == "task":
+            self.sessions.dismiss_flash()  # the task-start cue hides the first step: a gesture only reveals it, never acts on it
+            self.playbook.reveal()
         elif not self.sessions.handle_input(gi):
-            self.engine.handle_input(gi)
+            if self.playbook is not None:
+                self.playbook.handle_input(gi)
+            else:
+                self.engine.handle_input(gi)
         self.hud.sync()
         return self.hud.current
 
@@ -118,12 +165,54 @@ class Runtime:
     def tick(self) -> None:
         self.sessions.tick()
         self.engine.tick()
+        if self.playbook is not None:
+            self.playbook.tick()
         if self.voice is not None:
             self.voice.tick()
 
     def resolve_goal(self, req: GoalRequest) -> Optional[GoalResolution]:
         self.elog.write("input", goal=req.model_dump(mode="json"))
         res = self.sessions.apply_goal(req)
+        self.hud.sync()
+        return res
+
+    def _refine_unsupported(self, req: GoalRequest, res: GoalResolution) -> GoalResolution:
+        """Free-text goal with no card: save it for async research and say QUEUED only if it really was saved."""
+        if req.via not in ("phone_text", "voice") or not (req.text or "").strip():
+            return res
+        saved = self.research.save(req.session_id, req.mode, req.text or "", req.via)
+        if not saved.queued:
+            return res
+        self.elog.write("research", request=req.model_dump(mode="json"), status=saved.status)
+        return res.model_copy(update={
+            "research_queued": True,
+            "cue": Cue(line1="NOT SUPPORTED YET", line2="QUEUED FOR RESEARCH"),
+            "detail": res.detail + " Your request was " + SAVED_DETAIL + ".",
+        })
+
+    def request_research(self, session_id: str, mode: str, text: str) -> tuple[Optional[GoalResolution], SaveResult]:
+        """POST /research/request: save an unsupported request. Never promises availability."""
+        saved = self.research.save(session_id, mode, text, "phone_text")
+        if not saved.queued:
+            return None, saved
+        self.elog.write("research", request={"session_id": session_id, "mode": mode, "text": text}, status=saved.status)
+        res = GoalResolution(
+            session_id=session_id,
+            status="unsupported",
+            mode=mode,  # type: ignore[arg-type]
+            cue=Cue(line1="NOT SUPPORTED YET", line2="QUEUED FOR RESEARCH"),
+            detail=SAVED_DETAIL,
+            alternatives=[c.title for c in self.cards],
+            research_queued=True,
+        )
+        return res, saved
+
+    def ask(self, text: str) -> Optional[AskResult]:
+        """Contextual follow-up for the active playbook step. None if no playbook is active."""
+        if self.playbook is None:
+            return None
+        self.elog.write("input", ask=text[:300])
+        res = self.playbook.ask(text)
         self.hud.sync()
         return res
 
@@ -136,8 +225,9 @@ class Runtime:
         link = e.link_status()
         cam = e.camera_status
         polled = self._last_poll_ms is not None and self.clock.now_ms() - self._last_poll_ms < 5000
+        pi_ok = link == "up" and cam == "ok"
         return Health(
-            ok=link == "up" and cam == "ok",
+            ok=pi_ok if (self.playbook is None or self.playbook.current_is_measured) else True,  # manual steps need no telemetry
             uptime_s=round((self.clock.now_ms() - self.started) / 1000.0, 3),
             pi_link=link,  # type: ignore[arg-type]
             pi_last_seq=e.last_seq,
@@ -149,6 +239,23 @@ class Runtime:
 
     def state(self) -> State:
         e = self.engine
+        pb = self.playbook
+        if pb is not None:
+            events = sorted([*e.events, *pb.events], key=lambda ev: ev.at)[-50:]
+            return State(
+                session=self.sessions.view(),
+                engine="PLAYBOOK",
+                card_id=pb.card.card_id,
+                test=None,
+                step_id=pb.step.id,
+                check=None,
+                help_view=pb.help_view(),  # type: ignore[arg-type]
+                source=(pb.last_obs or e.last_obs).source if (pb.last_obs or e.last_obs) else None,
+                health=self.health(),
+                hud=self.hud.current,
+                playbook=pb.playbook_state(),
+                events=events,
+            )
         tr = e.current_track()
         return State(
             session=self.sessions.view(),

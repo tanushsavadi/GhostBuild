@@ -109,7 +109,7 @@ def test_menu_build_unsupported_returns_to_menu(rt):
     rt.tick()
     rt.handle_input(gi("swipe_down"))
     f = rt.handle_input(gi("press"))
-    assert f.mode == "uncertain" and f.cue.line1 == "NOT SUPPORTED YET"
+    assert f.mode == "uncertain" and f.cue.line1 == "NOTHING LOADED YET"  # 0 build cards loaded: honest, not "unsupported goal"
     assert rt.session().phase == "menu"
     rt.clock.advance(2600)
     rt.tick()

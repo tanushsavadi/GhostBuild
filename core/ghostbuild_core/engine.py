@@ -145,8 +145,10 @@ class Engine:
         null_after_ms: int = 500,
         max_gap_ms: int = 2000,
         on_event: Optional[Callable[[Evidence], None]] = None,
+        passive: bool = False,
     ) -> None:
         self.card = card
+        self.passive = passive  # True: keeps link/camera bookkeeping for Health but never writes a HUD screen (a playbook owns the glasses)
         self.clock = as_clock(clock)
         self.hud = hud if hud is not None else Hud(self.clock)
         self.asset_root = Path(asset_root) if asset_root is not None else Path.cwd()
@@ -229,7 +231,8 @@ class Engine:
             self._func_trigger_at = None
         self._last_rx = now
         self.last_obs = obs
-        self.hud.set_source(obs.source)
+        if not self.passive:
+            self.hud.set_source(obs.source)  # a passive engine (a playbook owns the glasses) must not relabel the frames
         was_lost = self._link_lost
         self._link_lost = False
         if was_lost:
@@ -550,6 +553,8 @@ class Engine:
         return None
 
     def _refresh(self, immediate: bool = False) -> None:
+        if self.passive:
+            return
         now = self.clock.now_ms()
         screen = self._compute_screen(now)
         if immediate:

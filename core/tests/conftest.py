@@ -115,3 +115,18 @@ def feed(engine, clock) -> Feeder:
 
 def press(g="press", surface="g2") -> G2Input:
     return G2Input(gesture=g, seq_seen=0, surface=surface)
+
+
+@pytest.fixture(autouse=True)
+def _research_requests_never_land_in_the_repo(monkeypatch, tmp_path_factory):
+    """Tests that run a Runtime on the real repo root must not drop request files into knowledge/requests/."""
+    from ghostbuild_core.research import ResearchQueue
+
+    orig = ResearchQueue.__init__
+
+    def init(self, asset_root, clock):
+        orig(self, asset_root, clock)
+        if Path(asset_root).resolve() == REPO:
+            self.dir = tmp_path_factory.mktemp("requests")
+
+    monkeypatch.setattr(ResearchQueue, "__init__", init)

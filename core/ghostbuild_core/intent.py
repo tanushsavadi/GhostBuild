@@ -192,3 +192,76 @@ def answer(intent: Intent, ctx: Ctx) -> Reply:
             return Reply(kind="show", cue=nxt.action, phone_text=nxt.why, phone_label=ctx.card.provenance)
         return _not_in_card(ctx, check.why if check else None)
     return Reply(kind="show", cue=NOT_SURE)
+
+
+# --------------------------------------------------------------------------- playbook follow-ups (/ask and the voice lane)
+PbIntent = Literal["where", "why", "faq", "troubleshoot", "next", "back", "picture", "status", "unknown"]
+
+NOT_IN_PLAYBOOK = Cue(line1="NOT IN MY PLAYBOOK", line2="SEE PHONE")
+
+_PB_STATUS = re.compile(r"\b(which|what) step\b|\bwhere am i\b|\bprogress\b|\bhow many (steps?|left)\b|\bstatus\b|\bam i done\b|\bsteps? (left|remaining)\b")
+_PB_PICTURE = re.compile(r"\b(show|see|open|display)\b.*\b(picture|photo|image|diagram|pic|view)\b|\bpicture\b|\bphoto\b|\bdiagram\b")
+_PB_NEXT = re.compile(r"^(next|next step|done|finished|continue|go on|move on|forward)$|\b(next step|i am done|i'm done|im done|all done)\b")
+_PB_BACK = re.compile(r"^(back|previous|go back|previous step|last step)$|\b(previous step|go back|last step)\b")
+_PB_TROUBLE = re.compile(
+    r"\bdid not work\b|\bdidn't work\b|\bdoesn't work\b|\bdoes not work\b|\bnot working\b|\bwhat if\b|\bstill (not|wrong|broken|dark|off)\b|"
+    r"\bnothing (changed|happened)\b|\bno luck\b|\bfailed\b|\bstuck\b|\bwon't\b|\bwhat else\b|\bproblem\b"
+)
+_PB_WHERE = re.compile(r"\bwhere\b|\bwhich part\b|\blocate\b")
+_PB_WHY = re.compile(r"\bwhy\b|\bmatter\b|\breason\b|\bimportant\b")
+
+_FAQ_STOP = {"the", "a", "an", "is", "are", "do", "does", "i", "it", "to", "of", "my", "me", "how", "what", "this", "that", "in", "on", "and", "or", "can", "should", "which"}
+
+
+def _stem(w: str) -> str:
+    for suf in ("ing", "es", "ed", "s"):
+        if w.endswith(suf) and len(w) - len(suf) >= 3:
+            return w[: -len(suf)]
+    return w
+
+
+def _content(text: str) -> set[str]:
+    return {_stem(w) for w in normalize(text).split() if w not in _FAQ_STOP and len(w) >= 2}
+
+
+def faq_best(text: str, faqs: list) -> Optional[tuple[int, float]]:
+    """Index and overlap ratio of the FAQ question sharing the most content tokens with `text`, or None below the bar.
+    Bar: at least 2 shared tokens, or the single content token of a one-word question. Ties go to the earlier FAQ (card order)."""
+    mine = _content(text)
+    best: Optional[tuple[int, int, float]] = None
+    for i, fq in enumerate(faqs):
+        theirs = _content(fq.q)
+        if not theirs:
+            continue
+        shared = len(mine & theirs)
+        if shared < 2 and not (shared == 1 and len(theirs) == 1):
+            continue
+        ratio = shared / len(theirs)
+        if ratio < 0.5:
+            continue
+        if best is None or (shared, ratio) > (best[1], best[2]):
+            best = (i, shared, ratio)
+    return (best[0], best[2]) if best else None
+
+
+def classify_playbook(text: str, faqs: list) -> PbIntent:
+    t = normalize(text)
+    if not t:
+        return "unknown"
+    if faq_best(t, faqs) is not None:
+        return "faq"
+    if _PB_STATUS.search(t):
+        return "status"
+    if _PB_TROUBLE.search(t):
+        return "troubleshoot"
+    if _PB_NEXT.search(t):
+        return "next"
+    if _PB_BACK.search(t):
+        return "back"
+    if _PB_PICTURE.search(t):
+        return "picture"
+    if _PB_WHERE.search(t):
+        return "where"
+    if _PB_WHY.search(t):
+        return "why"
+    return "unknown"
