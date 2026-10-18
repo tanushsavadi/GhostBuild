@@ -70,27 +70,6 @@
           "why": "Dark and flat frames mean little light reaches the sensor. A lens cover or paper flap is the first thing to check. Placeholder threshold, calibrate on the Pi spike.",
           "cites": [],
           "guide_id": "camera_lens"
-        },
-        {
-          "when": [
-            {
-              "signal": "camera.mean_luma",
-              "op": "lt",
-              "value": 25
-            },
-            {
-              "signal": "camera.luma_std",
-              "op": "gt",
-              "value": 8
-            }
-          ],
-          "action": {
-            "line1": "CHECK STATION LIGHT",
-            "line2": ""
-          },
-          "why": "Dark frame with some contrast suggests the scene is under-lit. No light level is documented in any fetched source, so this is a generic check only.",
-          "cites": [],
-          "guide_id": null
         }
       ],
       "offer_help_after_ms": 8000
