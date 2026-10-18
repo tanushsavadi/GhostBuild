@@ -54,6 +54,7 @@ class RunBody(BaseModel):
     doc_urls: list[str] = Field(default_factory=list, max_length=5)
     video_urls: list[str] = Field(default_factory=list, max_length=5)
     follow_up: Optional[str] = Field(default=None, max_length=500)
+    fast: bool = False  # live research: ask the agent for a lean, quick answer (fewer sources, no extra files)
 
     @field_validator("doc_urls", "video_urls")
     @classmethod
@@ -209,7 +210,7 @@ class ResearchRuns:
             self._runs[run_id] = {
                 "run_id": run_id, "creao_run_id": None, "share_url": None, "status": "queued", "creao_status": None, "error": None, "draft_id": None,
                 "goal": body.goal, "device": body.device, "model": body.model, "intent": body.intent, "session_id": body.session_id,
-                "doc_urls": body.doc_urls, "video_urls": body.video_urls, "follow_up": body.follow_up,
+                "doc_urls": body.doc_urls, "video_urls": body.video_urls, "follow_up": body.follow_up, "fast": body.fast,
                 "created_at": stamp, "updated_at": stamp, "validation_errors": [], "approved_by": None,
             }
             self._started += 1
@@ -234,10 +235,10 @@ class ResearchRuns:
 
             client = self._make_client()
             inputs = {"goal": body.goal, "device": body.device, "model": body.model, "intent": body.intent,
-                      "doc_urls": body.doc_urls, "video_urls": body.video_urls, "follow_up": body.follow_up}
+                      "doc_urls": body.doc_urls, "video_urls": body.video_urls, "follow_up": body.follow_up, "fast": body.fast}
             creao_id = client.start_run(inputs)
             self._update(run_id, creao_run_id=creao_id, status="running", share_url=creao.find_share_url(client.last_start_response))
-            raw = client.poll(creao_id, interval=self.poll_interval, max_wait=self.max_wait,
+            raw = client.poll(creao_id, interval=self.poll_interval, max_wait=self.max_wait, max_interval=4,
                               on_update=lambda status, _raw: self._update(run_id, creao_status=status))
             if creao.run_state(raw)[0] == "success" and hasattr(client, "attach_json_artifacts"):
                 raw = client.attach_json_artifacts(raw)  # the structured playbook is a JSON artifact, not inline text

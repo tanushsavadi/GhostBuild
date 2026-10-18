@@ -149,6 +149,15 @@ def _is_empty(value: Any) -> bool:
     return value is None or value == "" or value == []
 
 
+FAST_DIRECTIVE = (
+    "\n\nSPEED MODE: a person wearing smart glasses is waiting for this answer right now. Be fast and lean. "
+    "Use at most 3 sources (official docs first) and at most 2 searches; do not browse extra pages. "
+    "Produce ONLY the GhostBuild workflow JSON plus ONE simple labelled diagram. Do NOT write extra scripts, markdown reports or "
+    "README files, and do NOT re-render or vision-verify the diagram. Keep it to 5-7 short steps. Do not ask questions: "
+    "record every assumption under uncertainties and keep going."
+)
+
+
 def default_body(app_id: str, inputs: dict) -> dict:
     """Existing GhostBuild Intelligence form contract; extra context uses the saved goal field."""
     goal = str(inputs.get("goal") or "").strip()
@@ -160,6 +169,8 @@ def default_body(app_id: str, inputs: dict) -> dict:
             context.append(f"{label}: {', '.join(map(str, value)) if isinstance(value, list) else value}")
     if context:
         goal += "\n\nResearch context:\n" + "\n".join(context)
+    if inputs.get("fast"):
+        goal += FAST_DIRECTIVE
     return {"inputs": {"goal": goal, "intent": inputs.get("intent") or "build"}}  # app id travels in the URL, not the body
 
 
@@ -471,6 +482,7 @@ def _inputs_from_args(args: argparse.Namespace) -> dict:
         "doc_urls": args.doc_url or [],
         "video_urls": args.video_url or [],
         "follow_up": args.follow_up,
+        "fast": args.fast,
     }
 
 
@@ -524,6 +536,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     p.add_argument("--doc-url", action="append")
     p.add_argument("--video-url", action="append")
     p.add_argument("--follow-up")
+    p.add_argument("--fast", action="store_true", help="append the SPEED MODE directive (fewer sources, no extra files)")
     p.add_argument("--dry-run", action="store_true", help="print the exact request (without the key) and exit; no network")
     p.add_argument("--interval", type=float, default=3)
     p.add_argument("--max-wait", type=float, default=900)

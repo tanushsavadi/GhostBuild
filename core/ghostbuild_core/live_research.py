@@ -27,6 +27,7 @@ log = logging.getLogger("ghostbuild.live_research")
 
 FLAG_ENV = "GB_LIVE_RESEARCH"
 MAX_ENV = "GB_LIVE_RESEARCH_MAX"
+FAST_ENV = "GB_LIVE_RESEARCH_FAST"  # default on: ask the agent for a lean, quick answer
 UNREVIEWED_NOTE = "AI-researched live; not reviewed by a human. Check the sources before relying on it."
 
 
@@ -70,7 +71,7 @@ class LiveResearch:
         if cached_id is None and self.started >= self._max():
             return False
         try:
-            run_id = cached_id or self.runs.start(RunBody(session_id=req.session_id, goal=text[:300], intent=req.mode))
+            run_id = cached_id or self.runs.start(RunBody(session_id=req.session_id, goal=text[:300], intent=req.mode, fast=os.environ.get(FAST_ENV, "1") != "0"))
         except RunRejected as exc:
             log.info("live research not started: %s", exc.detail)
             return False
