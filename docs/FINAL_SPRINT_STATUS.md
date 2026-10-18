@@ -6,7 +6,7 @@ Updated October 18, 2026. Submission deadline: noon PDT; target Devpost completi
 
 - Integration: `codex/final-sprint`, `.worktrees/final-sprint`. Correction implementation: `e816740` plus subsequent release-label/documentation commits.
 - Existing sprint history and authorship are preserved. The unrelated Open Palm/ASL branch and voice PR #2 are not broadly merged.
-- Operator backend `:8787` reloaded at 06:57 PDT from the corrected checkout, preserving `logs/bench-0632` and a timestamped backup. Health returned HTTP 200. Its existing optional provider configuration was retained.
+- Operator backend `:8787` reloaded at 06:57 and 07:09 PDT from the corrected checkout, preserving `logs/bench-0632` and a timestamped backup. Health returned HTTP 200. Its existing optional provider configuration was retained.
 - GitHub publication/CI/merge: in progress; verify the remote PR and `main` before treating this record as a completed merge.
 
 ## Fresh verification
@@ -21,7 +21,7 @@ Updated October 18, 2026. Submission deadline: noon PDT; target Devpost completi
 | Live IKEA retrieval | Correction to MALM removed MICKE; official listings/photos and manual links retrieved. Selecting a listing offers its manual, with no invented prepared guide. |
 | Live Prusa compilation | MK4-to-MK3S+ correction removed old guide and compiled 13 steps from two official Prusa pages. Wall time 111.63 s in one bounded run; not a latency guarantee. AI-compiled, not human-reviewed. [Live correction record](evidence/framework/release-live-corrections.json). |
 | Physical G2 | **Operator-reported PASS** for this voice-disabled build: readable cue/image, press/swipes, answer return, reconnect. Detailed record still pending; not an independent automated device test. Mic/head-shake/Pi telemetry not established by this report. |
-| Provider history | Earlier sprint notes report real CREAO artifact normalization and ElevenLabs synthetic-audio STT/TTS. Not re-run during this release. Live correction tests here used Anthropic, not CREAO or ElevenLabs. [Earlier status record](https://github.com/tanushsavadi/GhostBuild/blob/65ce651/docs/FINAL_SPRINT_STATUS.md). |
+| Provider history | Earlier sprint notes report real CREAO artifact normalization and ElevenLabs synthetic-audio STT/TTS. Not re-run during this release. Live correction tests here used Anthropic, not CREAO. Fresh bounded ElevenLabs checks: TTS HTTP 200, valid 3.019 s MP3 in 1.391 s; STT provider startup failed after 5.013 s, without a transcript. Guidance/progress recovered unchanged. [Voice evidence](evidence/release/elevenlabs-live.json). [Earlier status record](https://github.com/tanushsavadi/GhostBuild/blob/65ce651/docs/FINAL_SPRINT_STATUS.md). |
 
 ## Packages and security
 
@@ -46,7 +46,7 @@ PASS means the stated scope was exercised; it does not silently imply physical o
 | WHERE/HOW/CORRECT | PASS | Three actual SDK image sends in official simulator; operator reports image readable. Optional external-cache failures retain fallback. |
 | Diagnostic branches/corrections | PASS | Regression suite and final browser Mac/bike/product checks. |
 | Appropriate safety behavior | PASS | Hazard confirmations, stop branches, no manual completion of measured steps tested. Expert review of compiled repair content remains pending. |
-| Voice/non-voice fallback | PASS | Text/gestures tested; audio lifecycle tests pass. Historical live provider record only; final physical mic NOT RUN. |
+| Voice/non-voice fallback | PASS | Text/gestures and audio lifecycle pass; fresh TTS provider generation passes. Fresh STT startup FAIL; physical mic NOT RUN. Voice remains optional and the staged G2 package disables it. |
 | Phone polish/usability | PASS | Fresh desktop/mobile, context/label/caption fixes, 390 px no overflow. |
 | G2 build/package | PASS | Portable and LAN archives above. |
 | Physical G2 status honest | PASS | Operator-reported checks distinguished from independent verification; details pending. |
@@ -58,7 +58,7 @@ PASS means the stated scope was exercised; it does not silently imply physical o
 | Integration branch pushed | NOT RUN | Initial HTTPS push timed out; retry/remote confirmation in progress. |
 | Main merged and remote verified | NOT RUN | Await remote branch publication and CI. No branch-protection bypass authorized or used. |
 | Release-blocking defects concealed | PASS | Hardware scope, human content review, missing publication assets and dev advisories explicitly recorded. |
-| Even Beta / video / Devpost | NOT RUN | Package built; no upload, public video URL or submission receipt established. |
+| Even Beta / video / Devpost | NOT RUN | Package built; official Even Hub portal is signed out in the available browser, so Beta upload requires account sign-in. No video URL or submission receipt established. |
 
 ## Presentation and remaining human work
 

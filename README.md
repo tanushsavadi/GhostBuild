@@ -132,7 +132,7 @@ node --test web/tests/*.mjs        # companion logic and audio lifecycle
 cd g2 && npm run build            # production TypeScript/Vite build
 ```
 
-Tests and simulator runs establish software behavior. They do not establish microphone capture, BLE timing or physical-task correctness. [Final sprint status](docs/FINAL_SPRINT_STATUS.md) records actual results, live-provider evidence and remaining release gates; [physical acceptance](docs/ACCEPTANCE.md) is a separate checklist.
+Fresh optional ElevenLabs TTS generation passed; the final STT startup check failed, so the demo keeps speech input off and uses text/gestures. Tests and simulator runs establish software behavior. They do not establish microphone capture, BLE timing or physical-task correctness. [Final sprint status](docs/FINAL_SPRINT_STATUS.md) records actual results, live-provider evidence and remaining release gates; [physical acceptance](docs/ACCEPTANCE.md) is a separate checklist.
 
 ## Built for the limits of real glasses
 
