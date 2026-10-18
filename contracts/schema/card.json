@@ -312,6 +312,65 @@
       "title": "GuideView",
       "type": "object"
     },
+    "Part": {
+      "additionalProperties": false,
+      "description": "A part or fastener a step uses, exactly as the source (a manual, a parts list) prints it. Never a guess: qty is null when the source prints none.",
+      "properties": {
+        "avoid": {
+          "default": false,
+          "description": "the source explicitly marks this part as NOT for this step",
+          "title": "Avoid",
+          "type": "boolean"
+        },
+        "id": {
+          "description": "the part number as printed, e.g. 101344",
+          "maxLength": 24,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "default": "",
+          "description": "short common name; descriptive, never a brand claim",
+          "maxLength": 60,
+          "title": "Name",
+          "type": "string"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "maxLength": 160,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "what the source says about it here, e.g. 'crossed out in this step: do not use'",
+          "title": "Note"
+        },
+        "qty": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "quantity printed for this step; null when the source gives none",
+          "title": "Qty"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "Part",
+      "type": "object"
+    },
     "Predicate": {
       "additionalProperties": false,
       "properties": {
@@ -427,6 +486,14 @@
     "Step": {
       "additionalProperties": false,
       "properties": {
+        "cites": {
+          "description": "where in a source this step comes from (e.g. manual page); phone shows the link",
+          "items": {
+            "$ref": "#/$defs/Cite"
+          },
+          "title": "Cites",
+          "type": "array"
+        },
         "cue": {
           "$ref": "#/$defs/Cue",
           "description": "the glasses text for this step: one action"
@@ -460,6 +527,26 @@
         "id": {
           "title": "Id",
           "type": "string"
+        },
+        "instruction": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Cue"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "authored plain-language action and method for the main step; exact identifiers stay in parts/detail. Legacy cue is the fallback; preserve safety quantities/values."
+        },
+        "parts": {
+          "description": "parts/fasteners this step uses, as the source prints them (assembly manuals, parts lists)",
+          "items": {
+            "$ref": "#/$defs/Part"
+          },
+          "title": "Parts",
+          "type": "array"
         },
         "requires": {
           "items": {
@@ -688,6 +775,24 @@
       },
       "title": "Sources",
       "type": "array"
+    },
+    "step_image": {
+      "anyOf": [
+        {
+          "enum": [
+            "where",
+            "how",
+            "correct"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "show this authored guide view with each step by default; navigation and evidence rules are unchanged",
+      "title": "Step Image"
     },
     "steps": {
       "description": "a playbook: ordered steps navigated by the wearer; tests (fault mode) and steps may coexist",

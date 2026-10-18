@@ -1,5 +1,66 @@
 {
   "$defs": {
+    "AnswerPage": {
+      "additionalProperties": false,
+      "description": "One complete readable page of an answer. Swipes page; press returns without completing a step.",
+      "properties": {
+        "count": {
+          "minimum": 1,
+          "title": "Count",
+          "type": "integer"
+        },
+        "grounding": {
+          "default": "guide",
+          "enum": [
+            "guide",
+            "general",
+            "unsure",
+            "deterministic"
+          ],
+          "title": "Grounding",
+          "type": "string"
+        },
+        "index": {
+          "minimum": 0,
+          "title": "Index",
+          "type": "integer"
+        },
+        "label": {
+          "default": "INFERRED",
+          "enum": [
+            "MEASURED LIVE",
+            "INFERRED",
+            "COMMANDED",
+            "DETERMINISTIC",
+            "HUMAN CONFIRMED",
+            "MANUFACTURER DOC",
+            "AUTHORED PROJECT SPEC",
+            "AI-EXTRACTED \u00b7 HUMAN-REVIEWED",
+            "AUTHORED DEMO METADATA",
+            "WEB TUTORIAL",
+            "VIDEO TUTORIAL",
+            "GITHUB SOURCE",
+            "REPLAY",
+            "SIMULATED"
+          ],
+          "title": "Label",
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 320,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text",
+        "index",
+        "count"
+      ],
+      "title": "AnswerPage",
+      "type": "object"
+    },
     "Cue": {
       "additionalProperties": false,
       "properties": {
@@ -187,6 +248,18 @@
       "additionalProperties": false,
       "description": "The only thing G2 renders. Written by core/ghostbuild_core/hud.py and nothing else.",
       "properties": {
+        "answer": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AnswerPage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "persistent answer page in ask mode; press returns to the same step"
+        },
         "cue": {
           "anyOf": [
             {

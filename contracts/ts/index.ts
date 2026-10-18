@@ -99,18 +99,9 @@ export type Title2 = string;
 export type Url = string | null;
 export type Sources = Source_[];
 /**
- * phone-only full explanation
+ * show this authored guide view with each step by default; navigation and evidence rules are unchanged
  */
-export type Detail = string;
-/**
- * how a confused beginner would ASK it out loud, lowercase, e.g. 'which leg is longer'
- */
-export type Q = string;
-export type Faq = Faq1[];
-export type GuideId = string | null;
-export type Id3 = string;
-export type Requires = string[];
-export type Title3 = string;
+export type StepImage = ("where" | "how" | "correct") | null;
 /**
  * page/section, or a timestamp like t=00:12:34 for video
  */
@@ -121,7 +112,48 @@ export type Source = string;
  * deep link (e.g. video &t=754s, repo file#L10)
  */
 export type Url1 = string | null;
+/**
+ * where in a source this step comes from (e.g. manual page); phone shows the link
+ */
 export type Cites = Cite[];
+/**
+ * phone-only full explanation
+ */
+export type Detail = string;
+/**
+ * how a confused beginner would ASK it out loud, lowercase, e.g. 'which leg is longer'
+ */
+export type Q = string;
+export type Faq = Faq1[];
+export type GuideId = string | null;
+export type Id3 = string;
+/**
+ * the source explicitly marks this part as NOT for this step
+ */
+export type Avoid = boolean;
+/**
+ * the part number as printed, e.g. 101344
+ */
+export type Id4 = string;
+/**
+ * short common name; descriptive, never a brand claim
+ */
+export type Name = string;
+/**
+ * what the source says about it here, e.g. 'crossed out in this step: do not use'
+ */
+export type Note = string | null;
+/**
+ * quantity printed for this step; null when the source gives none
+ */
+export type Qty = number | null;
+/**
+ * parts/fasteners this step uses, as the source prints them (assembly manuals, parts lists)
+ */
+export type Parts = Part[];
+export type Requires = string[];
+export type Title3 = string;
+export type Cites1 = Cite[];
 export type GuideId1 = string | null;
 export type When = Predicate[];
 export type Why = string;
@@ -147,7 +179,7 @@ export type FailAfterMs = number;
  * @minItems 1
  */
 export type FailWhen = [Predicate, ...Predicate[]];
-export type Id4 = string;
+export type Id5 = string;
 /**
  * gentle PRESS FOR PICTURE offer; once per fault
  */
@@ -205,11 +237,30 @@ export type PiLink = "up" | "stale" | "down";
 export type Source1 = ("pi_live" | "replay" | "simulated" | "manual") | null;
 export type UptimeS = number;
 export type Voice = "off" | "on";
-export type CueId = string | null;
 export type Count = number;
+export type Grounding = "guide" | "general" | "unsure" | "deterministic";
+export type Index = number;
+export type Label =
+  | "MEASURED LIVE"
+  | "INFERRED"
+  | "COMMANDED"
+  | "DETERMINISTIC"
+  | "HUMAN CONFIRMED"
+  | "MANUFACTURER DOC"
+  | "AUTHORED PROJECT SPEC"
+  | "AI-EXTRACTED · HUMAN-REVIEWED"
+  | "AUTHORED DEMO METADATA"
+  | "WEB TUTORIAL"
+  | "VIDEO TUTORIAL"
+  | "GITHUB SOURCE"
+  | "REPLAY"
+  | "SIMULATED";
+export type Text1 = string;
+export type CueId = string | null;
+export type Count1 = number;
 export type GuideId2 = string;
 export type H = number;
-export type Index = number;
+export type Index1 = number;
 export type Provenance2 =
   | "MEASURED LIVE"
   | "INFERRED"
@@ -261,8 +312,8 @@ export type Stale = boolean;
  */
 export type Check1 = "manual" | "measured";
 export type Confirmed = boolean;
-export type Count1 = number;
-export type Index1 = number;
+export type Count2 = number;
+export type Index2 = number;
 export type StepId2 = string;
 /**
  * plugin clears locally after this as a fallback
@@ -328,7 +379,7 @@ export type Engine = "NO_LINK" | "HEALTHY" | "FAULT" | "EXHAUSTED" | "AWAIT_FUNC
  * core epoch ms
  */
 export type At1 = number;
-export type Label =
+export type Label1 =
   | "MEASURED LIVE"
   | "INFERRED"
   | "COMMANDED"
@@ -343,7 +394,7 @@ export type Label =
   | "GITHUB SOURCE"
   | "REPLAY"
   | "SIMULATED";
-export type Text1 = string;
+export type Text2 = string;
 export type Events = Evidence[];
 export type HelpView = ("where" | "how" | "correct") | null;
 export type CardId3 = string;
@@ -360,7 +411,7 @@ export type StepIndex = number;
 export type Verified = string[];
 export type CardId4 = string | null;
 export type Goal = ("fix" | "build") | null;
-export type Id5 = string;
+export type Id6 = string;
 export type Phase = "welcome" | "menu" | "task";
 export type WelcomeShown = boolean;
 export type Source4 = ("pi_live" | "replay" | "simulated" | "manual") | null;
@@ -391,6 +442,7 @@ export interface Card {
   guides?: Guides;
   provenance: Provenance1;
   sources: Sources;
+  step_image?: StepImage;
   steps?: Steps;
   tests?: Tests;
   title: Title4;
@@ -468,11 +520,17 @@ export interface Source_ {
  * via the `definition` "Step".
  */
 export interface Step {
+  cites?: Cites;
   cue: Cue1;
   detail?: Detail;
   faq?: Faq;
   guide_id?: GuideId;
   id: Id3;
+  /**
+   * authored plain-language action and method for the main step; exact identifiers stay in parts/detail. Legacy cue is the fallback; preserve safety quantities/values.
+   */
+  instruction?: Cue | null;
+  parts?: Parts;
   requires?: Requires;
   title: Title3;
   troubleshoot?: Troubleshoot;
@@ -480,6 +538,16 @@ export interface Step {
   warnings?: Warnings;
   where?: Cue | null;
   why?: Cue | null;
+}
+/**
+ * This interface was referenced by `GhostBuildContracts`'s JSON-Schema
+ * via the `definition` "Cite".
+ */
+export interface Cite {
+  loc: Loc;
+  quote?: Quote;
+  source: Source;
+  url?: Url1;
 }
 /**
  * the glasses text for this step: one action
@@ -497,25 +565,28 @@ export interface Faq1 {
   q: Q;
 }
 /**
+ * A part or fastener a step uses, exactly as the source (a manual, a parts list) prints it. Never a guess: qty is null when the source prints none.
+ *
+ * This interface was referenced by `GhostBuildContracts`'s JSON-Schema
+ * via the `definition` "Part".
+ */
+export interface Part {
+  avoid?: Avoid;
+  id: Id4;
+  name?: Name;
+  note?: Note;
+  qty?: Qty;
+}
+/**
  * This interface was referenced by `GhostBuildContracts`'s JSON-Schema
  * via the `definition` "Check".
  */
 export interface Check {
   action: Cue;
-  cites?: Cites;
+  cites?: Cites1;
   guide_id?: GuideId1;
   when?: When;
   why: Why;
-}
-/**
- * This interface was referenced by `GhostBuildContracts`'s JSON-Schema
- * via the `definition` "Cite".
- */
-export interface Cite {
-  loc: Loc;
-  quote?: Quote;
-  source: Source;
-  url?: Url1;
 }
 /**
  * Optional evidence check. Without it a step is manual: only the wearer can confirm it (HUMAN CONFIRMED, never VERIFIED).
@@ -544,7 +615,7 @@ export interface Test {
   fact: Cue;
   fail_after_ms: FailAfterMs;
   fail_when: FailWhen;
-  id: Id4;
+  id: Id5;
   offer_help_after_ms?: OfferHelpAfterMs;
   ok: Cue;
   pass_after_ms: PassAfterMs;
@@ -628,6 +699,10 @@ export interface Health {
  */
 export interface HudFrame {
   /**
+   * persistent answer page in ask mode; press returns to the same step
+   */
+  answer?: AnswerPage | null;
+  /**
    * null in quiet mode (render blank)
    */
   cue?: Cue | null;
@@ -654,14 +729,27 @@ export interface HudFrame {
   v?: V5;
 }
 /**
+ * One complete readable page of an answer. Swipes page; press returns without completing a step.
+ *
+ * This interface was referenced by `GhostBuildContracts`'s JSON-Schema
+ * via the `definition` "AnswerPage".
+ */
+export interface AnswerPage {
+  count: Count;
+  grounding?: Grounding;
+  index: Index;
+  label?: Label;
+  text: Text1;
+}
+/**
  * This interface was referenced by `GhostBuildContracts`'s JSON-Schema
  * via the `definition` "ImageRef".
  */
 export interface ImageRef {
-  count: Count;
+  count: Count1;
   guide_id: GuideId2;
   h: H;
-  index: Index;
+  index: Index1;
   provenance: Provenance2;
   sha256: Sha256;
   step_id: StepId1;
@@ -690,8 +778,8 @@ export interface Menu {
 export interface StepRef {
   check: Check1;
   confirmed?: Confirmed;
-  count: Count1;
-  index: Index1;
+  count: Count2;
+  index: Index2;
   step_id: StepId2;
 }
 /**
@@ -765,8 +853,8 @@ export interface State {
 export interface Evidence {
   at: At1;
   evidence?: Evidence1;
-  label: Label;
-  text: Text1;
+  label: Label1;
+  text: Text2;
 }
 export interface Evidence1 {
   [k: string]: number | string | boolean | null;
@@ -790,7 +878,7 @@ export interface PlaybookState {
 export interface Session {
   card_id?: CardId4;
   goal?: Goal;
-  id: Id5;
+  id: Id6;
   phase: Phase;
   welcome_shown?: WelcomeShown;
 }

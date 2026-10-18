@@ -127,6 +127,16 @@ class ImageRef(Strict):
     step_id: str
 
 
+class AnswerPage(Strict):
+    """One complete readable page of an answer. Swipes page; press returns without completing a step."""
+
+    text: str = Field(min_length=1, max_length=320)
+    index: int = Field(ge=0)
+    count: int = Field(ge=1)
+    grounding: Literal["guide", "general", "unsure", "deterministic"] = "guide"
+    label: EvidenceLabel = "INFERRED"
+
+
 # --------------------------------------------------------------------------- core -> G2
 class HudFrame(Strict):
     """The only thing G2 renders. Written by core/ghostbuild_core/hud.py and nothing else."""
@@ -144,6 +154,7 @@ class HudFrame(Strict):
     source: Source
     session_id: Optional[str] = Field(default=None, description="current session; the plugin stores it and sends it in G2Hello on reconnect so the welcome never repeats")
     stale: bool = Field(default=False, description="true if backed by data older than the staleness limit; plugin shows ERROR instead")
+    answer: Optional[AnswerPage] = Field(default=None, description="persistent answer page in ask mode; press returns to the same step")
 
     @model_validator(mode="after")
     def _shape(self) -> "HudFrame":
@@ -153,6 +164,8 @@ class HudFrame(Strict):
             raise ValueError("non-quiet frames need a cue (also the text fallback for images)")
         if self.image is not None and self.mode != "visual":
             raise ValueError("image only in visual mode")
+        if self.answer is not None and self.mode != "ask":
+            raise ValueError("answer page only in ask mode")
         if (self.menu is not None) != (self.mode == "menu"):
             raise ValueError("menu iff mode == menu")
         if self.mode == "step" and self.step is None:
@@ -336,6 +349,16 @@ class StepVerify(Strict):
     ok: Cue = Field(description="shown once when measured evidence satisfies the step")
 
 
+class Part(Strict):
+    """A part or fastener a step uses, exactly as the source (a manual, a parts list) prints it. Never a guess: qty is null when the source prints none."""
+
+    id: str = Field(min_length=1, max_length=24, description="the part number as printed, e.g. 101344")
+    qty: Optional[int] = Field(default=None, ge=1, description="quantity printed for this step; null when the source gives none")
+    name: str = Field(default="", max_length=60, description="short common name; descriptive, never a brand claim")
+    note: Optional[str] = Field(default=None, max_length=160, description="what the source says about it here, e.g. 'crossed out in this step: do not use'")
+    avoid: bool = Field(default=False, description="the source explicitly marks this part as NOT for this step")
+
+
 class Step(Strict):
     id: str
     title: str = Field(max_length=28)
@@ -349,6 +372,9 @@ class Step(Strict):
     guide_id: Optional[str] = None
     verify: Optional[StepVerify] = None
     requires: list[str] = Field(default_factory=list)
+    instruction: Optional[Cue] = Field(default=None, description="authored plain-language action and method for the main step; exact identifiers stay in parts/detail. Legacy cue is the fallback; preserve safety quantities/values.")
+    parts: list[Part] = Field(default_factory=list, description="parts/fasteners this step uses, as the source prints them (assembly manuals, parts lists)")
+    cites: list[Cite] = Field(default_factory=list, description="where in a source this step comes from (e.g. manual page); phone shows the link")
 
 
 class Card(Strict):
@@ -362,6 +388,7 @@ class Card(Strict):
     functional: Optional[Functional] = None
     guides: list[Guide] = Field(default_factory=list)
     goal_mode: GoalMode = Field(default="fix", description="fix = repair/diagnose; build = guided supported setup")
+    step_image: Optional[GuideViewName] = Field(default=None, description="show this authored guide view with each step by default; navigation and evidence rules are unchanged")
     aliases: list[str] = Field(default_factory=list, description="lowercase phrases the deterministic goal resolver matches, e.g. 'camera', 'inspection station'")
 
     @model_validator(mode="after")
