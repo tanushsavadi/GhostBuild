@@ -1,0 +1,150 @@
+{
+  "guide_id": "led_pins",
+  "title": "IDENTIFY THE PINS",
+  "placeholder": false,
+  "pipeline_version": 2,
+  "g2_format": "PNG, 8-bit greyscale, values only multiples of 17 (= 16 gray4 levels), black = transparent, <=288x144",
+  "views": [
+    {
+      "view": "where",
+      "step_id": "led_pins.where",
+      "title": "WHERE",
+      "image": "knowledge/guides/led_pins/where.png",
+      "phone_image": "knowledge/guides/led_pins/where.phone.png",
+      "provenance": "AI-EXTRACTED · HUMAN-REVIEWED",
+      "depicts": "Generated wiring schematic (CREAO research agent, deterministic SVG; human-checked against the sourced pinout). Header pins 9 (GND) and 11 (GPIO17) circled. Not a photo of your hardware.",
+      "fallback": {
+        "line1": "PINS 9 AND 11 ON HEADER",
+        "line2": "LEFT COLUMN ROWS 5 AND 6"
+      },
+      "placeholder": false,
+      "fov_note": null,
+      "asset_kind": "original_diagram",
+      "reference_url": "https://www.raspberrypi.com/documentation/computers/raspberry-pi.html",
+      "w": 288,
+      "h": 144,
+      "grey_levels": 16,
+      "sha256": "7bf2278de98051d69433d50451a2ae6a563c27edb26904da1dc9591d81fd39da",
+      "bytes": 2069,
+      "phone_w": 1140,
+      "phone_h": 640,
+      "phone_sha256": "89d4fe647c896b2badeca29727adfb6fdf8bf64a6d26b701aee451be303fad57",
+      "phone_bytes": 113733,
+      "source": "assets/sources/led_pins/schematic.src.png",
+      "source_sha256": "dfea89b56edf57a90dae6453ad2ed456c439b86f54f7ac31c0cff1d0b9de0c7c",
+      "annotation": "rect",
+      "caption": "PINS 9 AND 11"
+    },
+    {
+      "view": "how",
+      "step_id": "led_pins.how",
+      "title": "HOW",
+      "image": "knowledge/guides/led_pins/how.png",
+      "phone_image": "knowledge/guides/led_pins/how.phone.png",
+      "provenance": "AI-EXTRACTED · HUMAN-REVIEWED",
+      "depicts": "Generated wiring schematic (CREAO research agent, deterministic SVG; human-checked against the sourced pinout). Arrow to pin 11 (BCM GPIO17); pin 9 above it is ground. Not a photo of your hardware.",
+      "fallback": {
+        "line1": "COUNT FROM PIN 1",
+        "line2": "PIN 11 CARRIES GPIO17"
+      },
+      "placeholder": false,
+      "fov_note": null,
+      "asset_kind": "original_diagram",
+      "reference_url": "https://www.raspberrypi.com/documentation/computers/raspberry-pi.html",
+      "w": 288,
+      "h": 144,
+      "grey_levels": 16,
+      "sha256": "700f41bf1cac38365fdc9f71062aa71d225832418c185034300738491148e242",
+      "bytes": 2238,
+      "phone_w": 1140,
+      "phone_h": 640,
+      "phone_sha256": "b8e5dcf651a3910874d87a1325b8fc0792de5bfbc4355cab229a4ec194495b10",
+      "phone_bytes": 115502,
+      "source": "assets/sources/led_pins/schematic.src.png",
+      "source_sha256": "dfea89b56edf57a90dae6453ad2ed456c439b86f54f7ac31c0cff1d0b9de0c7c",
+      "annotation": "arrow",
+      "caption": "PIN 11 = GPIO17"
+    },
+    {
+      "view": "correct",
+      "step_id": "led_pins.correct",
+      "title": "CORRECT",
+      "image": "knowledge/guides/led_pins/correct.png",
+      "phone_image": "knowledge/guides/led_pins/correct.phone.png",
+      "provenance": "AI-EXTRACTED · HUMAN-REVIEWED",
+      "depicts": "Generated wiring schematic (CREAO research agent, deterministic SVG; human-checked against the sourced pinout). Black wire to pin 9 (GND), red wire to pin 11 (GPIO17). Not a photo of your hardware.",
+      "fallback": {
+        "line1": "BLACK WIRE ON PIN 9",
+        "line2": "RED WIRE ON PIN 11"
+      },
+      "placeholder": false,
+      "fov_note": null,
+      "asset_kind": "original_diagram",
+      "reference_url": "https://www.raspberrypi.com/documentation/computers/raspberry-pi.html",
+      "w": 288,
+      "h": 144,
+      "grey_levels": 16,
+      "sha256": "453c03fa72f6c9ba665c3e06c0deb3966a2bec8c275a27aa75e5d7024d1f142e",
+      "bytes": 2467,
+      "phone_w": 1140,
+      "phone_h": 640,
+      "phone_sha256": "d3da918ecaa1b08865d1072b7128d7a5079c9dc2e84baeded5bf12010ddcf08f",
+      "phone_bytes": 111001,
+      "source": "assets/sources/led_pins/schematic.src.png",
+      "source_sha256": "dfea89b56edf57a90dae6453ad2ed456c439b86f54f7ac31c0cff1d0b9de0c7c",
+      "annotation": "rect",
+      "caption": "WIRES ON 9 AND 11"
+    }
+  ],
+  "guide": {
+    "id": "led_pins",
+    "title": "IDENTIFY THE PINS",
+    "views": [
+      {
+        "view": "where",
+        "step_id": "led_pins.where",
+        "title": "WHERE",
+        "image": "knowledge/guides/led_pins/where.png",
+        "phone_image": "knowledge/guides/led_pins/where.phone.png",
+        "provenance": "AI-EXTRACTED · HUMAN-REVIEWED",
+        "depicts": "Generated wiring schematic (CREAO research agent, deterministic SVG; human-checked against the sourced pinout). Header pins 9 (GND) and 11 (GPIO17) circled. Not a photo of your hardware.",
+        "fallback": {
+          "line1": "PINS 9 AND 11 ON HEADER",
+          "line2": "LEFT COLUMN ROWS 5 AND 6"
+        },
+        "fov_note": null,
+        "reference_url": "https://www.raspberrypi.com/documentation/computers/raspberry-pi.html"
+      },
+      {
+        "view": "how",
+        "step_id": "led_pins.how",
+        "title": "HOW",
+        "image": "knowledge/guides/led_pins/how.png",
+        "phone_image": "knowledge/guides/led_pins/how.phone.png",
+        "provenance": "AI-EXTRACTED · HUMAN-REVIEWED",
+        "depicts": "Generated wiring schematic (CREAO research agent, deterministic SVG; human-checked against the sourced pinout). Arrow to pin 11 (BCM GPIO17); pin 9 above it is ground. Not a photo of your hardware.",
+        "fallback": {
+          "line1": "COUNT FROM PIN 1",
+          "line2": "PIN 11 CARRIES GPIO17"
+        },
+        "fov_note": null,
+        "reference_url": "https://www.raspberrypi.com/documentation/computers/raspberry-pi.html"
+      },
+      {
+        "view": "correct",
+        "step_id": "led_pins.correct",
+        "title": "CORRECT",
+        "image": "knowledge/guides/led_pins/correct.png",
+        "phone_image": "knowledge/guides/led_pins/correct.phone.png",
+        "provenance": "AI-EXTRACTED · HUMAN-REVIEWED",
+        "depicts": "Generated wiring schematic (CREAO research agent, deterministic SVG; human-checked against the sourced pinout). Black wire to pin 9 (GND), red wire to pin 11 (GPIO17). Not a photo of your hardware.",
+        "fallback": {
+          "line1": "BLACK WIRE ON PIN 9",
+          "line2": "RED WIRE ON PIN 11"
+        },
+        "fov_note": null,
+        "reference_url": "https://www.raspberrypi.com/documentation/computers/raspberry-pi.html"
+      }
+    ]
+  }
+}

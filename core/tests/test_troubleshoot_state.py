@@ -32,7 +32,7 @@ def test_current_step_checks_in_card_order_then_confirmed_earlier_steps_then_exh
     a = [ask(r) for _ in range(5)]
     # step 2 has none, so the most recent confirmed step (1) first, in card order, source links skipped, then step 0
     assert [x.cue.line1 for x in a] == ["CHECK PIN 11", "CHECK PIN 9", "CHECK LED DIRECTION", "NO MORE CHECKS HERE", "NO MORE CHECKS HERE"]
-    assert "which you already confirmed" in a[0].detail and "Step 1" in a[0].detail
+    assert "From step 2, which you already confirmed" in a[0].detail
     assert a[3].label == "DETERMINISTIC" and "3 checks" in a[3].detail
     assert all("CHECK STEP FOUR" not in x.text for x in a)  # a step not reached yet is never consulted
 
@@ -65,3 +65,10 @@ def test_natural_symptom_phrases_route_to_troubleshoot():
 
     for phrase in ["the LED isn't lighting up", "it doesn't light", "nothing's happening", "the LED is not blinking", "no light at all", "it's not working"]:
         assert classify_playbook(phrase, []) == "troubleshoot", phrase
+
+
+def test_spoken_filler_does_not_make_a_deictic_question_abstain():
+    r = Rig(make_card(4, guides=None))
+    for phrase in ["wait where exactly is that", "hey, why do I do this", "um where does it go"]:
+        res = ask(r, phrase)
+        assert res.intent in ("where", "why") and res.answered, phrase

@@ -595,7 +595,7 @@ class PlaybookEngine:
                 self._tried.append((st.id, i))
                 detail = chk.why
                 if st.id != self.step.id:
-                    detail += f" (From step {self.card.steps.index(st) + 1}, {st.title}, which you already confirmed.)"
+                    detail += f" (From step {self.card.steps.index(st) + 1}, which you already confirmed: {_cue_text(st.cue).capitalize()}.)"
                 self._event(f"problem reported; suggested check {len(self._tried)}: {_cue_text(chk.action)}", "INFERRED",
                             {"step": self.step.id, "from_step": st.id, "tried": len(self._tried)})
                 return chk.action, detail, label
@@ -631,7 +631,9 @@ class PlaybookEngine:
         conversational = {"where", "why", "how", "there", "here", "that", "this", "these", "those", "it", "does",
                           "should", "would", "could", "please", "tell", "explain", "show", "look", "like", "correct",
                           "matter", "important", "reason", "part", "thing", "go", "connect", "do", "step", "done",
-                          "finish", "when", "more", "simply", "again", "exactly", "really", "need", "suppos"}
+                          "finish", "when", "more", "simply", "again", "exactly", "really", "need", "suppos",
+                          "wait", "hold", "hey", "okay", "well", "actually", "sorry", "um", "umm", "uh", "er", "hmm", "ok", "just", "now", "right",
+                          "confused", "lost", "sure", "can", "you", "mean", "closer", "bigger", "picture", "photo", "image"}
         terms = intent_mod._content(text) - conversational
         if not terms:
             return True
