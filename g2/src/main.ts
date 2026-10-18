@@ -17,7 +17,8 @@ import top from './top.json'
 
 // Open Palm on the glasses. A sentence becomes cards: hand picture, the sign's
 // name, two how-to lines and a small face (top right) for ASL grammar + emotion.
-//   tap          next card (while listening: done speaking; in the menu: choose)
+//   (cards move on by themselves after 2.5-10 s; dots show the time left)
+//   tap          pause / resume (while listening: done speaking; in the menu: choose)
 //   swipe down   full HOW description of the sign (in the menu: move down)
 //   swipe up     back (in the menu: move up)
 //   long-press   open / close the menu: Speak, Prepare, Prepared sentences, Practice
@@ -156,6 +157,7 @@ function openMenu(which: 'menu' | 'prepared' = 'menu'): void {
 
 function closeMenu(): void {
   mode = 'cards'
+  resumeTimer()
   version++
   void render()
 }
@@ -212,7 +214,7 @@ function lensText(): string {
     return [`${name} · HOW ${detailPage + 1}/${pages.length}`, pages[Math.min(detailPage, pages.length - 1)]].join('\n')
   }
   // Ultra-minimal: the sign and how to make it. Status and progress are on the phone.
-  return [name, card.how[0], card.how[1]].join('\n')
+  return [name, card.how[0], card.how[1], timeDots()].filter(Boolean).join('\n')
 }
 
 function lensImages(): { hand: string; face: string } {
@@ -283,12 +285,104 @@ function show(newCards: Card[]): void {
   detailPage = -1
   status = null
   mode = 'cards'
+  paused = false
+  startCardTimer()
   version++
   void render()
 }
 
 function setStatus(text: string | null): void {
   status = text
+  if (!text) resumeTimer()
+  version++
+  void render()
+}
+
+// ---- hands-free: cards advance by themselves ------------------------------------
+// Each card stays for a time that suits it; five dots under the lines empty as it
+// runs out. Tap pauses / resumes; reading HOW (swipe down) pauses until you swipe
+// back up. After the last sign the lens clears 5 s later. ?review=top stays manual.
+
+const AUTO = new URLSearchParams(location.search).get('review') !== 'top'
+const DOTS = 5
+const END_HOLD_MS = 5000
+let paused = false
+let total = 0
+let remaining = 0
+let tickTimer: ReturnType<typeof setTimeout> | undefined
+let endTimer: ReturnType<typeof setTimeout> | undefined
+
+/** ~5 s for a simple sign, up to ~10 s for two hands or a complex movement, 2.5 s a letter. */
+function dwell(card: Card): number {
+  if (card.kind === 'letter') return 2500
+  if (card.kind === 'unsupported') return 4000
+  const how = card.how.join(' ').toLowerCase()
+  let ms = 5000
+  if (/both|other|two hands|hands/.test(how)) ms += 2500
+  if (/circle|zigzag|repeat|twice|x2|then|swap|alternate|wiggle|flip|roll/.test(how)) ms += 1500
+  return Math.min(ms, 10_000)
+}
+
+function timeDots(): string {
+  if (!AUTO || !cards.length || total <= 0) return ''
+  const left = Math.max(0, Math.ceil((remaining / total) * DOTS))
+  return '●'.repeat(left) + '○'.repeat(DOTS - left) + (paused ? '  PAUSED' : '')
+}
+
+function canRun(): boolean {
+  return AUTO && !paused && mode === 'cards' && !status && detailPage < 0 && cards.length > 0
+}
+
+function startCardTimer(): void {
+  clearTimeout(tickTimer)
+  clearTimeout(endTimer)
+  tickTimer = undefined
+  total = remaining = cards[index] ? dwell(cards[index]) : 0
+  resumeTimer()
+}
+
+function resumeTimer(): void {
+  if (tickTimer || remaining <= 0 || !canRun()) return
+  const step = total / DOTS
+  tickTimer = setTimeout(() => {
+    tickTimer = undefined
+    if (!canRun()) return // paused meanwhile; resumeTimer() picks it up again
+    remaining -= step
+    if (remaining > 1) {
+      version++
+      void render()
+      resumeTimer()
+    } else {
+      advance()
+    }
+  }, step)
+}
+
+function pauseTimer(): void {
+  clearTimeout(tickTimer)
+  tickTimer = undefined
+}
+
+function advance(): void {
+  remaining = 0
+  if (index < cards.length - 1) {
+    index++
+    detailPage = -1
+    startCardTimer()
+  } else {
+    // Last sign: keep it a little longer, then go quiet.
+    endTimer = setTimeout(() => { cards = []; total = 0; version++; void render() }, END_HOLD_MS)
+  }
+  version++
+  void render()
+}
+
+function togglePause(): void {
+  if (!cards.length) return
+  paused = !paused
+  if (paused) pauseTimer()
+  else if (remaining > 0) resumeTimer()
+  else startCardTimer() // paused on an ended sentence: play it again from here
   version++
   void render()
 }
@@ -490,6 +584,12 @@ async function stopListening(): Promise<void> {
 
 // ---- cards: tap / swipe --------------------------------------------------------
 
+/** Tap on a card: pause / resume when hands-free, otherwise the next card (review mode). */
+function tap(): void {
+  if (AUTO) togglePause()
+  else next()
+}
+
 function next(): void {
   if (!cards.length) return
   index = (index + 1) % cards.length
@@ -505,6 +605,7 @@ function more(): void {
   const pages = paginate(detail.text).length
   if (detailPage >= pages - 1) return
   if (detailPage < 0 && cards[index].kind === 'sign') remember('hard_sign', cards[index].title)
+  pauseTimer() // reading HOW holds the card
   detailPage++
   version++
   void render()
@@ -514,6 +615,7 @@ function more(): void {
 function back(): void {
   if (detailPage < 0) return
   detailPage--
+  if (detailPage < 0) resumeTimer() // back on the card: carry on
   version++
   void render()
 }
@@ -561,7 +663,7 @@ bridge.onEvenHubEvent(event => {
     else if (is(OsEventTypeList.CLICK_EVENT)) menuItems()[menuIndex]?.choose()
     return
   }
-  if (is(OsEventTypeList.CLICK_EVENT)) next()
+  if (is(OsEventTypeList.CLICK_EVENT)) tap()
   else if (is(OsEventTypeList.SCROLL_BOTTOM_EVENT)) more()
   else if (is(OsEventTypeList.SCROLL_TOP_EVENT)) back()
 })

@@ -272,10 +272,16 @@ export function cardsFor(text: string): Card[] {
 
 export interface AiSign { gloss: string; spell: boolean }
 
-/** True when every word of the text is covered by a hand-written sentence (no AI needed). */
+const deckGlosses = new Set((deck.signs as Sign[]).map(s => s.gloss))
+
+/**
+ * True when hand-written content already covers the text, so the AI isn't asked:
+ * every card is part of a hand-written sentence, a demo sign from deck.json, or a
+ * fingerspelled letter, e.g. "Hello, nice to meet you" = HELLO + NICE MEET YOU.
+ */
 export function isKnownSentence(text: string): boolean {
   const cards = cardsFor(text)
-  return cards.length > 0 && cards.every(c => c.sentence)
+  return cards.length > 0 && cards.every(c => c.sentence || deckGlosses.has(c.title) || c.kind === 'letter')
 }
 
 const byGloss = new Map<string, Sign>()

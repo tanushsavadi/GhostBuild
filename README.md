@@ -27,8 +27,9 @@ You can't hold a phone and sign at the same time: signing needs both hands, and 
 
 | On the glasses | Does |
 |---|---|
-| Tap | Next sign (while listening: done speaking; in the menu: choose) |
-| Swipe down | Full step-by-step description of this sign, in pages (in the menu: move down) |
+| (nothing) | **Hands-free:** each sign stays 2.5–10 s (simple signs and letters shorter, two-handed or complex ones longer), five dots ●●●○○ show the time left, then the next sign comes up. After the last sign the lens clears 5 s later. |
+| Tap | Pause / resume (while listening: done speaking; in the menu: choose; in `?review=top`: next sign) |
+| Swipe down | Full step-by-step description of this sign, in pages; the timer waits while you read (in the menu: move down) |
 | Swipe up | Back to the card (in the menu: move up) |
 | Long-press | Open / close the menu: **Speak a sentence**, **Prepare a conversation**, **Prepared sentences**, **Practice signs**, Close |
 | Double-tap | Exit |
