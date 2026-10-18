@@ -26,6 +26,27 @@ describe('stub frames are valid HudFrames', () => {
   })
 })
 
+describe('playbook stub frames are valid HudFrames', () => {
+  const frames = {
+    chooser: F.chooser(1, 2), step0: F.step(2, 0), step2: F.step(3, 2), notMet: F.stepNotMet(4, 2),
+    picture0: F.stepPicture(5, 0, 0), picture1: F.stepPicture(6, 0, 1), passed: F.stepPassed(7), completion: F.completion(8),
+  }
+  for (const [name, f] of Object.entries(frames)) {
+    it(name, () => {
+      expect(validate(f), JSON.stringify(validate.errors)).toBe(true)
+      expect(f.source).toBe('simulated')
+      // models.py _shape rules the JSON schema cannot express
+      if (f.mode === 'step') expect(f.step).toBeTruthy()
+      if (f.mode === 'menu') expect(f.menu).toBeTruthy()
+      if (f.image) expect(f.mode).toBe('visual')
+    })
+  }
+  it('chooser has three options; step indices are 0-based and in range', () => {
+    expect(F.chooser(1).menu.options).toHaveLength(3)
+    for (let i = 0; i < F.PB_STEPS.length; i++) expect(F.step(1, i).step.index).toBeLessThan(F.step(1, i).step.count)
+  })
+})
+
 describe('stub png', () => {
   it('is a 288x144 4-bit grey PNG', () => {
     const p = stubGuidePng('where')

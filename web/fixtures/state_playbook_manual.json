@@ -1,0 +1,76 @@
+{
+  "v": 2,
+  "session": {
+    "id": "s-7",
+    "phase": "task",
+    "goal": "build",
+    "card_id": "flatpack_shelf",
+    "welcome_shown": true
+  },
+  "engine": "PLAYBOOK",
+  "card_id": "flatpack_shelf",
+  "test": null,
+  "step_id": "cams",
+  "check": null,
+  "help_view": null,
+  "source": null,
+  "health": {
+    "ok": true,
+    "uptime_s": 42.0,
+    "pi_link": "down",
+    "pi_last_seq": null,
+    "pi_age_ms": null,
+    "source": null,
+    "camera": "unknown",
+    "g2_clients": 1,
+    "voice": "off"
+  },
+  "hud": {
+    "type": "hud",
+    "v": 2,
+    "seq": 31,
+    "mode": "step",
+    "cue": {
+      "line1": "PRESS CAM LOCKS IN",
+      "line2": "ARROW TOWARD THE EDGE"
+    },
+    "image": null,
+    "menu": null,
+    "step": {
+      "index": 1,
+      "count": 4,
+      "step_id": "cams",
+      "check": "manual",
+      "confirmed": false
+    },
+    "cue_id": null,
+    "ttl_ms": null,
+    "source": "pi_live",
+    "session_id": null,
+    "stale": false
+  },
+  "playbook": {
+    "card_id": "flatpack_shelf",
+    "step_index": 1,
+    "step_count": 4,
+    "step_id": "cams",
+    "confirmed": [
+      "frame"
+    ],
+    "verified": []
+  },
+  "events": [
+    {
+      "at": 1792283000000,
+      "text": "task flatpack_shelf started (build)",
+      "label": "DETERMINISTIC",
+      "evidence": {}
+    },
+    {
+      "at": 1792283009000,
+      "text": "step frame confirmed by wearer",
+      "label": "HUMAN CONFIRMED",
+      "evidence": {}
+    }
+  ]
+}

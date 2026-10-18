@@ -28,6 +28,7 @@ if (!/\/$|\.html$/.test(location.pathname)) location.replace(location.pathname +
     </div>
     <div id="g2" class="g2" role="img" aria-label="Mirror of the current glasses display">
       <div id="g2-inner" class="g2-inner"></div>
+      <div id="g2-tag" class="g2-tag" hidden></div>
       <div id="g2-veil" class="g2-veil" hidden></div>
     </div>
     <div id="g2-meta" class="meta"></div>
@@ -38,6 +39,18 @@ if (!/\/$|\.html$/.test(location.pathname)) location.replace(location.pathname +
     <dl id="task" class="kv"></dl>
   </section>
 
+  <section class="card area-ask" aria-labelledby="h-ask">
+    <h2 id="h-ask">Ask about this task</h2>
+    <form id="ask-form" autocomplete="off">
+      <label class="field">Your question
+        <textarea id="ask-text" rows="2" maxlength="200" placeholder="e.g. how tight should it be"></textarea>
+      </label>
+      <button id="ask-send" type="submit">Ask</button>
+      <div id="ask-hint" class="meta"></div>
+    </form>
+    <div id="ask-result" aria-live="polite"></div>
+  </section>
+
   <section class="card area-goal" aria-labelledby="h-goal">
     <h2 id="h-goal">Set a goal (no glasses needed)</h2>
     <form id="goal-form" autocomplete="off">
@@ -46,20 +59,48 @@ if (!/\/$|\.html$/.test(location.pathname)) location.replace(location.pathname +
         <label><input type="radio" name="mode" value="build"><span>BUILD</span></label>
       </div>
       <label class="field">What do you want to do?
-        <textarea id="goal-text" rows="2" maxlength="300" placeholder="e.g. my camera view is black"></textarea>
+        <textarea id="goal-text" rows="2" maxlength="300" placeholder="e.g. assemble a shelf"></textarea>
       </label>
       <button id="goal-send" type="submit">Send goal</button>
       <div id="goal-hint" class="meta"></div>
     </form>
     <div id="goal-result" aria-live="polite"></div>
   </section>
+
+  <section class="card area-research" aria-labelledby="h-research">
+    <h2 id="h-research">Request research</h2>
+    <p class="meta lead">For something GhostBuild has no playbook for. The request is only saved for later; nothing becomes available now, and a human reviews any result before it can reach the glasses.</p>
+    <form id="research-form" autocomplete="off">
+      <div class="seg" role="radiogroup" aria-label="Research mode">
+        <label><input type="radio" name="rmode" value="fix"><span>FIX</span></label>
+        <label><input type="radio" name="rmode" value="build" checked><span>BUILD</span></label>
+      </div>
+      <label class="field">What should be researched?
+        <textarea id="research-text" rows="2" maxlength="300" placeholder="e.g. replace a bike inner tube"></textarea>
+      </label>
+      <button id="research-send" type="submit">Save for async research</button>
+      <div id="research-hint" class="meta"></div>
+    </form>
+    <div id="research-result" aria-live="polite"></div>
+  </section>
 </div>
 <div class="col">
+  <section id="sec-playbook" class="card area-playbook" aria-labelledby="h-playbook" hidden>
+    <div class="card-head">
+      <h2 id="h-playbook">Playbook</h2>
+      <span id="pb-count" class="pill pill-warn"></span>
+    </div>
+    <div id="pb-head"></div>
+    <ol id="pb-steps" class="pb-steps"></ol>
+    <div id="pb-current"></div>
+  </section>
+
   <section class="card area-guide" aria-labelledby="h-guide">
     <h2 id="h-guide">Guide pictures</h2>
     <div id="guide-note" class="meta"></div>
     <div id="guide" class="guide-list"></div>
     <h3>Sources</h3>
+    <div id="sources-prov" class="meta"></div>
     <ul id="sources" class="sources"></ul>
   </section>
 
@@ -70,7 +111,8 @@ if (!/\/$|\.html$/.test(location.pathname)) location.replace(location.pathname +
 
 </div>
 </main>
-<footer class="foot">Polls GET /state at 1 Hz. Nothing here is a repair confirmation; evidence labels say where each fact came from.</footer>
+<footer class="foot">Polls GET /state at 1 Hz. Nothing here confirms a step or a repair; evidence labels say where each fact came from.</footer>
+<script src="logic.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
