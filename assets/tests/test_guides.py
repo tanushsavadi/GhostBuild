@@ -2,7 +2,10 @@
 from __future__ import annotations
 
 import copy
+import io
 import json
+import re
+import sys
 import typing
 from pathlib import Path
 
@@ -115,6 +118,21 @@ def test_build_is_deterministic(tmp_path):
     assert m1["views"][0]["sha256"] == gi.sha256_hex(f1["where.png"])
 
 
+# Committed guides are generated on macOS (`make guides`). Pillow's macOS and manylinux wheels bundle different zlib and
+# FreeType builds, so encoded PNG bytes are only reproducible there; elsewhere every input that makes a guide stale
+# (source hash, annotation, caption, provenance, size) is still compared, only the encoded-byte fields are not.
+BYTE_EXACT = sys.platform == "darwin"
+_ENCODED = ("sha256", "bytes", "phone_sha256", "phone_bytes")
+
+
+def _portable(manifest: dict) -> dict:
+    m = copy.deepcopy(manifest)
+    for v in m.get("views", []):
+        for k in _ENCODED:
+            v.pop(k, None)
+    return m
+
+
 def test_committed_outputs_are_not_stale():
     """What is committed in knowledge/guides must equal a fresh build (otherwise: run `make guides`)."""
     for gdir in sorted((ROOT / "assets" / "sources").iterdir()):
@@ -122,13 +140,23 @@ def test_committed_outputs_are_not_stale():
             continue
         _, files = bg.build_guide(gdir, ROOT / "knowledge" / "guides", write=False)
         for name, data in files.items():
-            assert (ROOT / "knowledge" / "guides" / gdir.name / name).read_bytes() == data, f"{gdir.name}/{name} stale"
+            committed = (ROOT / "knowledge" / "guides" / gdir.name / name).read_bytes()
+            if BYTE_EXACT:
+                assert committed == data, f"{gdir.name}/{name} stale"
+            elif name.endswith(".json"):
+                assert _portable(json.loads(committed)) == _portable(json.loads(data)), f"{gdir.name}/{name} stale"
+            else:
+                old, new = Image.open(io.BytesIO(committed)), Image.open(io.BytesIO(data))
+                assert (old.size, old.mode) == (new.size, new.mode), f"{gdir.name}/{name} stale"
 
 
 def test_inventory_in_sync():
     mans = [bg.build_guide(g, ROOT / "knowledge" / "guides", write=False)[0]
             for g in sorted((ROOT / "assets" / "sources").iterdir()) if g.is_dir()]
-    assert (ROOT / "assets" / "INVENTORY.md").read_text() == bg.inventory_md(mans, {})
+    committed, fresh = (ROOT / "assets" / "INVENTORY.md").read_text(), bg.inventory_md(mans, {})
+    if not BYTE_EXACT:
+        committed, fresh = (re.sub(r", \d+ B\)", ", N B)", t) for t in (committed, fresh))
+    assert committed == fresh
 
 
 # --------------------------------------------------------------------------- single annotation rule
