@@ -9,7 +9,7 @@ from contracts.models import Card, Step
 from .schemas import Message, Note, Profile
 
 SCOPE = (
-    "Scope: low-voltage hobby electronics and Raspberry Pi accessories, paper and craft builds, small household, bike, 3D-printer and "
+    "Scope: low-voltage hobby electronics and single-board-computer accessories, paper and craft builds, small household, bike, 3D-printer and "
     "similar fixes. Decline kindly, and suggest a qualified professional, for mains electricity, gas, lithium-battery modification, "
     "medical, brakes or anything that could seriously hurt someone."
 )
@@ -36,7 +36,7 @@ How to decide each turn:
 - If it is outside scope, action "decline" and say why in one kind sentence.
 - cue1 and cue2 are the glasses text: ALL CAPS, at most 24 and 26 characters, the question in a few words (for example EXPERIENCE WITH THIS? / FIRST TIME OR DONE IT?).
 - quick_replies: up to 4 short tap-to-answer options when the question has natural choices.
-- profile: record what THIS turn taught you (their experience, and short facts such as "has a breadboard" or "Raspberry Pi 4"). Only what they said. Do not invent.
+- profile: record what THIS turn taught you (their experience, and short facts such as "has a breadboard" or the exact board model they named). Only what they said. Do not invent.
 - goal (for start): the task as one clear sentence that includes every specific they gave (device, parts, symptoms, experience), so a researcher needs no further questions.
 
 {SCOPE}"""
