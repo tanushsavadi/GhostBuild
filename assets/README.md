@@ -5,6 +5,14 @@ The three images in `knowledge/guides/camera_lens/` are **SCHEMATIC STAND-INS** 
 marked `placeholder: true`, provenance `AUTHORED DEMO METADATA`, with a red `SCHEMATIC - REPLACE WITH RIG PHOTO` banner on the
 phone image. Replace them before the demo. Total time with the helper: about 2 minutes per photo.
 
+## Playbook stand-ins (paper_cup)
+`cup_fold_half` (where/how/correct) and `cup_pinch` (where/how) are generic flat schematics of a square sheet and the triangle it
+becomes (`assets/tools/make_standin_paper_cup.py`). They follow only the sentences of the cited tutorial (https://origami.me/cup/,
+steps 1 and 2), carry `placeholder: true`, provenance `AUTHORED DEMO METADATA`, and a phone banner `SCHEMATIC - REPLACE WITH PHOTO`
+(set by the guide-level `"banner"` key in `annotations.json`; without it the banner says `... RIG PHOTO`). The position of the
+step-2 pinch is deliberately NOT drawn. Replace them with photos of a real folded sheet, same file names, `"placeholder": false`.
+Every playbook picture step needs a guide in the card AND a folder here; at most two steps per card get one.
+
 ## What the G2 gets
 `knowledge/guides/<guide_id>/<view>.png`: 8-bit greyscale PNG, exactly **288x144**, pixel values only 0,17,...,255 (= the 16 gray4
 levels), black = transparent on the glasses. The size is fixed because the plugin's image container must match it

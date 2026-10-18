@@ -1,0 +1,141 @@
+{
+  "guide_id": "cup_fold_half",
+  "title": "Cup: fold in half",
+  "placeholder": true,
+  "pipeline_version": 1,
+  "g2_format": "PNG, 8-bit greyscale, values only multiples of 17 (= 16 gray4 levels), black = transparent, <=288x144",
+  "views": [
+    {
+      "view": "where",
+      "step_id": "cup_fold_half.where",
+      "title": "WHERE",
+      "image": "knowledge/guides/cup_fold_half/where.png",
+      "phone_image": "knowledge/guides/cup_fold_half/where.phone.png",
+      "provenance": "AUTHORED DEMO METADATA",
+      "depicts": "SCHEMATIC stand-in: a square sheet seen as a diamond, bottom corner circled (generic drawing, not a photo)",
+      "fallback": {
+        "line1": "BOTTOM CORNER OF THE",
+        "line2": "DIAMOND"
+      },
+      "placeholder": true,
+      "fov_note": null,
+      "w": 288,
+      "h": 144,
+      "grey_levels": 10,
+      "sha256": "9121867259870f5c90a26499dab3ea28ce7cc8cf068d984bd1d557fb3873aeae",
+      "bytes": 837,
+      "phone_w": 1280,
+      "phone_h": 640,
+      "phone_sha256": "5ad9bc3bce19e95351bbb2d20c2d61e746a8893261d5589e95deae1d198955a5",
+      "phone_bytes": 45636,
+      "source": "assets/sources/cup_fold_half/where.src.png",
+      "source_sha256": "561a6d6cde0d97fa4871ab5ae05014d831a2a534193a69503d07bc85f4353907",
+      "annotation": "circle",
+      "caption": "BOTTOM CORNER"
+    },
+    {
+      "view": "how",
+      "step_id": "cup_fold_half.how",
+      "title": "HOW",
+      "image": "knowledge/guides/cup_fold_half/how.png",
+      "phone_image": "knowledge/guides/cup_fold_half/how.phone.png",
+      "provenance": "AUTHORED DEMO METADATA",
+      "depicts": "SCHEMATIC stand-in: arrow from the bottom corner up to the top corner, dashed line = where the fold lies (generic drawing, not a photo)",
+      "fallback": {
+        "line1": "FOLD BOTTOM CORNER UP",
+        "line2": "TO MEET THE TOP CORNER"
+      },
+      "placeholder": true,
+      "fov_note": null,
+      "w": 288,
+      "h": 144,
+      "grey_levels": 16,
+      "sha256": "6b228588ce201cc27e52e88751ac164c8d93be77ada928c59d7f4d617074f4e3",
+      "bytes": 1227,
+      "phone_w": 1280,
+      "phone_h": 640,
+      "phone_sha256": "67678ea035abe207f600d2456063f61f9afceca180360ed71c3b3d4f8d2c7456",
+      "phone_bytes": 48034,
+      "source": "assets/sources/cup_fold_half/how.src.png",
+      "source_sha256": "4613d8ad30a326050418a8e5e08cc312453840abecd16c7aafb8c0d509b69569",
+      "annotation": "arrow",
+      "caption": "BOTTOM TO TOP CORNER"
+    },
+    {
+      "view": "correct",
+      "step_id": "cup_fold_half.correct",
+      "title": "CORRECT",
+      "image": "knowledge/guides/cup_fold_half/correct.png",
+      "phone_image": "knowledge/guides/cup_fold_half/correct.phone.png",
+      "provenance": "AUTHORED DEMO METADATA",
+      "depicts": "SCHEMATIC stand-in: the folded shape, a triangle (generic drawing, not a photo)",
+      "fallback": {
+        "line1": "A FOLDED TRIANGLE",
+        "line2": "FOLD EDGE AT THE BASE"
+      },
+      "placeholder": true,
+      "fov_note": null,
+      "w": 288,
+      "h": 144,
+      "grey_levels": 5,
+      "sha256": "a285b956ee1cd4491fd0920b6202de25a81e67a2bd590047c1e5d7e04129fcc7",
+      "bytes": 684,
+      "phone_w": 1280,
+      "phone_h": 640,
+      "phone_sha256": "6301ed4c7a2222b0e32082edcd2e3a8b9af7f9feb2213fdb7f33475f9ca7835e",
+      "phone_bytes": 27491,
+      "source": "assets/sources/cup_fold_half/correct.src.png",
+      "source_sha256": "ab9750c747d4405f513b2c05a49a050a79b5f34a934cd65bf724c64a25f0d0f2",
+      "annotation": "rect",
+      "caption": "FOLDED TRIANGLE"
+    }
+  ],
+  "guide": {
+    "id": "cup_fold_half",
+    "title": "Cup: fold in half",
+    "views": [
+      {
+        "view": "where",
+        "step_id": "cup_fold_half.where",
+        "title": "WHERE",
+        "image": "knowledge/guides/cup_fold_half/where.png",
+        "phone_image": "knowledge/guides/cup_fold_half/where.phone.png",
+        "provenance": "AUTHORED DEMO METADATA",
+        "depicts": "SCHEMATIC stand-in: a square sheet seen as a diamond, bottom corner circled (generic drawing, not a photo)",
+        "fallback": {
+          "line1": "BOTTOM CORNER OF THE",
+          "line2": "DIAMOND"
+        },
+        "fov_note": null
+      },
+      {
+        "view": "how",
+        "step_id": "cup_fold_half.how",
+        "title": "HOW",
+        "image": "knowledge/guides/cup_fold_half/how.png",
+        "phone_image": "knowledge/guides/cup_fold_half/how.phone.png",
+        "provenance": "AUTHORED DEMO METADATA",
+        "depicts": "SCHEMATIC stand-in: arrow from the bottom corner up to the top corner, dashed line = where the fold lies (generic drawing, not a photo)",
+        "fallback": {
+          "line1": "FOLD BOTTOM CORNER UP",
+          "line2": "TO MEET THE TOP CORNER"
+        },
+        "fov_note": null
+      },
+      {
+        "view": "correct",
+        "step_id": "cup_fold_half.correct",
+        "title": "CORRECT",
+        "image": "knowledge/guides/cup_fold_half/correct.png",
+        "phone_image": "knowledge/guides/cup_fold_half/correct.phone.png",
+        "provenance": "AUTHORED DEMO METADATA",
+        "depicts": "SCHEMATIC stand-in: the folded shape, a triangle (generic drawing, not a photo)",
+        "fallback": {
+          "line1": "A FOLDED TRIANGLE",
+          "line2": "FOLD EDGE AT THE BASE"
+        },
+        "fov_note": null
+      }
+    ]
+  }
+}

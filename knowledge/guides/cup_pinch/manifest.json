@@ -1,0 +1,99 @@
+{
+  "guide_id": "cup_pinch",
+  "title": "Cup: pinch the left edge",
+  "placeholder": true,
+  "pipeline_version": 1,
+  "g2_format": "PNG, 8-bit greyscale, values only multiples of 17 (= 16 gray4 levels), black = transparent, <=288x144",
+  "views": [
+    {
+      "view": "where",
+      "step_id": "cup_pinch.where",
+      "title": "WHERE",
+      "image": "knowledge/guides/cup_pinch/where.png",
+      "phone_image": "knowledge/guides/cup_pinch/where.phone.png",
+      "provenance": "AUTHORED DEMO METADATA",
+      "depicts": "SCHEMATIC stand-in: the folded triangle with its left edge boxed; the pinch position is NOT drawn (generic drawing, not a photo)",
+      "fallback": {
+        "line1": "LEFT EDGE OF THE",
+        "line2": "FOLDED TRIANGLE"
+      },
+      "placeholder": true,
+      "fov_note": null,
+      "w": 288,
+      "h": 144,
+      "grey_levels": 12,
+      "sha256": "85f2ee5ecaa19d5cb3b4a9eca610bfd17e2d3998c8baed4f03661dd493a89bdc",
+      "bytes": 766,
+      "phone_w": 1280,
+      "phone_h": 640,
+      "phone_sha256": "3e8bf7e889be67a742a6dad96e39d87387604abef4b00a5a68eed7f9b65b3f1e",
+      "phone_bytes": 20112,
+      "source": "assets/sources/cup_pinch/where.src.png",
+      "source_sha256": "ab9750c747d4405f513b2c05a49a050a79b5f34a934cd65bf724c64a25f0d0f2",
+      "annotation": "rect",
+      "caption": "LEFT EDGE"
+    },
+    {
+      "view": "how",
+      "step_id": "cup_pinch.how",
+      "title": "HOW",
+      "image": "knowledge/guides/cup_pinch/how.png",
+      "phone_image": "knowledge/guides/cup_pinch/how.phone.png",
+      "provenance": "AUTHORED DEMO METADATA",
+      "depicts": "SCHEMATIC stand-in: arrow from the left edge down toward the bottom edge; only a small pinch is made, its position is NOT drawn (generic drawing, not a photo)",
+      "fallback": {
+        "line1": "FOLD LEFT EDGE DOWN",
+        "line2": "ONLY A SMALL MARK"
+      },
+      "placeholder": true,
+      "fov_note": null,
+      "w": 288,
+      "h": 144,
+      "grey_levels": 12,
+      "sha256": "836691753d8ac723a8698696c993b04cc8c312c7db38fb5763aaaa69a3b657bc",
+      "bytes": 1060,
+      "phone_w": 1280,
+      "phone_h": 640,
+      "phone_sha256": "9f806e7830e8fd0b8a54ba1ac634a187b94553b6cec436f60753ff4bd2a20c4b",
+      "phone_bytes": 35360,
+      "source": "assets/sources/cup_pinch/how.src.png",
+      "source_sha256": "ab9750c747d4405f513b2c05a49a050a79b5f34a934cd65bf724c64a25f0d0f2",
+      "annotation": "arrow",
+      "caption": "LEFT EDGE TO BOTTOM EDGE"
+    }
+  ],
+  "guide": {
+    "id": "cup_pinch",
+    "title": "Cup: pinch the left edge",
+    "views": [
+      {
+        "view": "where",
+        "step_id": "cup_pinch.where",
+        "title": "WHERE",
+        "image": "knowledge/guides/cup_pinch/where.png",
+        "phone_image": "knowledge/guides/cup_pinch/where.phone.png",
+        "provenance": "AUTHORED DEMO METADATA",
+        "depicts": "SCHEMATIC stand-in: the folded triangle with its left edge boxed; the pinch position is NOT drawn (generic drawing, not a photo)",
+        "fallback": {
+          "line1": "LEFT EDGE OF THE",
+          "line2": "FOLDED TRIANGLE"
+        },
+        "fov_note": null
+      },
+      {
+        "view": "how",
+        "step_id": "cup_pinch.how",
+        "title": "HOW",
+        "image": "knowledge/guides/cup_pinch/how.png",
+        "phone_image": "knowledge/guides/cup_pinch/how.phone.png",
+        "provenance": "AUTHORED DEMO METADATA",
+        "depicts": "SCHEMATIC stand-in: arrow from the left edge down toward the bottom edge; only a small pinch is made, its position is NOT drawn (generic drawing, not a photo)",
+        "fallback": {
+          "line1": "FOLD LEFT EDGE DOWN",
+          "line2": "ONLY A SMALL MARK"
+        },
+        "fov_note": null
+      }
+    ]
+  }
+}

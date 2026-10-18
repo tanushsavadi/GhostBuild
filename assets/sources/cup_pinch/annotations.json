@@ -1,0 +1,65 @@
+{
+  "guide_id": "cup_pinch",
+  "title": "Cup: pinch the left edge",
+  "placeholder": true,
+  "banner": "SCHEMATIC – REPLACE WITH PHOTO",
+  "units": "px",
+  "views": [
+    {
+      "view": "where",
+      "step_id": "cup_pinch.where",
+      "title": "WHERE",
+      "source": "where.src.png",
+      "crop": [
+        400,
+        10,
+        1200,
+        410
+      ],
+      "annotation": {
+        "type": "rect",
+        "x0": 535,
+        "y0": 65,
+        "x1": 800,
+        "y1": 345
+      },
+      "caption": "LEFT EDGE",
+      "provenance": "AUTHORED DEMO METADATA",
+      "depicts": "SCHEMATIC stand-in: the folded triangle with its left edge boxed; the pinch position is NOT drawn (generic drawing, not a photo)",
+      "fallback_cue": {
+        "line1": "LEFT EDGE OF THE",
+        "line2": "FOLDED TRIANGLE"
+      }
+    },
+    {
+      "view": "how",
+      "step_id": "cup_pinch.how",
+      "title": "HOW",
+      "source": "how.src.png",
+      "crop": [
+        400,
+        10,
+        1200,
+        410
+      ],
+      "annotation": {
+        "type": "arrow",
+        "from": [
+          675,
+          205
+        ],
+        "to": [
+          760,
+          322
+        ]
+      },
+      "caption": "LEFT EDGE TO BOTTOM EDGE",
+      "provenance": "AUTHORED DEMO METADATA",
+      "depicts": "SCHEMATIC stand-in: arrow from the left edge down toward the bottom edge; only a small pinch is made, its position is NOT drawn (generic drawing, not a photo)",
+      "fallback_cue": {
+        "line1": "FOLD LEFT EDGE DOWN",
+        "line2": "ONLY A SMALL MARK"
+      }
+    }
+  ]
+}

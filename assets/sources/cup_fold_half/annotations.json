@@ -1,0 +1,90 @@
+{
+  "guide_id": "cup_fold_half",
+  "title": "Cup: fold in half",
+  "placeholder": true,
+  "banner": "SCHEMATIC – REPLACE WITH PHOTO",
+  "units": "px",
+  "views": [
+    {
+      "view": "where",
+      "step_id": "cup_fold_half.where",
+      "title": "WHERE",
+      "source": "where.src.png",
+      "crop": [
+        100,
+        30,
+        1500,
+        730
+      ],
+      "annotation": {
+        "type": "circle",
+        "cx": 800,
+        "cy": 555,
+        "r": 55
+      },
+      "caption": "BOTTOM CORNER",
+      "provenance": "AUTHORED DEMO METADATA",
+      "depicts": "SCHEMATIC stand-in: a square sheet seen as a diamond, bottom corner circled (generic drawing, not a photo)",
+      "fallback_cue": {
+        "line1": "BOTTOM CORNER OF THE",
+        "line2": "DIAMOND"
+      }
+    },
+    {
+      "view": "how",
+      "step_id": "cup_fold_half.how",
+      "title": "HOW",
+      "source": "how.src.png",
+      "crop": [
+        100,
+        30,
+        1500,
+        730
+      ],
+      "annotation": {
+        "type": "arrow",
+        "from": [
+          800,
+          540
+        ],
+        "to": [
+          800,
+          115
+        ]
+      },
+      "caption": "BOTTOM TO TOP CORNER",
+      "provenance": "AUTHORED DEMO METADATA",
+      "depicts": "SCHEMATIC stand-in: arrow from the bottom corner up to the top corner, dashed line = where the fold lies (generic drawing, not a photo)",
+      "fallback_cue": {
+        "line1": "FOLD BOTTOM CORNER UP",
+        "line2": "TO MEET THE TOP CORNER"
+      }
+    },
+    {
+      "view": "correct",
+      "step_id": "cup_fold_half.correct",
+      "title": "CORRECT",
+      "source": "correct.src.png",
+      "crop": [
+        100,
+        30,
+        1500,
+        730
+      ],
+      "annotation": {
+        "type": "rect",
+        "x0": 530,
+        "y0": 60,
+        "x1": 1070,
+        "y1": 350
+      },
+      "caption": "FOLDED TRIANGLE",
+      "provenance": "AUTHORED DEMO METADATA",
+      "depicts": "SCHEMATIC stand-in: the folded shape, a triangle (generic drawing, not a photo)",
+      "fallback_cue": {
+        "line1": "A FOLDED TRIANGLE",
+        "line2": "FOLD EDGE AT THE BASE"
+      }
+    }
+  ]
+}
