@@ -57,3 +57,7 @@ tmp/
 .worktrees/
 knowledge/drafts/
 knowledge/requests/
+
+# CREAO raw responses and run table (local only; also covered by knowledge/requests/)
+knowledge/requests/creao_raw/
+knowledge/requests/creao_runs.json
