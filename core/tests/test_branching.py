@@ -111,3 +111,29 @@ def test_linear_cards_are_unchanged():
     r.confirm()
     r.send("swipe_up")
     assert r.pb.index == 0 and r.cur.mode == "step"
+
+
+def test_expected_state_requests_use_the_sources_words_or_say_it_is_not_described():
+    c = graph_card().model_dump(mode="json")
+    c["steps"][1]["expected"] = "The Apple logo appears and the desktop colours look normal."
+    r = Rig(Card.model_validate(c))
+    r.pb.choose("builtin")
+    res = r.pb.ask("what should it look like when it's done?")
+    assert res.intent == "correct" and "desktop colours look normal" in res.detail and r.cur.answer is not None
+    r.send("press")
+    r.confirm()  # a1 -> a_done (no expected text)
+    res = r.pb.ask("how do I know it worked")
+    assert res.intent == "correct" and "does not describe" in res.detail and not r.pb.verified
+
+
+def test_engine_summary_describes_every_guide_from_its_data(tmp_path):
+    from fastapi.testclient import TestClient
+
+    from ghostbuild_core.clock import ManualClock
+    from ghostbuild_core.runtime import Runtime
+    from ghostbuild_core.server import create_app
+
+    rt = Runtime([graph_card()], clock=ManualClock(), log_dir=tmp_path, asset_root=tmp_path, brain=None)
+    with TestClient(create_app(rt, tick_interval=None)) as c:
+        g = c.get("/engine/summary").json()["guides"][0]
+    assert g["task_kind"] == "diagnosis" and g["questions"] == 1 and g["endings"] == 2 and g["hazards"] == 1 and g["quoted"] == 0

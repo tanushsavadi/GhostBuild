@@ -359,6 +359,8 @@ class Assistant:
         if decision == "REQUEST_CONFIRMATION":
             task.confirmation_pending = req.text or ""
         if action == "ask":
+            if ready is None and decision == "ASK_QUESTION" and (reply.goal or st.first_text):
+                self.rt.live.prefetch(task.id + ":" + str(task.revision), reply.goal or st.first_text)  # research while conversing
             st.asked += 1
             task.pending_question = reply.say
             key = intake_question_key(reply)

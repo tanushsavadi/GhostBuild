@@ -220,7 +220,8 @@ _PB_NEXT = re.compile(
     r"(?: (?:what's|what is) next)?(?: please)?$"
 )
 _PB_HOW = re.compile(r"\bshow (?:me )?how\b|\bhow (?:do|should|can) i\b|^how$|\bhow (?:view|picture)\b")
-_PB_CORRECT = re.compile(r"\b(?:look like|looks like|should it look|correct (?:view|picture|look))\b|^correct$")
+_PB_CORRECT = re.compile(r"\b(?:look like|looks like|should (?:it|this|that) look|correct (?:view|picture|look)|finished (?:result|state|look)|"
+                         r"end result|when (?:it'?s|it is) (?:done|right|finished)|how (?:do|will|can) i (?:know|tell) (?:it|this|that) (?:worked|is right|is done))\b|^correct$")
 _PB_REPEAT = re.compile(r"^(?:please )?(?:repeat|repeat that|say that again|what did you say|explain that again)(?: please)?$")
 
 _PB_BACK = re.compile(r"^(?:please )?(?:back|previous|go back|previous step|last step|go back to the previous step)(?: please)?$")

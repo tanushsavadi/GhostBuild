@@ -239,3 +239,16 @@ def test_d_bike_guide_tubeless_answer_stops_with_the_sources_reason(tmp_path):
     assert pb.step.kind == "question"
     res = rt.ask("it's tubeless")
     assert res.intent == "choice" and pb.step.kind == "stop"
+
+
+def test_research_while_conversing_prefetches_once_per_task_revision_and_compile_reuses_it(tmp_path, monkeypatch):
+    rt = boot(tmp_path, FakeBrain(intake=[IntakeReply(action="ask", say="Which model is it?", question_key="model", critical_unknowns=["model"])]))
+    monkeypatch.setenv("GB_LIVE_RESEARCH", "1")
+    monkeypatch.setenv("GB_RESEARCH_ENGINE", "compile")
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-only")
+    started = []
+    monkeypatch.setattr(rt.live, "prefetch", lambda key, goal: started.append((key, goal)))
+    ask_goal(rt, "descale my espresso machine", via="phone_text")
+    settle(rt)
+    t = task_of(rt)
+    assert started == [(f"{t.id}:{t.revision}", "descale my espresso machine")]  # asked a question AND started looking

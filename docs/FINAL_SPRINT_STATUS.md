@@ -1,5 +1,23 @@
 # Final sprint status
 
+## Latest: universal framework (06:40 PDT, Claude Opus 5.5) — see [FRAMEWORK.md](FRAMEWORK.md)
+
+Branch `codex/final-sprint`, checkpoint commit `a4d0f14` (+ later commits; local only, nothing pushed). Operator :8787 reloaded 06:08 (backup `logs/backup-bench-0445-0608`).
+
+| Capability | Label | Evidence |
+|---|---|---|
+| Branching action graph in the existing contract | ENGINE TESTED + SIMULATOR VERIFIED | additive `Step.kind/choices/next/expected/tools/risk`, `Card.task_kind/review`; G2 menu question, swipe/press answer, route-back, hazard double confirm, outcome/stop; `core/tests/test_branching.py` |
+| Generic source adapter + verified compiler | LIVE VERIFIED | `knowledge/sources.py`, `knowledge/compile.py`, `knowledge/find_sources.py`; verbatim quotes, routes and glasses text checked in code; `knowledge/tests/test_compile.py` |
+| Cached demos | CACHED, AI-COMPILED (not human-reviewed) | Mac display colours (6 Apple pages), flat bike tyre (4 Park Tool pages, 12 photos), Prusa MK4 extrusion (3 Prusa pages); all 0 validation errors |
+| Uncached dynamic task | LIVE VERIFIED | "clean the filter on my Bosch dishwasher" → 3 official Bosch pages → 10-step guide on the glasses in **32.8 s** (2 Anthropic requests); `docs/evidence/adaptive/live-uncached-compile.json` |
+| Interview → guide | LIVE (real assistant) | Mac: intake 3.3 s → guide; "only my external monitor…" answers the guide's question (0.01 s, no model); bike: "I'm not sure what kind of tire" → sourced identification step |
+| Visuals | SIMULATOR + BROWSER | source photo + vision crop/highlight; comparison pictures whole; Mac menu-path drawings (labelled, not screenshots); "what should it look like" → CORRECT picture or the source's own expected text, else "not described" |
+| Research while conversing | ENGINE TESTED | the assistant's question about an uncached task starts source search/fetch, keyed by task revision |
+| Engine page (Act IV) | BROWSER VERIFIED | `/phone/engine.html` from `/engine/summary`: sources, quoted steps, questions, pictures per guide |
+| Hot path | MEASURED | local HTTP medians: state 0.98 ms, G2 picture 1.29 ms, deterministic ask 1.55 ms (`docs/evidence/framework/hot-path-latency.json`) |
+| Anthropic usage this phase | COUNTED | demo compiles 13 + 5 + 9 + 13 + 13 (bike v1–v3, Mac v2, Prusa incl. vision crops), Mac v1 2, live uncached 2, live assistant runs ≈10. CREAO 0. ElevenLabs 0 |
+| Physical G2 / mic / BLE | NOT RUN | |
+
 ## Latest: adaptive assistant finished by Claude Opus 5.5 (05:35 PDT) — operator :8787 reloaded
 
 Takeover of [CLAUDE_ADAPTIVE_TAKEOVER.md](CLAUDE_ADAPTIVE_TAKEOVER.md). Nothing committed or pushed by Claude (note: four commits at 05:05 on this branch were made outside this session). Evidence: `docs/evidence/adaptive/`.

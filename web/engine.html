@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GhostBuild engine</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  .eng{max-width:1100px;margin:0 auto;padding:24px 16px 48px}
+  .eng h1{font-size:clamp(28px,5vw,44px);margin:6px 0 6px}
+  .eng .lede{color:var(--dim);margin:0 0 22px;max-width:62ch}
+  .flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:0 0 26px}
+  .stage{border:1px solid var(--line);border-radius:16px;padding:16px;background:color-mix(in srgb,var(--accent) 5%,transparent);position:relative}
+  .stage b{display:block;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+  .stage .n{font-size:30px;font-weight:700;line-height:1.1}
+  .stage .s{color:var(--dim);font-size:13px;margin-top:6px}
+  .stage:not(:last-child)::after{content:"→";position:absolute;right:-13px;top:42%;color:var(--accent);font-weight:700}
+  .guides{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+  .g{border:1px solid var(--line);border-radius:14px;padding:14px;min-width:0}
+  .g.now{outline:2px solid var(--accent)}
+  .g h3{margin:2px 0 8px;font-size:17px}
+  .chip{display:inline-block;font:600 11px ui-monospace,Menlo,monospace;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line);border-radius:999px;padding:3px 8px;margin:0 4px 4px 0}
+  .g .facts{color:var(--dim);font-size:13px;margin:8px 0 0;line-height:1.5}
+  .g .src{font-size:12px;word-break:break-word;margin-top:6px}
+  .chip{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:top}
+  .live{margin:22px 0 0;padding:14px;border:1px dashed var(--line);border-radius:14px}
+  @media(max-width:760px){.flow{grid-template-columns:1fr 1fr}.stage:nth-child(2)::after{content:none}}
+  @media(max-width:420px){.flow{grid-template-columns:1fr}.stage::after{content:none!important}}
+</style>
+</head>
+<body>
+<main class="eng">
+  <p class="meta">GHOSTBUILD · HOW IT WORKS</p>
+  <h1>Different sources. One verified compiler. One runtime.</h1>
+  <p class="lede">Every guide below is plain data played by the same engine on the glasses and the phone. Steps quote their sources, questions choose the route, and safety steps ask twice. Nothing is called reviewed until a person reviews it.</p>
+  <section class="flow" aria-label="Pipeline">
+    <div class="stage"><b>Trusted sources</b><div class="n" id="n-src">–</div><div class="s">manufacturer & specialist sites</div></div>
+    <div class="stage"><b>Verified compiler</b><div class="n" id="n-steps">–</div><div class="s">steps quoting their source verbatim</div></div>
+    <div class="stage"><b>Adaptive runtime</b><div class="n" id="n-q">–</div><div class="s">questions that choose the route</div></div>
+    <div class="stage"><b>One G2 experience</b><div class="n" id="n-pic">–</div><div class="s">pictures from the sources</div></div>
+  </section>
+  <section class="guides" id="guides" aria-label="Loaded guides"></section>
+  <section class="live" id="live" aria-live="polite"></section>
+  <p class="meta"><a href="./">← back to the companion</a></p>
+</main>
+<script>
+(function () {
+  function el(tag, attrs, kids) {
+    var n = document.createElement(tag);
+    Object.keys(attrs || {}).forEach(function (k) { if (k === 'text') n.textContent = attrs[k]; else n.setAttribute(k, attrs[k]); });
+    (kids || []).forEach(function (c) { if (c) n.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
+    return n;
+  }
+  function render(d) {
+    var gs = d.guides || [], domains = {};
+    gs.forEach(function (g) { g.sources.forEach(function (s) { domains[s] = 1; }); });
+    var sum = function (k) { return gs.reduce(function (a, g) { return a + (g[k] || 0); }, 0); };
+    document.getElementById('n-src').textContent = Object.keys(domains).length + ' sites';
+    document.getElementById('n-steps').textContent = sum('quoted') + ' / ' + sum('steps');
+    document.getElementById('n-q').textContent = sum('questions');
+    document.getElementById('n-pic').textContent = sum('pictures');
+    var box = document.getElementById('guides'); box.textContent = '';
+    gs.forEach(function (g) {
+      box.appendChild(el('article', { class: 'g' + (g.card_id === d.active ? ' now' : '') }, [
+        el('h3', { text: g.title }),
+        el('span', { class: 'chip', text: g.task_kind || 'guide' }),
+        el('span', { class: 'chip', text: g.provenance }),
+        g.ai_compiled ? el('span', { class: 'chip', text: 'AI-compiled · not human-reviewed' }) : null,
+        el('div', { class: 'facts', text: g.steps + ' steps · ' + g.questions + ' questions · ' + g.endings + ' endings · ' + g.hazards + ' safety steps · ' + g.pictures + ' pictures' + (g.measured ? ' · ' + g.measured + ' measured' : '') }),
+        el('div', { class: 'src', text: g.sources.length ? 'Sources: ' + g.sources.join(', ') : 'Sources: authored card' })
+      ]));
+    });
+    var lv = d.live || {}, live = document.getElementById('live'); live.textContent = '';
+    live.appendChild(el('b', { text: 'Something new? ' }));
+    if (lv.active) live.appendChild(document.createTextNode('Researching “' + lv.active.goal + '” · ' + (lv.active.status || '') + ' · ' + lv.active.elapsed_s + ' s'));
+    else if (lv.last) live.appendChild(document.createTextNode('Last: “' + lv.last.goal + '” → ' + (lv.last.ok ? 'compiled in ' + (lv.last.took_s || '?') + ' s from ' + (lv.last.sources || []).length + ' sources' : 'no reliable guide (' + (lv.last.error || lv.last.status) + ')')));
+    else live.appendChild(document.createTextNode(lv.enabled ? 'Ask for any task: an unfamiliar one is compiled from official sources (' + d.engine + ' engine).' : 'Live research is off on this backend.'));
+  }
+  function tick() {
+    fetch('/engine/summary', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(render).catch(function () {})
+      .finally(function () { setTimeout(tick, 3000); });
+  }
+  tick();
+})();
+</script>
+</body>
+</html>

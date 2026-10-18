@@ -755,6 +755,13 @@ class PlaybookEngine:
             cue, detail = st.cue, st.detail
         elif intent == "why":
             cue = st.why
+        elif intent == "correct":
+            # no picture of the finished state: the source's own words for it, or an honest "not described"
+            if st.expected:
+                cue, detail = Cue(line1="WHEN IT'S RIGHT", line2="FROM THE SOURCE"), st.expected
+            else:
+                cue = Cue(line1="NOT DESCRIBED IN GUIDE", line2="SOURCE LINK ON PHONE")
+                detail, label = "The source does not describe the finished result for this step. Check the cited page on your phone.", "DETERMINISTIC"
         elif intent == "faq":
             i = intent_mod.faq_best(text, st.faq)
             cue = st.faq[i[0]].a if i else None
@@ -951,8 +958,9 @@ class PlaybookEngine:
                           "matter", "important", "reason", "part", "thing", "go", "connect", "do", "step", "done",
                           "finish", "when", "more", "simply", "again", "exactly", "really", "need", "suppos",
                           "wait", "hold", "hey", "okay", "well", "actually", "sorry", "um", "umm", "uh", "er", "hmm", "ok", "just", "now", "right",
-                          "confused", "lost", "sure", "can", "you", "mean", "closer", "bigger", "picture", "photo", "image"}
-        terms = intent_mod._content(text) - conversational
+                          "confused", "lost", "sure", "can", "you", "mean", "closer", "bigger", "picture", "photo", "image",
+                          "finished", "result", "end", "know", "worked", "work", "working", "tell", "state", "looks", "supposed"}
+        terms = {t.strip("'") for t in intent_mod._content(text)} - conversational - {"", "it", "s"}
         if not terms:
             return True
         st = self.step

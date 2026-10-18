@@ -57,7 +57,8 @@ class LiveResearch:
         self.last: Optional[dict] = None
         self.cards: dict[str, dict] = {}  # card_id -> {run_id, draft_id, goal}: loaded live, never human-reviewed
         self.started = 0
-        self.durations: list[float] = []  # how long finished live runs really took (seconds): the wait estimate learns from them
+        self.durations: list[float] = []
+        self._prefetched: dict[str, dict] = {}  # task id -> {goal, urls}: sources found while the person was still answering  # how long finished live runs really took (seconds): the wait estimate learns from them
 
     def _now(self) -> float:
         return self.rt.clock.now_ms() / 1000.0  # the runtime clock: the glasses screen and the phone estimate always agree
@@ -131,6 +132,34 @@ class LiveResearch:
             self._done.put(run_id)
         return True
 
+    def prefetch(self, task_id: str, goal: str) -> None:
+        """Research while conversing: find and fetch the official sources for an uncached goal while the person answers.
+        Keyed by the task id, so a correction or a new goal (new id / revision) never reuses mismatched sources."""
+        if not (self.enabled and self.engine == "compile") or task_id in self._prefetched or len(goal.split()) < 2:
+            return
+        import threading
+
+        self._prefetched[task_id] = {"goal": goal, "urls": None}
+        root = self.rt.asset_root
+
+        def work() -> None:
+            try:
+                from knowledge.find_sources import find_sources
+                from knowledge.sources import fetch
+
+                urls, _ = find_sources(goal)
+                for u in urls:
+                    try:
+                        fetch(u, root)  # warms the page cache the compiler reads
+                    except Exception:
+                        log.info("prefetch could not read %s", u)
+                if task_id in self._prefetched:
+                    self._prefetched[task_id]["urls"] = urls
+            except Exception as exc:
+                log.info("prefetch failed: %s", type(exc).__name__)
+
+        threading.Thread(target=work, name="gb-prefetch", daemon=True).start()
+
     def _start_compile(self, req: GoalRequest, text: str) -> bool:
         """Official-source compiler as the research engine: search -> fetch -> compile -> verify, on a worker thread."""
         if self.started >= self._max():
@@ -140,6 +169,9 @@ class LiveResearch:
 
         run_id = "c-" + uuid.uuid4().hex[:8]
         audience = self.rt.assistant.audience_for(req.session_id) or ""
+        task = self.rt.assistant.tasks.get(req.session_id)
+        pre = self._prefetched.get(f"{task.id}:{task.revision}") if task else None  # same task, same revision only
+        pre_urls = list(pre["urls"]) if pre and pre.get("urls") else None
         self.started += 1
         self.active = {"run_id": run_id, "session_id": req.session_id, "goal": text[:300], "mode": req.mode, "started": self._now(),
                        "engine": "compile", "stage": "finding official sources"}
@@ -153,7 +185,10 @@ class LiveResearch:
                 from knowledge.compile import compile_task
                 from knowledge.find_sources import find_sources
 
-                urls, search = find_sources(text)
+                if pre_urls:
+                    urls, search = pre_urls, {"prefetched": True, "picked": pre_urls}
+                else:
+                    urls, search = find_sources(text)
                 out["search"] = search
                 if not urls:
                     raise ValueError("no official or specialist source found")

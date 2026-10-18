@@ -272,6 +272,24 @@ def create_app(
                                       "steps": len(c.steps), "provenance": c.provenance}
                                      for c in runtime.startable_cards()]})
 
+    @app.get("/engine/summary")
+    async def engine_summary() -> Response:
+        """What the one runtime is playing right now: every loaded guide, its sources and its shape (read-only, for the phone)."""
+        from urllib.parse import urlparse
+
+        def shape(c):
+            kinds = [s.kind for s in c.steps]
+            return {"card_id": c.card_id, "title": c.title, "task_kind": c.task_kind or ("assembly" if c.goal_mode == "build" else "diagnosis" if c.tests else None),
+                    "provenance": c.provenance, "review": c.review, "steps": len(c.steps), "questions": kinds.count("question"),
+                    "quoted": sum(1 for s in c.steps if any(ct.quote for ct in s.cites)),
+                    "endings": kinds.count("outcome") + kinds.count("stop"), "hazards": sum(1 for s in c.steps if s.risk == "hazard"),
+                    "pictures": sum(len(g.views) for g in c.guides), "measured": sum(1 for s in c.steps if s.verify is not None),
+                    "sources": sorted({urlparse(x.url).netloc.removeprefix("www.") for x in c.sources if x.url}),
+                    "ai_compiled": c.card_id in runtime.live.cards or bool(c.review and "AI-compiled" in c.review)}
+        cards = runtime.all_cards()
+        return JSONResponse({"guides": [shape(c) for c in cards if c.steps], "engine": runtime.live.engine,
+                             "live": runtime.live.view(), "active": runtime.active_card.card_id})
+
     @app.post("/session/action")
     async def phone_action(body: PhoneAction) -> Response:
         if body.session_id != runtime.session().id:
