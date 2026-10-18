@@ -32,6 +32,8 @@ export interface Card {
   face?: string
   /** The ASL sentence this card belongs to, e.g. "YOUR NAME WHAT?". */
   sentence?: string
+  /** Who chose the word order when it wasn't a hand-written sentence, e.g. "AI · LOCAL". */
+  order?: string
 }
 
 const descriptions = wiktionary as Record<string, { t: string; u: string }>
@@ -226,6 +228,40 @@ export function cardsFor(text: string): Card[] {
     else cards.push(...spell(word))
   }
   return cards
+}
+
+// ---- AI word order (laptop /api/translate) -----------------------------------
+// The model only chooses signs and their order; every card is built here from
+// our own data. A gloss we have no sign for is fingerspelled, never invented.
+
+export interface AiSign { gloss: string; spell: boolean }
+
+/** True when every word of the text is covered by a hand-written sentence (no AI needed). */
+export function isKnownSentence(text: string): boolean {
+  const cards = cardsFor(text)
+  return cards.length > 0 && cards.every(c => c.sentence)
+}
+
+const byGloss = new Map<string, Sign>()
+for (const sign of byWord.values()) if (!byGloss.has(sign.gloss)) byGloss.set(sign.gloss, sign)
+
+function signForGloss(gloss: string): Sign | undefined {
+  return byGloss.get(gloss) ?? lookup(gloss.toLowerCase().replace(/-/g, ' ')) ?? lookup(gloss.toLowerCase())
+}
+
+export function cardsForAi(signs: AiSign[], face: string, source: string): Card[] {
+  const cards: Card[] = []
+  for (const s of signs) {
+    const sign = signForGloss(s.gloss)
+    // A word the model wanted spelled but we have a sign for (e.g. BATHROOM) gets the sign;
+    // names are rarely in the vocabulary, so they stay spelled.
+    if (sign && !(s.spell && !byWord.has(s.gloss.toLowerCase()))) cards.push(signCard(sign))
+    else cards.push(...spell(s.gloss.toLowerCase().replace(/[^a-z0-9]/g, '')))
+  }
+  const faceCue = face === 'brows down' ? 'Brows down (question)' : face === 'brows up' ? 'Brows up (yes/no question)'
+    : face === 'head shake' ? 'Shake your head slightly' : undefined
+  const sentence = `${cards.map(c => c.title.split('  ')[0]).join(' ')}${face.startsWith('brows') ? '?' : ''}`
+  return cards.map(c => ({ ...c, face: faceCue, sentence, order: source }))
 }
 
 /** Throws if a phrases.json step names a word with no sign (run in tests/checks). */

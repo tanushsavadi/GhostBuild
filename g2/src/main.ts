@@ -9,7 +9,7 @@ import {
   OsEventTypeList,
   AudioInputSource,
 } from '@evenrealities/even_hub_sdk'
-import { cardsFor, cardsForWord, CREDIT, type Card } from './matcher'
+import { cardsFor, cardsForWord, cardsForAi, isKnownSentence, tokenize, CREDIT, type AiSign, type Card } from './matcher'
 import top from './top.json'
 
 // Open Palm: a phrase becomes a sequence of cards (handshape image + how-to
@@ -64,7 +64,8 @@ function showOnPhone(card: Card | undefined, n: number, total: number): void {
   }
   const parts: Node[] = []
   if (card.sentence) {
-    parts.push(el('small', `ASL order: ${card.sentence}${card.face ? ` · Face: ${card.face}` : ''} (AI-drafted, unchecked)`), el('br'))
+    const by = card.order ? `chosen live by ${card.order}` : 'hand-written, AI-drafted'
+    parts.push(el('small', `ASL order: ${card.sentence}${card.face ? ` · Face: ${card.face}` : ''} (${by}, unchecked)`), el('br'))
   }
   parts.push(
     el('b', card.title), document.createTextNode(` ${n}/${total}`), el('br'),
@@ -154,7 +155,7 @@ function lensText(): string {
     card.how[1],
     // In a known sentence the face carries the grammar, so it takes the spacer's place.
     ...(card.face ? [`FACE: ${card.face}`] : long ? [] : ['']),
-    card.detail ? `${card.label} · ▼ HOW` : card.label,
+    [card.order ? 'AI ORDER' : '', card.label, card.detail ? '▼ HOW' : ''].filter(Boolean).join(' · '),
     next ? `NEXT ${next.title.split('  ')[0]}` : 'LAST · TAP TO REPEAT',
   ].join('\n')
 }
@@ -207,13 +208,51 @@ async function render(): Promise<void> {
   }
 }
 
-function start(phrase: string): void {
-  cards = cardsFor(phrase)
+function show(newCards: Card[]): void {
+  cards = newCards
   index = 0
   detailPage = -1
   status = null
   version++
   void render()
+}
+
+// ---- AI word order: new sentences go to the laptop's local model -------------
+// Hand-written sentences and single words stay instant and offline. Anything
+// else asks /api/translate (AI · LOCAL); if it fails or takes longer than
+// AI_TIMEOUT_MS, the sentence is signed word by word as before. ?ai=off disables it.
+
+const AI_ON = new URLSearchParams(location.search).get('ai') !== 'off'
+const AI_TIMEOUT_MS = 8000
+let request = 0
+
+function start(phrase: string): void {
+  const words = tokenize(phrase).length
+  if (!AI_ON || words < 2 || isKnownSentence(phrase)) {
+    show(cardsFor(phrase))
+    return
+  }
+  const mine = ++request
+  setStatus('TRANSLATING...')
+  void (async () => {
+    let aiCards: Card[] | null = null
+    try {
+      const res = await fetch('/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: phrase }),
+        signal: AbortSignal.timeout(AI_TIMEOUT_MS),
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const data = (await res.json()) as { signs: AiSign[]; face: string; source: string; ms: number }
+      if (data.signs.length) aiCards = cardsForAi(data.signs, data.face, data.source)
+      console.log(`[coach] AI order in ${data.ms} ms: ${aiCards?.map(c => c.title.split('  ')[0]).join(' ')}`)
+    } catch (err) {
+      console.warn('[coach] AI order unavailable, signing word by word', err)
+    }
+    if (mine !== request) return // a newer sentence arrived meanwhile
+    show(aiCards ?? cardsFor(phrase))
+  })()
 }
 
 function setStatus(text: string | null): void {

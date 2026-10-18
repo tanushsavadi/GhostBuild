@@ -41,6 +41,9 @@ From `g2/`: `npm install` (then `npm rebuild @evenrealities/evenhub-simulator` i
 - Handshape PNGs: `uv run tools/build_handshapes.py --all` (writes `g2/public/handshapes/`). Vocabulary: `uv run tools/build_deck.py` (writes `g2/src/asllex.json`).
 - Windows: the phone can only reach the dev server if port 5173 is allowed inbound (the venue network is Public).
 
+## Live AI word order (built 2026-10-18 ~03:20)
+New sentences of 2+ words → `/api/translate` (laptop server) → Ollama qwen3.5:4b (kept loaded, ~1 s) → cleanup (WH-word last, NOT-X split, I→ME, filler dropped) → `cardsForAi` builds cards from our data, labelled AI ORDER; fallback word-by-word after 8 s. Checked in the simulator: "What time does the store close?" → TIME SHOP CLOSE WHAT, brows down, 1.1 s.
+
 ## AI model comparison (2026-10-18 02:00, `uv run tools/bench_llm.py <models>`)
 Same prompt (rules + 4 examples), 18 test sentences, temperature 0, JSON schema; laptop RTX 3060 6 GB. Score: 0.4 signs present + 0.2 face cue + 0.2 ASL order + 0.2 no English filler. References are AI-drafted (UNCHECKED): good for ranking models, not for grading ASL.
 

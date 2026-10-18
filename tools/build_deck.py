@@ -76,7 +76,7 @@ MOVEMENT = {
 ALIASES = {
     "i": "me", "he": "this/it", "she": "this/it", "it": "this/it", "this": "this/it", "that": "this/it",
     "goodbye": "bye", "okay": "fine_2", "ok": "fine_2", "food": "eat_1",
-    "mom": "mother", "dad": "father",
+    "mom": "mother", "dad": "father", "store": "shop_2",
 }
 
 
@@ -117,6 +117,7 @@ def motion_line(e: dict) -> str:
 
 
 def words_for(entry_id: str) -> list[str]:
+    entry_id = entry_id.strip()  # a few ASL-LEX IDs carry stray spaces ("close ")
     if "/" in entry_id:
         return [w for w in entry_id.split("/") if w.isalpha()]
     base = re.sub(r"_\d+$", "", entry_id)
@@ -153,7 +154,7 @@ def main() -> None:
     out = {}
     for word, e in sorted(best.items()):
         # "this/it" is the pointing sign used for he, she, it, this and that.
-        gloss = "POINT" if "/" in e["EntryID"] else re.sub(r"_\d+$", "", e["EntryID"]).replace("_", "-").upper()
+        gloss = "POINT" if "/" in e["EntryID"] else re.sub(r"_\d+$", "", e["EntryID"].strip()).replace("_", "-").upper()
         video = (e.get("VimeoVideo") or "").rsplit("/", 1)[-1]
         # Last field: 1 = hand-written lines from howto.json, 0 = template lines.
         if e["EntryID"] in howto_by_entry:

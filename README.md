@@ -75,7 +75,7 @@ npm rebuild @evenrealities/evenhub-simulator   # only if "npm run simulate" says
 npm run dev                                    # leave running
 ```
 
-**Laptop server** (needed for speech; repo root, second terminal):
+**Laptop server** (needed for speech and AI word order; repo root, second terminal). For AI word order also install [Ollama](https://ollama.com) and run `ollama pull qwen3.5:4b-q4_K_M` once:
 
 ```bash
 uv run tools/open_palm_server.py
@@ -152,6 +152,7 @@ Typed sentences are handled entirely on the phone. Speech goes glasses mic → p
 `g2/src/matcher.ts` turns a sentence into cards, in this order of preference:
 
 1. **Known sentence** (`phrases.json`): ASL order plus a face cue.
+   - **Any other sentence of 2+ words** goes to the laptop's local AI (`POST /api/translate`, Ollama `qwen3.5:4b`, about 1 s once loaded). It returns only sign names, their ASL order and a face cue; a cleanup step moves question words last and fixes known slips; the cards are then built from our data and marked **AI ORDER**. If the AI doesn't answer within 8 s, the sentence falls back to the steps below. `?ai=off` turns it off.
 2. **Multi-word sign** (*thank you*, *I love you*, *sign language*).
 3. **Single word**: hand-written demo sign (`deck.json`) first, then ASL-LEX (`asllex.json`); plurals and *-ing*/*-ed* forms are handled.
 4. **Anything else is fingerspelled.** It never makes up a sign.
