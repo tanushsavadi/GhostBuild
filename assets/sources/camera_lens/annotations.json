@@ -1,0 +1,45 @@
+{
+  "guide_id": "camera_lens",
+  "title": "Camera lens",
+  "placeholder": true,
+  "units": "px",
+  "views": [
+    {
+      "view": "where",
+      "step_id": "camera_lens.where",
+      "title": "WHERE",
+      "source": "where.src.png",
+      "crop": [400, 100, 1200, 500],
+      "annotation": {"type": "circle", "cx": 800, "cy": 295, "r": 118},
+      "caption": "CAMERA LENS",
+      "provenance": "AUTHORED DEMO METADATA",
+      "depicts": "SCHEMATIC stand-in: generic camera module on a stand, lens circled (not the team's rig)",
+      "fallback_cue": {"line1": "CAMERA = ROUND LENS", "line2": "ON THE CAMERA MODULE"},
+      "fov_note": "Placeholder: replace with a photo of the real station showing the camera lens"
+    },
+    {
+      "view": "how",
+      "step_id": "camera_lens.how",
+      "title": "HOW",
+      "source": "how.src.png",
+      "crop": [400, 40, 1360, 520],
+      "annotation": {"type": "arrow", "from": [1250, 130], "to": [1005, 285]},
+      "caption": "REMOVE COVER",
+      "provenance": "AUTHORED DEMO METADATA",
+      "depicts": "SCHEMATIC stand-in: removable cover over the lens, arrow to the pull tab (not the team's rig)",
+      "fallback_cue": {"line1": "TAKE OFF THE COVER", "line2": "OR CLEAR THE LENS"}
+    },
+    {
+      "view": "correct",
+      "step_id": "camera_lens.correct",
+      "title": "CORRECT",
+      "source": "correct.src.png",
+      "crop": [400, 40, 1360, 520],
+      "annotation": {"type": "rect", "x0": 1040, "y0": 95, "x1": 1352, "y1": 345},
+      "caption": "VIEW IS CLEAR",
+      "provenance": "AUTHORED DEMO METADATA",
+      "depicts": "SCHEMATIC stand-in: lens uncovered and a bright, clear view (not the team's rig)",
+      "fallback_cue": {"line1": "LENS UNCOVERED", "line2": "VIEW IS BRIGHT"}
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GhostBuild annotate helper</title>
+<style>
+:root{--bg:#101214;--fg:#e8ecef;--dim:#8a949c;--card:#1a1e22;--acc:#ffe600;--ok:#3ddc6b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.4 system-ui,sans-serif;padding:16px;max-width:1100px;margin-inline:auto}
+h1{font-size:20px;margin:0 0 4px}p.d{color:var(--dim);margin:0 0 12px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin:10px 0}
+label{display:flex;flex-direction:column;font-size:12px;color:var(--dim);gap:3px}
+input,select,button,textarea{background:var(--card);color:var(--fg);border:1px solid #333b42;border-radius:6px;padding:7px 9px;font:inherit}
+button{cursor:pointer}button.on{border-color:var(--acc);color:var(--acc)}button.go{background:#1d4d2a;border-color:var(--ok)}
+canvas{max-width:100%;border:1px solid #333b42;touch-action:none;cursor:crosshair;display:block}
+.cols{display:flex;gap:16px;flex-wrap:wrap}.cols>div{flex:1 1 320px}
+textarea{width:100%;min-height:240px;font:12px ui-monospace,monospace}
+#hint{color:var(--acc);min-height:1.4em}
+</style></head><body>
+<h1>annotations.json helper</h1>
+<p class="d">Runs entirely offline in this page. Pick a photo, drag the CROP box, then place ONE highlight, fill the fields, press "Add view", repeat for where/how/correct, copy the JSON into <code>assets/sources/&lt;guide_id&gt;/annotations.json</code>. Coordinates are pixels of the ORIGINAL photo.</p>
+<div class="row">
+ <label>Photo<input type="file" id="file" accept="image/*"></label>
+ <label>guide_id<input id="gid" value="camera_lens"></label>
+ <label>Guide title<input id="gtitle" value="Camera lens"></label>
+ <label>Mode<span><button id="mCrop" class="on">1 Crop</button> <button id="mAnn">2 Highlight</button></span></label>
+ <label>Highlight<select id="atype"><option>circle</option><option>arrow</option><option>rect</option></select></label>
+ <label><span>Lock crop 2:1 (G2 shape)</span><input type="checkbox" id="lock" checked></label>
+</div>
+<div id="hint">Load a photo.</div>
+<div class="cols">
+<div><canvas id="cv" width="640" height="360"></canvas>
+ <p class="d">Crop: drag a box (yellow dashed). Highlight: circle = drag from centre outwards; rect = drag corner to corner; arrow = drag from tail to the tip (tip = what it points at).</p>
+ <div class="row"><label>G2 preview (288x144, approx.)<canvas id="pv" width="288" height="144" style="cursor:default"></canvas></label>
+ <label>gamma (&lt;1 darkens)<input id="gamma" type="number" step="0.1" value="1.0" style="width:90px"></label></div></div>
+<div>
+ <div class="row">
+  <label>view<select id="view"><option>where</option><option>how</option><option>correct</option></select></label>
+  <label>title (&le;24)<input id="title" maxlength="24" value="WHERE"></label>
+  <label>caption (&le;24)<input id="caption" maxlength="24" value="CAMERA LENS"></label>
+ </div>
+ <div class="row"><label style="flex:1">depicts<input id="depicts" value="Photo of the rig with the camera lens circled"></label></div>
+ <div class="row">
+  <label>provenance<select id="prov"><option>AUTHORED DEMO METADATA</option><option>AUTHORED PROJECT SPEC</option><option>MANUFACTURER DOC</option><option>HUMAN CONFIRMED</option><option>AI-EXTRACTED · HUMAN-REVIEWED</option></select></label>
+  <label>fallback line1 (&le;24)<input id="f1" maxlength="24" value="CHECK CAMERA LENS"></label>
+  <label>fallback line2 (&le;26)<input id="f2" maxlength="26" value=""></label>
+ </div>
+ <div class="row"><button class="go" id="add">Add / replace this view</button><button id="clear">Clear all views</button><button id="copy">Copy JSON</button></div>
+ <textarea id="out" spellcheck="false" readonly></textarea>
+</div></div>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};
+var cv=$('cv'),cx=cv.getContext('2d'),pv=$('pv'),px=pv.getContext('2d');
+var img=null,fname='photo.jpg',sc=1,mode='crop',crop=null,ann=null,drag=null,views=[];
+$('file').onchange=function(e){var f=e.target.files[0];if(!f)return;fname=f.name;var im=new Image();
+ im.onload=function(){img=im;sc=Math.min(640/im.width,520/im.height);cv.width=Math.round(im.width*sc);cv.height=Math.round(im.height*sc);crop=null;ann=null;draw();$('hint').textContent=im.width+'x'+im.height+' px loaded. Drag the crop box.'};
+ im.src=URL.createObjectURL(f)};
+function setMode(m){mode=m;$('mCrop').className=m=='crop'?'on':'';$('mAnn').className=m=='ann'?'on':''}
+$('mCrop').onclick=function(){setMode('crop')};$('mAnn').onclick=function(){setMode('ann')};
+function pos(e){var r=cv.getBoundingClientRect();return [(e.clientX-r.left)*cv.width/r.width/sc,(e.clientY-r.top)*cv.height/r.height/sc]}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+cv.onpointerdown=function(e){if(!img)return;cv.setPointerCapture(e.pointerId);drag=pos(e);if(mode=='crop')crop=[drag[0],drag[1],drag[0],drag[1]];else ann=mk(drag,drag)};
+cv.onpointermove=function(e){if(!drag)return;var p=pos(e);p=[clamp(p[0],0,img.width),clamp(p[1],0,img.height)];
+ if(mode=='crop'){var x1=p[0],y1=p[1];if($('lock').checked){var w=x1-drag[0],h=y1-drag[1],s=Math.max(Math.abs(w)/2,Math.abs(h));x1=drag[0]+Math.sign(w||1)*s*2;y1=drag[1]+Math.sign(h||1)*s}crop=[drag[0],drag[1],clamp(x1,0,img.width),clamp(y1,0,img.height)]}
+ else ann=mk(drag,p);draw()};
+cv.onpointerup=function(){drag=null;draw()};
+function mk(a,b){var t=$('atype').value;
+ if(t=='circle')return {type:'circle',cx:a[0],cy:a[1],r:Math.hypot(b[0]-a[0],b[1]-a[1])};
+ if(t=='rect')return {type:'rect',x0:Math.min(a[0],b[0]),y0:Math.min(a[1],b[1]),x1:Math.max(a[0],b[0]),y1:Math.max(a[1],b[1])};
+ return {type:'arrow','from':[a[0],a[1]],to:[b[0],b[1]]}}
+function norm(c){return c?[Math.min(c[0],c[2]),Math.min(c[1],c[3]),Math.max(c[0],c[2]),Math.max(c[1],c[3])]:null}
+function drawAnn(c,a,k,lw){c.lineWidth=lw;c.strokeStyle='#ffe600';c.fillStyle='#ffe600';c.beginPath();
+ if(a.type=='circle'){c.arc(a.cx*k,a.cy*k,a.r*k,0,7);c.stroke()}
+ else if(a.type=='rect'){c.strokeRect(a.x0*k,a.y0*k,(a.x1-a.x0)*k,(a.y1-a.y0)*k)}
+ else{var x0=a.from[0]*k,y0=a.from[1]*k,x1=a.to[0]*k,y1=a.to[1]*k,g=Math.atan2(y1-y0,x1-x0),h=14;
+  c.moveTo(x0,y0);c.lineTo(x1,y1);c.stroke();c.beginPath();c.moveTo(x1,y1);c.lineTo(x1-h*Math.cos(g-.4),y1-h*Math.sin(g-.4));c.lineTo(x1-h*Math.cos(g+.4),y1-h*Math.sin(g+.4));c.fill()}}
+function draw(){cx.clearRect(0,0,cv.width,cv.height);if(!img)return;cx.drawImage(img,0,0,cv.width,cv.height);
+ var c=norm(crop);if(c){cx.fillStyle='rgba(0,0,0,.55)';cx.fillRect(0,0,cv.width,cv.height);cx.drawImage(img,c[0],c[1],c[2]-c[0],c[3]-c[1],c[0]*sc,c[1]*sc,(c[2]-c[0])*sc,(c[3]-c[1])*sc);
+  cx.setLineDash([6,4]);cx.strokeStyle='#ffe600';cx.lineWidth=1.5;cx.strokeRect(c[0]*sc,c[1]*sc,(c[2]-c[0])*sc,(c[3]-c[1])*sc);cx.setLineDash([])}
+ if(ann)drawAnn(cx,ann,sc,3);preview();hint()}
+function preview(){px.fillStyle='#000';px.fillRect(0,0,288,144);var c=norm(crop)||[0,0,img.width,img.height];
+ var w=c[2]-c[0],h=c[3]-c[1];if(w<2||h<2)return;var s=Math.min(288/w,144/h),dw=w*s,dh=h*s,ox=(288-dw)/2,oy=(144-dh)/2;
+ var g=parseFloat($('gamma').value)||1;px.filter='grayscale(1) contrast(1.1) brightness('+g+')';px.drawImage(img,c[0],c[1],w,h,ox,oy,dw,dh);px.filter='none';
+ if(ann){var a=JSON.parse(JSON.stringify(ann));var m=function(x,y){return[(x-c[0])*s+ox,(y-c[1])*s+oy]};
+  if(a.type=='circle'){var p=m(a.cx,a.cy);a.cx=p[0];a.cy=p[1];a.r*=s}else if(a.type=='rect'){var p=m(a.x0,a.y0),q=m(a.x1,a.y1);a.x0=p[0];a.y0=p[1];a.x1=q[0];a.y1=q[1]}else{a.from=m(a.from[0],a.from[1]);a.to=m(a.to[0],a.to[1])}
+  drawAnn(px,a,1,3)}}
+$('gamma').oninput=function(){if(img)draw()};
+function hint(){var c=norm(crop);var t='';if(c)t+='crop '+c.map(Math.round).join(',')+' ('+Math.round(c[2]-c[0])+'x'+Math.round(c[3]-c[1])+', ratio '+((c[2]-c[0])/Math.max(1,c[3]-c[1])).toFixed(2)+'). ';
+ if(ann&&c){var ax=ann.type=='circle'?ann.cx:ann.type=='rect'?(ann.x0+ann.x1)/2:ann.to[0],ay=ann.type=='circle'?ann.cy:ann.type=='rect'?(ann.y0+ann.y1)/2:ann.to[1];
+  if(ax<c[0]||ax>c[2]||ay<c[1]||ay>c[3])t+='WARNING: highlight target is outside the crop. '}$('hint').textContent=t||'Drag the crop box, then switch to Highlight.'}
+function r(v){return Math.round(v)}
+function annJson(a){if(a.type=='circle')return{type:'circle',cx:r(a.cx),cy:r(a.cy),r:r(a.r)};
+ if(a.type=='rect')return{type:'rect',x0:r(a.x0),y0:r(a.y0),x1:r(a.x1),y1:r(a.y1)};return{type:'arrow','from':[r(a.from[0]),r(a.from[1])],to:[r(a.to[0]),r(a.to[1])]}}
+function render(){var o={guide_id:$('gid').value,title:$('gtitle').value,placeholder:false,units:'px',views:views};$('out').value=JSON.stringify(o,null,2)}
+$('add').onclick=function(){if(!img||!ann){$('hint').textContent='Need a photo, a crop (optional) and ONE highlight first.';return}
+ var c=norm(crop),v={view:$('view').value,step_id:$('gid').value+'.'+$('view').value,title:$('title').value,source:fname,crop:c?c.map(r):null,annotation:annJson(ann),caption:$('caption').value,
+  provenance:$('prov').value,depicts:$('depicts').value,fallback_cue:{line1:$('f1').value,line2:$('f2').value}};
+ var g=parseFloat($('gamma').value);if(g&&g!==1)v.gamma=g;if(!v.crop)delete v.crop;
+ views=views.filter(function(x){return x.view!==v.view}).concat([v]);render();$('hint').textContent='Added '+v.view+'. '+views.length+' view(s). Copy the JSON when all are in; copy the photo into assets/sources/'+$('gid').value+'/ with the file name shown in "source".'};
+$('clear').onclick=function(){views=[];render()};
+$('copy').onclick=function(){var t=$('out');t.removeAttribute('readonly');t.select();try{document.execCommand('copy');$('hint').textContent='Copied.'}catch(e){}t.setAttribute('readonly','')};
+$('view').onchange=function(){var m={where:['WHERE','CAMERA LENS'],how:['HOW','REMOVE COVER'],correct:['CORRECT','VIEW IS CLEAR']}[$('view').value];$('title').value=m[0];$('caption').value=m[1]};
+render();
+})();
+</script></body></html>
