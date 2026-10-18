@@ -124,7 +124,7 @@ class Procedure(Strict):
     v: Literal[1] = 1
     id: str = Field(pattern=SLUG)
     title: str = Field(max_length=80)
-    domain: str = Field(description="Free text, e.g. electronics, paper folding, building bricks")
+    domain: str = Field(description="Free text, e.g. electronics, paper folding, toy building")
     origin: Literal["authored", "agent_compiled"]
     source: Source
     review: Review
@@ -179,7 +179,17 @@ class JigProfile(Strict):
     fields: dict[str, list[str | int | bool]] = Field(description="Observation field -> allowed values")
     checks: dict[str, list[Predicate]] = Field(description="Check id -> all-of predicates (pass = VERIFIED)")
     faults: dict[str, list[Predicate]] = Field(default_factory=dict, description="Fault id -> all-of predicates")
+    edge_checks: list[str] = Field(
+        default_factory=list, description="Checks that verify only on a fail->pass change seen while the step is active"
+    )
     notes: str = ""
+
+    @model_validator(mode="after")
+    def _known(self) -> JigProfile:
+        bad = [c for c in self.edge_checks if c not in self.checks]
+        if bad:
+            raise ValueError(f"edge_checks not in checks: {bad}")
+        return self
 
 
 # --- live messages ---------------------------------------------------------------------------------

@@ -285,7 +285,7 @@
   "additionalProperties": false,
   "properties": {
     "domain": {
-      "description": "Free text, e.g. electronics, paper folding, building bricks",
+      "description": "Free text, e.g. electronics, paper folding, toy building",
       "title": "Domain",
       "type": "string"
     },

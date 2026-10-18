@@ -71,6 +71,14 @@
       "title": "Checks",
       "type": "object"
     },
+    "edge_checks": {
+      "description": "Checks that verify only on a fail->pass change seen while the step is active",
+      "items": {
+        "type": "string"
+      },
+      "title": "Edge Checks",
+      "type": "array"
+    },
     "faults": {
       "additionalProperties": {
         "items": {

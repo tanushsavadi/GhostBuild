@@ -54,3 +54,6 @@ tmp/
 
 # --- archives / caches (LDraw zip, doc exports) ---
 *.zip
+
+# --- runtime state (agent drafts) ---
+var/

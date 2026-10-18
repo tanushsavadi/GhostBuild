@@ -8,7 +8,7 @@ PY := uv run python
 need = @test -e $(1) || { echo "not yet: $(1) missing (owner $(2))"; exit 1; }
 
 .PHONY: help doctor setup contracts test lint-generic check-secrets health \
-        core core-mock perception compile compile-proof twin \
+        core core-sim g2-cli perception compile compile-proof twin \
         g2-dev g2-sim g2-qr g2-pack demo sentry-bridge fetch-agent
 
 help:
@@ -35,24 +35,27 @@ health:            ## are the running services up? (CORE=http://<mac1>:8787 to c
 
 # --- lint / test -----------------------------------------------------------
 lint-generic:      ## no domain terms in core source or the contract source (05 design rule)
-	@! grep -rniE 'lego|brick|stud|2x4|ldraw' --include='*.py' --include='*.ts' \
+	@! grep -rniE 'lego|brick|stud|2x4|ldraw|resistor|breadboard|origami' --include='*.py' --include='*.ts' \
 	    core/ghostbuild_core contracts/models.py contracts/ts/index.ts 2>/dev/null \
 	  || { echo "lint-generic: domain terms found above"; exit 1; }
 	@echo "lint-generic: ok"
 
 test: contracts lint-generic check-secrets
-	@for t in contracts/tests core/tests perception/tests knowledge/tests adapters/lego_grid/tests; do \
+	@for t in contracts/tests core/tests compiler/tests knowledge/tests; do \
 	  [ -d $$t ] && { echo "== pytest $$t"; $(PY) -m pytest -q $$t || exit 1; } || true; done
 	@for d in g2 twin; do [ -f $$d/package.json ] && { echo "== $$d"; (cd $$d && npx tsc --noEmit && npx vitest run --passWithNoTests) || exit 1; } || true; done
 
 # --- services (Mac 1 unless noted) -----------------------------------------
-core:              ## core :8787
+core:              ## core :8787 (real jig over ws role=jig). CORE_FLAGS="--no-jig" if the jig gate is red
 	$(call need,core/ghostbuild_core/__main__.py,D)
 	$(PY) -m ghostbuild_core $(CORE_FLAGS)
 
-core-mock:         ## core :8787 on scripted observations
+core-sim:          ## core :8787 with a simulated jig (frames labelled simulated; dev only, never for judging)
 	$(call need,core/ghostbuild_core/__main__.py,D)
-	$(PY) -m ghostbuild_core --mock-vision scenarios/demo.yaml --bundle knowledge/fixtures/rocket_bundle.json $(CORE_FLAGS)
+	$(PY) -m ghostbuild_core --simulate-jig $(CORE_FLAGS)
+
+g2-cli:            ## terminal stand-in for the G2 plugin (CORE=http://host:8787)
+	$(PY) scripts/g2_cli.py
 
 perception:        ## webcam -> core (HANDS=--hands to enable hand veto)
 	$(call need,perception/ghostbuild_perception,C)
