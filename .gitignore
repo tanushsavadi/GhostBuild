@@ -64,3 +64,6 @@ knowledge/requests/creao_raw/
 knowledge/requests/creao_runs.json
 
 knowledge/live/
+
+# Runtime product lookups and downloaded source PDFs
+knowledge/products/ikea/cache/
