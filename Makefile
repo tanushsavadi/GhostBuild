@@ -20,7 +20,7 @@ doctor:            ## is my environment working?
 setup:             ## python env (3.11, all groups) + node deps that exist
 	uv sync --all-groups
 	cd contracts/ts && npm ci
-	@for d in g2; do [ -f $$d/package-lock.json ] && (cd $$d && npm ci) || true; done
+	@for d in g2; do [ -f $$d/package-lock.json ] && (cd $$d && npm ci && npm rebuild @evenrealities/evenhub-simulator) || true; done
 
 contracts:         ## THE 12:45 contract-lock check: export schema + TS, validate every example in Python and TS
 	$(PY) contracts/tools/lock_check.py
@@ -70,19 +70,20 @@ compile:           ## optional build-time card compiler (needs ANTHROPIC_API_KEY
 	$(PY) -m knowledge.compile $(ARGS)
 
 # --- G2 (B's laptop) -------------------------------------------------------
-g2-dev:
+g2-dev:            ## Vite dev server for the plugin (phone QR / simulator); BACKEND=http://<laptop-ip>:8787
 	$(call need,g2/package.json,B)
-	cd g2 && npx vite --host --port 5173
+	cd g2 && VITE_BACKEND_URL=$${BACKEND:-http://localhost:8787} npx vite --host --port 5173
 
-g2-sim:
-	evenhub-simulator -g http://localhost:5173
+g2-sim:            ## official simulator against the dev server (run `make core-sim` and `make g2-dev` first)
+	cd g2 && npx evenhub-simulator -g http://localhost:5173
 
-g2-qr:
-	evenhub qr --url "http://$$(ipconfig getifaddr en0):5173"
+g2-qr:             ## QR to sideload the dev server onto the paired phone/G2
+	cd g2 && npx evenhub qr --url "http://$$(ipconfig getifaddr en0):5173"
 
-g2-pack:
+g2-pack:           ## package g2/ghostbuild.ehpk with the backend URL whitelisted: BACKEND=http://<laptop-ip>:8787 make g2-pack
 	$(call need,g2/app.json,B)
-	cd g2 && npm run build && evenhub pack app.json dist -o ghostbuild.ehpk --sdk-ver 0.0.16 -c
+	@test -n "$(BACKEND)" || { echo "BACKEND=http://<laptop-ip>:8787 is required (it becomes the network whitelist)"; exit 1; }
+	cd g2 && VITE_BACKEND_URL=$(BACKEND) npm run pack:lan
 
 demo:              ## core + browser mirror; run `make pi` on the Pi and open G2
 	$(call need,core/ghostbuild_core/__main__.py,D)
