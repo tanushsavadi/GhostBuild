@@ -260,3 +260,32 @@ new processor. Socket construction failure never opens the microphone, and backg
 a pending voice response after release. GhostBuild does not save microphone recordings. Sustained G2 capture and
 provider STT remain **NOT physically verified**; this build uses intentional hold-to-talk only when flagged.
 The phone landing screen links to `/phone/` in a separate browsing context and keeps connection settings available.
+
+### Actual-core simulator regression (two generic cards)
+
+Use isolated ports: this test changes the backend's active task and deliberately confirms manual steps using simulator inputs.
+It does not perform a physical activity. Start these from the integration checkout, in separate terminals:
+
+```bash
+# Repository root: no --simulate, no Pi required, voice disabled
+PYTHONPATH=.:core:pi uv run python -m ghostbuild_core --port 8791 --log-dir /tmp/ghostbuild-g2-regression
+# g2/
+npm run dev -- --port 5174 --strictPort
+# g2/
+npx evenhub-simulator 'http://localhost:5174/?surface=simulator&backend=http://localhost:8791' --automation-port 9899
+# g2/
+npm run sim:core
+```
+
+`sim:core` resolves the shipped paper-cup and LED-breadboard cards through the same `/session/goal` API. It asserts real
+core HUD state after actual simulator touch events: manual confirmation, three WHERE/HOW/CORRECT images, return without
+losing the step, contextual explanation, a second generic task, honest user-confirmed completion and quiet. It also requires
+three successful image SDK sends from this run. It honors the engine's 1500 ms accidental-input guard. `CORE`, `SIM` and `OUT`
+override defaults. Results, exact image metrics and original RGBA screenshots go under `sim-shots/final-real-core/`;
+`result.json` starts RUNNING and becomes PASS/FAIL, so a failed rerun cannot leave an earlier PASS.
+
+**2026-10-18 00:01 PDT actual integration result:** all 15 checks PASS; three actual SDK image sends PASS;
+no Pi, physical G2 or ElevenLabs call was involved. Stopping and restarting that isolated backend also passed:
+OFFLINE screenshot had 987 lit pixels; the persisted completed task resumed at server seq 0, and the restored quiet
+screenshot had zero lit pixels. Session and confirmation state survived; no stale success remained. The G2 phone landing
+was also inspected through the official simulator's webview screenshot API.

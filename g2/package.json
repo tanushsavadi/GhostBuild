@@ -16,7 +16,8 @@
     "sim:playbook": "node tools/sim-playbook.mjs sim-shots",
     "app-json": "node tools/gen-app-json.mjs app.local.json",
     "pack": "npm run build && evenhub pack app.json dist -o ghostbuild.ehpk --sdk-ver 0.0.16",
-    "pack:lan": "npm run build && npm run app-json && evenhub pack app.local.json dist -o ghostbuild.ehpk --sdk-ver 0.0.16"
+    "pack:lan": "npm run build && npm run app-json && evenhub pack app.local.json dist -o ghostbuild.ehpk --sdk-ver 0.0.16",
+    "sim:core": "node tools/sim-core.mjs"
   },
   "dependencies": {
     "@evenrealities/even_hub_sdk": "0.0.16"
