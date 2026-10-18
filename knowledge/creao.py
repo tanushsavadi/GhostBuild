@@ -395,7 +395,8 @@ def _no_key() -> int:
     return 2
 
 
-def save_raw(run_id: str, document: dict, directory: Path = RAW_DIR, key: Optional[str] = None) -> Path:
+def save_raw(run_id: str, document: dict, directory: Optional[Path] = None, key: Optional[str] = None) -> Path:
+    directory = directory or RAW_DIR
     directory.mkdir(parents=True, exist_ok=True)
     safe = re.sub(r"[^A-Za-z0-9_.-]", "_", run_id)[:80] or "run"
     path = directory / f"{safe}.json"
