@@ -240,3 +240,9 @@ def test_swipe_up_leaves_the_conversation_and_drops_a_late_answer(tmp_path):
 def test_g2_menu_picks_bypass_the_assistant(tmp_path):
     rt = boot(tmp_path, FakeBrain())
     assert rt.assistant.wants_goal(GoalRequest(session_id=rt.session().id, mode="build", via="g2_menu", text=None)) is False
+
+
+def test_intake_prompt_forbids_assuming_and_judging_and_asks_for_experience():
+    p = prompts.INTAKE_SYSTEM
+    assert "NEVER assume" in p and "Do NOT judge, approve or correct" in p and "experience" in p and "At most 3 questions" in p
+    assert "library_id" in prompts.intake_context([card_with_content()], Profile(), 0) and "servo" in prompts.intake_context([card_with_content()], Profile(), 0)

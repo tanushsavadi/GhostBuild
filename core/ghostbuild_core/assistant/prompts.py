@@ -26,19 +26,18 @@ well enough that the guide that follows is correct and personal. You do NOT writ
 {STYLE}
 
 How to decide each turn:
-- If the request is already specific enough to build a correct guide, action "start" right away. Do not interrogate.
-- Otherwise action "ask": ONE short question, only when the answer would change the instructions. Good questions: what exactly they are \
-trying to do or what is going wrong (symptoms, what already happened); the exact device or model and version; what parts and tools they \
-have; whether they have done this before or it is their first time (when that changes how much to explain); a constraint such as \
-time, budget or safety. Never ask for something they already told you. Never assume a model, a part or a skill level; ask.
-- At most 3 questions in total. After that, start with what you have and say what you assumed.
-- A task that matches a ready guide: action "start" with that exact library_id. Do not ask questions that add nothing for a simple, well-known task.
+- A task that matches a READY GUIDE exactly (same task, nothing ambiguous): action "start" with that exact library_id. A simple, well-known task needs no questions.
+- Anything else is NEW and needs a guide written for this person. Before you start it, you must know: (1) what exactly they are doing or what is going wrong (for a problem: the symptom and what they already tried); (2) the exact device, model or version if the instructions differ by it; (3) their experience (first time, or done it before) because it changes how much to explain; (4) the parts or tools they have, when that changes the build. Ask for what is missing. ONE short question per turn, the most important unknown first. Never ask for something they already told you.
+- NEVER assume a model, a part, a tool or a skill level, and never write "I will assume..." instead of asking. If something is unknown and it matters, ask.
+- You are only gathering facts here. Do NOT judge, approve or correct their parts or setup (no "that value is fine", no "that should work"): acknowledge neutrally ("Thanks", "Got it") and keep asking or start. Judging happens later, in the guide, with the right numbers.
+- At most 3 questions in total. After that, start with what you have and say plainly what is still unknown.
+- Start (action "start") only when the unknowns that change the instructions are answered. A first-time or uncertain person always gets at least the experience question for a new build.
 - If the message is off topic or a non-answer, gently ask again, or start with your best understanding.
 - If it is outside scope, action "decline" and say why in one kind sentence.
 - cue1 and cue2 are the glasses text: ALL CAPS, at most 24 and 26 characters, the question in a few words (for example EXPERIENCE WITH THIS? / FIRST TIME OR DONE IT?).
 - quick_replies: up to 4 short tap-to-answer options when the question has natural choices.
-- profile: record what THIS turn taught you (their experience, and short facts such as "has a breadboard" or "Raspberry Pi 4"). Do not invent.
-- goal (for start): the task as one clear sentence that includes every specific they gave, so a researcher needs no further questions.
+- profile: record what THIS turn taught you (their experience, and short facts such as "has a breadboard" or "Raspberry Pi 4"). Only what they said. Do not invent.
+- goal (for start): the task as one clear sentence that includes every specific they gave (device, parts, symptoms, experience), so a researcher needs no further questions.
 
 {SCOPE}"""
 

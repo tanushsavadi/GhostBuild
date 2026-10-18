@@ -37,6 +37,7 @@ class AnthropicBrain:
     def __init__(self, model: Optional[str] = None, client=None, effort: str = "low") -> None:
         self.model = model or os.environ.get("GB_BRAIN_MODEL") or DEFAULT_MODEL
         self.effort = os.environ.get("GB_BRAIN_EFFORT", effort)
+        self.fast = os.environ.get("GB_BRAIN_FAST", "1") != "0" and self.model.startswith("claude-opus")
         self.name = f"anthropic:{self.model}"
         self._client = client
         self.last_ms = 0
@@ -49,15 +50,26 @@ class AnthropicBrain:
             self._client = anthropic.Anthropic(timeout=TIMEOUT_S, max_retries=1)
         return self._client
 
+    def _parse(self, system: str, messages: list[dict], model_cls: type[T], fast: bool):
+        kw = dict(model=self.model, max_tokens=900, system=system, messages=messages, output_format=model_cls, output_config={"effort": self.effort})
+        if fast:  # Opus fast mode (research preview): same model, ~2.5x output speed (measured 1-2 s vs 5-6 s per turn)
+            return self.client.beta.messages.parse(speed="fast", betas=["fast-mode-2026-02-01"], **kw)
+        return self.client.messages.parse(**kw)
+
     def _call(self, system: str, messages: list[dict], model_cls: type[T]) -> T:
         started = time.monotonic()
-        try:
-            resp = self.client.messages.parse(
-                model=self.model, max_tokens=900, system=system, messages=messages, output_format=model_cls,
-                output_config={"effort": self.effort},
-            )
-        except Exception as exc:  # SDK errors are typed, but every one of them means "use the fallback"
-            raise BrainError(f"{type(exc).__name__}") from None
+        resp = None
+        fast = self.fast
+        for attempt in (0, 1):
+            try:
+                resp = self._parse(system, messages, model_cls, fast)
+                break
+            except Exception as exc:  # SDK errors are typed, but every one of them means "try standard, then use the fallback"
+                if fast and attempt == 0:
+                    log.info("fast mode unavailable (%s); using standard speed", type(exc).__name__)
+                    fast = False
+                    continue
+                raise BrainError(f"{type(exc).__name__}") from None
         self.last_ms = int((time.monotonic() - started) * 1000)
         if getattr(resp, "stop_reason", "") == "refusal":
             raise BrainError("refused")
