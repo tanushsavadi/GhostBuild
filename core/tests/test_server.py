@@ -78,8 +78,11 @@ def test_observation_to_ws_frame_end_to_end(client, rt):
             post_obs(client, rt, f)  # keep the link up while the welcome plays
         rt.clock.advance(2600)
         rt.tick()
+        p = ws.receive_json()
+        assert p["mode"] == "intervene" and p["cue"]["line1"] == "WHAT DO YOU NEED?" and p["menu"] is None  # conversation front screen
+        ws.send_text(json.dumps(inp("press")))  # failsafe: a tap lists what can start
         m = ws.receive_json()
-        assert m["mode"] == "menu" and m["menu"]["prompt"] == "WHAT DO YOU NEED?" and m["menu"]["options"][0] == "PI CAMERA VIEW"
+        assert m["mode"] == "menu" and m["menu"]["prompt"] == "PICK A TASK" and m["menu"]["options"][0] == "PI CAMERA VIEW"
         ws.send_text(json.dumps(inp("press")))
         t = ws.receive_json()
         assert t["mode"] == "intervene" and t["cue"]["line1"].startswith("FIX:")
@@ -109,12 +112,12 @@ def test_two_clients_get_same_frames_and_known_hello_gets_current(client, rt):
         rt.clock.advance(2600)
         post_obs(client, rt, f)
         ma, mb = a.receive_json(), b.receive_json()
-        assert ma == mb and ma["mode"] == "menu"
+        assert ma == mb and ma["cue"]["line1"] == "WHAT DO YOU NEED?"
         assert client.get("/health").json()["g2_clients"] == 2
         # reconnect with known id: current frame, not welcome
         with client.websocket_connect("/ws?role=g2") as c:
             c.send_text(json.dumps({**HELLO, "session_id": sid}))
-            assert c.receive_json()["mode"] == "menu"
+            assert c.receive_json()["cue"]["line1"] == "WHAT DO YOU NEED?"
 
 
 def test_ws_ignores_garbage_and_input_before_hello(client):
@@ -136,7 +139,8 @@ def test_polling_fallback(client, rt):
         post_obs(client, rt, f)
     rt.clock.advance(2600)
     rt.tick()
-    assert client.get(f"/hud?after={seq}").json()["mode"] == "menu"
+    assert client.get(f"/hud?after={seq}").json()["cue"]["line1"] == "WHAT DO YOU NEED?"
+    assert client.post("/input", json=inp("press")).json()["mode"] == "menu"  # failsafe list
     r = client.post("/input", json=inp("press"))
     assert r.status_code == 200 and r.json()["cue"]["line1"].startswith("FIX:")
     assert client.get("/health").json()["g2_clients"] == 1

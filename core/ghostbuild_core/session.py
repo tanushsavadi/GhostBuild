@@ -67,6 +67,7 @@ class SessionManager:
         self._menu_selected = self._default_menu()
         self._flash: Optional[tuple[Screen, int]] = None
         self._choice: Optional[_Choice] = None
+        self._show_list = False  # the task list is a failsafe behind a tap; the front screen is a conversation prompt
         self._progress: dict[str, dict] = {}  # playbook progress per session id (internal; not part of the Session contract)
         self._load()
 
@@ -185,6 +186,7 @@ class SessionManager:
             self.active_id = sess.id
             self._menu_selected = self._default_menu()
             self._choice = None
+            self._show_list = False
             self._save()
         if sess.phase == "task" and sess.card_id:
             card = self._card(sess.card_id)
@@ -204,6 +206,7 @@ class SessionManager:
         self._menu_selected = self._default_menu()
         self._flash = None
         self._choice = None
+        self._show_list = False
         self._save()
         self._record("event", text=f"new session {sid} for client {client_id}")
         return s
@@ -225,9 +228,16 @@ class SessionManager:
             return True
         if self._flash is not None:
             self._flash = None  # the wearer is interacting: show the menu underneath
-        ch = self._choice or self._root_choice()
+        ch = self._choice or (self._root_choice() if self._show_list else None)
         if ch is not None:
+            if self._choice is None and gi.gesture == "swipe_up" and ch.selected == 0:
+                self._show_list = False  # swipe up from the top of the failsafe list: back to the conversation prompt
+                self._render()
+                return True
             return self._chooser_input(s, ch, gi)
+        if gi.gesture == "press":
+            self._show_list = True  # failsafe: a tap shows what can be started when voice and the phone are not an option
+            self._menu_selected = 0
         self._render()
         return True
 
@@ -325,6 +335,7 @@ class SessionManager:
         s.phase, s.goal, s.card_id = "menu", None, None
         self._choice = None
         self._flash = None
+        self._show_list = False
         self._menu_selected = self._default_menu()
         self._save()
         self._render()
@@ -340,13 +351,14 @@ class SessionManager:
         if self._flash is not None and now < self._flash[1]:
             screen = self._flash[0]
         elif s is not None and s.phase == "welcome":
-            screen = Screen.welcome(Cue(line1="GHOSTBUILD", line2="WHAT DO YOU NEED?"), WELCOME_MS)
+            screen = Screen.welcome(Cue(line1="GHOSTBUILD", line2="HANDS BUSY. MIND CLEAR."), WELCOME_MS)
         elif s is not None and s.phase == "menu":
-            ch = self._choice or self._root_choice()
-            if ch is None:
-                screen = Screen.uncertain(Cue(line1="NOTHING LOADED YET", line2="SEE PHONE"), ttl_ms=FLASH_MS)
+            ch = self._choice or (self._root_choice() if self._show_list else None)
+            if ch is not None:
+                screen = Screen.make_menu("PICK A TASK", ch.labels, ch.selected)
             else:
-                prompt = ("HOLD TO SPEAK OR PICK" if self._voice_on() else "WHAT DO YOU NEED?") if ch.mode == "any" else "PICK A TASK"
-                screen = Screen.make_menu(prompt, ch.labels, ch.selected)
+                # the front screen is a conversation: say what you need (hold) or type it on the phone; no list, no BUILD/FIX
+                hint = "HOLD TO SPEAK" if self._voice_on() else "TYPE ON YOUR PHONE"
+                screen = Screen.intervene(Cue(line1="WHAT DO YOU NEED?", line2=hint), cue_id="prompt", immediate=True)
         self.hud.set_layer("ui", screen)
         self.hud.sync()

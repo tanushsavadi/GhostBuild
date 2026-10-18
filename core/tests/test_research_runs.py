@@ -112,6 +112,8 @@ def to_menu(rt):
     rt.hello(G2Hello(client_id="g2-1", session_id=None))
     rt.clock.advance(2600)
     rt.tick()
+    assert rt.hud.current.cue.line1 == "WHAT DO YOU NEED?" and rt.hud.current.menu is None  # the front screen is a conversation prompt
+    rt.handle_input(G2Input(gesture="press", seq_seen=0))  # failsafe: a tap shows the task list
     assert rt.hud.current.mode == "menu"
 
 
@@ -164,7 +166,7 @@ def test_end_to_end_two_different_tasks_neither_is_hardcoded(world, caplog):
 
     # BUILD chooser (no restart): the new card is an option, and its first step renders as a step frame
     f = build_chooser(rt)
-    assert f.mode == "menu" and f.menu.prompt == "WHAT DO YOU NEED?"
+    assert f.mode == "menu" and f.menu.prompt == "PICK A TASK"
     label = next(o for o in f.menu.options if o.startswith("REPLACE A BICYCLE"))
     idx = f.menu.options.index(label)
     for _ in range(idx):
@@ -194,6 +196,7 @@ def test_end_to_end_two_different_tasks_neither_is_hardcoded(world, caplog):
     rt.hello(G2Hello(client_id="g2-2", session_id=None))
     rt.clock.advance(2600)
     rt.tick()
+    rt.handle_input(gi("press"))  # failsafe list
     f = build_chooser(rt)
     assert f.menu is not None and len(f.menu.options) == 4 and "MORE ON PHONE" not in f.menu.options
     router_idx = next(i for i, o in enumerate(f.menu.options) if o.startswith("RESET A HOME ROUTER"))
@@ -380,6 +383,7 @@ def test_reload_keeps_position_when_step_ids_match_and_restarts_when_not(tmp_pat
     rt.hello(G2Hello(client_id="g1", session_id=None))
     clock.advance(2600)
     rt.tick()
+    rt.handle_input(gi("press"))  # failsafe list
     ch = rt.sessions._root_choice()
     for _ in range(next(i for i, c in enumerate(ch.cards) if c.card_id == "demo_task")):
         rt.handle_input(gi("swipe_down"))

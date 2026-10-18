@@ -77,11 +77,13 @@ def test_resolver_ambiguous_menu(card_dict, card):
 # ------------------------------------------------------------------ session / onboarding
 def test_welcome_once_then_menu(rt):
     f = rt.hello(hello())
-    assert f.mode == "welcome" and (f.cue.line1, f.cue.line2) == ("GHOSTBUILD", "WHAT DO YOU NEED?") and f.ttl_ms == 2500
+    assert f.mode == "welcome" and (f.cue.line1, f.cue.line2) == ("GHOSTBUILD", "HANDS BUSY. MIND CLEAR.") and f.ttl_ms == 2500
     rt.clock.advance(2600)
     rt.tick()
-    m = rt.hud.current
-    assert m.mode == "menu" and m.menu.prompt == "WHAT DO YOU NEED?" and m.menu.selected == 0 and "PI CAMERA VIEW" in m.menu.options
+    p = rt.hud.current  # the front screen is a conversation prompt: no list, no BUILD/FIX
+    assert p.mode == "intervene" and p.menu is None and (p.cue.line1, p.cue.line2) == ("WHAT DO YOU NEED?", "TYPE ON YOUR PHONE")
+    m = rt.handle_input(gi("press"))  # failsafe: a tap shows the list
+    assert m.mode == "menu" and m.menu.prompt == "PICK A TASK" and m.menu.selected == 0 and "PI CAMERA VIEW" in m.menu.options
     assert [x for x in cues(rt) if x[0] == "welcome"] == [("welcome", "GHOSTBUILD")]
 
 
@@ -90,7 +92,10 @@ def test_menu_navigation_clamped_and_fix_selects_card(rt):
     rt.clock.advance(2600)
     rt.tick()
     live(rt, 100)
-    assert rt.handle_input(gi("swipe_up")).menu.selected == 0  # clamped
+    rt.handle_input(gi("press"))  # open the failsafe list
+    assert rt.handle_input(gi("swipe_down")).menu.selected == 1
+    assert rt.handle_input(gi("swipe_down")).menu.selected == 1  # clamped
+    assert rt.handle_input(gi("swipe_up")).menu.selected == 0
     assert rt.handle_input(gi("swipe_down")).menu.selected == 1
     assert rt.handle_input(gi("swipe_down")).menu.selected == 1  # clamped
     assert rt.handle_input(gi("swipe_up")).menu.selected == 0
@@ -107,6 +112,7 @@ def test_menu_build_unsupported_returns_to_menu(rt):
     rt.hello(hello())
     rt.clock.advance(2600)
     rt.tick()
+    rt.handle_input(gi("press"))  # open the failsafe list
     rt.handle_input(gi("swipe_down"))  # the second row is the phone: nothing is started
     f = rt.handle_input(gi("press"))
     assert f.mode == "uncertain" and f.cue.line1 == "USE THE PHONE"
@@ -123,8 +129,9 @@ def test_reconnect_with_known_id_never_rewelcomes(rt):
     rt.tick()
     n = len(rt.hud.frames)
     f = rt.hello(hello(sid))
-    assert f.mode == "menu" and len(rt.hud.frames) == n  # current frame, no welcome, no new frame
-    rt.handle_input(gi("press"))
+    assert f.cue.line1 == "WHAT DO YOU NEED?" and len(rt.hud.frames) == n  # current frame, no welcome, no new frame
+    rt.handle_input(gi("press"))  # list
+    rt.handle_input(gi("press"))  # start
     live(rt, 3000)
     f = rt.hello(hello(sid))
     assert f.mode == "quiet"
@@ -162,7 +169,7 @@ def test_any_gesture_in_welcome_skips_it_to_the_menu(rt):
     rt.hello(hello())
     assert rt.hud.current.mode == "welcome"
     rt.handle_input(gi("press"))
-    assert rt.session().phase == "menu" and rt.hud.current.mode == "menu"  # nobody waits for a banner; nothing was chosen
+    assert rt.session().phase == "menu" and rt.hud.current.cue.line1 == "WHAT DO YOU NEED?"  # nobody waits for a banner; nothing was chosen
     assert rt.session().card_id is None
 
 
@@ -174,7 +181,8 @@ def test_restart_persistence(card, asset_root, tmp_path):
     sid = r1.session().id
     c1.advance(2600)
     r1.tick()
-    r1.handle_input(gi("press"))
+    r1.handle_input(gi("press"))  # open the failsafe list
+    r1.handle_input(gi("press"))  # start the first task
     r1.close()
     assert json.loads((logs / "sessions.json").read_text())["active"] == sid
 
@@ -195,7 +203,7 @@ def test_restart_during_menu_resumes_menu(card, asset_root, tmp_path):
     r1.close()
     r2 = Runtime([card], clock=ManualClock(), log_dir=tmp_path, asset_root=asset_root)
     f = r2.hello(hello(sid))
-    assert f.mode == "menu"
+    assert f.cue.line1 == "WHAT DO YOU NEED?" and r2.session().phase == "menu"
 
 
 def test_phone_goal_unsupported_and_supported(rt):
@@ -212,7 +220,8 @@ def test_task_engine_runs_after_start_and_fault_cue_returns(rt):
     rt.hello(hello())
     rt.clock.advance(2600)
     rt.tick()
-    rt.handle_input(gi("press"))
+    rt.handle_input(gi("press"))  # open the failsafe list
+    rt.handle_input(gi("press"))  # start the first task
     f = Feeder(rt.engine, rt.clock)
     for _ in range(40):
         rt.clock.advance(100)
@@ -228,7 +237,8 @@ def test_input_dismisses_task_start_flash_and_reaches_engine(rt):
     rt.hello(hello())
     rt.clock.advance(2600)
     rt.tick()
-    rt.handle_input(gi("press"))
+    rt.handle_input(gi("press"))  # open the failsafe list
+    rt.handle_input(gi("press"))  # start the first task
     assert rt.hud.current.cue.line1.startswith("FIX:")
     rt.handle_input(gi("press"))  # engine press, healthy w/o data => nothing; the flash is dismissed
     assert rt.hud.current.mode == "quiet"

@@ -32,6 +32,8 @@ def to_menu(rt, client="g2-1"):
     rt.hello(G2Hello(client_id=client, session_id=None))
     rt.clock.advance(2600)
     rt.tick()
+    assert rt.hud.current.cue.line1 == "WHAT DO YOU NEED?" and rt.hud.current.menu is None  # the front screen is a conversation prompt
+    rt.handle_input(G2Input(gesture="press", seq_seen=0))  # failsafe: a tap shows the task list
     assert rt.hud.current.mode == "menu"
 
 
@@ -93,7 +95,7 @@ def test_build_menu_single_card_starts_playbook_with_short_cue(led, lens, tmp_pa
 def test_first_step_is_on_screen_at_once_and_the_next_swipe_moves_on(led, tmp_path):
     rt = boot([led], tmp_path)
     to_menu(rt)
-    assert cur(rt).menu.prompt == "WHAT DO YOU NEED?" and cur(rt).menu.selected == 0  # one task listed, no BUILD/FIX question
+    assert cur(rt).menu.prompt == "PICK A TASK" and cur(rt).menu.selected == 0  # the failsafe list; no BUILD/FIX question
     rt.handle_input(gi("press"))
     assert cur(rt).mode == "step" and cur(rt).step.index == 0
     rt.handle_input(gi("swipe_down"))  # a bounce right after the step appeared is ignored, not turned into progress
@@ -236,7 +238,7 @@ def test_chooser_two_cards_swipe_press(tmp_path):
     rt = boot(cards, tmp_path)
     to_menu(rt)
     f = cur(rt)
-    assert f.mode == "menu" and f.menu.prompt == "WHAT DO YOU NEED?"
+    assert f.mode == "menu" and f.menu.prompt == "PICK A TASK"
     assert f.menu.options == ["ASSEMBLE A SHELF", "BUILD A BIRD FEEDER"] and f.menu.selected == 0
     assert rt.handle_input(gi("swipe_down")).menu.selected == 1
     assert rt.handle_input(gi("swipe_down")).menu.selected == 1  # clamped
@@ -499,10 +501,11 @@ def test_after_the_last_step_the_next_gesture_returns_to_the_task_list_not_a_bla
     for _ in range(2):
         confirm(rt)
     assert cur(rt).mode == "intervene" and "ALL STEPS DONE" in cur(rt).cue.line1  # acknowledged first
-    f = rt.handle_input(gi("swipe_down"))  # any press / swipe-down while or after the acknowledgement opens the list again
-    assert f.mode == "menu" and f.menu.options[0] == "TWO STEP TASK"
+    f = rt.handle_input(gi("swipe_down"))  # any press / swipe-down while or after the acknowledgement goes back to the conversation
+    assert f.cue.line1 == "WHAT DO YOU NEED?" and f.menu is None
     assert rt.session().phase == "menu" and rt.playbook is None
-    f = rt.handle_input(gi("press"))  # ...and it can be started again from the top
+    rt.handle_input(gi("press"))  # failsafe list
+    f = rt.handle_input(gi("press"))  # ...and the task can be started again from the top
     assert f.mode == "step" and f.step.index == 0
 
 

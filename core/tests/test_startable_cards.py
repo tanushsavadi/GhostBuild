@@ -33,22 +33,37 @@ def test_fault_cards_hidden_without_a_device_but_every_playbook_remains():
     assert "camera_lens" in {c.card_id for c in rt.cards}  # still loaded: a running session can resolve it
 
 
-def test_first_screen_lists_what_can_start_and_a_press_starts_it_without_an_error():
+def tap(rt):
+    rt.handle_input(G2Input(gesture="press", seq_seen=rt.hud.current.seq))
+
+
+def test_front_screen_is_a_conversation_and_the_failsafe_list_hides_what_cannot_start():
     rt, clock = rig(require_device_link=True)
     press_through_welcome(rt, clock)
+    p = rt.hud.current
+    assert p.mode == "intervene" and p.menu is None and p.cue.line1 == "WHAT DO YOU NEED?"  # no list, no BUILD/FIX
+    tap(rt)
     m = rt.hud.current.menu
-    assert m is not None and m.prompt == "WHAT DO YOU NEED?" and "PI CAMERA VIEW" not in m.options  # no Pi: the fault card is not offered
-    rt.handle_input(G2Input(gesture="press", seq_seen=rt.hud.current.seq))
+    assert m is not None and m.prompt == "PICK A TASK" and "PI CAMERA VIEW" not in m.options  # no Pi: the fault card is not offered
+    tap(rt)
     f = rt.hud.current
     assert f.mode != "error" and not f.stale and rt.sessions.view().phase == "task"
 
 
 def test_with_a_device_reporting_the_fault_card_is_listed_too():
-    from contracts.models import Observation  # noqa: F401  (link state is what matters)
-
     rt, clock = rig(require_device_link=True, simulate=True)
     press_through_welcome(rt, clock)
+    tap(rt)
     assert any("CAMERA" in o for o in rt.hud.current.menu.options)
+
+
+def test_swipe_up_from_the_top_of_the_failsafe_list_returns_to_the_conversation():
+    rt, clock = rig()
+    press_through_welcome(rt, clock)
+    tap(rt)
+    assert rt.hud.current.menu is not None
+    rt.handle_input(G2Input(gesture="swipe_up", seq_seen=rt.hud.current.seq))
+    assert rt.hud.current.menu is None and rt.hud.current.cue.line1 == "WHAT DO YOU NEED?"
 
 
 def test_simulated_device_keeps_the_fault_card_available():
@@ -56,10 +71,10 @@ def test_simulated_device_keeps_the_fault_card_available():
     assert "camera_lens" in {c.card_id for c in rt.startable_cards()}
 
 
-def test_first_screen_says_hold_to_speak_only_when_voice_is_on():
+def test_front_screen_says_hold_to_speak_only_when_voice_is_on():
     rt, clock = rig()
     press_through_welcome(rt, clock)
-    assert rt.hud.current.menu.prompt == "WHAT DO YOU NEED?"
+    assert rt.hud.current.cue.line2 == "TYPE ON YOUR PHONE"
     rt.voice = object()  # VoiceService attaches itself here when enabled
     rt.sessions.refresh()
-    assert rt.hud.current.menu.prompt == "HOLD TO SPEAK OR PICK" and len(rt.hud.current.menu.prompt) <= 24
+    assert (rt.hud.current.cue.line1, rt.hud.current.cue.line2) == ("WHAT DO YOU NEED?", "HOLD TO SPEAK")
