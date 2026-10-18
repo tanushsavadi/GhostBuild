@@ -9,7 +9,7 @@
 </head>
 <body>
 <header class="top">
-  <a class="brand" href="./" aria-label="GhostBuild home"><span class="brand-mark" aria-hidden="true">g</span> ghostbuild<span class="brand-caption">YOUR BUILD / FIX SPECIALIST</span></a>
+  <a class="brand" href="./" aria-label="GhostBuild home"><span class="brand-mark" aria-hidden="true">g</span> ghostbuild<span class="brand-caption">HANDS-FREE HELP FOR PHYSICAL TASKS</span></a>
   <div id="link-chip" class="chip chip-wait" role="status">Connecting</div>
 </header>
 <div id="devbar" class="devbar" hidden></div>
@@ -18,18 +18,14 @@
 <main class="grid">
 <div class="col">
   <section class="card area-goal" aria-labelledby="h-goal">
-    <p class="eyebrow">LET’S GET STARTED</p><h2 id="h-goal">What shall we build or fix?</h2>
+    <p class="eyebrow">LET’S GET STARTED</p><h2 id="h-goal">What do you need help with?</h2>
     <form id="goal-form" autocomplete="off">
-      <div class="seg" role="radiogroup" aria-label="Goal mode">
-        <label><input type="radio" name="mode" value="build" checked><span>BUILD <small>Make something</small></span></label>
-        <label><input type="radio" name="mode" value="fix"><span>FIX <small>Get it working</small></span></label>
-      </div>
-      <label class="field" for="goal-text">Tell me what you’re working with</label>
-      <textarea id="goal-text" rows="2" maxlength="300" placeholder="I want to build…" required></textarea>
+      <label class="field" for="goal-text">Say it however you like</label>
+      <textarea id="goal-text" rows="2" maxlength="300" placeholder="e.g. blink an LED on my Pi, fold a paper cup, my camera view is black" required></textarea>
       <button id="goal-send" type="submit">Find my guide <span aria-hidden="true">↗</span></button>
       <div id="goal-hint" class="meta"></div>
     </form><div id="goal-result" aria-live="polite"></div>
-    <div class="ready-guides"><p class="eyebrow">READY TO EXPLORE</p><div id="task-catalog" class="catalog"><p class="meta">Loading reviewed guides…</p></div></div>
+    <div class="ready-guides"><p class="eyebrow">OR PICK A READY GUIDE</p><div id="task-catalog" class="catalog"><p class="meta">Loading reviewed guides…</p></div></div>
   </section>
   <section class="card area-mirror" aria-labelledby="h-mirror">
     <div class="card-head"><h2 id="h-mirror">In your line of sight</h2><span id="src-badge" class="src src-none">NO SOURCE</span></div>

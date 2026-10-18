@@ -161,6 +161,7 @@ class Runtime:
                 active = "updated"
         self.elog.write("event", text=f"cards reloaded: added={added} changed={changed} active={active}")
         log.info("cards reloaded: %d loaded, added=%s changed=%s active=%s", len(merged), added, changed, active)
+        self.sessions.refresh()  # an open task list must show a card that was just approved
         return {"loaded": len(merged), "added": added, "changed": changed, "active": active}
 
     @property

@@ -454,7 +454,7 @@
     ev.preventDefault();
     if (!sessionReady() || S.goalBusy) return;
     window.dispatchEvent(new Event('ghostbuild:input'));
-    var mode = document.querySelector('input[name=mode]:checked').value, text = $('goal-text').value.trim();
+    var text = $('goal-text').value.trim(), mode = L.inferMode(text);
     var body = { v: 2, session_id: S.state.session.id, mode: mode, via: 'phone_text', text: text ? text : null };
     S.goalBusy = true; renderGoalHint();
     var p;
@@ -676,7 +676,7 @@
       p.then(function (r) {
         C.approving = false; btn.disabled = false; tok.value = '';
         if (!r.ok) { out.textContent = L.approveError(r.status, r.text); return; }
-        out.textContent = FIXTURE ? 'FIXTURE RESPONSE: nothing was approved.' : 'Approved by ' + who.value.trim() + '. The task is now in the BUILD/FIX list on the glasses and here.';
+        out.textContent = FIXTURE ? 'FIXTURE RESPONSE: nothing was approved.' : 'Approved by ' + who.value.trim() + '. The task is now in the task list on the glasses and here.';
         if (!FIXTURE) { loadCatalog(); C.detail = null; }
       });
     });
@@ -764,15 +764,13 @@
     }).catch(function () { $('task-catalog').textContent = 'Prepared guides will appear when connected.'; setTimeout(loadCatalog, 5000); });
   }
   function renderCatalog() {
-    var mode = document.querySelector('input[name=mode]:checked').value;
     var box = $('task-catalog'); clear(box);
-    S.catalog.filter(function (t) { return t.mode === mode; }).forEach(function (task) {
+    S.catalog.forEach(function (task) {
       var btn = h('button', {type:'button'}, h('span', {text:task.title}), h('small', {text: task.steps ? task.steps + ' STEPS  ↗' : 'EVIDENCE CHECK  ↗'}));
       btn.addEventListener('click', function () { $('goal-text').value = task.title; $('goal-form').requestSubmit(); }); box.appendChild(btn);
     });
-    if (!box.children.length) box.appendChild(h('p',{class:'meta',text:'No prepared guide for this mode yet. Describe your task for research.'}));
+    if (!box.children.length) box.appendChild(h('p',{class:'meta',text:'No prepared guide yet. Describe your task above and it can be researched.'}));
   }
-  Array.prototype.forEach.call(document.querySelectorAll('input[name=mode]'), function (radio) { radio.addEventListener('change', function () { renderCatalog(); $('goal-text').placeholder = radio.value === 'build' ? 'I want to build…' : 'What needs attention?'; }); });
   loadCatalog();
   function tick(poll) { renderWorkspace(); renderStatus(); renderMirror(); renderTask(); renderPlaybook(); renderTimeline(); renderGuides(); renderGoalHint(); renderAskHint(); renderResearchHint(); }
   devbar(); tick(); poll(); setInterval(tick, 500);

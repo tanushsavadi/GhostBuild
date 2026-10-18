@@ -46,11 +46,18 @@ def settle(rt, ms=2700):
         rt.tick()
 
 
+def pick(rt, card_id=None, mode="build"):
+    """Choose a task on the glasses' first screen (every startable task is listed; there is no BUILD/FIX question)."""
+    ch = rt.sessions._root_choice()
+    idx = next(i for i, c in enumerate(ch.cards) if (c.card_id == card_id if card_id else c.goal_mode == mode))
+    for _ in range(idx - cur(rt).menu.selected):
+        rt.handle_input(gi("swipe_down"))
+    return rt.handle_input(gi("press"))
+
+
 def start_build(rt):
     to_menu(rt)
-    swipes(rt, 1)
-    f = rt.handle_input(gi("press"))
-    return f
+    return pick(rt, mode="build")
 
 
 @pytest.fixture
@@ -88,11 +95,7 @@ def test_build_menu_single_card_starts_playbook_with_short_cue(led, lens, tmp_pa
 def test_gesture_during_task_start_cue_only_reveals_the_first_step(led, tmp_path):
     rt = boot([led], tmp_path)
     to_menu(rt)
-    assert cur(rt).menu.selected == 1  # only a build card: BUILD is the highlighted default, FIX would be a dead end
-    rt.handle_input(gi("swipe_up"))  # ...but FIX is still honest if chosen
-    f = rt.handle_input(gi("press"))
-    assert f.mode == "uncertain" and f.cue.line1 == "NOTHING LOADED YET"
-    swipes(rt, 1)
+    assert cur(rt).menu.prompt == "WHAT DO YOU NEED?" and cur(rt).menu.selected == 0  # one task listed, no BUILD/FIX question
     rt.handle_input(gi("press"))
     assert cur(rt).cue.line1.startswith("BUILD:")
     rt.clock.advance(300)
@@ -101,12 +104,20 @@ def test_gesture_during_task_start_cue_only_reveals_the_first_step(led, tmp_path
     assert rt.state().playbook.confirmed == []
 
 
-def test_fix_with_zero_cards_is_honest_and_not_a_guess(led, tmp_path):
+def test_unmatched_request_is_honest_and_not_a_guess_in_either_mode(led, tmp_path):
     rt = boot([led], tmp_path)
     to_menu(rt)
-    rt.handle_input(gi("swipe_up"))  # select FIX (BUILD is the default when FIX has nothing)
-    f = rt.handle_input(gi("press"))  # only a build card loaded
-    assert (f.cue.line1, f.cue.line2) == ("NOTHING LOADED YET", "TRY THE OTHER OPTION") and f.mode == "uncertain"
+    for mode in ("fix", "build"):  # the mode is only a hint now; neither finds a card for this
+        res = rt.resolve_goal(GoalRequest(session_id=rt.session().id, mode=mode, via="g2_menu", text="repair my washing machine"))
+        assert res.status == "unsupported" and res.cue.line1 == "NOT SUPPORTED YET"
+    assert rt.session().phase == "menu" and rt.playbook is None
+
+
+def test_mode_is_a_hint_the_words_decide(led, tmp_path):
+    rt = boot([led], tmp_path)  # only a BUILD card is loaded
+    to_menu(rt)
+    res = rt.resolve_goal(GoalRequest(session_id=rt.session().id, mode="fix", via="phone_text", text="light an led"))
+    assert res.status == "supported" and res.card_id == "led_breadboard" and res.mode == "build"
 
 
 def test_full_playbook_walk_through_runtime_no_pi(led, tmp_path):
@@ -223,8 +234,9 @@ def build_cards(n):
 def test_chooser_two_cards_swipe_press(tmp_path):
     cards = build_cards(2)
     rt = boot(cards, tmp_path)
-    f = start_build(rt)
-    assert f.mode == "menu" and f.menu.prompt == "PICK A TASK"
+    to_menu(rt)
+    f = cur(rt)
+    assert f.mode == "menu" and f.menu.prompt == "WHAT DO YOU NEED?"
     assert f.menu.options == ["ASSEMBLE A SHELF", "BUILD A BIRD FEEDER"] and f.menu.selected == 0
     assert rt.handle_input(gi("swipe_down")).menu.selected == 1
     assert rt.handle_input(gi("swipe_down")).menu.selected == 1  # clamped
@@ -237,7 +249,8 @@ def test_chooser_two_cards_swipe_press(tmp_path):
 
 def test_chooser_three_cards(tmp_path):
     rt = boot(build_cards(3), tmp_path)
-    f = start_build(rt)
+    to_menu(rt)
+    f = cur(rt)
     assert f.menu.options == ["ASSEMBLE A SHELF", "BUILD A BIRD FEEDER", "CHANGE A BIKE TIRE"] and all(len(o) <= 24 for o in f.menu.options)
     swipes(rt, 2)
     rt.handle_input(gi("press"))
@@ -246,7 +259,8 @@ def test_chooser_three_cards(tmp_path):
 
 def test_chooser_more_than_three_shows_more_on_phone_hint_only(tmp_path):
     rt = boot(build_cards(5), tmp_path)
-    f = start_build(rt)
+    to_menu(rt)
+    f = cur(rt)
     # the Menu contract allows at most 4 options: three cards + MORE ON PHONE
     assert f.menu.options == ["ASSEMBLE A SHELF", "BUILD A BIRD FEEDER", "CHANGE A BIKE TIRE", "MORE ON PHONE"]
     swipes(rt, 3)
@@ -259,7 +273,8 @@ def test_chooser_more_than_three_shows_more_on_phone_hint_only(tmp_path):
 
 def test_chooser_four_cards_shows_all_four_no_more(tmp_path):
     rt = boot(build_cards(4), tmp_path)
-    f = start_build(rt)
+    to_menu(rt)
+    f = cur(rt)
     assert len(f.menu.options) == 4 and "MORE ON PHONE" not in f.menu.options
     swipes(rt, 3)
     rt.handle_input(gi("press"))
@@ -268,7 +283,7 @@ def test_chooser_four_cards_shows_all_four_no_more(tmp_path):
 
 def test_double_press_is_never_sent_so_chooser_has_no_special_case(tmp_path):
     rt = boot(build_cards(2), tmp_path)
-    start_build(rt)
+    to_menu(rt)
     n = len(rt.hud.frames)
     rt.handle_input(gi("hold_start"))  # holds are the voice lane's; the chooser ignores them
     assert rt.hud.current.mode == "menu" and len(rt.hud.frames) == n

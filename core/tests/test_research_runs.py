@@ -122,8 +122,7 @@ def settle(rt, ms=2700):
 
 
 def build_chooser(rt):
-    rt.handle_input(gi("swipe_down"))
-    return rt.handle_input(gi("press"))
+    return rt.hud.current  # the first screen after the welcome already lists every task (no BUILD/FIX question)
 
 
 # --------------------------------------------------------------------------- the end-to-end story
@@ -165,7 +164,7 @@ def test_end_to_end_two_different_tasks_neither_is_hardcoded(world, caplog):
 
     # BUILD chooser (no restart): the new card is an option, and its first step renders as a step frame
     f = build_chooser(rt)
-    assert f.mode == "menu" and f.menu.prompt == "PICK A TASK"
+    assert f.mode == "menu" and f.menu.prompt == "WHAT DO YOU NEED?"
     label = next(o for o in f.menu.options if o.startswith("REPLACE A BICYCLE"))
     idx = f.menu.options.index(label)
     for _ in range(idx):
@@ -190,13 +189,13 @@ def test_end_to_end_two_different_tasks_neither_is_hardcoded(world, caplog):
     ids = [x.card_id for x in rt.cards]
     assert len(ids) == 4 and any(i.startswith("reset_a_home_router") for i in ids)
 
-    # a fresh session sees all 3 build cards, router included, and its first step renders
+    # a fresh session lists every task (3 build cards + the fault card), router included, and its first step renders
     rt.clock.advance(20_000)
     rt.hello(G2Hello(client_id="g2-2", session_id=None))
     rt.clock.advance(2600)
     rt.tick()
     f = build_chooser(rt)
-    assert f.menu is not None and len(f.menu.options) == 3 and "MORE ON PHONE" not in f.menu.options
+    assert f.menu is not None and len(f.menu.options) == 4 and "MORE ON PHONE" not in f.menu.options
     router_idx = next(i for i, o in enumerate(f.menu.options) if o.startswith("RESET A HOME ROUTER"))
     for _ in range(router_idx):
         rt.handle_input(gi("swipe_down"))
@@ -381,8 +380,10 @@ def test_reload_keeps_position_when_step_ids_match_and_restarts_when_not(tmp_pat
     rt.hello(G2Hello(client_id="g1", session_id=None))
     clock.advance(2600)
     rt.tick()
-    rt.handle_input(gi("swipe_down"))  # BUILD (only one build card -> starts directly)
-    rt.handle_input(gi("press"))
+    ch = rt.sessions._root_choice()
+    for _ in range(next(i for i, c in enumerate(ch.cards) if c.card_id == "demo_task")):
+        rt.handle_input(gi("swipe_down"))
+    rt.handle_input(gi("press"))  # pick the demo task from the first screen
     settle(rt)
     for _ in range(2):  # confirm two manual steps
         clock.advance(1600)

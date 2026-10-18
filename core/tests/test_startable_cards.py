@@ -33,23 +33,22 @@ def test_fault_cards_hidden_without_a_device_but_every_playbook_remains():
     assert "camera_lens" in {c.card_id for c in rt.cards}  # still loaded: a running session can resolve it
 
 
-def test_menu_defaults_to_build_and_first_press_starts_a_playbook_not_an_error():
+def test_first_screen_lists_what_can_start_and_a_press_starts_it_without_an_error():
     rt, clock = rig(require_device_link=True)
     press_through_welcome(rt, clock)
-    assert rt.hud.current.menu is not None and rt.hud.current.menu.selected == 1  # BUILD
+    m = rt.hud.current.menu
+    assert m is not None and m.prompt == "WHAT DO YOU NEED?" and "PI CAMERA VIEW" not in m.options  # no Pi: the fault card is not offered
     rt.handle_input(G2Input(gesture="press", seq_seen=rt.hud.current.seq))
     f = rt.hud.current
-    assert f.mode != "error" and not f.stale
+    assert f.mode != "error" and not f.stale and rt.sessions.view().phase == "task"
 
 
-def test_choosing_fix_with_no_device_says_nothing_loaded_not_stale_data():
-    rt, clock = rig(require_device_link=True)
+def test_with_a_device_reporting_the_fault_card_is_listed_too():
+    from contracts.models import Observation  # noqa: F401  (link state is what matters)
+
+    rt, clock = rig(require_device_link=True, simulate=True)
     press_through_welcome(rt, clock)
-    rt.handle_input(G2Input(gesture="swipe_up", seq_seen=rt.hud.current.seq))  # FIX
-    rt.handle_input(G2Input(gesture="press", seq_seen=rt.hud.current.seq))
-    f = rt.hud.current
-    assert not f.stale and f.mode != "error"
-    assert rt.sessions.view().phase == "menu"  # still choosing; no task was started
+    assert any("CAMERA" in o for o in rt.hud.current.menu.options)
 
 
 def test_simulated_device_keeps_the_fault_card_available():

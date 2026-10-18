@@ -49,6 +49,10 @@
     if (confirmed) return { kind: 'confirmed', label: 'HUMAN CONFIRMED' };
     return { kind: 'pending', label: 'pending' };
   }
+  /** The words decide build vs fix; core retries the other mode if nothing matches, so this is only a hint. */
+  function inferMode(text) {
+    return /\b(fix|broken|black|dark|blank|not working|doesn't|does not|won't|wrong|lost|repair|problem|stuck|covered|dead|no picture|isn't|stopped)\b/i.test(String(text || '')) ? 'fix' : 'build';
+  }
   /** How a step gets completed, shown next to a pending step. */
   function stepRule(step) {
     return step.verify ? 'completes only on measured evidence' : 'you confirm it (swipe down on the glasses)';
@@ -212,7 +216,7 @@
   return {
     isPlaybookCard: isPlaybookCard, cardUsesTelemetry: cardUsesTelemetry, usesTelemetry: usesTelemetry,
     showPiHealth: showPiHealth, showPiBanners: showPiBanners, currentStepIndex: currentStepIndex,
-    stepStatus: stepStatus, stepRule: stepRule, counterText: counterText, collectCites: collectCites,
+    stepStatus: stepStatus, stepRule: stepRule, inferMode: inferMode, counterText: counterText, collectCites: collectCites,
     provenanceNote: provenanceNote, isTimestampLoc: isTimestampLoc,
     normalizeAsk: normalizeAsk, askError: askError, researchOutcome: researchOutcome, researchError: researchError,
     NOT_AVAILABLE: NOT_AVAILABLE,

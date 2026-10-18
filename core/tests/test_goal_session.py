@@ -77,11 +77,11 @@ def test_resolver_ambiguous_menu(card_dict, card):
 # ------------------------------------------------------------------ session / onboarding
 def test_welcome_once_then_menu(rt):
     f = rt.hello(hello())
-    assert f.mode == "welcome" and (f.cue.line1, f.cue.line2) == ("GHOSTBUILD", "BUILD OR FIX?") and f.ttl_ms == 2500
+    assert f.mode == "welcome" and (f.cue.line1, f.cue.line2) == ("GHOSTBUILD", "WHAT DO YOU NEED?") and f.ttl_ms == 2500
     rt.clock.advance(2600)
     rt.tick()
     m = rt.hud.current
-    assert m.mode == "menu" and m.menu.options == ["FIX", "BUILD"] and m.menu.selected == 0
+    assert m.mode == "menu" and m.menu.prompt == "WHAT DO YOU NEED?" and m.menu.selected == 0 and "PI CAMERA VIEW" in m.menu.options
     assert [x for x in cues(rt) if x[0] == "welcome"] == [("welcome", "GHOSTBUILD")]
 
 
@@ -107,9 +107,9 @@ def test_menu_build_unsupported_returns_to_menu(rt):
     rt.hello(hello())
     rt.clock.advance(2600)
     rt.tick()
-    rt.handle_input(gi("swipe_down"))
+    rt.handle_input(gi("swipe_down"))  # the second row is the phone: nothing is started
     f = rt.handle_input(gi("press"))
-    assert f.mode == "uncertain" and f.cue.line1 == "NOTHING LOADED YET"  # 0 build cards loaded: honest, not "unsupported goal"
+    assert f.mode == "uncertain" and f.cue.line1 == "USE THE PHONE"
     assert rt.session().phase == "menu"
     rt.clock.advance(2600)
     rt.tick()

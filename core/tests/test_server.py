@@ -79,7 +79,7 @@ def test_observation_to_ws_frame_end_to_end(client, rt):
         rt.clock.advance(2600)
         rt.tick()
         m = ws.receive_json()
-        assert m["mode"] == "menu" and m["menu"]["options"] == ["FIX", "BUILD"]
+        assert m["mode"] == "menu" and m["menu"]["prompt"] == "WHAT DO YOU NEED?" and m["menu"]["options"][0] == "PI CAMERA VIEW"
         ws.send_text(json.dumps(inp("press")))
         t = ws.receive_json()
         assert t["mode"] == "intervene" and t["cue"]["line1"].startswith("FIX:")

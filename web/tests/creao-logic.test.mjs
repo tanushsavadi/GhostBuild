@@ -95,3 +95,11 @@ test('fixtures are labelled MOCK and carry no secret-looking key', () => {
   }
   assert.match(JSON.stringify(fx('research_runs')), /MOCK data, not real CREAO output/)
 })
+
+test('build vs fix is inferred from the words, never asked', () => {
+  assert.equal(L.inferMode('blink an LED on my Pi'), 'build')
+  assert.equal(L.inferMode('fold a paper cup'), 'build')
+  assert.equal(L.inferMode('my camera view is black'), 'fix')
+  assert.equal(L.inferMode("the LED isn't lighting"), 'fix')
+  assert.equal(L.inferMode(''), 'build')
+})

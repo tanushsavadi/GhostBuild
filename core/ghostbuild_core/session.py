@@ -69,8 +69,18 @@ class SessionManager:
         self._load()
 
     def _default_menu(self) -> int:
-        """Highlight FIX only when something can actually start in FIX; otherwise BUILD, so the first press is never a dead end."""
-        return 0 if any(c.goal_mode == "fix" for c in self._startable()) else 1
+        return 0
+
+    def _root_choice(self) -> Optional[_Choice]:
+        """The first screen after the welcome: every task that can start now, whatever its mode. Mode (build/fix) is a property of the
+        card and is inferred from what the person says; nobody is asked to pick it."""
+        pool = sorted(self._startable(), key=lambda c: (goal_mod.short_title(c.title, 40), c.card_id))
+        if not pool:
+            return None
+        shown, labels, more = goal_mod.chooser_options(pool)
+        if len(labels) < 2:  # a menu needs two rows; the phone row is the always-available non-glasses path
+            labels, more = [*labels, goal_mod.MORE_ON_PHONE], True
+        return _Choice(mode="any", cards=shown, labels=labels, more=more, selected=min(self._menu_selected, len(labels) - 1))
 
     # ------------------------------------------------------------------ persistence
     def _load(self) -> None:
@@ -209,17 +219,9 @@ class SessionManager:
             return True
         if self._flash is not None:
             self._flash = None  # the wearer is interacting: show the menu underneath
-        ch = self._choice
+        ch = self._choice or self._root_choice()
         if ch is not None:
             return self._chooser_input(s, ch, gi)
-        if gi.gesture == "swipe_down":
-            self._menu_selected = min(self._menu_selected + 1, len(MENU_OPTIONS) - 1)
-        elif gi.gesture == "swipe_up":
-            self._menu_selected = max(self._menu_selected - 1, 0)
-        elif gi.gesture == "press":
-            mode = "fix" if self._menu_selected == 0 else "build"
-            self.apply_goal(GoalRequest(session_id=s.id, mode=mode, via="g2_menu", text=None))
-            return True
         self._render()
         return True
 
@@ -228,14 +230,16 @@ class SessionManager:
             ch.selected = min(ch.selected + 1, len(ch.labels) - 1)
         elif gi.gesture == "swipe_up":
             ch.selected = max(ch.selected - 1, 0)
-        elif gi.gesture == "press":
+        if ch.mode == "any":
+            self._menu_selected = ch.selected  # the root list is rebuilt on every render; remember where the wearer is
+        if gi.gesture == "press":
             if ch.more and ch.selected == len(ch.labels) - 1:
                 # MORE ON PHONE does nothing but point at the phone text box (a non-voice path always exists)
                 self._flash = (Screen.uncertain(Cue(line1="USE THE PHONE", line2="TYPE YOUR TASK"), ttl_ms=FLASH_MS), self.clock.now_ms() + FLASH_MS)
             else:
                 card = ch.cards[ch.selected]
                 self._record("event", text=f"chooser picked {card.card_id}")
-                self._start(s, card, ch.mode)
+                self._start(s, card, card.goal_mode)
                 return True
         self._render()
         return True
@@ -247,6 +251,11 @@ class SessionManager:
             return None
         cards = self._startable()
         res = goal_mod.resolve(req, cards)
+        if res.status == "unsupported" and (req.text or "").strip():
+            other = req.model_copy(update={"mode": "build" if req.mode == "fix" else "fix"})
+            alt = goal_mod.resolve(other, cards)
+            if alt.status in ("supported", "ambiguous"):
+                req, res = other, alt  # "fix my LED" / "build" are hints; the words decide
         if res.status == "unsupported" and self._refine is not None:
             res = self._refine(req, res)
         self._record("event", text=f"goal via {req.via}: {res.status} {res.card_id or ''}")
@@ -298,6 +307,10 @@ class SessionManager:
         if changed:
             self._render()
 
+    def refresh(self) -> None:
+        """Re-render the active session's screen (the task list is derived from the loaded cards on every render)."""
+        self._render()
+
     def _render(self) -> None:
         s = self.active
         now = self.clock.now_ms()
@@ -305,10 +318,12 @@ class SessionManager:
         if self._flash is not None and now < self._flash[1]:
             screen = self._flash[0]
         elif s is not None and s.phase == "welcome":
-            screen = Screen.welcome(Cue(line1="GHOSTBUILD", line2="BUILD OR FIX?"), WELCOME_MS)
-        elif s is not None and s.phase == "menu" and self._choice is not None:
-            screen = Screen.make_menu("PICK A TASK", self._choice.labels, self._choice.selected)
+            screen = Screen.welcome(Cue(line1="GHOSTBUILD", line2="WHAT DO YOU NEED?"), WELCOME_MS)
         elif s is not None and s.phase == "menu":
-            screen = Screen.make_menu("BUILD OR FIX?", MENU_OPTIONS, self._menu_selected)
+            ch = self._choice or self._root_choice()
+            if ch is None:
+                screen = Screen.uncertain(Cue(line1="NOTHING LOADED YET", line2="SEE PHONE"), ttl_ms=FLASH_MS)
+            else:
+                screen = Screen.make_menu("WHAT DO YOU NEED?" if ch.mode == "any" else "PICK A TASK", ch.labels, ch.selected)
         self.hud.set_layer("ui", screen)
         self.hud.sync()
