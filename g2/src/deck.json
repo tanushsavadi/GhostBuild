@@ -37,7 +37,7 @@
     {
       "id": "my", "gloss": "MY", "words": ["my", "mine"],
       "handshape": "open_b",
-      "how": ["Flat hand, palm in", "Place palm on your chest"],
+      "how": ["Flat hand, palm facing you", "Place palm on your chest"],
       "status": "UNCHECKED",
       "asllex": { "type": "OneHanded", "location": "Upper chest", "movement": "Straight" },
       "video": "https://player.vimeo.com/video/345578777"

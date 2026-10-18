@@ -5,11 +5,11 @@
     "Point to your own chest"
   ],
   "want": [
-    "Both hands open, palms up",
+    "Both hands open, palms facing up",
     "Pull in, curling the fingers"
   ],
   "need": [
-    "Index hooked, palm down",
+    "Index hooked, palm facing down",
     "Bend wrist down twice"
   ],
   "like": [
@@ -25,7 +25,7 @@
     "Arc them forward, away"
   ],
   "come": [
-    "Flat hand, palm up, out front",
+    "Flat hand, palm facing up, out front",
     "Curl it back toward you"
   ],
   "eat": [
@@ -45,11 +45,11 @@
     "Shake it side to side"
   ],
   "where": [
-    "Index up, palm out",
+    "Index up, palm facing out",
     "Wag it side to side"
   ],
   "what": [
-    "Both hands open, palms up",
+    "Both hands open, palms facing up",
     "Shake slightly side to side"
   ],
   "who": [
@@ -66,7 +66,7 @@
   ],
   "how": [
     "Both bent hands, backs touching",
-    "Roll up and over, palms up"
+    "Roll up and over, palms facing up"
   ],
   "good": [
     "Flat hand, fingertips at chin",
@@ -105,7 +105,7 @@
     "Tap thumb on forehead twice"
   ],
   "work": [
-    "Both fists, palms down",
+    "Both fists, palms facing down",
     "Tap wrist on back of other x2"
   ],
   "school": [
@@ -149,7 +149,7 @@
     "Roll it forward in circles"
   ],
   "bye": [
-    "Open hand, palm out",
+    "Open hand, palm facing out",
     "Fold fingers down, like a wave"
   ],
   "fine": [
@@ -177,11 +177,11 @@
     "Tap fingertips together twice"
   ],
   "finish": [
-    "Both open hands, palms in",
+    "Both open hands, palms facing you",
     "Flip them out, palms away"
   ],
   "again": [
-    "Flat palm up; other hand bent",
+    "Flat palm facing up; other hand bent",
     "Arc over, tips land on palm"
   ],
   "slow": [
@@ -205,23 +205,23 @@
     "Arc forward, away"
   ],
   "today": [
-    "Both Y hands, palms up",
+    "Both Y hands, palms facing up",
     "Drop down slightly twice"
   ],
   "now": [
-    "Both Y hands, palms up",
+    "Both Y hands, palms facing up",
     "Drop down slightly once"
   ],
   "later": [
-    "L hand, palm out",
+    "L hand, palm facing out",
     "Tip the index finger forward"
   ],
   "wait": [
-    "Both hands open, palms up",
+    "Both hands open, palms facing up",
     "Wiggle the fingers"
   ],
   "stop": [
-    "Flat palm up; other flat hand",
+    "Flat palm facing up; other flat hand",
     "Chop edge down onto palm"
   ],
   "sit": [
@@ -229,7 +229,7 @@
     "Rest them on top"
   ],
   "same": [
-    "Y hand, palm down",
+    "Y hand, palm facing down",
     "Move side to side"
   ],
   "different": [
@@ -273,7 +273,7 @@
     "Pull down, closing fingers"
   ],
   "can": [
-    "Both fists, palms down",
+    "Both fists, palms facing down",
     "Move down firmly together"
   ],
   "not": [
