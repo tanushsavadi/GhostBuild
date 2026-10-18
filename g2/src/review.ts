@@ -1,7 +1,7 @@
 import top from './top.json'
 import phraseBook from './phrases.json'
 import checkedFile from './checked.json'
-import { cardForWord, CREDIT, type Card } from './matcher'
+import { cardsForWord, CREDIT, type Card } from './matcher'
 
 // Review page: compare each card with its reference video and mark it right or
 // wrong. Marks live in this browser (localStorage) and export as the "checked"
@@ -47,15 +47,23 @@ function el(tag: string, text = '', attrs: Record<string, string> = {}): HTMLEle
   return e
 }
 
-function row(word: string, rank: number, card: Card): HTMLElement {
+// A word is usually one card; a fingerspelled word (TV) is one card per letter.
+function row(word: string, rank: number, cards: Card[]): HTMLElement {
+  const card = cards[0]
   const mark = marks[word] ?? ''
   const box = el('div', '', { class: `sign ${mark === 'ok' ? 'ok' : mark ? 'wrong' : ''}` })
-  box.append(card.handshape ? el('img', '', { src: `/handshapes/${card.handshape}_bold.png`, alt: `${card.handshape} handshape` }) : el('div'))
+  const pictures = el('div', '', { class: 'pictures' })
+  for (const c of cards) {
+    pictures.append(c.handshape ? el('img', '', { src: `/handshapes/${c.handshape}_bold.png`, alt: `${c.handshape} handshape` }) : el('div'))
+  }
+  box.append(pictures)
 
   const body = el('div')
-  const title = el('h2', card.title)
+  const title = el('h2', cards.length > 1 ? cards.map(c => c.title.split('  ')[0]).join('-') : card.title)
   title.append(el('span', `  #${rank} · "${word}"`, { class: 'rank' }))
-  body.append(title, el('div', `${card.how[0]} / ${card.how[1]}`, { class: 'lines' }), el('div', card.label, { class: 'label' }))
+  body.append(title)
+  for (const c of cards) body.append(el('div', `${cards.length > 1 ? `${c.title.split('  ')[0]}: ` : ''}${c.how[0]} / ${c.how[1]}`, { class: 'lines' }))
+  body.append(el('div', card.label, { class: 'label' }))
 
   if (card.detail) {
     const d = el('details')
@@ -89,13 +97,13 @@ function render(): void {
   container.replaceChildren()
   let done = 0
   words.forEach((word, i) => {
-    const card = cardForWord(word)
-    if (!card) return
+    const cards = cardsForWord(word)
+    if (!cards.length) return
     const mark = marks[word]
     if (mark) done++
     if (filter === 'todo' && mark) return
     if (filter === 'wrong' && !mark?.startsWith('wrong')) return
-    container.append(row(word, i + 1, card))
+    container.append(row(word, i + 1, cards))
   })
   $<HTMLSpanElement>('count').textContent = `${done}/${words.length} marked`
 }

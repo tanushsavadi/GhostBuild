@@ -43,6 +43,11 @@
     "time": "wrong: tap back of the other wrist with the index (fixed, recheck)",
     "coffee": "ok",
     "change": "wrong: cross both not both X (fixed, recheck)",
-    "better": "wrong: flat hand fingers pointing right (fixed, recheck)"
+    "better": "wrong: flat hand fingers pointing right (fixed, recheck)",
+    "doesnt matter": "ok",
+    "tv": "wrong: fingerspell should be divided to parts (fixed, recheck)",
+    "shoes": "wrong: tap what sides, be precise (fixed, recheck)",
+    "teacher": "wrong: push out then straighten (fixed, recheck)",
+    "cook": "wrong: flat hand facing up on bottom palm, flip so faces down like a pancake would (fixed, recheck)"
   }
 }

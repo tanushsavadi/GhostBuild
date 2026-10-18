@@ -8,7 +8,7 @@ import {
   CreateStartUpPageContainer,
   OsEventTypeList,
 } from '@evenrealities/even_hub_sdk'
-import { cardsFor, cardForWord, CREDIT, type Card } from './matcher'
+import { cardsFor, cardsForWord, CREDIT, type Card } from './matcher'
 import top from './top.json'
 
 // Open Palm: a phrase becomes a sequence of cards (handshape image + how-to
@@ -237,10 +237,7 @@ function back(): void {
 const params = new URLSearchParams(location.search)
 const initial = params.get('phrase')
 if (params.get('review') === 'top') {
-  cards = (top as string[]).flatMap(word => {
-    const card = cardForWord(word)
-    return card ? [card] : []
-  })
+  cards = (top as string[]).flatMap(word => cardsForWord(word))
   version++
   void render()
 } else if (initial) start(initial)

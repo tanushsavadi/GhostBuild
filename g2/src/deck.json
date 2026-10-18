@@ -127,5 +127,6 @@
     "y": { "handshape": "y", "how": "Thumb and pinky out" },
     "z": { "handshape": "1", "how": "Index finger, draw a Z" }
   },
+  "spell": ["tv"],
   "skip": ["is", "am", "are", "do", "does", "did", "to", "the", "a", "an", "and", "it", "its", "it's", "i'm", "be", "of"]
 }

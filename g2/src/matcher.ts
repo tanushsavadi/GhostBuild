@@ -47,6 +47,8 @@ interface Sign {
 
 const letters = deck.letters as Record<string, { handshape: string | null; how: string }>
 const skip = new Set(deck.skip)
+// Words signed by fingerspelling them (e.g. TV = T-V), one card per letter.
+const spelled = new Set(deck.spell)
 
 // word -> [gloss, handshape, line 1, line 2, vimeo id, 1 = hand-written lines (tools/howto.json)]
 type LexRow = [string, string | null, string, string, string, number]
@@ -163,13 +165,14 @@ function signCard(sign: Sign): Card {
   }
 }
 
-/** The card for one vocabulary word as-is (review mode), or undefined if it has no sign. */
-export function cardForWord(word: string): Card | undefined {
+/** The cards for one vocabulary word as-is (review mode); empty if it has no sign. */
+export function cardsForWord(word: string): Card[] {
+  if (spelled.has(word)) return spell(word, checked[word] === 'ok')
   const sign = byWord.get(word)
-  return sign ? signCard(sign) : undefined
+  return sign ? [signCard(sign)] : []
 }
 
-function spell(word: string): Card[] {
+function spell(word: string, refChecked = false): Card[] {
   const chars = word.replace(/'/g, '')
   if (/[0-9]/.test(chars)) {
     return [{
@@ -186,7 +189,7 @@ function spell(word: string): Card[] {
     title: `${ch.toUpperCase()}  (${upper} ${i + 1}/${chars.length})`,
     how: [letters[ch].how, `Fingerspell ${upper}`] as [string, string],
     handshape: letters[ch].handshape,
-    label: 'FINGERSPELL · UNCHECKED',
+    label: refChecked ? 'FINGERSPELL · REF-CHECKED' : 'FINGERSPELL · UNCHECKED',
   }))
 }
 
@@ -214,6 +217,10 @@ export function cardsFor(text: string): Card[] {
     }
     const word = tokens[i]
     i += 1
+    if (spelled.has(word)) {
+      cards.push(...cardsForWord(word))
+      continue
+    }
     const sign = lookup(word)
     if (sign) cards.push(signCard(sign))
     else cards.push(...spell(word))
