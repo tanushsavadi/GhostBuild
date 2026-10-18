@@ -488,7 +488,9 @@ class SessionManager:
                 rem = p["remaining_s"]
                 tail = "TAKING LONGER" if p["over"] else ("ALMOST THERE" if rem <= 10 else f"ABOUT {rem}S" if rem < 90 else f"ABOUT {round(rem / 60)} MIN")
                 line2 = "●" * n + "○" * (10 - n) + " " + tail
-            screen = Screen.intervene(Cue(line1=f"RESEARCHING {secs // 60}:{secs % 60:02d}", line2=line2), cue_id="research")
+            # the first frame answers the press that started it; later timer updates keep the HUD's rate limit
+            screen = Screen.intervene(Cue(line1=f"RESEARCHING {secs // 60}:{secs % 60:02d}", line2=line2), cue_id="research",
+                                      immediate=now - self._research["started_ms"] < 1000)
         elif s is not None and s.phase == "menu" and self._convo is not None and self._convo["sid"] == s.id:
             screen = Screen.intervene(self._convo["cue"], cue_id="convo", immediate=True)  # the assistant's question stays until answered, then the guide starts
         elif s is not None and s.phase == "menu":

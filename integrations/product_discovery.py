@@ -23,7 +23,9 @@ def attach_discovery(runtime):
         [IkeaSource(runtime.asset_root)],
         path=path.with_name("discovery.json") if path else None,
         live=os.getenv("GB_DISCOVERY_LIVE", "1") == "1",
-        research=os.getenv("GB_DISCOVERY_RESEARCH", "0") == "1",
+        # A confirmed product without a prepared guide compiles one from its official manual whenever paid live research
+        # is on (GB_LIVE_RESEARCH=1, compile engine); GB_DISCOVERY_RESEARCH=0 opts out.
+        research=os.getenv("GB_DISCOVERY_RESEARCH", os.getenv("GB_LIVE_RESEARCH", "0")) == "1",
     )
 
     # Old processes may have persisted an unidentified, generic product draft.
