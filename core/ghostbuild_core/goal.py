@@ -100,9 +100,9 @@ def option_label(card: Card, taken: set[str]) -> str:
 
 
 def chooser_options(chosen: list[Card]) -> tuple[list[Card], list[str], bool]:
-    """Menu limits options to 3: up to 3 cards, or 2 cards + `MORE ON PHONE` when more than 3 are loaded."""
-    more = len(chosen) > 3
-    shown = chosen[:2] if more else chosen[:3]
+    """Menu allows up to 4 options: all cards when at most 4 are loaded, else 3 cards + `MORE ON PHONE`."""
+    more = len(chosen) > 4
+    shown = chosen[:3] if more else chosen[:4]
     taken: set[str] = set()
     labels = [option_label(c, taken) for c in shown]
     if more:
