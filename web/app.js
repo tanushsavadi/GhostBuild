@@ -370,7 +370,7 @@
   function renderPlaybook() {
     var sec_ = $('sec-playbook'), c = S.card, st = S.state, pb = st && st.playbook;
     var show = !!(pb && st);
-    var key = JSON.stringify([show, S.live && S.live.unreviewed_cards, pb, c && c.card_id, c && c.steps, c && c.sources, S.cardErr, fresh().ok]);
+    var key = JSON.stringify([show, S.live && S.live.unreviewed_cards, pb, c && c.card_id, c && c.steps, c && c.sources, c && c.review, S.cardErr, fresh().ok]);
     memo(sec_, key, function () {
       sec_.hidden = !show; if (!show) return;
       var head = $('pb-head'), ol = $('pb-steps'), cur = $('pb-current'), cnt = $('pb-count');
@@ -383,7 +383,8 @@
       }
       var idx = L.currentStepIndex(st, c), list = c.steps;
       head.appendChild(h('div', { class: 'pb-title', text: c.title }));
-      if (S.live && (S.live.unreviewed_cards || []).indexOf(c.card_id) >= 0) head.appendChild(h('div', { class: 'unreviewed' }, h('b', { text: 'AI-RESEARCHED · NOT HUMAN-REVIEWED' }), h('div', { class: 'meta', text: S.live.note + ' The sources are listed with each step.' })));
+      var reviewNote = L.reviewNotice(c, S.live);
+      if (reviewNote) head.appendChild(h('div', { class: 'unreviewed' }, h('b', { text: 'AI-ASSISTED · NOT HUMAN-REVIEWED' }), h('div', { class: 'meta', text: reviewNote + ' The sources are listed with each step.' })));
       head.appendChild(h('div', { class: 'meta' }, 'Provenance: ', lbl(c.provenance)));
       var nConf = pb.confirmed.length, nVer = pb.verified.length;
       if (nConf + nVer >= list.length && list.length) head.appendChild(h('div', { class: 'res supported compact' },
@@ -776,7 +777,7 @@
     if (active) {
       var title = S.card && S.card.title || 'Your task';
       $('workspace-title').textContent = title;
-      $('workspace-subtitle').textContent = pb ? (pb.confirmed.length + pb.verified.length) + ' of ' + pb.step_count + ' steps complete. Take it one step at a time.' : 'Guidance from your reviewed task. Evidence stays clearly labeled.';
+      $('workspace-subtitle').textContent = pb ? (pb.confirmed.length + pb.verified.length) + ' of ' + pb.step_count + ' steps complete. Take it one step at a time.' : 'Guidance for your current task. Evidence stays clearly labeled.';
     }
     var box = $('phone-controls'), hud = st && st.hud;
     var key = JSON.stringify([hud && hud.seq, active, S.actionBusy, fresh().ok]);

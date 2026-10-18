@@ -287,6 +287,15 @@ class Runtime:
 
     def resolve_goal(self, req: GoalRequest) -> Optional[GoalResolution]:
         """A spoken or typed request. With an assistant it is first talked through (questions, experience); otherwise resolved directly."""
+        if (self.discovery is not None and self.discovery.active(req.session_id)
+                and req.session_id == self.session().id and req.text
+                and any(c.title.casefold() == req.text.strip().casefold() for c in self.startable_cards())
+                and not any(src.wants(req.text) for src in self.discovery.sources.values())):
+            # An explicit prepared-guide selection leaves discovery; descriptions still refine its shortlist.
+            self.discovery.cancel(req.session_id)
+            self.assistant.cancel(req.session_id)
+            self.assistant.intakes.pop(req.session_id, None)
+            self.assistant.tasks.pop(req.session_id, None)
         if req.session_id == self.session().id and req.text:
             self.assistant.observe_goal(req)
         if self.discovery is not None and self.discovery.wants(req):

@@ -64,5 +64,6 @@
     ],
     "step_count": 13,
     "unreviewed": true
-  }
+  },
+  "timing_note": "Wall times are measured with time.monotonic. The Runtime used a fixed ManualClock, so last.took_s=0 is not a latency measurement."
 }

@@ -12,6 +12,12 @@
 
   function steps(card) { return (card && Array.isArray(card.steps)) ? card.steps : []; }
   function isPlaybookCard(card) { return steps(card).length > 0; }
+  function reviewNotice(card, live) {
+    if (!card) return '';
+    if (/not human-reviewed/i.test(card.review || '')) return 'This AI-compiled guide has not been reviewed by a human. Check the sources before relying on it.';
+    if (live && (live.unreviewed_cards || []).indexOf(card.card_id) >= 0) return live.note || 'AI-researched; not reviewed by a human. Check the sources before relying on it.';
+    return '';
+  }
   function cardUsesTelemetry(card) {
     if (!card) return false;
     if (Array.isArray(card.tests) && card.tests.length > 0) return true;
@@ -226,7 +232,7 @@
   }
 
   return {
-    isPlaybookCard: isPlaybookCard, cardUsesTelemetry: cardUsesTelemetry, usesTelemetry: usesTelemetry,
+    isPlaybookCard: isPlaybookCard, reviewNotice: reviewNotice, cardUsesTelemetry: cardUsesTelemetry, usesTelemetry: usesTelemetry,
     showPiHealth: showPiHealth, showPiBanners: showPiBanners, currentStepIndex: currentStepIndex,
     stepStatus: stepStatus, stepRule: stepRule, inferMode: inferMode, waitText: waitText, counterText: counterText, collectCites: collectCites,
     provenanceNote: provenanceNote, isTimestampLoc: isTimestampLoc,

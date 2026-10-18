@@ -45,3 +45,18 @@ def test_excluded_product_names_are_not_sent_as_search_keywords():
     assert attrs.name_hint == "MALM" and attrs.excluded_names == ["MICKE"]
     query = search_query(attrs).lower()
     assert "malm" in query and "micke" not in query
+
+
+@pytest.mark.parametrize("card_id", ["paper_cup", "mac_display_colors"])
+def test_ready_guide_selection_exits_unfinished_product_discovery(env, card_id):
+    rt, discovery, _ = env
+    rt.assistant.attach(None)
+    say(rt, "assemble a white IKEA desk")
+    sid = rt.session().id
+    assert discovery.active(sid)
+    card = rt.card_by_id(card_id)
+    result = say(rt, card.title)
+    assert result.status == "supported"
+    assert discovery.state(sid).phase == "idle"
+    assert rt.playbook.card.card_id == card_id
+    assert rt.assistant.tasks[sid].goal == card.title

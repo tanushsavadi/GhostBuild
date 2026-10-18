@@ -127,7 +127,7 @@ This macOS command produces `g2/ghostbuild.ehpk` with the backend origin in its 
 Credentials belong only in the backend environment. Never put a provider key in `g2/`, a URL, or a screenshot. The server loads `.env` from the working directory. [The environment example](.env.example) documents feature switches; [setup](docs/SETUP.md#optional-providers) describes enabling them deliberately.
 
 ```sh
-make test                         # contracts, generic lint, secret scan, Python, G2 types/Vitest
+make test                         # contracts, lint, secrets, Python, phone logic, G2 types/Vitest
 node --test web/tests/*.mjs        # companion logic and audio lifecycle
 cd g2 && npm run build            # production TypeScript/Vite build
 ```
@@ -140,7 +140,7 @@ G2 has **no camera and no speaker**. It does not see the wearer's surroundings. 
 
 Manual completion is **HUMAN CONFIRMED**. A step with a telemetry check requires measured evidence. AI-compiled guides remain labelled **not human-reviewed** until a person reviews them. Safety stops and source links remain part of the guide; the system cannot establish that an arbitrary physical repair succeeded.
 
-Existing physical-session reports cover basic task/gesture traffic, but the final display, images, reconnection, microphone and head-shake behavior still require device acceptance. The Pi wiring document remains a template until someone records the actual build. We do not count simulator screenshots as hardware proof.
+The operator reports readable cues/images, gestures, answer return and reconnect passed on the final voice-disabled build; the detailed device record is pending. Microphone and head-shake behavior still require physical acceptance. The Pi wiring document remains a template until someone records the actual build. We do not count simulator screenshots as hardware proof.
 
 ## Explore the repository
 

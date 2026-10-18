@@ -1,9 +1,9 @@
 # Operator runbook — laptop, Pi, G2 (live hardware only)
 
-Simulated runs do not count. Record each result in the matrix at the bottom. Laptop IP below is an example; get yours with `ipconfig getifaddr en0`.
+For the current general BUILD/FIX product, use [SETUP.md](SETUP.md) and [DEMO_RUNBOOK.md](DEMO_RUNBOOK.md). This page retains the optional Pi-station network/wiring checklist; its unfilled matrix is not physical release evidence. Simulated runs do not count. Record each result in the matrix at the bottom. Laptop IP below is an example; get yours with `ipconfig getifaddr en0`.
 
 ## Quick start (3 terminals, in this order)
-1. **Laptop:** `git checkout lead/hw-pivot && git pull && make setup && make core` (leave running). Then in a second tab: `make lan` — it prints the exact Pi and G2 commands with this laptop's IP and says whether core is reachable.
+1. **Laptop:** `git checkout main && git pull && make setup && make core` (leave running). Then in a second tab: `make lan` — it prints the exact Pi and G2 commands with this laptop's IP and says whether core is reachable.
 2. **Pi operator:** run the "PI OPERATOR" lines `make lan` printed. First one must print JSON, otherwise stop and fix the network (section 0).
 3. **G2 operator:** run the "G2 OPERATOR" lines. First goal: the real welcome frame on the glasses, then press, then the WHERE picture.
 
@@ -17,17 +17,17 @@ Laptop, Pi and phone must be on the SAME network that allows device-to-device tr
 
 ## 1. Laptop (D / lead)
 ```
-git fetch && git checkout lead/hw-pivot && git pull
+git fetch && git checkout main && git pull
 make setup                       # python + node deps (g2, contracts)
 make test                        # expect: GREEN python, GREEN ts, lint-generic ok, all pytest/vitest pass
-make core                        # LIVE mode, port 8787 (needs the Pi). Never use core-sim for judging.
+make core                        # Manual guidance needs no Pi; the telemetry demo needs live Pi observations.
 make health                      # or: curl http://<laptop-ip>:8787/health
 ```
 Expected before the Pi connects: `"pi_link":"down"`. After the Pi connects: `"pi_link":"up","source":"pi_live","camera":"ok"`. Open `http://<laptop-ip>:8787/phone` on a laptop browser: source badge LIVE, no red SIMULATED banner.
 
 ## 2. Raspberry Pi (C)
 ```
-git clone https://github.com/tanushsavadi/GhostBuild && cd GhostBuild && git checkout lead/hw-pivot
+git clone https://github.com/tanushsavadi/GhostBuild && cd GhostBuild && git checkout main
 sudo apt update && sudo apt install -y python3-picamera2 python3-gpiozero python3-numpy python3-httpx python3-venv
 python3 -m venv --system-site-packages ~/gbvenv && . ~/gbvenv/bin/activate && pip install -r pi/requirements.txt
 rpicam-hello --list-cameras      # must list a camera; if not: power off, reseat the camera ribbon (contacts toward the correct side per Raspberry Pi docs), enable camera
@@ -43,8 +43,8 @@ Troubleshooting: camera not detected -> reseat ribbon, `rpicam-hello`, check `dm
 
 ## 3. G2 plugin and Beta (B)
 ```
-cd g2 && npm ci && npm rebuild @evenrealities/evenhub-simulator
-npx evenhub login                                   # human step: your Even developer account
+npm ci --prefix g2
+(cd g2 && npm rebuild @evenrealities/evenhub-simulator && npx evenhub login)                                   # human step: your Even developer account
 BACKEND=http://<laptop-ip>:8787 make g2-pack        # writes g2/ghostbuild.ehpk (NOT committed)
 ```
 Install on the phone: (a) fastest: `BACKEND=http://<laptop-ip>:8787 make g2-dev` then `make g2-qr`, scan with the Even app (dev sideload); (b) Beta: upload `ghostbuild.ehpk` at hub.evenrealities.com -> project -> Builds, push to a Beta group, phone: Me -> Beta tester -> Install. Do (a) first to find problems, (b) as soon as (a) shows frames.
@@ -61,10 +61,10 @@ Follow `docs/ACCEPTANCE.md` on physical G2 with the Pi live. Record below.
 | Pi LED | NOT RUN | |
 | Pi -> core | NOT RUN | |
 | Core -> physical G2 | NOT RUN | |
-| Welcome / BUILD / FIX | NOT RUN | |
+| Welcome / task request | NOT RUN | |
 | Fault cue | NOT RUN | |
 | Touch press | NOT RUN | |
 | WHERE image | NOT RUN | |
-| HOW / CORRECT swipe | NOT RUN | |
+| HOW / CORRECT press cycle | NOT RUN | |
 | Recovery -> automatic HUD clear | NOT RUN | |
 | Beta package | NOT RUN | |
