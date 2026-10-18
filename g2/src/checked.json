@@ -27,7 +27,7 @@
     "hello": "ok",
     "let me see": "wrong: k shape doesn't make sense here (fixed, recheck)",
     "paper": "ok",
-    "we will see": "ok",
+    "we will see": "wrong: same sign as let me see, use the V version (fixed, recheck)",
     "home": "ok",
     "friend": "ok",
     "more": "ok",
