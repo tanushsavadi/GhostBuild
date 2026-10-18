@@ -231,7 +231,8 @@ class Engine:
             self._func_trigger_at = None
         self._last_rx = now
         self.last_obs = obs
-        self.hud.set_source(obs.source)
+        if not self.passive:
+            self.hud.set_source(obs.source)  # a passive engine (a playbook owns the glasses) must not relabel the frames
         was_lost = self._link_lost
         self._link_lost = False
         if was_lost:

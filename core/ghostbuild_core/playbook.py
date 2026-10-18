@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import logging
 from collections import deque
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any, Callable, Optional
 
@@ -76,15 +76,12 @@ class AskResult:
     card_id: str
 
     def as_json(self) -> dict[str, Any]:
+        """POST /ask response (matches the phone page): answer = the Cue shown on the glasses, or null when the playbook has no answer;
+        text = the full card text for the phone (a troubleshoot answer carries its `why`)."""
         return {
+            "answer": {"line1": self.cue.line1, "line2": self.cue.line2} if self.answered else None,
+            "text": self.text if not self.detail else f"{self.text}. {self.detail}",
             "intent": self.intent,
-            "answered": self.answered,
-            "cue": {"line1": self.cue.line1, "line2": self.cue.line2},
-            "text": self.text,
-            "detail": self.detail,
-            "label": self.label,
-            "step_id": self.step_id,
-            "card_id": self.card_id,
         }
 
 
@@ -299,7 +296,7 @@ class PlaybookEngine:
         )
         self.verified.append(st.id)
         self._sat_since = None
-        self._flash(Screen.verified(st.verify.ok, ttl_ms=VERIFIED_TTL_MS, cue_id=f"{self.card.card_id}/{st.id}/ok", immediate=True),
+        self._flash(replace(Screen.verified(st.verify.ok, ttl_ms=VERIFIED_TTL_MS, cue_id=f"{self.card.card_id}/{st.id}/ok", immediate=True), source=obs.source),
                     VERIFIED_TTL_MS, "verified", consumes_input=True, now=now)
         self._after_step_done(now)
 
@@ -395,6 +392,8 @@ class PlaybookEngine:
         measured = sum(1 for s in steps if s.verify is not None)
         if measured == len(steps):
             screen = Screen.verified(Cue(line1="● PLAYBOOK VERIFIED", line2="EVERY STEP CHECKED"), ttl_ms=DONE_TTL_MS, cue_id=f"{self.card.card_id}/done", immediate=True)
+            if self.last_obs is not None:
+                screen = replace(screen, source=self.last_obs.source)  # driven by the last observation
         else:
             line2 = "YOU CONFIRMED EACH" if measured == 0 else "SOME CHECKED, SOME BY YOU"
             screen = Screen.intervene(Cue(line1="✓ ALL STEPS DONE", line2=line2), cue_id=f"{self.card.card_id}/done", ttl_ms=DONE_TTL_MS, immediate=True)
@@ -472,6 +471,8 @@ class PlaybookEngine:
         screen = self._compute_screen(now)
         if immediate:
             screen = screen.with_immediate(True)
+        if screen.source is None:
+            screen = replace(screen, source="manual")  # not backed by telemetry: the wearer's own navigation
         self.hud.set_layer("engine", screen)
         self.hud.sync()
 
@@ -548,7 +549,6 @@ class PlaybookEngine:
                     break
         elif intent == "status":
             cue = Cue(line1=f"STEP {self.index + 1} OF {self.count}" if not self.done else "TASK COMPLETE", line2=(st.title if not self.done else self.card.title).upper()[:26])
-            detail = st.detail
             label = "DETERMINISTIC"
         elif intent in ("next", "back", "picture"):
             return self._ask_navigate(intent, now)
@@ -561,7 +561,7 @@ class PlaybookEngine:
             self._event(f"answer ({intent}): {body}" + (f" | {detail}" if detail else ""), label, {"step": st.id})
         self._flash(Screen.ask(cue, ttl_ms=ASK_TTL_MS), ASK_TTL_MS, "ask", now=now)
         self._refresh(immediate=True)
-        return AskResult(intent=intent, answered=answered, cue=cue, text=body, detail=detail or st.detail, label=label, step_id=st.id, card_id=self.card.card_id)
+        return AskResult(intent=intent, answered=answered, cue=cue, text=body, detail=detail, label=label, step_id=st.id, card_id=self.card.card_id)
 
     def _ask_navigate(self, intent: str, now: int) -> AskResult:
         gesture = {"next": "swipe_down", "back": "swipe_up", "picture": "press"}[intent]
@@ -573,7 +573,7 @@ class PlaybookEngine:
         cue = cur.cue or Cue(line1="OK", line2="")
         moved = before != (self.index, self.done, self.view_idx, tuple(self.confirmed))
         return AskResult(
-            intent=intent, answered=moved or cur.mode in ("uncertain", "ask"), cue=cue, text=_cue_text(cue), detail=self.step.detail,
+            intent=intent, answered=moved or cur.mode in ("uncertain", "ask"), cue=cue, text=_cue_text(cue), detail="",
             label="DETERMINISTIC", step_id=self.step.id, card_id=self.card.card_id,
         )
 

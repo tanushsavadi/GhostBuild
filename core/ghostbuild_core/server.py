@@ -256,9 +256,7 @@ def create_app(
         res = runtime.ask(body.text.strip())
         if res is None:
             raise HTTPException(status_code=409, detail="no active playbook; start a task with steps first")
-        d = res.as_json()
-        d["session_id"] = body.session_id or runtime.session().id
-        return JSONResponse(d)
+        return JSONResponse(res.as_json())
 
     @app.get("/guides/{guide_id}/{view}.png")
     async def get_guide(guide_id: str, view: str) -> Response:

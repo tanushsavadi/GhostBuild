@@ -134,7 +134,7 @@ def test_full_playbook_walk_through_runtime_no_pi(led, tmp_path):
     assert len(done) == 1 and done[0].cue.line2 == "SOME CHECKED, SOME BY YOU"
     labels = {e.label for e in rt.state().events}
     assert {"HUMAN CONFIRMED", "SIMULATED"} <= labels and "MEASURED LIVE" not in labels
-    assert all(f.source == "simulated" for f in rt.hud.frames[-1:])
+    assert [f.source for f in rt.hud.frames if f.mode == "verified"] == ["simulated"] and rt.hud.frames[-1].source == "manual"
 
 
 # ------------------------------------------------------------------ resume
@@ -378,35 +378,35 @@ def test_ask_intents_answer_from_card_text_only(tmp_path):
             return r.json()
 
         j = ask("where is it")
-        assert j["intent"] == "where" and j["answered"] and j["cue"] == {"line1": "WHERE 1 IS", "line2": "ON THE LEFT"}
-        assert j["text"] == "WHERE 1 IS ON THE LEFT" and j["step_id"] == "s1"
+        assert j["intent"] == "where" and j["answer"] == {"line1": "WHERE 1 IS", "line2": "ON THE LEFT"}
+        assert j["text"] == "WHERE 1 IS ON THE LEFT"
         f = cur(rt)
         assert f.mode == "ask" and f.cue.line1 == "WHERE 1 IS" and f.ttl_ms == 4000
         settle(rt, 4100)
         assert cur(rt).mode == "step" and cur(rt).step.step_id == "s1"
         j = ask("why do I do this")
-        assert j["intent"] == "why" and j["cue"]["line1"] == "WHY 1: SAFETY"
+        assert j["intent"] == "why" and j["answer"]["line1"] == "WHY 1: SAFETY"
         settle(rt, 4100)
         j = ask("which part is thing 1")
-        assert j["intent"] == "faq" and j["cue"]["line1"] == "PART 1 IS BLUE"
+        assert j["intent"] == "faq" and j["answer"]["line1"] == "PART 1 IS BLUE"
         settle(rt, 4100)
         j = ask("it didn't work, what now")
-        assert j["intent"] == "troubleshoot" and j["cue"]["line1"] == "CHECK PART 1" and "slips" in j["detail"]
+        assert j["intent"] == "troubleshoot" and j["answer"]["line1"] == "CHECK PART 1" and "slips" in j["text"]
         ev = rt.state().events
         assert any(e.label == "INFERRED" and "troubleshoot" in e.text for e in ev)
         assert any(e.label == "AUTHORED DEMO METADATA" and "CHECK PART 1" in e.text and "slips" in e.text for e in ev)  # provenance = the card's
         settle(rt, 4100)
         j = ask("which step am I on")
-        assert j["intent"] == "status" and j["cue"]["line1"] == "STEP 2 OF 4"
+        assert j["intent"] == "status" and j["answer"]["line1"] == "STEP 2 OF 4"
         settle(rt, 4100)
         j = ask("flibbertigibbet")
-        assert j["intent"] == "unknown" and j["answered"] is False and j["cue"] == {"line1": "NOT IN MY PLAYBOOK", "line2": "SEE PHONE"}
+        assert j["intent"] == "unknown" and j["answer"] is None and j["text"] == "NOT IN MY PLAYBOOK SEE PHONE" and set(j) == {"answer", "text", "intent"}
         assert cur(rt).mode == "ask"
         settle(rt, 4100)
         # a step without that content never invents it
         confirm(rt)  # s2: no troubleshoot entry
         j = ask("what if it didn't work")
-        assert j["answered"] is False and j["cue"]["line1"] == "NOT IN MY PLAYBOOK"
+        assert j["answer"] is None and j["text"].startswith("NOT IN MY PLAYBOOK")
 
 
 def test_ask_navigation_matches_gestures_and_never_verifies(tmp_path):
@@ -422,7 +422,7 @@ def test_ask_navigation_matches_gestures_and_never_verifies(tmp_path):
         c.post("/ask", json={"session_id": "", "text": "next"})
         assert rt.state().playbook.step_index == 3 and rt.state().playbook.step_id == "s3"  # s3 is measured
         j = c.post("/ask", json={"session_id": "", "text": "next"}).json()
-        assert j["cue"]["line1"] == "NO PI DATA" and rt.state().playbook.step_index == 3 and rt.state().playbook.verified == []
+        assert j["answer"]["line1"] == "NO PI DATA" and rt.state().playbook.step_index == 3 and rt.state().playbook.verified == []
 
 
 def test_ask_show_picture_opens_the_guide(tmp_path):

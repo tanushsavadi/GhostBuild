@@ -40,6 +40,7 @@ class Screen:
     ttl_ms: Optional[int] = None
     immediate: bool = False
     stale: bool = False
+    source: Optional[Source] = None  # per-screen override; None = the Hud's current source (set from observations). Playbook screens use "manual".
 
     # ---- constructors -----------------------------------------------------
     @staticmethod
@@ -187,7 +188,7 @@ class Hud:
                 step=s.step,
                 cue_id=s.cue_id,
                 ttl_ms=s.ttl_ms,
-                source=self.source,
+                source=s.source or self.source,
                 session_id=self.session_id,
                 stale=s.stale,
             )

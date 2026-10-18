@@ -340,3 +340,23 @@ def test_overlay_returns_to_the_step_exactly_after_its_ttl():
     assert r.cur.mode == "ask"
     r.wait(100)
     assert r.cur.mode == "step"
+
+
+# ------------------------------------------------------------------ frame source
+def test_frames_are_manual_unless_driven_by_an_observation():
+    r = Rig(measured_card(hold=0))
+    assert r.cur.source == "manual"  # even though the Hud itself was built as simulated
+    r.confirm()
+    r.feed(300, led=True, source="simulated")
+    v = [x for x in r.frames if x.mode == "verified"]
+    assert v and all(x.source == "simulated" for x in v)
+    steps = [x for x in r.frames if x.mode in ("step", "uncertain", "ask", "visual")]
+    assert steps and all(x.source == "manual" for x in steps)
+    r.wait(6000)
+    assert r.cur.source == "manual"
+
+
+def test_pi_observations_do_not_relabel_manual_frames():
+    r = Rig(make_card(3))
+    r.feed(500, led=False, source="pi_live")
+    assert r.cur.source == "manual" and all(x.source == "manual" for x in r.frames)
