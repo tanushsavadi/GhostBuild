@@ -65,6 +65,10 @@ guides:            ## build G2-ready guide PNGs from knowledge/guides sources
 	$(call need,assets/build_guides.py,A)
 	$(PY) assets/build_guides.py
 
+card-import:       ## validate + store a research-agent envelope as a DRAFT: make card-import FILE=envelope.json
+	@test -n "$(FILE)" || { echo "FILE=<envelope.json> required"; exit 1; }
+	$(PY) -m knowledge.importer $(FILE)
+
 compile:           ## optional build-time card compiler (needs ANTHROPIC_API_KEY)
 	$(call need,knowledge/compile.py,D)
 	$(PY) -m knowledge.compile $(ARGS)

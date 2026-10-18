@@ -55,3 +55,4 @@ tmp/
 # --- archives / caches (LDraw zip, doc exports) ---
 *.zip
 .worktrees/
+knowledge/drafts/
