@@ -142,6 +142,7 @@ class Runtime:
             self.voice.on_hold(gi.gesture)
         elif self.playbook is not None and self.sessions.flash_showing() and self.sessions.active is not None and self.sessions.active.phase == "task":
             self.sessions.dismiss_flash()  # the task-start cue hides the first step: a gesture only reveals it, never acts on it
+            self.playbook.reveal()
         elif not self.sessions.handle_input(gi):
             if self.playbook is not None:
                 self.playbook.handle_input(gi)

@@ -182,6 +182,10 @@ class PlaybookEngine:
             return None
         return g.views[min(self.view_idx, len(g.views) - 1)].view
 
+    def reveal(self) -> None:
+        """The wearer dismissed an overlay: show the current screen now (a direct response to input)."""
+        self._refresh(immediate=True)
+
     def detach(self) -> None:
         self._unsub()
         self.hud.set_layer("engine", None)
