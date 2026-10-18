@@ -1,0 +1,190 @@
+{
+  "creao_status": "completed",
+  "error": null,
+  "device": null,
+  "model": null,
+  "intent": "build",
+  "session_id": null,
+  "doc_urls": [],
+  "video_urls": [],
+  "follow_up": null,
+  "created_at": "2026-10-18T03:00:00Z",
+  "updated_at": "2026-10-18T03:04:00Z",
+  "validation_errors": [],
+  "approved_by": null,
+  "FIXTURE": "MOCK data, not real CREAO output",
+  "run_id": "r-demo1",
+  "creao_run_id": "MOCK-run-router",
+  "status": "draft_ready",
+  "draft_id": "reset_a_home_router_to_factory_settings_e227-20261018T043229",
+  "goal": "reset a home router to factory settings",
+  "draft": {
+    "draft_id": "reset_a_home_router_to_factory_settings_e227-20261018T043229",
+    "card_id": "reset_a_home_router_to_factory_settings_e227",
+    "title": "Reset a home router to factory settings",
+    "goal_mode": "build",
+    "provenance": "MANUFACTURER DOC",
+    "provenance_note": "DRAFT: not reviewed by a human; it cannot reach the glasses until approved",
+    "aliases": [
+      "reset a home router to factory settings",
+      "home router to factory settings"
+    ],
+    "steps": [
+      {
+        "id": "note_your_current_settings",
+        "title": "Note your current settings",
+        "cue": {
+          "line1": "WRITE DOWN THE WI-FI",
+          "line2": "NAME AND PASSWORD"
+        },
+        "detail": "Write down the Wi-Fi name and password and any custom DNS because they are erased by the reset.",
+        "warnings": [
+          "Resetting erases your Wi-Fi name, password and any custom settings; note them first."
+        ],
+        "why": null,
+        "check": "manual",
+        "cites": []
+      },
+      {
+        "id": "find_the_reset_hole",
+        "title": "Find the reset hole",
+        "cue": {
+          "line1": "LOOK ON THE BACK PANEL",
+          "line2": "FOR A SMALL RECESSED HOLE"
+        },
+        "detail": "Look on the back panel for a small recessed hole labelled RESET.",
+        "warnings": [],
+        "why": null,
+        "check": "manual",
+        "cites": []
+      },
+      {
+        "id": "power_the_router_on",
+        "title": "Power the router on",
+        "cue": {
+          "line1": "PLUG THE POWER ADAPTER",
+          "line2": "IN AND WAIT"
+        },
+        "detail": "Plug the power adapter in and wait until the power light is steady (about two minutes). Why: A reset while the unit is still booting may not register.",
+        "warnings": [],
+        "why": {
+          "line1": "A RESET WHILE THE UNIT",
+          "line2": "STILL BOOTING"
+        },
+        "check": "manual",
+        "cites": []
+      },
+      {
+        "id": "hold_the_reset_button",
+        "title": "Hold the reset button",
+        "cue": {
+          "line1": "PRESS AND HOLD THE",
+          "line2": "RECESSED BUTTON"
+        },
+        "detail": "Press and hold the recessed button with a straightened paperclip for 10 to 15 seconds (some models need 30), then release when the lights flash. Do not let go early or the reset will not complete. Reference only, no picture on the glasses: Photo of a paperclip pressing the recessed reset hole https://www.ifixit.com/Guide/MOCK-Reset-A-Router/000000. UNCERTAIN: Step 4: only text was read, so the exact light pattern that signals the reset was NOT seen.",
+        "warnings": [
+          "Use a paperclip, never a sharp pin that could snap off inside."
+        ],
+        "why": {
+          "line1": "UNCERTAIN: STEP 4: ONLY",
+          "line2": "TEXT WAS READ"
+        },
+        "check": "manual",
+        "cites": []
+      },
+      {
+        "id": "wait_for_the_restart",
+        "title": "Wait for the restart",
+        "cue": {
+          "line1": "WAIT ABOUT THREE MINUTES",
+          "line2": "WHILE THE ROUTER RESTARTS"
+        },
+        "detail": "Wait about three minutes while the router restarts and the lights settle; the case may be warm.",
+        "warnings": [],
+        "why": null,
+        "check": "manual",
+        "cites": [
+          {
+            "source": "video_2",
+            "loc": "t=00:04:20",
+            "quote": null,
+            "url": "https://www.youtube.com/watch?v=MOCKrouter02&t=260s"
+          }
+        ]
+      },
+      {
+        "id": "sign_in_with_the_defaults",
+        "title": "Sign in with the defaults",
+        "cue": {
+          "line1": "CONNECT TO THE DEFAULT",
+          "line2": "WI-FI NAME PRINTED"
+        },
+        "detail": "Connect to the default Wi-Fi name printed on the label and sign in with the default admin password from the label.",
+        "warnings": [],
+        "why": null,
+        "check": "manual",
+        "cites": []
+      }
+    ],
+    "sources": [
+      {
+        "id": "docs_1",
+        "kind": "MANUFACTURER DOC",
+        "title": "MOCK: router reset guide",
+        "url": "https://www.ifixit.com/Guide/MOCK-Reset-A-Router/000000"
+      },
+      {
+        "id": "video_2",
+        "kind": "VIDEO TUTORIAL",
+        "title": "MOCK: reset walkthrough video",
+        "url": "https://www.youtube.com/watch?v=MOCKrouter02"
+      },
+      {
+        "id": "tutorial_3",
+        "kind": "WEB TUTORIAL",
+        "title": "MOCK: vendor forum thread",
+        "url": "https://forum.example.org/threads/router-reset-hold-time"
+      }
+    ],
+    "video_notes": [
+      {
+        "url": "https://www.youtube.com/watch?v=MOCKrouter02&t=260s",
+        "t_start": "00:04:20",
+        "t_end": "",
+        "summary": "wait for restart",
+        "source": "video_2"
+      }
+    ],
+    "uncertainties": [
+      "FIXTURE: MOCK data for the phone page, not real CREAO output.",
+      "Hold time differs by model; the sources say 10, 15 or 30 seconds.",
+      "Step 4: only text was read, so the exact light pattern that signals the reset was NOT seen.",
+      "Photos and video frames were not inspected.",
+      "GhostBuild normalizer: visual references are descriptions or links only; no pictures were produced and none are shown on the glasses",
+      "GhostBuild normalizer: glasses text shortened at word boundaries to fit two lines (the full text is in the phone detail): step 1 cue (Note your current settings); step 2 cue (Find the reset hole); step 3 cue (Power the router on); step 4 cue (Hold the reset button); step 5 cue (Wait for the restart); step 6 cue (Sign in with the defaults); Hold the reset button: CHECK item; Power the router on: why line; Hold the reset button: UNCERTAIN line"
+    ],
+    "visual_references": [
+      {
+        "view": "how",
+        "url": "https://www.ifixit.com/Guide/MOCK-Reset-A-Router/000000",
+        "description": "Photo of a paperclip pressing the recessed reset hole",
+        "step": "hold_the_reset_button",
+        "reference_only": true
+      },
+      {
+        "view": "how",
+        "url": null,
+        "description": "Annotated diagram of a router back panel with the reset hole circled",
+        "step": null,
+        "reference_only": true
+      }
+    ],
+    "reference_only_note": "reference only — no picture on glasses",
+    "guides": 0,
+    "pictures_on_glasses": false,
+    "validation": {
+      "ok": true,
+      "errors": []
+    }
+  }
+}

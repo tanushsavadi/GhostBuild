@@ -82,6 +82,35 @@ if (!/\/$|\.html$/.test(location.pathname)) location.replace(location.pathname +
       <div id="research-hint" class="meta"></div>
     </form>
     <div id="research-result" aria-live="polite"></div>
+
+    <div id="creao-box" class="creao" hidden>
+      <h3>Research with CREAO</h3>
+      <p class="meta lead">Runs the research agent now (takes minutes). The result is only a DRAFT: nothing reaches the glasses until a person approves it below.</p>
+      <form id="creao-form" autocomplete="off">
+        <label class="field">Goal (required)
+          <textarea id="creao-goal" rows="2" maxlength="300" placeholder="e.g. replace a bicycle inner tube"></textarea>
+        </label>
+        <label class="field">Device (optional)<input id="creao-device" type="text" maxlength="120"></label>
+        <label class="field">Model (optional)<input id="creao-model" type="text" maxlength="120"></label>
+        <div class="seg" role="radiogroup" aria-label="Research intent">
+          <label><input type="radio" name="cintent" value="build" checked><span>BUILD</span></label>
+          <label><input type="radio" name="cintent" value="fix"><span>FIX</span></label>
+        </div>
+        <label class="field">Documentation links (optional, one per line)
+          <textarea id="creao-docs" rows="2" placeholder="https://..."></textarea>
+        </label>
+        <label class="field">Video links (optional, one per line)
+          <textarea id="creao-videos" rows="2" placeholder="https://..."></textarea>
+        </label>
+        <label class="field">Follow-up (optional)<input id="creao-follow" type="text" maxlength="500"></label>
+        <button id="creao-send" type="submit">Research with CREAO</button>
+        <div id="creao-hint" class="meta"></div>
+      </form>
+      <div id="creao-msg" aria-live="polite"></div>
+      <h3>Runs</h3>
+      <ul id="creao-runs" class="runs"></ul>
+      <div id="creao-draft"></div>
+    </div>
   </section>
 </div>
 <div class="col">

@@ -118,6 +118,94 @@
     return 'RESEARCH FAILED: HTTP ' + status + (body ? ' ' + String(body).slice(0, 160) : '') + '. Nothing was saved.';
   }
 
+  // ---------------------------------------------------------------- CREAO research runs (only when GET /research/status says enabled)
+  var REFERENCE_ONLY = 'reference only — no picture on glasses';
+  /** Nothing CREAO-related is shown unless core reports it enabled. */
+  function creaoEnabled(status) { return !!status && typeof status === 'object' && status.enabled === true; }
+  function parseUrls(text) {
+    return String(text || '').split(/[\s,]+/).map(function (x) { return x.trim(); }).filter(Boolean);
+  }
+  function isHttpUrl(u) { return /^https?:\/\/[^\s/$.?#][^\s]*$/i.test(String(u || '')); }
+  /** form: {goal, device, model, intent, docUrls, videoUrls, followUp} (URL fields are free text). -> {ok, errors, body} */
+  function buildRunBody(form) {
+    var errors = [], f = form || {};
+    var goal = String(f.goal || '').trim();
+    if (!goal) errors.push('Describe the goal first.');
+    if (goal.length > 300) errors.push('The goal is limited to 300 characters.');
+    var doc = parseUrls(f.docUrls), vid = parseUrls(f.videoUrls);
+    doc.concat(vid).forEach(function (u) { if (!isHttpUrl(u)) errors.push('Only http(s) links are accepted: ' + u.slice(0, 60)); });
+    if (doc.length > 5 || vid.length > 5) errors.push('At most 5 documentation links and 5 video links.');
+    var body = { goal: goal };
+    ['device', 'model', 'intent'].forEach(function (k) { var v = String(f[k] || '').trim(); if (v) body[k] = v; });
+    var fu = String(f.followUp || '').trim(); if (fu) body.follow_up = fu;
+    if (doc.length) body.doc_urls = doc;
+    if (vid.length) body.video_urls = vid;
+    if (f.sessionId) body.session_id = f.sessionId;
+    return { ok: errors.length === 0, errors: errors, body: body };
+  }
+  /** Status chip for a run record. A draft is never described as approved or available; approved_by is the only exception. */
+  function runStatus(rec) {
+    var st = rec && rec.status;
+    if (st === 'draft_ready' && rec.approved_by) return { kind: 'ok', label: 'APPROVED by ' + rec.approved_by, active: false };
+    if (st === 'draft_ready') return { kind: 'warn', label: 'DRAFT — needs human approval', active: false };
+    if (st === 'queued') return { kind: 'warn', label: 'queued', active: true };
+    if (st === 'running') return { kind: 'warn', label: 'running' + (rec.creao_status ? ' (' + rec.creao_status + ')' : ''), active: true };
+    if (st === 'invalid') return { kind: 'bad', label: 'INVALID — cannot be approved', active: false };
+    if (st === 'failed') return { kind: 'bad', label: 'FAILED', active: false };
+    return { kind: 'warn', label: String(st || 'unknown'), active: false };
+  }
+  function anyActive(runs) { return (runs || []).some(function (r) { return runStatus(r).active; }); }
+  /** Preview model of GET /research/runs/{id}.draft. Visual references are always reference-only. */
+  function draftView(draft) {
+    if (!draft || typeof draft !== 'object') return null;
+    var refs = (draft.visual_references || []).map(function (v) { return { view: v.view, url: isHttpUrl(v.url) ? v.url : null, description: v.description || '', note: REFERENCE_ONLY }; });
+    var valErrors = (draft.validation && draft.validation.errors) || [];
+    return {
+      title: draft.title || '', cardId: draft.card_id || '', mode: draft.goal_mode || '', provenance: draft.provenance || '',
+      steps: (draft.steps || []).map(function (st, i) { return { n: i + 1, title: st.title, cue: [st.cue && st.cue.line1, st.cue && st.cue.line2].filter(Boolean).join(' / '), check: st.check === 'measured' ? 'MEASURED' : 'you confirm it', detail: st.detail || '', warnings: st.warnings || [] }; }),
+      sources: (draft.sources || []).map(function (so) { return { kind: so.kind, title: so.title, url: isHttpUrl(so.url) ? so.url : null }; }),
+      timestamps: collectTimestamps(draft),
+      uncertainties: draft.uncertainties || [],
+      references: refs,
+      hasPictures: !!draft.pictures_on_glasses,
+      validationOk: !!(draft.validation && draft.validation.ok) && valErrors.length === 0,
+      validationErrors: valErrors,
+    };
+  }
+  /** [{source, loc, url, step}] for every step cite whose loc is a timestamp. */
+  function collectTimestamps(draft) {
+    var out = [];
+    (draft.steps || []).forEach(function (st) { (st.cites || []).forEach(function (c) { if (isTimestampLoc(c.loc)) out.push({ source: c.source, loc: c.loc, url: isHttpUrl(c.url) ? c.url : null, step: st.title }); }); });
+    return out;
+  }
+  /** Approve only with an approved-able draft, a reviewer name and a token (both kept in memory by the page). */
+  function canApprove(rec, reviewer, token) {
+    if (!rec || rec.status !== 'draft_ready' || !rec.draft_id || rec.approved_by) return { ok: false, why: rec && rec.approved_by ? 'Already approved.' : 'Only a valid draft can be approved.' };
+    if (!rec.draft || !rec.draft.validation || rec.draft.validation.ok !== true) return { ok: false, why: 'The draft does not validate.' };
+    if (!String(reviewer || '').trim()) return { ok: false, why: 'Enter your name as reviewer.' };
+    if (!String(token || '').trim()) return { ok: false, why: 'Enter the admin token.' };
+    return { ok: true, why: '' };
+  }
+  function runError(status, body) {
+    if (status === 503) return 'CREAO is disabled on this core (set GB_CREAO=1 and CREAO_API_KEY on the backend). Nothing was started.';
+    if (status === 429) return 'Not started: ' + (detailOf(body) || 'rate limit') + '.';
+    if (status === 422) return 'Not started: ' + (detailOf(body) || 'invalid request') + '.';
+    if (status === 0) return 'Could not reach core. Nothing was started.';
+    return 'Not started: HTTP ' + status + (body ? ' ' + String(body).slice(0, 160) : '') + '.';
+  }
+  function approveError(status, body) {
+    if (status === 401) return 'NOT APPROVED: the admin token was rejected.';
+    if (status === 503) return 'NOT APPROVED: approval is disabled on this core (GB_ADMIN_TOKEN is not set).';
+    if (status === 409) return 'NOT APPROVED: ' + (detailOf(body) || 'refused') + '.';
+    if (status === 422) return 'NOT APPROVED: a reviewer name is required.';
+    if (status === 0) return 'NOT APPROVED: could not reach core.';
+    return 'NOT APPROVED: HTTP ' + status + (body ? ' ' + String(body).slice(0, 160) : '') + '.';
+  }
+  function detailOf(body) {
+    try { var j = typeof body === 'string' ? JSON.parse(body) : body; if (j && typeof j.detail === 'string') return j.detail.slice(0, 240); } catch (e) { /* not JSON */ }
+    return '';
+  }
+
   return {
     isPlaybookCard: isPlaybookCard, cardUsesTelemetry: cardUsesTelemetry, usesTelemetry: usesTelemetry,
     showPiHealth: showPiHealth, showPiBanners: showPiBanners, currentStepIndex: currentStepIndex,
@@ -125,5 +213,8 @@
     provenanceNote: provenanceNote, isTimestampLoc: isTimestampLoc,
     normalizeAsk: normalizeAsk, askError: askError, researchOutcome: researchOutcome, researchError: researchError,
     NOT_AVAILABLE: NOT_AVAILABLE,
+    REFERENCE_ONLY: REFERENCE_ONLY, creaoEnabled: creaoEnabled, parseUrls: parseUrls, isHttpUrl: isHttpUrl, buildRunBody: buildRunBody,
+    runStatus: runStatus, anyActive: anyActive, draftView: draftView, collectTimestamps: collectTimestamps, canApprove: canApprove,
+    runError: runError, approveError: approveError,
   };
 });
