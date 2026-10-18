@@ -1,6 +1,6 @@
 # Open Palm
 
-**Say what you want to tell a Deaf person; Even Realities G2 glasses show you how to sign it, one sign at a time, hands-free.**
+**Learn how to use ASL in your every day life. Say what you want to tell a Deaf person; Even Realities G2 glasses show you how to sign it, one sign at a time, hands-free.**
 
 Signing needs both hands and eye contact, so a phone is in the way. Open Palm puts each sign in your field of view: the handshape, two short how-to lines, and a small face showing the expression to hold.
 
