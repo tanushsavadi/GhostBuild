@@ -2,6 +2,16 @@
 
 Simulated runs do not count. Record each result in the matrix at the bottom. Laptop IP below is an example; get yours with `ipconfig getifaddr en0`.
 
+## Quick start (3 terminals, in this order)
+1. **Laptop:** `git checkout lead/hw-pivot && git pull && make setup && make core` (leave running). Then in a second tab: `make lan` — it prints the exact Pi and G2 commands with this laptop's IP and says whether core is reachable.
+2. **Pi operator:** run the "PI OPERATOR" lines `make lan` printed. First one must print JSON, otherwise stop and fix the network (section 0).
+3. **G2 operator:** run the "G2 OPERATOR" lines. First goal: the real welcome frame on the glasses, then press, then the WHERE picture.
+
+**Report the first live result exactly like this** (paste logs): `Pi->core: PASS/FAIL (/health JSON)`, `Core->G2: PASS/FAIL (what the glasses showed)`, plus the first error line from the Pi terminal, `make core` terminal, or the phone/Even app.
+
+**Network ladder** (go down only when the rung above fails): (1) venue Wi-Fi, http://LAN IP; (2) phone hotspot or laptop Internet Sharing for all three devices; (3) HTTPS tunnel (e.g. `tailscale funnel 8787`) — then rebuild with `BACKEND=https://<name>.ts.net make g2-pack` (a packaged app may block cleartext http to a LAN IP; this is unverified until the first device test).
+**macOS firewall:** the first time Python listens, click Allow. If you missed it: System Settings -> Network -> Firewall -> allow Python, or `sudo /usr/libexec/ApplicationFirewall/socketfilterfw --add "$(uv run python -c 'import sys;print(sys.executable)')" --unblockapp "$(uv run python -c 'import sys;print(sys.executable)')"`.
+
 ## 0. Network (do first)
 Laptop, Pi and phone must be on the SAME network that allows device-to-device traffic. Venue/campus Wi-Fi often isolates clients. If `curl http://<laptop-ip>:8787/health` from the Pi fails, use a phone hotspot or the laptop's Internet Sharing for all three. When the laptop IP changes, rebuild the `.ehpk` (section 3). macOS will ask to allow incoming connections for Python the first time: Allow.
 

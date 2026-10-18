@@ -65,6 +65,9 @@ guides:            ## build G2-ready guide PNGs from knowledge/guides sources
 	$(call need,assets/build_guides.py,A)
 	$(PY) assets/build_guides.py
 
+lan:               ## print Pi/G2 operator commands with this laptop's IP and check core reachability
+	@scripts/lan.sh
+
 card-import:       ## validate + store a research-agent envelope as a DRAFT: make card-import FILE=envelope.json
 	@test -n "$(FILE)" || { echo "FILE=<envelope.json> required"; exit 1; }
 	$(PY) -m knowledge.importer $(FILE)
