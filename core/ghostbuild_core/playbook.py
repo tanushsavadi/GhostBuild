@@ -135,6 +135,7 @@ class PlaybookEngine:
         self._shown_key: Optional[tuple] = None
         self._shown_at: int = 0
         self._image_cache: dict[str, tuple[Any, Optional[tuple[int, int, str]]]] = {}
+        self._tried: list[tuple[str, int]] = []  # (step id, check index) already suggested for 'that didn't work'; cleared when a step is confirmed
 
         self._restore(progress)
         self._unsub = self.hud.subscribe(self._on_frame)
@@ -358,6 +359,7 @@ class PlaybookEngine:
         if not from_ask and not self._step_settled(now):
             return  # accidental-input guard: no frame
         self.confirmed.append(st.id)
+        self._tried.clear()
         self._event(f"step {st.id} confirmed by wearer", "HUMAN CONFIRMED", {"step": st.id})
         self._after_step_done(now)
 
@@ -561,11 +563,7 @@ class PlaybookEngine:
             i = intent_mod.faq_best(text, st.faq)
             cue = st.faq[i[0]].a if i else None
         elif intent == "troubleshoot":
-            last = self.last_obs
-            for chk in st.troubleshoot:
-                if not chk.when or (last is not None and eval_all(chk.when, last)):
-                    cue, detail = chk.action, chk.why
-                    break
+            cue, detail, label = self._next_check(label)
         elif intent == "status":
             cue = Cue(line1=f"STEP {self.index + 1} OF {self.count}" if not self.done else "TASK COMPLETE", line2=(st.title if not self.done else self.card.title).upper()[:26])
             label = "DETERMINISTIC"
@@ -581,6 +579,33 @@ class PlaybookEngine:
         self._flash(Screen.ask(cue, ttl_ms=ASK_TTL_MS), ASK_TTL_MS, "ask", now=now)
         self._refresh(immediate=True)
         return AskResult(intent=intent, answered=answered, cue=cue, text=body, detail=detail, label=label, step_id=st.id, card_id=self.card.card_id)
+
+    def _next_check(self, label: EvidenceLabel) -> tuple[Optional[Cue], str, EvidenceLabel]:
+        """The next untried CHECK for 'that did not work'. Order: the current step's checks (card order = most likely first), then the
+        checks of steps the wearer already confirmed, most recent first (a finished step can be the cause). Steps not reached yet are never
+        consulted. A check with a telemetry predicate is offered only while measured data satisfies it. Source-link entries are not checks."""
+        last = self.last_obs
+        earlier = [s for s in reversed(self.card.steps[: self.index]) if s.id in self.confirmed or s.id in self.verified]
+        for st in [self.step, *earlier]:
+            for i, chk in enumerate(st.troubleshoot):
+                if (st.id, i) in self._tried or chk.action.line1.startswith("CHECK SOURCE"):
+                    continue
+                if chk.when and not (last is not None and eval_all(chk.when, last)):
+                    continue
+                self._tried.append((st.id, i))
+                detail = chk.why
+                if st.id != self.step.id:
+                    detail += f" (From step {self.card.steps.index(st) + 1}, {st.title}, which you already confirmed.)"
+                self._event(f"problem reported; suggested check {len(self._tried)}: {_cue_text(chk.action)}", "INFERRED",
+                            {"step": self.step.id, "from_step": st.id, "tried": len(self._tried)})
+                return chk.action, detail, label
+        if self._tried:
+            n = len(self._tried)
+            self._event(f"problem reported; all {n} checks in this card were already suggested", "DETERMINISTIC", {"step": self.step.id, "tried": n})
+            return (Cue(line1="NO MORE CHECKS HERE", line2="SEE PHONE"),
+                    f"You have already tried {n} check{'s' if n != 1 else ''} from this guide. The card has no further suggestions for this problem.",
+                    "DETERMINISTIC")
+        return None, "", label
 
     def _ask_navigate(self, intent: str, now: int) -> AskResult:
         gesture = {"next": "swipe_down", "back": "swipe_up", "picture": "press"}[intent]

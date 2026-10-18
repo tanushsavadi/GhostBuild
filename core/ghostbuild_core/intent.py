@@ -214,7 +214,9 @@ _PB_BACK = re.compile(r"^(?:please )?(?:back|previous|go back|previous step|last
 
 _PB_TROUBLE = re.compile(
     r"\bdid not work\b|\bdidn't work\b|\bdoesn't work\b|\bdoes not work\b|\bnot working\b|\bwhat if\b|\bstill (not|wrong|broken|dark|off)\b|"
-    r"\bnothing (changed|happened)\b|\bno luck\b|\bfailed\b|\bstuck\b|\bwon't\b|\bwhat else\b|\bproblem\b"
+    r"\bnothing (changed|happened)\b|\bno luck\b|\bfailed\b|\bstuck\b|\bwon't\b|\bwhat else\b|\bproblem\b|"
+    r"\b(isn't|isnt|is not|aren't|wasn't|not) (working|lighting|blinking|turning on|coming on|showing|responding|lit)\b|"
+    r"\bdoesn't (light|blink|turn on|come on|show|respond)\b|\bnothing's (happening|changing)\b|\bno (light|blink|response)\b"
 )
 _PB_WHERE = re.compile(r"\bwhere\b|\bwhich part\b|\blocate\b")
 _PB_WHY = re.compile(r"\bwhy\b|\bmatter\b|\breason\b|\bimportant\b")

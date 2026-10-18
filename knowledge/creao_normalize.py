@@ -36,7 +36,7 @@ STEP_TITLE_KEYS = ("title", "name")
 STEP_DETAIL_KEYS = ("detail", "details", "description", "explanation", "notes")
 STEP_WARN_KEYS = ("warnings", "warning", "tips", "tip", "safety", "cautions", "caution")
 FAQ_KEYS = ("faq", "faqs", "questions")
-TROUBLE_KEYS = ("troubleshooting", "troubleshoot", "problems")
+TROUBLE_KEYS = ("troubleshooting", "troubleshoot", "problems", "troubleshooting_branches")
 SOURCE_KEYS = ("sources", "references", "citations")
 UNCERTAIN_KEYS = ("uncertainties", "caveats", "limitations", "unknowns", "uncertainty")
 VISUAL_KEYS = ("visuals", "images", "diagrams", "visual_references", "pictures")
@@ -541,11 +541,19 @@ def _attribute_text(text: str, steps: list[dict]) -> Optional[int]:
     return None
 
 
+def _stem(word: str) -> str:
+    for suffix in ("ing", "ed", "es", "s"):
+        if word.endswith(suffix) and len(word) - len(suffix) >= 3:
+            word = word[: -len(suffix)]
+            break
+    return word[:-1] if len(word) > 3 and word[-1] == word[-2] else word
+
+
 def _best_step(text: str, steps: list[dict]) -> int:
-    toks = _tokens(text)
+    toks = {_stem(t) for t in _tokens(text)}
     best, score = 0, 0
     for i, s in enumerate(steps):
-        sc = len(toks & _tokens(s["title"] + " " + s["_action"] + " " + s["detail"]))
+        sc = len(toks & {_stem(t) for t in _tokens(s["title"] + " " + s["_action"] + " " + s["detail"])})
         if sc > score:
             best, score = i, sc
     return best
@@ -613,6 +621,11 @@ def _build_card(payload: dict, request: str, ctx: _Ctx, device: str, model: str,
         # troubleshoot
         for t in _as_list(d.get("troubleshooting")) + _as_list(d.get("troubleshoot")) + _as_list(d.get("problems")):
             _add_trouble(step, t, ctx)
+        fails = [t for t in (_text_of(x) for x in _as_list(d.get("likely_failures"))) if t]
+        for nc in _as_list(d.get("next_checks")):
+            nc_text = _text_of(nc)
+            if nc_text:
+                _add_trouble(step, {"problem": "; ".join(fails)[:200], "check": nc_text}, ctx)
         # per-step uncertainty
         for k in ("uncertainties", "uncertainty", "caveats", "caveat", "limitations"):
             for u in _as_list(d.get(k)):
@@ -653,6 +666,9 @@ def _build_card(payload: dict, request: str, ctx: _Ctx, device: str, model: str,
         q = _first_str(f, ("q", "question")) if isinstance(f, dict) else ""
         _add_faq(steps[_best_step(q, steps)], f, ctx)
     for t in [t for k in TROUBLE_KEYS for t in _as_list(payload.get(k))]:
+        if isinstance(t, dict) and isinstance(t.get("likely_causes"), list):  # {symptom, likely_causes:[{cause, evidence, fix}]}
+            _add_symptom_causes(steps, t, ctx)
+            continue
         text = _text_of(t) if not isinstance(t, dict) else (_first_str(t, ("problem", "issue", "symptom")) + " " + _first_str(t, ("fix", "solution", "action", "check")))
         _add_trouble(steps[_best_step(text, steps)], t, ctx)
     for u in [u for k in UNCERTAIN_KEYS for u in _as_list(payload.get(k))]:
@@ -774,6 +790,33 @@ def _add_faq(step: dict, f: Any, ctx: _Ctx) -> None:
     step["faq"].append({"q": _clean_faq_q(q), "a": cue})
     if short:
         step["detail"] = (step["detail"] + f" FAQ: {q.strip()} {a.strip()}").strip()
+
+
+def _add_symptom_causes(steps: list[dict], branch: dict, ctx: _Ctx) -> None:
+    """One symptom with several likely causes -> one CHECK item per cause, on the step where that cause is acted on.
+    The CHECK cue names the cause (what to look at); the phone text keeps the symptom, evidence and fix. Nothing is invented."""
+    symptom = _first_str(branch, ("symptom", "problem", "issue"))
+    for c in _as_list(branch.get("likely_causes")):
+        if not isinstance(c, dict):
+            continue
+        cause = _first_str(c, ("cause", "reason"))
+        evidence = _first_str(c, ("evidence", "how_to_check", "signs"))
+        fix = _first_str(c, ("fix", "check", "solution", "action"))
+        if not cause:
+            continue
+        step = steps[_best_step(" ".join((cause, evidence, fix)), steps)]
+        before = len(step["troubleshoot"])
+        for candidate in (cause, evidence, fix):  # the first phrase that makes a legal CHECK cue (no diagnosis words)
+            if not candidate:
+                continue
+            _add_trouble(step, {"problem": symptom, "check": re.split(r"\s*[(;,]\s*", candidate, 1)[0]}, ctx)
+            if step["troubleshoot"][-1]["action"].get("line2") != "SEE PHONE" or candidate == fix:
+                break
+            step["troubleshoot"].pop()
+        if len(step["troubleshoot"]) > before:
+            step["troubleshoot"][-1]["why"] = " ".join(x for x in (
+                f"If {symptom.rstrip('.')}:" if symptom else "", cause.rstrip(".") + ".",
+                f"Evidence: {evidence.rstrip('.')}." if evidence else "", f"Fix: {fix.rstrip('.')}." if fix else "") if x)
 
 
 def _add_trouble(step: dict, t: Any, ctx: _Ctx) -> None:

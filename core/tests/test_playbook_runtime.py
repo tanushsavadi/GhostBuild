@@ -414,9 +414,12 @@ def test_ask_intents_answer_from_card_text_only(tmp_path):
         assert cur(rt).mode == "ask"
         settle(rt, 4100)
         # a step without that content never invents it
-        confirm(rt)  # s2: no troubleshoot entry
+        confirm(rt)  # s2: no troubleshoot entry of its own; the confirmed step s1's check is the only candidate
         j = ask("what if it didn't work")
-        assert j["answer"] is None and j["text"].startswith("NOT IN MY PLAYBOOK")
+        assert j["answer"]["line1"] == "CHECK PART 1" and "which you already confirmed" in j["text"]
+        settle(rt, 4100)
+        j = ask("what if it didn't work")  # already suggested: no repeat, no invention
+        assert j["answer"]["line1"] == "NO MORE CHECKS HERE" and j["label"] == "DETERMINISTIC"
 
 
 def test_ask_navigation_matches_gestures_and_never_verifies(tmp_path):
