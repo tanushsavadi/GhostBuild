@@ -241,7 +241,7 @@ export type SessionId = string | null;
 export type Surface = "g2" | "simulator";
 export type Type = "g2_hello";
 export type V1 = 2;
-export type Gesture = "press" | "swipe_down" | "swipe_up" | "hold_start" | "hold_end";
+export type Gesture = "press" | "swipe_down" | "swipe_up" | "hold_start" | "hold_end" | "home";
 /**
  * last hud seq the plugin had rendered
  */

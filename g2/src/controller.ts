@@ -10,7 +10,7 @@ export interface ControllerDeps {
   sendInput: (i: G2Input) => boolean
   /** Ask the transport for the current frame again (re-hello). */
   rehello: () => void
-  /** Local exit: shutDownPageContainer(1). Double press only. */
+  /** Local exit: shutDownPageContainer(1). Double press on the home screen, or when the backend is unreachable. */
   exit: () => void
   surface: () => 'g2' | 'simulator'
   /** Hold-to-ask capture (voice.ts). Only present when built with VITE_FLAG_VOICE=1; it then OWNS hold_start/hold_end
@@ -42,6 +42,9 @@ export class Controller {
   private expired: { seq: number; key: string } | null = null
   private offlineShown = false
   private healthy = false
+  /** Double press: system exit on a root screen (core tags it cue_id "home", as Even QA requires); Home everywhere else. */
+  private atRoot = false
+  private homeSentAt: number | null = null
   private opts: ViewOptions
 
   constructor(private readonly d: ControllerDeps) {
@@ -115,6 +118,7 @@ export class Controller {
       return
     }
     this.seqSeen = frame.seq
+    this.atRoot = frame.cue_id === 'home'
     const view = frameToView(frame, this.opts)
 
     if (this.expired && this.expired.seq === frame.seq && this.expired.key === view.key) {
@@ -159,7 +163,14 @@ export class Controller {
   // ------------------------------------------------------------------- gestures
   onAction(a: GestureAction): void {
     if (a.kind === 'exit') {
-      this.d.exit() // never forwarded to the backend
+      // Double press: system exit at root, offline, or when the last Home changed nothing; otherwise Home from any step.
+      const last = this.gate.lastSeq
+      if (!this.healthy || this.atRoot || last === this.homeSentAt) {
+        this.d.exit()
+        return
+      }
+      this.homeSentAt = last
+      if (!this.d.sendInput({ type: 'g2_input', v: 2, gesture: 'home', seq_seen: this.seqSeen, surface: this.d.surface() })) this.d.exit()
       return
     }
     if (a.kind !== 'send') return

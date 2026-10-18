@@ -89,11 +89,48 @@ describe('frames', () => {
 })
 
 describe('gestures', () => {
-  it('double press exits locally and is NEVER sent to the backend', () => {
+  it('double press while offline exits locally and is NEVER sent to the backend', () => {
     const { c, sent, exits } = setup()
     c.onAction({ kind: 'exit' })
     expect(exits).toHaveLength(1)
     expect(sent).toEqual([])
+  })
+  it('double press at the root screen exits at once (Even QA), even while connected', () => {
+    const { c, sent, exits } = setup()
+    c.onHealth(true)
+    c.onMessage({ ...example('hud_menu'), seq: 49, cue_id: 'home' })
+    c.onAction({ kind: 'exit' })
+    expect(exits).toHaveLength(1)
+    expect(sent).toEqual([])
+  })
+  it('double press = Home from a step; on the root screen it returns, double press = exit', () => {
+    const { c, sent, exits } = setup()
+    c.onHealth(true)
+    c.onMessage({ ...example('hud_step'), seq: 50 })
+    c.onAction({ kind: 'exit' })
+    expect(sent.map((i) => [i.gesture, i.seq_seen])).toEqual([['home', 50]])
+    expect(exits).toHaveLength(0)
+    c.onMessage({ ...example('hud_menu'), seq: 51, cue_id: 'home' })
+    c.onAction({ kind: 'exit' })
+    expect(exits).toHaveLength(1)
+    expect(sent).toHaveLength(1)
+  })
+  it('a Home that changed nothing makes the next double press exit (never a dead gesture)', () => {
+    const { c, sent, exits } = setup()
+    c.onHealth(true)
+    c.onMessage({ ...example('hud_step'), seq: 60 })
+    c.onAction({ kind: 'exit' })
+    c.onAction({ kind: 'exit' })
+    expect(sent.map((i) => i.gesture)).toEqual(['home'])
+    expect(exits).toHaveLength(1)
+  })
+  it('a Home that cannot be sent exits locally', () => {
+    const exits: number[] = []
+    const c = new Controller({ render: () => {}, sendInput: () => false, rehello: () => {}, exit: () => exits.push(1), surface: () => 'g2' })
+    c.onHealth(true)
+    c.onMessage({ ...example('hud_step'), seq: 70 })
+    c.onAction({ kind: 'exit' })
+    expect(exits).toHaveLength(1)
   })
   it('ignore/lifecycle actions send nothing', () => {
     const { c, sent } = setup()
@@ -209,12 +246,13 @@ describe('playbook: step mode and 3-option menu', () => {
     send(c, { sysEvent: {} })
     expect(sent.map((i) => [i.gesture, i.seq_seen])).toEqual([['swipe_down', 30], ['swipe_up', 30], ['press', 30]])
   })
-  it('double press in step mode exits locally and sends nothing', () => {
+  it('double press in step mode goes Home (connected) and never reaches the backend as a press', () => {
     const { c, sent, exits } = setup()
+    c.onHealth(true)
     c.onMessage({ ...example('hud_step'), seq: 31 })
     send(c, { sysEvent: { eventType: 3 } })
-    expect(exits).toHaveLength(1)
-    expect(sent).toEqual([])
+    expect(exits).toHaveLength(0)
+    expect(sent.map((i) => i.gesture)).toEqual(['home'])
   })
   it('swipe and press are forwarded in a 3-option menu', () => {
     const { c, sent, rendered } = setup()

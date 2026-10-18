@@ -41,7 +41,7 @@ GuideViewName = Literal["where", "how", "correct"]
 HudMode = Literal["quiet", "welcome", "menu", "step", "intervene", "visual", "ask", "verified", "uncertain", "error"]
 GoalMode = Literal["fix", "build"]
 GoalVia = Literal["g2_menu", "voice", "phone_text"]
-Gesture = Literal["press", "swipe_down", "swipe_up", "hold_start", "hold_end"]
+Gesture = Literal["press", "swipe_down", "swipe_up", "hold_start", "hold_end", "home"]  # home: G2 double press while a task is shown
 
 
 class Strict(BaseModel):

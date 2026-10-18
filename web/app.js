@@ -208,9 +208,9 @@
     memo(tagEl, tp.join('  '), function () { tagEl.hidden = !tp.length; tagEl.textContent = tp.join('  '); });
     var note = document.querySelector('.area-mirror .gesture-note');
     if (note) {
-      var gestureNote = 'Press for a picture · Swipe up goes back · Double press exits G2';
-      if (hud && hud.answer) gestureNote = 'Swipe to read the answer · Press to return to your step · Double press exits G2';
-      else if (hud && hud.menu) gestureNote = 'Swipe to choose an answer · Press to select · Double press exits G2';
+      var gestureNote = 'Press for a picture · Swipe up goes back · Double press: home';
+      if (hud && hud.answer) gestureNote = 'Swipe to read the answer · Press to return to your step · Double press: home';
+      else if (hud && hud.menu) gestureNote = 'Swipe to choose an answer · Press to select · Double press: home';
       else if (hud && hud.step && hud.step.check === 'manual') gestureNote = 'Press for pictures · Swipe down confirms this step · Swipe up goes back';
       note.textContent = gestureNote;
     }

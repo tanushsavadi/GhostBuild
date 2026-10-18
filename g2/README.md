@@ -25,7 +25,7 @@ the installed skills disagree with the `.d.ts`, the `.d.ts` wins (see Discrepanc
 |---|---|---|
 | `view.ts` | `frameToView(frame)`: quiet -> `" "`; 1-2 centred lines; menu with `> FIX` / `  BUILD` (2 or 3 options); step frames = action cue + small counter on the dim tag line (`3/8`, `● 3/8` measured, `3/8 OK` confirmed); picture + caption (+ step counter when opened from a step); stale -> `STALE DATA`; non-live source tag | yes |
 | `glyphs.ts` | whitelist sanitizer (ASCII + documented glyphs, folds the rest, `VITE_GLYPHS=ascii` fallback) | yes |
-| `gestures.ts` | SDK event -> `press / swipe_up / swipe_down / hold_start / hold_end`; DOUBLE -> local exit only | yes |
+| `gestures.ts` | SDK event -> `press / swipe_up / swipe_down / hold_start / hold_end`; DOUBLE -> system exit at a root screen (`cue_id` "home") or offline, `home` elsewhere | yes |
 | `gate.ts` | `SeqGate` (never backwards, never a duplicate seq) + `isHudFrame` runtime guard | yes |
 | `controller.ts` | gate + identical-view skip + `ttl_ms` local clear + 3 s offline view + re-hello; no SDK calls | yes |
 | `conn.ts` | WS `/ws?role=g2` + hello first + backoff; 4 s -> poll `GET /hud?after=` every 300 ms + `POST /hello`, `POST /input` | yes |
@@ -67,8 +67,9 @@ the installed skills disagree with the `.d.ts`, the `.d.ts` wins (see Discrepanc
 * `stale: true` frames render `STALE DATA / CHECK LINK`. Non-`pi_live` sources always show a `SIMULATED` or `REPLAY` tag, including
   in quiet mode.
 * Gestures: single press -> `press`; text-container scroll 2 -> `swipe_down`, 1 -> `swipe_up`; `LONG_PRESS_EVENT (9)` /
-  `LONG_PRESS_RELEASE_EVENT (10)` -> `hold_start` / `hold_end` (core can ignore them); **DOUBLE (3), checked first in every envelope ->
-  `shutDownPageContainer(1)` locally, never sent**. A press is a recheck, never a commit. Inputs are dropped (not queued) with no
+  `LONG_PRESS_RELEASE_EVENT (10)` -> `hold_start` / `hold_end` (core can ignore them); **DOUBLE (3), checked first in every envelope: on a root
+  screen (core tags it `cue_id: "home"`) or offline -> `shutDownPageContainer(1)` locally; anywhere else -> `home` (back to the
+  task list), and a second double press there exits**. A press is a recheck, never a commit. Inputs are dropped (not queued) with no
   connection, because a stale recheck is meaningless later.
 * Surface label: `?surface=simulator|g2`, else the simulator's hard-coded device sn (`S2001234567890`, observed) marks it
   `simulator`; hardware reports `g2`. Used on hello and inputs so a simulator run is never mistaken for the glasses.
@@ -100,7 +101,7 @@ cd g2 && npm run simulate             # evenhub-simulator "http://localhost:5173
 ```
 
 Drive core with `curl -X POST "localhost:8787/sim/scenario?name=blocked|recover|healthy"`. The simulator window: Up/Down = swipe,
-Click = press, Double Click = exit dialog. Automation: `curl localhost:9898/api/screenshot/glasses -o shot.png` (RGBA, alpha > 0 =
+Click = press, Double Click = Home from a task, exit dialog at the root screen. Automation: `curl localhost:9898/api/screenshot/glasses -o shot.png` (RGBA, alpha > 0 =
 lit), `curl localhost:9898/api/console`, `POST /api/input {"action":"click|up|down|double_click|long_press|long_press_release"}`.
 The plugin logs `[ghostbuild] ready` once the page exists (wait ~4 s after launch before sending input).
 
@@ -204,12 +205,12 @@ Playbook (generic step cards; physical G2 needed, none of this is hardware-verif
 - [ ] **Accidental-swipe guard:** brush the temple / scroll a few times quickly; confirm how many steps a stray swipe skips and that core's guard (not this plugin) stops a double-advance. Press must NEVER confirm a step (press = open picture / recheck only).
 - [ ] A measured step does not advance on swipe; press shows `NOT MET YET`, and the step clears only when the measured evidence arrives (`● CHECK PASSED`), never from a gesture.
 - [ ] Picture opened from a step: the 288x144 picture is legible, the caption and `2/8  PIC 1/2` counter are readable under it; press or swipe up returns to the same step; a failed image fetch shows the text cue.
-- [ ] Chooser (3 options, `> ` marker): swipe moves one option per swipe, press selects, double press still exits; all three rows fit the container.
-- [ ] Double press during a step shows the system exit dialog and sends nothing to core.
+- [ ] Chooser (3 options, `> ` marker): swipe moves one option per swipe, press selects, double press at the root task list exits; all three rows fit the container.
+- [ ] Double press during a step returns to the task list (core log: `home`); a second double press shows the system exit dialog.
 
 Input:
 - [ ] Single press arrives once (not twice). Swipe down/up map the right way (down = next view).
-- [ ] Double press shows the system exit dialog; cancel keeps the app working; nothing was sent to core (check core log).
+- [ ] Double press on the root screen shows the system exit dialog at once; cancel keeps the app working; nothing was sent to core (check core log).
 - [ ] Long press: does `hold_start`/`hold_end` reach core, or does the OS menu claim it (docs: tap-then-hold opens the OS menu)?
 - [ ] Ring (R1) gestures behave the same, if available.
 
