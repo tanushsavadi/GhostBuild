@@ -50,7 +50,23 @@ It is a phrasebook coach for a hearing person's first conversations, not an inte
 
 ## Quick start
 
-**Needs:** Node 20+, [`uv`](https://docs.astral.sh/uv/) (only to rebuild the data), the Even Realities app on a phone, and G2 glasses (or just the simulator).
+**Needs:** Node 20+, [`uv`](https://docs.astral.sh/uv/) (for the laptop server and the data tools), the Even Realities app on a phone, and G2 glasses (or just the simulator).
+
+**Get the code** (Open Palm lives on the `test_sim` branch):
+
+```bash
+git clone https://github.com/tanushsavadi/GhostBuild.git
+cd GhostBuild
+git checkout test_sim
+```
+
+**Keys** (only for speech): create a file named `.env` in the repo root with your own key. It is git-ignored; never commit it.
+
+```
+ELEVENLABS_API_KEY=your-elevenlabs-key
+```
+
+**Run the app** (first terminal):
 
 ```bash
 cd g2
@@ -59,7 +75,7 @@ npm rebuild @evenrealities/evenhub-simulator   # only if "npm run simulate" says
 npm run dev                                    # leave running
 ```
 
-**Laptop server** (needed for speech; repo root, second terminal). Put `ELEVENLABS_API_KEY=...` in `.env` first:
+**Laptop server** (needed for speech; repo root, second terminal):
 
 ```bash
 uv run tools/open_palm_server.py
