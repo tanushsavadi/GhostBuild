@@ -85,6 +85,15 @@ def _score(card: Card, text: str) -> int:
     return score
 
 
+def covers(card: Card, text: str) -> bool:
+    """The request names everything the card's title is about, or one of its alias phrases. Stricter than _score: a
+    shared phrase cannot select a guide for a different object."""
+    words = _words(text)
+    if any(_has_phrase(words, _words(a)) for a in card.aliases):
+        return True
+    return _tokens(re.sub(r"\([^)]*\)", " ", card.title)) <= _tokens(text)
+
+
 def _prefix(mode: str) -> str:
     return "FIX: " if mode == "fix" else "BUILD: "
 

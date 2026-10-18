@@ -383,17 +383,31 @@ def to_card(g: GraphWire, docs: list[SourceDoc], *, root: Path, card_id: str, re
     return card, notes + [f"uncovered: {u}" for u in g.uncovered]
 
 
+def fetch_readable(urls: list[str], root: Path) -> tuple[list[SourceDoc], list[str]]:
+    """Every page that can be read; one blocked or broken page is skipped and noted, not fatal. None readable is an error."""
+    docs, skipped = [], []
+    for u in urls:
+        try:
+            docs.append(fetch(u, root))
+        except Exception as exc:
+            log.info("source skipped %s: %s", u, exc)
+            skipped.append(f"{u}: {type(exc).__name__}")
+    if not docs:
+        raise ValueError("no source page could be read: " + "; ".join(skipped))
+    return docs, skipped
+
+
 def compile_task(goal: str, urls: list[str], *, root: Path = REPO_ROOT, card_id: Optional[str] = None, context: str = "",
                  review: str = "", vision: bool = True) -> tuple[dict, dict]:
     t0 = time.monotonic()
-    docs = [fetch(u, root) for u in urls]
+    docs, skipped = fetch_readable(urls, root)
     fetch_s = round(time.monotonic() - t0, 2)
     client = _client()
     g, stats = compile_graph(goal, docs, context=context, client=client)
     cid = card_id or (re.sub(r"[^a-z0-9]+", "_", g.title.lower()).strip("_")[:40] + "_" + hashlib.sha1((goal + "|".join(urls)).encode()).hexdigest()[:4])
     t1 = time.monotonic()
     card, notes = to_card(g, docs, root=root, card_id=cid, review=review, vision=vision, client=client)
-    stats.update(fetch_s=fetch_s, images_s=round(time.monotonic() - t1, 2), total_s=round(time.monotonic() - t0, 2), notes=notes,
+    stats.update(fetch_s=fetch_s, images_s=round(time.monotonic() - t1, 2), total_s=round(time.monotonic() - t0, 2), notes=notes, skipped=skipped,
                  sources=[{"url": d.url, "title": d.title, "kind": d.kind, "blocks": len(d.blocks), "pictures": len(d.images)} for d in docs])
     return card, stats
 

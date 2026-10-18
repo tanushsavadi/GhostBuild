@@ -252,3 +252,135 @@ def test_research_while_conversing_prefetches_once_per_task_revision_and_compile
     settle(rt)
     t = task_of(rt)
     assert started == [(f"{t.id}:{t.revision}", "descale my espresso machine")]  # asked a question AND started looking
+
+
+# ------------------------------------------------------------------ I: an identified task converges on research instead of re-asking
+def test_i_identified_task_researches_instead_of_rewording_the_same_question(tmp_path, monkeypatch):
+    """Operator trace 2026-10-18 07:21: model known, location safe, yet the equipment question was reworded until the
+    assistant gave up. A choice the official manual documents is a branch for the sourced guide, not a reason to stall."""
+    open_choice = ["whether it carries a spare wheel and jack, a sealant kit, or both"]
+    brain = FakeBrain(intake=[
+        IntakeReply(action="ask", say="What is the make, model and year?", question_key="vehicle model", critical_unknowns=["exact vehicle"]),
+        IntakeReply(action="ask", say="Does it have a spare wheel and jack, or a sealant kit?", question_key="flat tire equipment",
+                    critical_unknowns=open_choice,
+                    facts=[TaskFact(field="model", value="2024 Toyota Corolla", origin="user", quote="2024 Toyota Corolla")]),
+        IntakeReply(action="ask", decision="REQUEST_CONFIRMATION", say="Do you mean both a spare and a kit?",
+                    question_key="flat tire equipment confirmation", critical_unknowns=open_choice),
+        IntakeReply(action="ask", say="Lift the floor cover and tell me what is there.", question_key="flat tire equipment physical check",
+                    identification_help="Look under the floor cover for a wheel, a jack or a sealant bottle.", critical_unknowns=open_choice),
+    ])
+    rt = boot(tmp_path, brain)
+    sent = []
+    monkeypatch.setattr(rt, "resolve_goal_direct", lambda req, **kw: sent.append(req.text))
+    for text in ("my car has a flat tire", "2024 Toyota Corolla", "Yes, I have access to both.", "Both."):
+        ask_goal(rt, text, via="phone_text")
+        settle(rt)
+    t = task_of(rt)
+    assert decisions(rt) == ["ASK_QUESTION", "ASK_QUESTION", "REQUEST_CONFIRMATION", "RESEARCH"]
+    assert t.critical_unknowns == [] and t.confirmation_pending == "" and t.unnecessary_questions == 1
+    assert len(sent) == 1 and "2024 Toyota Corolla" in sent[0] and open_choice[0] in sent[0]  # the guide must cover both options
+    assert rt.assistant.chat[rt.session().id][-1].text.startswith("I have enough to look up the official procedure")
+
+
+def test_i_a_clear_answer_to_a_confirmation_releases_research(tmp_path, monkeypatch):
+    brain = FakeBrain(intake=[
+        IntakeReply(action="ask", decision="REQUEST_CONFIRMATION", say="Did you say the MK3S+?", question_key="model confirmation",
+                    critical_unknowns=["exact printer model"]),
+        IntakeReply(action="start", decision="RESEARCH", say="Thanks, I will find the official procedure.", goal="unclog a Prusa MK3S+ nozzle",
+                    context_sufficient=True),
+    ])
+    rt = boot(tmp_path, brain)
+    monkeypatch.setattr(rt, "resolve_goal_direct", lambda req, **kw: None)
+    ask_goal(rt, "unclog my prusa nozzle, I think it's the mk3s+", via="phone_text")
+    settle(rt)
+    assert task_of(rt).confirmation_pending
+    ask_goal(rt, "Yes, the MK3S+ model.", via="phone_text")  # not the literal word "yes": still a clear answer
+    settle(rt)
+    assert decisions(rt)[-1] == "RESEARCH" and task_of(rt).confirmation_pending == ""
+
+
+def test_i_a_hedged_answer_keeps_the_confirmation_open(tmp_path):
+    brain = FakeBrain(intake=[
+        IntakeReply(action="ask", decision="REQUEST_CONFIRMATION", say="Did you say the MK3S+?", question_key="model confirmation"),
+        IntakeReply(action="start", decision="RESEARCH", say="Finding it.", goal="unclog a Prusa nozzle", context_sufficient=True),
+    ])
+    rt = boot(tmp_path, brain)
+    ask_goal(rt, "unclog my prusa nozzle", via="phone_text")
+    settle(rt)
+    ask_goal(rt, "maybe, I'm not sure", via="phone_text")
+    settle(rt)
+    assert decisions(rt)[-1] == "REQUEST_CONFIRMATION" and rt.playbook is None
+
+
+def test_i_rewording_without_an_identity_still_stops_instead_of_guessing(tmp_path):
+    brain = FakeBrain(intake=[
+        IntakeReply(action="ask", say="Which exact model?", question_key="model", critical_unknowns=["exact model"]),
+        IntakeReply(action="ask", say="Is there a label with the model?", question_key="model label", critical_unknowns=["exact model"]),
+        IntakeReply(action="ask", say="Can you read the model on the label?", question_key="model label reading", critical_unknowns=["exact model"]),
+    ])
+    rt = boot(tmp_path, brain)
+    for text in ("tighten a loose cabinet hinge", "no idea", "I can't find one"):
+        ask_goal(rt, text, via="phone_text")
+        settle(rt)
+    assert decisions(rt) == ["ASK_QUESTION", "ASK_QUESTION", "ESCALATE_OR_STOP"] and rt.playbook is None
+
+
+def test_i_research_handoff_never_starts_a_guide_for_a_different_object(tmp_path):
+    """Live check 2026-10-18 07:32: after the interview the research goal 'Fix a flat tire on a 2024 Toyota Corolla'
+    started the prepared bike guide, because two of its three title words matched. The research path needs the whole
+    title (or an alias phrase); otherwise it researches."""
+    from pbhelpers import make_card
+    bike = make_card(3, card_id="bike_flat", title="Fix a Flat Bike Tire", goal_mode="fix", aliases=["flat tire on my bike"])
+    brain = FakeBrain(intake=[
+        IntakeReply(action="ask", say="What is the make, model and year?", question_key="vehicle model", critical_unknowns=["exact vehicle"]),
+        IntakeReply(action="start", decision="RESEARCH", say="I will find the official procedure.", context_sufficient=True,
+                    goal="Fix a flat tire on a 2024 Toyota Corolla",
+                    facts=[TaskFact(field="model", value="2024 Toyota Corolla", origin="user", quote="2024 Toyota Corolla")]),
+        IntakeReply(action="start", decision="RESEARCH", say="Finding it.", context_sufficient=True, goal="Fix a flat bike tire"),
+    ])
+    rt = boot(tmp_path, brain, cards=[bike])
+    ask_goal(rt, "my car has a flat tire", via="phone_text", mode="fix")
+    settle(rt)
+    ask_goal(rt, "2024 Toyota Corolla", via="phone_text", mode="fix")
+    settle(rt)
+    assert decisions(rt)[-1] == "RESEARCH" and rt.playbook is None  # not the bike guide
+    ask_goal(rt, "new task: fix my flat bike tire", via="phone_text", mode="fix")
+    settle(rt)
+    assert rt.playbook is not None and rt.playbook.card.card_id == "bike_flat"  # the whole title still selects it
+
+
+def test_i_prefetch_restarts_once_the_exact_model_is_known(tmp_path, monkeypatch):
+    """Live check 2026-10-18: sources prefetched for 'my car has a flat tire' (a generic owner-manual index) were reused for
+    the compile after the person named the exact model. A new identity is a new search."""
+    brain = FakeBrain(intake=[
+        IntakeReply(action="ask", say="Which model?", question_key="vehicle model", critical_unknowns=["model"]),
+        IntakeReply(action="ask", say="Are you parked safely?", question_key="parking safety", critical_unknowns=["safe location"],
+                    goal="Fix a flat tire on a 2024 Toyota Corolla",
+                    facts=[TaskFact(field="model", value="2024 Toyota Corolla", origin="user", quote="2024 Toyota Corolla")]),
+    ])
+    rt = boot(tmp_path, brain)
+    started = []
+    monkeypatch.setattr(rt.live, "prefetch", lambda key, goal: started.append((key, goal)))
+    ask_goal(rt, "my car has a flat tire", via="phone_text")
+    settle(rt)
+    ask_goal(rt, "2024 Toyota Corolla", via="phone_text")
+    settle(rt)
+    t = task_of(rt)
+    assert [k for k, _ in started] == [f"{t.id}:{t.revision}", f"{t.id}:{t.revision}:2024 toyota corolla"]
+    assert started[-1][1] == "Fix a flat tire on a 2024 Toyota Corolla" and t.research_key() == started[-1][0]
+
+
+def test_i_a_long_model_goal_is_clipped_to_the_contract_not_a_crash(tmp_path, monkeypatch):
+    long_goal = "Fix a flat tire on a 2024 Toyota Corolla following the owner's manual, " + "covering every documented option " * 12
+    brain = FakeBrain(intake=[
+        IntakeReply(action="ask", say="Parked safely?", question_key="parking", goal=long_goal, critical_unknowns=["safe location"]),
+        IntakeReply(action="start", decision="RESEARCH", say="Finding it.", goal=long_goal, context_sufficient=True),
+    ])
+    rt = boot(tmp_path, brain)
+    sent = []
+    monkeypatch.setattr(rt, "resolve_goal_direct", lambda req, **kw: sent.append(req.text))
+    ask_goal(rt, "my car has a flat tire", via="phone_text")
+    settle(rt)
+    ask_goal(rt, "yes, on level pavement", via="phone_text")
+    settle(rt)
+    assert len(sent) == 1 and len(sent[0]) <= 300 and sent[0].startswith("Fix a flat tire on a 2024 Toyota Corolla")

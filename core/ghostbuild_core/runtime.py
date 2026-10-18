@@ -311,12 +311,13 @@ class Runtime:
             return res
         return self.resolve_goal_direct(req)
 
-    def resolve_goal_direct(self, req: GoalRequest) -> Optional[GoalResolution]:
-        """The deterministic resolver (cards, then live research). Also the fallback whenever the assistant cannot help."""
+    def resolve_goal_direct(self, req: GoalRequest, *, strict: bool = False) -> Optional[GoalResolution]:
+        """The deterministic resolver (cards, then live research). Also the fallback whenever the assistant cannot help.
+        strict (after an interview chose research): a ready card must cover the whole request, else research."""
         self.elog.write("input", goal=req.model_dump(mode="json"))
         if self._reuse_goal(req):
             return self._reuse_resolution(req)
-        res = self.sessions.apply_goal(req)
+        res = self.sessions.apply_goal(req, strict=strict)
         if res is not None and res.status == "supported" and res.card_id and req.text:
             card = self.card_by_id(res.card_id)
             if card is not None:

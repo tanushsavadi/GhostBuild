@@ -122,3 +122,19 @@ def test_cached_demo_cards_are_valid_cited_and_every_step_is_reachable(cid):
         todo += [ids.index(n) for n in nxt]
     assert len(seen) == len(ids), f"unreachable: {set(ids) - {ids[i] for i in seen}}"
     assert any(st.kind in ("outcome", "stop") for st in card.steps)
+
+
+def test_an_unreadable_source_is_skipped_not_fatal(monkeypatch):
+    """Live check 2026-10-18: one picked page answered 403 and the whole compile failed although other pages were readable."""
+    import knowledge.compile as comp
+
+    def fake_fetch(url, root):
+        if "blocked" in url:
+            raise RuntimeError("Client error '403 Forbidden'")
+        return doc()
+
+    monkeypatch.setattr(comp, "fetch", fake_fetch)
+    docs, skipped = comp.fetch_readable(["https://blocked.example/a", "https://support.apple.com/x"], ROOT)
+    assert len(docs) == 1 and skipped == ["https://blocked.example/a: RuntimeError"]
+    with pytest.raises(ValueError, match="no source page could be read"):
+        comp.fetch_readable(["https://blocked.example/a"], ROOT)

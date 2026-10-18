@@ -302,11 +302,14 @@ class SessionManager:
         return True
 
     # ------------------------------------------------------------------ goal
-    def apply_goal(self, req: GoalRequest) -> Optional[GoalResolution]:
+    def apply_goal(self, req: GoalRequest, *, strict: bool = False) -> Optional[GoalResolution]:
+        """strict: only cards the request fully covers (goal.covers); everything else goes to research."""
         sess = self.sessions.get(req.session_id)
         if sess is None:
             return None
         cards = self._startable()
+        if strict:
+            cards = [c for c in cards if goal_mod.covers(c, req.text or "")]
         res = goal_mod.resolve(req, cards)
         if res.status == "unsupported" and (req.text or "").strip():
             other = req.model_copy(update={"mode": "build" if req.mode == "fix" else "fix"})

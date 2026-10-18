@@ -170,7 +170,7 @@ class LiveResearch:
         run_id = "c-" + uuid.uuid4().hex[:8]
         audience = self.rt.assistant.audience_for(req.session_id) or ""
         task = self.rt.assistant.tasks.get(req.session_id)
-        pre = self._prefetched.get(f"{task.id}:{task.revision}") if task else None  # same task, same revision only
+        pre = self._prefetched.get(task.research_key()) if task else None  # same task, revision and identity only
         pre_urls = list(pre["urls"]) if pre and pre.get("urls") else None
         self.started += 1
         self.active = {"run_id": run_id, "session_id": req.session_id, "goal": text[:300], "mode": req.mode, "started": self._now(),
@@ -214,7 +214,8 @@ class LiveResearch:
             self.last = {"run_id": act["run_id"], "goal": act["goal"], "ok": False, "status": "failed", "error": out.get("error"),
                          "engine": "compile", "took_s": round(took, 1), "at": time.time()}
             self.rt.sessions.fail_research(Cue(line1="NO RELIABLE GUIDE", line2="NO VERIFIED SOURCE FOUND"))
-            self.rt.elog.write("live_research", event="failed", run_id=act["run_id"], engine="compile", error=out.get("error"))
+            self.rt.elog.write("live_research", event="failed", run_id=act["run_id"], engine="compile", error=out.get("error"),
+                               picked=(out.get("search") or {}).get("picked"))
             return
         card = Card.model_validate(out["card"])
         self.durations.append(took)

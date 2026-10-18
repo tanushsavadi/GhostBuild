@@ -135,6 +135,11 @@ class TaskProfile(BaseModel):
         ):
             self.first_useful_at = now
 
+    def research_key(self) -> str:
+        """Prefetched sources belong to one task, revision and named identity; naming the exact model means a new search."""
+        ident = "|".join(f.value.casefold() for f in self.facts if f.origin == "user" and f.field in ("model", "variant"))
+        return f"{self.id}:{self.revision}" + (f":{ident}" if ident else "")
+
     def signature(self):
         return {
             "goal": self.goal,
@@ -250,23 +255,42 @@ def question_key(reply) -> str:
     return " ".join(re.findall(r"[a-z0-9]+", text.lower()))
 
 
+def same_topic(a: str, b: str) -> bool:
+    """Two question keys ask about the same thing: one narrows or rewords the other."""
+    ta, tb = set(a.split()), set(b.split())
+    if not ta or not tb:
+        return False
+    return ta <= tb or tb <= ta or len(ta & tb) >= 0.6 * len(ta | tb)
+
+
+def identified(task: TaskProfile) -> bool:
+    """The person named the exact model or variant themselves (a quoted user fact, never an inference)."""
+    return any(f.origin == "user" and f.field in ("model", "variant") for f in task.facts)
+
+
 def decide(reply, task: TaskProfile, *, ready_exact: bool) -> Decision:
     if reply.action == "decline" or reply.decision == "ESCALATE_OR_STOP":
         return "ESCALATE_OR_STOP"
-    if reply.decision in (
-        "EXPLAIN",
-        "SHOW_VISUAL",
-        "REQUEST_CONFIRMATION",
-        "IDENTIFY_PRODUCT",
-    ):
+    if reply.decision in ("EXPLAIN", "SHOW_VISUAL"):
         return reply.decision
-    if (
+    asking = reply.decision in ("REQUEST_CONFIRMATION", "IDENTIFY_PRODUCT") or (
         reply.action == "ask"
         or task.critical_unknowns
         or not (reply.context_sufficient or ready_exact)
-    ):
-        key = question_key(reply)
-        if key in task.asked:
+    )
+    key = question_key(reply)
+    # A reworded question counts as a repeat once its topic (the broadest earlier key it narrows) was asked twice.
+    core = min((k for k in task.asked if same_topic(k, key)), key=len, default="")
+    repeated = asking and (key in task.asked or (bool(core) and sum(same_topic(k, core) for k in task.asked) >= 2))
+    if repeated and identified(task):
+        # Asking the same thing again will not resolve it. With the exact model known, the official source is the
+        # authority: a guide that covers each documented option and asks at the step where it matters.
+        task.unnecessary_questions += 1
+        return "START_GUIDE" if ready_exact else "RESEARCH"
+    if reply.decision in ("REQUEST_CONFIRMATION", "IDENTIFY_PRODUCT"):
+        return reply.decision
+    if asking:
+        if repeated:
             task.unnecessary_questions += 1
             return "EXPLAIN" if reply.identification_help else "ESCALATE_OR_STOP"
         return "ASK_QUESTION"

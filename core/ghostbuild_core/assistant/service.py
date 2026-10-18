@@ -22,7 +22,7 @@ from .. import goal as goal_mod
 from ..cache import ANSWER_TTL_S, digest, question_key, reusable_question
 from ..playbook import AskResult
 from . import prompts
-from .adaptive import TaskProfile, decide, question_key as intake_question_key, correction, new_goal, task_switch
+from .adaptive import TaskProfile, decide, question_key as intake_question_key, correction, hedged, new_goal, task_switch
 from .brain import Brain, BrainError
 from .cuefmt import cue_from_reply, fit_cue
 from .router import route as route_utterance
@@ -54,6 +54,12 @@ class _Result:
     payload: Any = None
     error: Optional[str] = None
     ctx: dict = field(default_factory=dict)
+
+
+def fit_goal(text: str, limit: int = 300) -> str:
+    """A model-written goal within the GoalRequest contract, cut at a word boundary."""
+    text = " ".join((text or "").split())
+    return text if len(text) <= limit else text[: limit + 1].rsplit(" ", 1)[0].rstrip(",;:")
 
 
 class Assistant:
@@ -210,8 +216,8 @@ class Assistant:
             self.tasks[sid] = TaskProfile(goal=text, mode=req.mode)
         task = self.tasks[sid]
         task.observe(text)
-        if task.confirmation_pending and text.lower() in ("yes", "yes that's right", "correct"):
-            task.confirmation_pending = ""
+        if task.confirmation_pending and not hedged(text):
+            task.confirmation_pending = ""  # the next clear reply answers the confirmation; the model reads it in context
         if correction(text) and active:
             task.critical_unknowns = ["Confirm the corrected product, model or configuration"]
         self._persist()
@@ -338,6 +344,7 @@ class Assistant:
             self._persist()
             return
         self.profiles[sid] = self.profiles.get(sid, Profile()).merged(reply.profile)
+        reply.goal = fit_goal(reply.goal)
         task = self.tasks.setdefault(sid, TaskProfile(goal=st.first_text, mode=st.mode))
         task.phase = "intake"
         task.merge(reply.facts)
@@ -347,6 +354,8 @@ class Assistant:
         ready = self._ready_card(st.first_text, st.mode, reply.library_id) or (
             self._ready_card(reply.goal, st.mode, reply.library_id) if reply.goal else None)
         decision = decide(reply, task, ready_exact=ready is not None)
+        if decision in ("RESEARCH", "START_GUIDE") and (reply.action == "ask" or task.critical_unknowns):
+            self._converge(task, reply)
         if task.confirmation_pending and decision in ("RESEARCH", "START_GUIDE"):
             decision = "REQUEST_CONFIRMATION"
             reply.say = "Please confirm the exact request before I choose a procedure: " + task.confirmation_pending
@@ -362,7 +371,7 @@ class Assistant:
             task.confirmation_pending = req.text or ""
         if action == "ask":
             if ready is None and decision == "ASK_QUESTION" and (reply.goal or st.first_text):
-                self.rt.live.prefetch(task.id + ":" + str(task.revision), reply.goal or st.first_text)  # research while conversing
+                self.rt.live.prefetch(task.research_key(), reply.goal or st.first_text)  # research while conversing
             st.asked += 1
             task.pending_question = reply.say
             key = intake_question_key(reply)
@@ -392,6 +401,20 @@ class Assistant:
         else:
             self._begin(sid, req, reply, st)
         self._persist()
+
+    @staticmethod
+    def _converge(task: TaskProfile, reply: IntakeReply) -> None:
+        """The policy stopped a repeated question: the open choices become requirements the sourced guide must cover."""
+        model = next((f.value for f in reversed(task.facts) if f.origin == "user" and f.field in ("model", "variant")), "")
+        goal = (reply.goal or task.goal).strip().rstrip(".")
+        if model and model.casefold() not in goal.casefold():
+            goal += f" ({model})"
+        if task.critical_unknowns:
+            goal += ". Cover each documented option for: " + "; ".join(task.critical_unknowns)
+        reply.goal = fit_goal(goal)
+        reply.say = ("I have enough to look up the official procedure" + (f" for the {model}" if model else "")
+                     + ". The guide will cover each option and ask you at the step where it matters.")
+        task.critical_unknowns, task.confirmation_pending = [], ""
 
     def _begin(
         self, sid: str, req: GoalRequest, reply: IntakeReply, st: _Intake
@@ -424,7 +447,7 @@ class Assistant:
                 task.phase = "intake"
             d.submit(clarified)  # the conversation named a product source: identify the real product before any manual
             return
-        self.rt.resolve_goal_direct(clarified)  # -> live research with context
+        self.rt.resolve_goal_direct(clarified, strict=True)  # -> live research with context, never a loosely matching card
 
     def audience_for(self, sid: Optional[str]) -> Optional[str]:
         """What a researcher should know about the person, from their own words (<= 480 chars)."""
