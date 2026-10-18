@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>GhostBuild phone (dev)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script>
+// Fixture mode without a backend: /web/dev.html?fixture=1 (or =state_visual, state_healthy, ...). Serve the REPO ROOT, e.g.
+//   python3 -m http.server 8000      then open  http://localhost:8000/web/dev.html?fixture=1
+var q = new URLSearchParams(location.search);
+if (!q.get('fixture')) q.set('fixture', '1');
+location.replace('index.html?' + q.toString());
+</script></head><body style="background:#111;color:#eee;font:16px system-ui">Loading fixture...</body></html>
