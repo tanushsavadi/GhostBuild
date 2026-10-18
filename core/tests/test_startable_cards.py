@@ -78,3 +78,29 @@ def test_front_screen_says_hold_to_speak_only_when_voice_is_on():
     rt.voice = object()  # VoiceService attaches itself here when enabled
     rt.sessions.refresh()
     assert (rt.hud.current.cue.line1, rt.hud.current.cue.line2) == ("WHAT DO YOU NEED?", "HOLD TO SPEAK")
+
+
+def test_prompt_rests_when_nothing_is_asked_and_any_gesture_wakes_it_without_acting():
+    rt, clock = rig()
+    press_through_welcome(rt, clock)
+    assert rt.hud.current.cue.line1 == "WHAT DO YOU NEED?"
+    clock.advance(21_000)
+    rt.tick()
+    assert rt.hud.current.mode == "quiet"  # the wearer is not made to stare at a prompt
+    tap(rt)  # first gesture wakes the screen, nothing more
+    assert rt.hud.current.cue.line1 == "WHAT DO YOU NEED?" and rt.hud.current.menu is None
+    tap(rt)  # a second one is the failsafe list
+    assert rt.hud.current.menu is not None
+
+
+def test_hold_to_speak_works_from_the_resting_screen_and_keeps_it_lit():
+    rt, clock = rig()
+    press_through_welcome(rt, clock)
+    clock.advance(21_000)
+    rt.tick()
+    assert rt.hud.current.mode == "quiet"
+    rt.sessions.wake()  # what voice.on_hold does at the start of a hold
+    assert rt.hud.current.cue.line1 == "WHAT DO YOU NEED?"
+    clock.advance(10_000)
+    rt.tick()
+    assert rt.hud.current.cue.line1 == "WHAT DO YOU NEED?"  # still within the rest time after the interaction

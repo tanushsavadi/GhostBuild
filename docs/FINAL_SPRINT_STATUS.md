@@ -36,6 +36,11 @@ Updated Sun 2026-10-18 ~01:10 PDT by Claude Opus 5.5 (took over from Codex at it
 - Deliberate change to the earlier rule that only reviewed cards reach the glasses: these cards pass the same validator but are not human-reviewed; they stay drafts on disk and in memory only until a human approves.
 - Tests: core 519, knowledge 257, assets 41, g2 184, web 18.
 
+## Quiet intelligence (03:45 PDT, operator design principle)
+- Screens that only wait for the wearer rest (go dark): the front prompt after 20 s, the research wait after 10 s (env `GB_REST_PROMPT_S`, `GB_REST_RESEARCH_S`). A gesture wakes it (the first gesture only wakes, never acts), a hold to speak wakes it, and a finished guide / failure / answer always wakes it. Steps, answers (4 s auto-dismiss) and pictures-on-press unchanged. Core 525 tests; not yet felt on the glasses.
+- Research wait: estimated progress bar + time left (glasses `●●●○○○○○○○ ABOUT 40S`, phone determinate bar + stages), labelled as an estimate; learns from real run durations. Fast-mode research measured 105 s vs 295 s.
+- Conversational intake (Claude brain) NOT built yet: needs `ANTHROPIC_API_KEY` (none present; ElevenLabs key lacks convai).
+
 ## Not done / blocked
 - Physical G2 image + gesture + reconnect test (operator). Voice on G2 needs a voice-build `.ehpk` (`VITE_FLAG_VOICE=1`, declares g2-microphone) and a real device test.
 - Human approval of the LED card (above). Hero hardware (Pi / breadboard / LED / 330 ohm) availability unconfirmed with the operator.

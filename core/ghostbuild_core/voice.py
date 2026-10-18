@@ -138,6 +138,7 @@ class VoiceService:
         if sess is None or sess.phase == "welcome":
             return
         if gesture == "hold_start":
+            self.rt.sessions.wake()  # the wearer is talking to us: the front screen stays lit afterwards
             if self.state in ("listening", "thinking"):
                 return  # duplicate start cannot extend recording indefinitely
             self._utterance_context = self._context_key()

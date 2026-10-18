@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import secrets
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -22,6 +23,10 @@ log = logging.getLogger("ghostbuild.session")
 
 WELCOME_MS = 2500
 FLASH_MS = 2500
+# Quiet intelligence: a screen that only waits for the wearer rests (goes dark) so they stay present. A gesture or a hold wakes it;
+# anything that needs them (a finished guide, a failure, an answer) always wakes it.
+REST_PROMPT_MS = int(float(os.environ.get("GB_REST_PROMPT_S", "20")) * 1000)
+REST_RESEARCH_MS = int(float(os.environ.get("GB_REST_RESEARCH_S", "10")) * 1000)
 JOIN_WINDOW_MS = 15000  # a second surface (simulator) that says hello right after the first joins that session
 MENU_OPTIONS = ["FIX", "BUILD"]
 
@@ -69,6 +74,7 @@ class SessionManager:
         self._menu_selected = self._default_menu()
         self._flash: Optional[tuple[Screen, int]] = None
         self._choice: Optional[_Choice] = None
+        self._awake_at = 0  # last moment the wearer interacted (or something woke the screen)
         self._research: Optional[dict] = None  # live research in progress for the wearer's session: {sid, goal, started_ms}
         self._show_list = False  # the task list is a failsafe behind a tap; the front screen is a conversation prompt
         self._progress: dict[str, dict] = {}  # playbook progress per session id (internal; not part of the Session contract)
@@ -168,6 +174,7 @@ class SessionManager:
     # ------------------------------------------------------------------ hello
     def hello(self, h: G2Hello) -> Session:
         now = self.clock.now_ms()
+        self._awake_at = now  # a (re)connecting wearer sees the screen, then it may rest
         sess = self.sessions.get(h.session_id) if h.session_id else None
         if sess is None:
             act = self.active
@@ -223,6 +230,11 @@ class SessionManager:
                 self._flash = None
                 self._render()
             return False
+        rested = self._is_rested(s)
+        self._awake_at = self.clock.now_ms()
+        if rested and gi.gesture in ("press", "swipe_up", "swipe_down"):
+            self._render()  # the first gesture only wakes the screen; it never acts on something the wearer could not see
+            return True
         if s.phase == "welcome":
             s.phase = "menu"  # a gesture skips the welcome: nobody should wait for a banner
             self._menu_selected = self._default_menu()
@@ -334,11 +346,14 @@ class SessionManager:
             changed = True
         if self._research is not None and self._flash is None:
             changed = True  # re-render: the elapsed time is part of the screen (frames are only emitted when the text changes)
+        elif s is not None and s.phase == "menu" and self._flash is None and self._choice is None and not self._show_list and now - self._awake_at >= REST_PROMPT_MS:
+            changed = True  # the prompt reaches its rest time
         if changed:
             self._render()
 
     def begin_research(self, sid: str, goal: str) -> None:
         self._research = {"sid": sid, "goal": goal, "started_ms": self.clock.now_ms()}
+        self._awake_at = self.clock.now_ms()
         self._record("event", text=f"live research started for {sid}")
         self._render()
 
@@ -354,6 +369,7 @@ class SessionManager:
 
     def fail_research(self, cue: Cue) -> None:
         self._research = None
+        self._awake_at = self.clock.now_ms()
         self._flash = (Screen.uncertain(cue, ttl_ms=FLASH_MS * 2), self.clock.now_ms() + FLASH_MS * 2)
         self._render()
 
@@ -371,6 +387,19 @@ class SessionManager:
         self._save()
         self._render()
 
+    def _is_rested(self, s: Session) -> bool:
+        if s.phase != "menu" or self._flash is not None:
+            return False
+        now = self.clock.now_ms()
+        if self._research is not None and self._research["sid"] == s.id:
+            return now - self._awake_at >= REST_RESEARCH_MS
+        return self._choice is None and not self._show_list and now - self._awake_at >= REST_PROMPT_MS
+
+    def wake(self) -> None:
+        """Something happened that the wearer should see (a hold to speak, a result): keep the screen lit from now."""
+        self._awake_at = self.clock.now_ms()
+        self._render()
+
     def refresh(self) -> None:
         """Re-render the active session's screen (the task list is derived from the loaded cards on every render)."""
         self._render()
@@ -383,6 +412,8 @@ class SessionManager:
             screen = self._flash[0]
         elif s is not None and s.phase == "welcome":
             screen = Screen.welcome(Cue(line1="GHOSTBUILD", line2="VOICE VIA ELEVENLABS" if self._voice_on() else "HANDS BUSY. MIND CLEAR."), WELCOME_MS)
+        elif s is not None and s.phase == "menu" and self._research is not None and self._research["sid"] == s.id and now - self._awake_at >= REST_RESEARCH_MS:
+            screen = Screen.quiet()  # still researching, but the display rests; completion or a gesture wakes it
         elif s is not None and s.phase == "menu" and self._research is not None and self._research["sid"] == s.id:
             secs = max(0, (now - self._research["started_ms"]) // 1000) // 5 * 5  # 5 s steps: calm, and few BLE writes
             title = goal_mod.short_title(self._research["goal"], 26).upper()
@@ -399,6 +430,8 @@ class SessionManager:
             ch = self._choice or (self._root_choice() if self._show_list else None)
             if ch is not None:
                 screen = Screen.make_menu("PICK A TASK", ch.labels, ch.selected)
+            elif self._choice is None and not self._show_list and self._flash is None and now - self._awake_at >= REST_PROMPT_MS:
+                screen = Screen.quiet()  # nothing asked for: the display rests (hold to speak still works)
             else:
                 # the front screen is a conversation: say what you need (hold) or type it on the phone; no list, no BUILD/FIX
                 hint = "HOLD TO SPEAK" if self._voice_on() else "TYPE ON YOUR PHONE"

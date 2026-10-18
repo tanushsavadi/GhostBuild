@@ -170,3 +170,21 @@ def test_the_estimate_learns_from_real_run_durations(live):
     assert rt.live.expected_s() == 110
     rt.live.durations.extend([60.0, 80.0, 70.0])
     assert rt.live.expected_s() == 70.0
+
+
+def test_the_wait_screen_rests_after_a_few_seconds_a_gesture_peeks_and_completion_wakes_it(live):
+    c, rt = live, live.rt
+    ask(c, MOCK_A_REQUEST)
+    rt.clock.advance(3000)
+    rt.tick()
+    assert rt.hud.current.cue.line1.startswith("RESEARCHING ")  # shown at first so the wearer knows it is working
+    rt.clock.advance(9000)
+    rt.tick()
+    assert rt.hud.current.mode == "quiet"  # then it rests: eyes free, the surroundings stay in view
+    rt.handle_input(gi("press"))  # a gesture only peeks at the progress
+    assert rt.hud.current.cue.line1.startswith("RESEARCHING ") and rt.live.active is not None
+    rt.clock.advance(11_000)
+    rt.tick()
+    assert rt.hud.current.mode == "quiet"
+    settle_live(c)  # the guide is ready: that always wakes the display
+    assert rt.hud.current.mode == "intervene" and rt.hud.current.cue.line2 == "AI RESEARCHED, UNREVIEWED"
