@@ -207,7 +207,7 @@ Playbook (generic step cards; physical G2 needed, none of this is hardware-verif
 - [ ] Picture opened from a step: the 288x144 picture is legible, the caption and `2/8  PIC 1/2` counter are readable under it; press or swipe up returns to the same step; a failed image fetch shows the text cue.
 - [ ] Chooser (3 options, `> ` marker): swipe moves one option per swipe, press selects, double press at the root task list exits; all three rows fit the container.
 - [ ] Double press during a step returns to the task list (core log: `home`); a second double press shows the system exit dialog.
-- [ ] Launch intro (G H O S T B U I L D reveal + bar, ~2.7 s) plays on app start, not on reconnect; ▲ ▼ ● hint glyphs render on the bottom line (else set `VITE_GLYPHS=ascii`).
+- [ ] Launch intro (G H O S T B U I L D reveal + bar, ~2.7 s) plays on app start, not on reconnect; ◀ ▶ ● hint glyphs render on the bottom line (else set `VITE_GLYPHS=ascii`); swiping forward along the temple advances, backward goes back; a swipe never also selects.
 - [ ] Swipe up: enlarged photo → photo list; preparing a guide → that product's photo; first step → back to where it was opened.
 
 Input:

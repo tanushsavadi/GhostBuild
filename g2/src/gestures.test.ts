@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { vi } from 'vitest'
 import { GestureRouter, eventTypeOf, mapHubEvent } from './gestures'
 
 describe('eventTypeOf', () => {
@@ -20,6 +21,10 @@ describe('mapHubEvent', () => {
   it('swipes come from textEvent: 2 = down, 1 = up', () => {
     expect(mapHubEvent({ textEvent: { eventType: 2 } })).toEqual({ kind: 'send', gesture: 'swipe_down' })
     expect(mapHubEvent({ textEvent: { eventType: 1 } })).toEqual({ kind: 'send', gesture: 'swipe_up' })
+  })
+  it('on the glasses the wearer\'s forward swipe (SCROLL_TOP) goes forward and the other way goes back', () => {
+    expect(mapHubEvent({ textEvent: { eventType: 1 } }, { forwardOnTop: true })).toEqual({ kind: 'send', gesture: 'swipe_down' })
+    expect(mapHubEvent({ textEvent: { eventType: 2 } }, { forwardOnTop: true })).toEqual({ kind: 'send', gesture: 'swipe_up' })
   })
   it('DOUBLE press is a local exit in every envelope and never a send', () => {
     for (const e of [{ sysEvent: { eventType: 3 } }, { textEvent: { eventType: 3 } }, { listEvent: { eventType: 3 } }]) {
@@ -63,5 +68,50 @@ describe('GestureRouter', () => {
     expect(r.route({ textEvent: { eventType: 2 } }).kind).toBe('send')
     expect(r.route({ sysEvent: { eventType: 3 } }).kind).toBe('exit')
     expect(r.route({ sysEvent: { eventType: 3 } }).kind).toBe('exit')
+  })
+})
+
+
+describe('GestureRouter on the glasses: a swipe is never also a tap', () => {
+  // Operator logs 2026-10-18: 11 taps landed 3-550 ms before a swipe; the temple reports the start of a swipe as a click.
+  const setup = () => {
+    vi.useFakeTimers()
+    let t = 0
+    const out: string[] = []
+    const r = new GestureRouter(() => t, 150, true, 280)
+    const go = (ev: unknown, dt = 0) => { t += dt; vi.advanceTimersByTime(dt); const a = r.route(ev as never, (x) => out.push(x.kind === 'send' ? x.gesture : x.kind)); if (a.kind !== 'ignore') out.push(a.kind === 'send' ? a.gesture : a.kind) }
+    return { go, out, tick: (dt: number) => { t += dt; vi.advanceTimersByTime(dt) } }
+  }
+  it('a tap followed by a swipe within the hold is only the swipe', () => {
+    const { go, out, tick } = setup()
+    go({ sysEvent: {} })
+    go({ textEvent: { eventType: 1 } }, 3)
+    tick(500)
+    expect(out).toEqual(['swipe_down'])
+    vi.useRealTimers()
+  })
+  it('a lone tap still goes through after the hold', () => {
+    const { go, out, tick } = setup()
+    go({ sysEvent: {} })
+    expect(out).toEqual([])
+    tick(300)
+    expect(out).toEqual(['press'])
+    vi.useRealTimers()
+  })
+  it('a tap right after a swipe is its tail, not a select', () => {
+    const { go, out, tick } = setup()
+    go({ textEvent: { eventType: 2 } })
+    go({ sysEvent: {} }, 100)
+    tick(500)
+    expect(out).toEqual(['swipe_up'])
+    vi.useRealTimers()
+  })
+  it('a double tap is never preceded by its first tap', () => {
+    const { go, out, tick } = setup()
+    go({ sysEvent: {} })
+    go({ sysEvent: { eventType: 3 } }, 120)
+    tick(500)
+    expect(out).toEqual(['exit'])
+    vi.useRealTimers()
   })
 })

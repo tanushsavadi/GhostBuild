@@ -7,6 +7,8 @@ interface ImportMetaEnv {
   readonly VITE_FLAG_VOICE?: string
   /** "0" skips the launch intro (g2/src/intro.ts). */
   readonly VITE_FLAG_INTRO?: string
+  /** "classic" maps the temple swipe as before (SCROLL_BOTTOM = forward) on the glasses too. */
+  readonly VITE_SWIPE?: string
   /** 'ascii' = strict ASCII fallbacks for every non-ASCII glyph (use if the hardware glyph test fails). */
   readonly VITE_GLYPHS?: string
   /** Approx characters per line for space-padding centring (calibrate on hardware). */

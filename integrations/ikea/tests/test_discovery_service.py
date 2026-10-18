@@ -534,8 +534,9 @@ def _compile_env(env, monkeypatch, fail=False):
     import knowledge.compile as comp
     import knowledge.find_sources as fs
 
-    rt, d, _ = env
+    rt, d, src = env
     d.research = True
+    monkeypatch.setattr(type(src), "auto_card", lambda self, rec: None, raising=False)  # no per-step builder: compile path
     monkeypatch.setenv("GB_LIVE_RESEARCH", "1")
     monkeypatch.setenv("GB_RESEARCH_ENGINE", "compile")
     monkeypatch.setenv("ANTHROPIC_API_KEY", "test-only")
@@ -634,9 +635,9 @@ def test_a_guide_that_cannot_start_says_so_on_the_glasses(env):
 def test_photo_screens_show_their_gestures(env):
     rt, d, _ = env
     say(rt, DEMO)
-    assert "● ENLARGE" in rt.hud.current.cue.line2 and "▲▼" in rt.hud.current.cue.line2
+    assert "● ENLARGE" in rt.hud.current.cue.line2 and "◀▶" in rt.hud.current.cue.line2
     rt.handle_input(G2Input(gesture="press", seq_seen=rt.hud.current.seq))
-    assert rt.hud.current.cue.line2 == "● PICK  ▼ NEXT  ▲ BACK"
+    assert rt.hud.current.cue.line2 == "● PICK  ▶ NEXT  ◀ BACK"
 
 
 def test_swipe_up_while_preparing_returns_to_the_photo_and_choosing_again_resumes(env, monkeypatch):
@@ -653,7 +654,7 @@ def test_swipe_up_while_preparing_returns_to_the_photo_and_choosing_again_resume
         rt.handle_input(G2Input(gesture="swipe_up", seq_seen=rt.hud.current.seq))
         s = d.state(s.session_id)
         assert s.phase == "choosing" and s.candidates[s.focus].record.article == rec.article  # back on that photo
-        assert rt.hud.current.cue.line2 == "● PICK  ▼ NEXT  ▲ BACK"
+        assert rt.hud.current.cue.line2 == "● PICK  ▶ NEXT  ◀ BACK"
         rt.handle_input(G2Input(gesture="press", seq_seen=rt.hud.current.seq))  # pick it again: wait for the same build
         assert d.state(s.session_id).phase == "loading" and rt.hud.current.cue.line1.startswith("RESEARCHING")
         gate.set()
@@ -694,3 +695,22 @@ def test_shortlist_image_shows_a_position_strip_for_more_than_one_page():
     blank = Image.new("L", (288, 144), 0)
     position_strip(blank, total=3, current=0)
     assert max(blank.getpixel((x, 140)) for x in range(288)) == 0  # one page: no strip
+
+
+def test_a_per_step_manual_build_is_used_before_the_generic_compile(env, monkeypatch):
+    """Operator 09:00: compiled MICKE 10244743 came out as 'DO MANUAL PAGES 1-10'. A numbered manual now becomes one step per
+    manual step with its own crop (integrations/ikea/auto_manual.py); the page-level compile is only the fallback."""
+    rt, d, calls, cleanup = _compile_env(env, monkeypatch)
+    rt_, d_, src = env
+    base = next(c for c in rt.cards if c.steps).model_dump(mode="json")
+    monkeypatch.setattr(type(src), "auto_card", lambda self, rec: {**base, "card_id": "zz_test_compiled_alex", "title": "ALEX - assembly"},
+                        raising=False)
+    try:
+        say(rt, DEMO)
+        s = d.state(rt.session().id)
+        rec = next(c.record for c in s.candidates if c.record.name == "ALEX")
+        d.select(s.session_id, rec.article)
+        assert _until(rt, lambda: rt.playbook is not None)
+        assert rt.playbook.card.title == "ALEX - assembly" and calls == []  # the generic compile never ran
+    finally:
+        cleanup()
