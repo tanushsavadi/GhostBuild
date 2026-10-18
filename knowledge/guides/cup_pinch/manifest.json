@@ -1,8 +1,8 @@
 {
   "guide_id": "cup_pinch",
-  "title": "PINCH THE EDGE",
-  "placeholder": true,
-  "pipeline_version": 1,
+  "title": "MARK THE REFERENCE",
+  "placeholder": false,
+  "pipeline_version": 2,
   "g2_format": "PNG, 8-bit greyscale, values only multiples of 17 (= 16 gray4 levels), black = transparent, <=288x144",
   "views": [
     {
@@ -12,26 +12,28 @@
       "image": "knowledge/guides/cup_pinch/where.png",
       "phone_image": "knowledge/guides/cup_pinch/where.phone.png",
       "provenance": "AUTHORED DEMO METADATA",
-      "depicts": "SCHEMATIC stand-in: the folded triangle with its left edge boxed; the pinch position is NOT drawn (generic drawing, not a photo)",
+      "depicts": "Original instructional diagram: left sloping edge of the top triangle layer identified. Not a photo or a live observation.",
       "fallback": {
-        "line1": "LEFT EDGE OF THE",
-        "line2": "FOLDED TRIANGLE"
+        "line1": "TOP LAYER LEFT EDGE",
+        "line2": "LEAVE LOWER LAYER FLAT"
       },
-      "placeholder": true,
+      "placeholder": false,
       "fov_note": null,
+      "asset_kind": "original_diagram",
+      "reference_url": "https://origami.me/cup/",
       "w": 288,
       "h": 144,
-      "grey_levels": 12,
-      "sha256": "85f2ee5ecaa19d5cb3b4a9eca610bfd17e2d3998c8baed4f03661dd493a89bdc",
-      "bytes": 766,
-      "phone_w": 1280,
+      "grey_levels": 15,
+      "sha256": "66576dbed58830bc0d7361d5626b7a0484fba3a138731af6c5d0aa22808071f0",
+      "bytes": 1083,
+      "phone_w": 1140,
       "phone_h": 640,
-      "phone_sha256": "3e8bf7e889be67a742a6dad96e39d87387604abef4b00a5a68eed7f9b65b3f1e",
-      "phone_bytes": 20112,
+      "phone_sha256": "9834908787d5bb39bf26cfecf833478e2ba8f7f23f8c2a39711a8be19ae0d2f6",
+      "phone_bytes": 55310,
       "source": "assets/sources/cup_pinch/where.src.png",
-      "source_sha256": "ab9750c747d4405f513b2c05a49a050a79b5f34a934cd65bf724c64a25f0d0f2",
-      "annotation": "rect",
-      "caption": "LEFT EDGE"
+      "source_sha256": "8d96922f8cda06f6082eece3c895136e9d074840c3be0ec7f660dd6a3206adba",
+      "annotation": "arrow",
+      "caption": "TOP LAYER: LEFT EDGE"
     },
     {
       "view": "how",
@@ -40,31 +42,63 @@
       "image": "knowledge/guides/cup_pinch/how.png",
       "phone_image": "knowledge/guides/cup_pinch/how.phone.png",
       "provenance": "AUTHORED DEMO METADATA",
-      "depicts": "SCHEMATIC stand-in: arrow from the left edge down toward the bottom edge; only a small pinch is made, its position is NOT drawn (generic drawing, not a photo)",
+      "depicts": "Original instructional diagram: temporary angle-bisector fold bringing the left edge onto the bottom edge; pinch is where the guide meets the right edge. Not a photo or a live observation.",
       "fallback": {
-        "line1": "FOLD LEFT EDGE DOWN",
-        "line2": "ONLY A SMALL MARK"
+        "line1": "LOWER LEFT EDGE TO BASE",
+        "line2": "PINCH RIGHT EDGE ONLY"
       },
-      "placeholder": true,
+      "placeholder": false,
       "fov_note": null,
+      "asset_kind": "original_diagram",
+      "reference_url": "https://origami.me/cup/",
       "w": 288,
       "h": 144,
-      "grey_levels": 12,
-      "sha256": "836691753d8ac723a8698696c993b04cc8c312c7db38fb5763aaaa69a3b657bc",
-      "bytes": 1060,
-      "phone_w": 1280,
+      "grey_levels": 15,
+      "sha256": "a5a8fc78b357bb65059132259891d81b2b18b23b8d0a752bce7b8785076f8e83",
+      "bytes": 1637,
+      "phone_w": 1140,
       "phone_h": 640,
-      "phone_sha256": "9f806e7830e8fd0b8a54ba1ac634a187b94553b6cec436f60753ff4bd2a20c4b",
-      "phone_bytes": 35360,
+      "phone_sha256": "79ddeab2fc6c3a580b4cb6b1d0c41cf164e7f9c01571f86e3e225e23de22a5f1",
+      "phone_bytes": 73527,
       "source": "assets/sources/cup_pinch/how.src.png",
-      "source_sha256": "ab9750c747d4405f513b2c05a49a050a79b5f34a934cd65bf724c64a25f0d0f2",
+      "source_sha256": "a94c522d01d6e68a712af59b7bc879cdad4d35596ddf2a5519bec7fd69e0fb0a",
       "annotation": "arrow",
-      "caption": "LEFT EDGE TO BOTTOM EDGE"
+      "caption": "ALIGN; PINCH ONLY"
+    },
+    {
+      "view": "correct",
+      "step_id": "cup_pinch.correct",
+      "title": "CORRECT",
+      "image": "knowledge/guides/cup_pinch/correct.png",
+      "phone_image": "knowledge/guides/cup_pinch/correct.phone.png",
+      "provenance": "AUTHORED DEMO METADATA",
+      "depicts": "Original instructional diagram: triangle reopened after the temporary fold; the precise small reference pinch is highlighted on the right edge. Not a photo or a live observation.",
+      "fallback": {
+        "line1": "UNFOLD BACK TO TRIANGLE",
+        "line2": "SMALL MARK ON RIGHT EDGE"
+      },
+      "placeholder": false,
+      "fov_note": null,
+      "asset_kind": "original_diagram",
+      "reference_url": "https://origami.me/cup/",
+      "w": 288,
+      "h": 144,
+      "grey_levels": 15,
+      "sha256": "25a53535aa39c5025d2b449b7aeb2c247ddab943d05384d2992aa6f608415a08",
+      "bytes": 1105,
+      "phone_w": 1140,
+      "phone_h": 640,
+      "phone_sha256": "9d965c50b16b79ef2d759e027397bd4083d8d7e84fdec60de733277f5ac9ed87",
+      "phone_bytes": 54997,
+      "source": "assets/sources/cup_pinch/correct.src.png",
+      "source_sha256": "1db25a0b4b1da8022e6675efad0442dd1f157fa1e6cff7372cf457f7f5ec8050",
+      "annotation": "circle",
+      "caption": "UNFOLD; KEEP ONE MARK"
     }
   ],
   "guide": {
     "id": "cup_pinch",
-    "title": "PINCH THE EDGE",
+    "title": "MARK THE REFERENCE",
     "views": [
       {
         "view": "where",
@@ -73,12 +107,13 @@
         "image": "knowledge/guides/cup_pinch/where.png",
         "phone_image": "knowledge/guides/cup_pinch/where.phone.png",
         "provenance": "AUTHORED DEMO METADATA",
-        "depicts": "SCHEMATIC stand-in: the folded triangle with its left edge boxed; the pinch position is NOT drawn (generic drawing, not a photo)",
+        "depicts": "Original instructional diagram: left sloping edge of the top triangle layer identified. Not a photo or a live observation.",
         "fallback": {
-          "line1": "LEFT EDGE OF THE",
-          "line2": "FOLDED TRIANGLE"
+          "line1": "TOP LAYER LEFT EDGE",
+          "line2": "LEAVE LOWER LAYER FLAT"
         },
-        "fov_note": null
+        "fov_note": null,
+        "reference_url": "https://origami.me/cup/"
       },
       {
         "view": "how",
@@ -87,12 +122,28 @@
         "image": "knowledge/guides/cup_pinch/how.png",
         "phone_image": "knowledge/guides/cup_pinch/how.phone.png",
         "provenance": "AUTHORED DEMO METADATA",
-        "depicts": "SCHEMATIC stand-in: arrow from the left edge down toward the bottom edge; only a small pinch is made, its position is NOT drawn (generic drawing, not a photo)",
+        "depicts": "Original instructional diagram: temporary angle-bisector fold bringing the left edge onto the bottom edge; pinch is where the guide meets the right edge. Not a photo or a live observation.",
         "fallback": {
-          "line1": "FOLD LEFT EDGE DOWN",
-          "line2": "ONLY A SMALL MARK"
+          "line1": "LOWER LEFT EDGE TO BASE",
+          "line2": "PINCH RIGHT EDGE ONLY"
         },
-        "fov_note": null
+        "fov_note": null,
+        "reference_url": "https://origami.me/cup/"
+      },
+      {
+        "view": "correct",
+        "step_id": "cup_pinch.correct",
+        "title": "CORRECT",
+        "image": "knowledge/guides/cup_pinch/correct.png",
+        "phone_image": "knowledge/guides/cup_pinch/correct.phone.png",
+        "provenance": "AUTHORED DEMO METADATA",
+        "depicts": "Original instructional diagram: triangle reopened after the temporary fold; the precise small reference pinch is highlighted on the right edge. Not a photo or a live observation.",
+        "fallback": {
+          "line1": "UNFOLD BACK TO TRIANGLE",
+          "line2": "SMALL MARK ON RIGHT EDGE"
+        },
+        "fov_note": null,
+        "reference_url": "https://origami.me/cup/"
       }
     ]
   }

@@ -279,11 +279,40 @@ def test_custom_placeholder_banner_text_is_optional_and_validated(tmp_path):
             gi.parse_guide(gdir / "annotations.json")
 
 
-def test_paper_cup_standins_are_flagged_schematic_placeholders():
-    for gid, views in (("cup_fold_half", ["where", "how", "correct"]), ("cup_pinch", ["where", "how"])):
+def test_paper_cup_original_diagrams_are_truthful_and_complete():
+    from contracts.models import Card
+    card = Card.model_validate_json((ROOT / "knowledge/cards/paper_cup.json").read_text())
+    expected = {"fold_half": "cup_fold_half", "pinch": "cup_pinch", "left_corner": "cup_left_corner", "right_corner": "cup_right_corner"}
+    for sid, gid in expected.items():
+        assert next(s for s in card.steps if s.id == sid).guide_id == gid
         man = json.loads((ROOT / f"knowledge/guides/{gid}/manifest.json").read_text())
         spec = gi.parse_guide(ROOT / f"assets/sources/{gid}/annotations.json")
-        assert [v["view"] for v in man["views"]] == views
-        assert man["placeholder"] is True and spec.views[0].banner == "SCHEMATIC – REPLACE WITH PHOTO"
-        assert all(v["placeholder"] and v["provenance"] == "AUTHORED DEMO METADATA" for v in man["views"])
-        assert all(v["depicts"].startswith("SCHEMATIC stand-in") for v in man["views"])
+        assert [v["view"] for v in man["views"]] == ["where", "how", "correct"]
+        assert man["placeholder"] is False
+        assert all(v.asset_kind == "original_diagram" for v in spec.views)
+        assert all(v["provenance"] == "AUTHORED DEMO METADATA" and not v["placeholder"] for v in man["views"])
+        assert all(v["depicts"].startswith("Original instructional diagram:") for v in man["views"])
+        assert all(v["reference_url"] == "https://origami.me/cup/" for v in man["guide"]["views"])
+        for v in man["views"]:
+            image = Image.open(ROOT / v["image"])
+            assert image.size == (288, 144) and v["bytes"] < 5000
+            assert sum(n for n, pixel in image.getcolors() if pixel >= 170) / (288*144) < .25
+            assert Image.open(ROOT / v["phone_image"]).height <= gi.PHONE_MAX[1]
+    assert "built from real photo" not in (ROOT / "assets/INVENTORY.md").read_text()
+
+
+def test_source_type_is_independent_of_placeholder_status(tmp_path):
+    gdir = make_guide(tmp_path)
+    path = gdir / "annotations.json"
+    raw = json.loads(path.read_text())
+    raw["asset_kind"] = "original_diagram"
+    raw["reference_url"] = "https://example.org/fold"
+    path.write_text(json.dumps(raw))
+    man, files = bg.build_guide(gdir, tmp_path / "out", write=False)
+    assert man["views"][0]["asset_kind"] == "original_diagram" and not man["views"][0]["placeholder"]
+    assert man["guide"]["views"][0]["reference_url"] == "https://example.org/fold"
+    assert "original instructional diagram" in bg.inventory_md([man], {})
+    raw["asset_kind"] = "unknown-photo-claim"
+    path.write_text(json.dumps(raw))
+    with pytest.raises(gi.GuideError, match="asset_kind"):
+        gi.parse_guide(path)

@@ -26,7 +26,7 @@ from typing import Any
 
 from PIL import Image, ImageChops, ImageDraw, ImageFont, ImageOps
 
-PIPELINE_VERSION = 1
+PIPELINE_VERSION = 2
 G2_MAX_W, G2_MAX_H = 288, 144
 LEVELS = 16
 STEP = 255 // (LEVELS - 1)  # 17 -> 0,17,...,255
@@ -72,6 +72,8 @@ class ViewSpec:
     canvas: tuple[int, int]
     fov_note: str | None = None
     banner: str = ""  # placeholder banner text for the phone image; "" = the default PLACEHOLDER_BANNER
+    asset_kind: str = "unspecified"  # photographs and authored diagrams are distinct from readiness/placeholder status
+    reference_url: str | None = None
 
 
 @dataclass(frozen=True)
@@ -187,6 +189,12 @@ def parse_guide(path: Path) -> GuideSpec:
         pos = v.get("caption_pos", "bottom")
         if pos not in ("bottom", "top"):
             raise GuideError(f"{vc}: caption_pos must be 'bottom' or 'top'")
+        asset_kind = v.get("asset_kind", raw.get("asset_kind", "unspecified"))
+        if asset_kind not in ("photograph", "original_diagram", "unspecified"):
+            raise GuideError(f"{vc}: asset_kind must be photograph|original_diagram|unspecified")
+        reference_url = v.get("reference_url", raw.get("reference_url"))
+        if reference_url is not None and (not isinstance(reference_url, str) or not reference_url.startswith(("https://", "http://"))):
+            raise GuideError(f"{vc}: reference_url must be http(s)")
         views.append(ViewSpec(
             view=name, step_id=_req(v, "step_id", vc), title=vtitle, source=_req(v, "source", vc),
             provenance=prov, depicts=_req(v, "depicts", vc), fallback={"line1": l1, "line2": l2},
@@ -195,6 +203,7 @@ def parse_guide(path: Path) -> GuideSpec:
             contrast=float(v.get("contrast", 1.0)), gamma=float(v.get("gamma", 1.0)),
             canvas=(int(canvas[0]), int(canvas[1])), fov_note=v.get("fov_note"),
             banner=_banner_text(v.get("banner", raw.get("banner")), vc),
+            asset_kind=asset_kind, reference_url=reference_url,
         ))
     return GuideSpec(gid, title, g_placeholder, tuple(views))
 
@@ -383,7 +392,8 @@ def render_phone(src: Image.Image, spec: ViewSpec, placeholder: bool) -> Image.I
     if spec.autocontrast > 0:
         img = ImageOps.autocontrast(img, cutoff=spec.autocontrast)
     img = tone(img, replace(spec, autocontrast=0.0))
-    scale = min(PHONE_MAX[0] / img.width, PHONE_MAX[1] / img.height)
+    diagram_header = 70 if not placeholder and spec.asset_kind == "original_diagram" else 0
+    scale = min(PHONE_MAX[0] / img.width, (PHONE_MAX[1] - diagram_header) / img.height)
     nw, nh = max(1, round(img.width * scale)), max(1, round(img.height * scale))
     img = img.resize((nw, nh), Image.LANCZOS).convert("RGBA")
     mapped = _map_annotation(ann, box, scale, (0, 0))
@@ -401,17 +411,20 @@ def render_phone(src: Image.Image, spec: ViewSpec, placeholder: bool) -> Image.I
         d.text((nw / 2, y0 + bar / 2), spec.caption, fill=(255, 255, 255, 255), font=font, anchor="mm")
     if placeholder:
         _banner(d, nw, nh, spec.caption_pos, spec.banner or PLACEHOLDER_BANNER)
+    elif spec.asset_kind == "original_diagram":
+        img = ImageOps.expand(img, border=(0, diagram_header, 0, 0), fill=(12, 45, 35, 255))
+        _banner(ImageDraw.Draw(img), nw, img.height, "bottom", "ORIGINAL DIAGRAM – SOURCE LINK ON PHONE", bg=(12, 45, 35, 255))
     return img.convert("RGB")
 
 
-def _banner(d: ImageDraw.ImageDraw, nw: int, nh: int, caption_pos: str, text: str = PLACEHOLDER_BANNER) -> None:
+def _banner(d: ImageDraw.ImageDraw, nw: int, nh: int, caption_pos: str, text: str = PLACEHOLDER_BANNER, bg=(200, 20, 20, 255)) -> None:
     """Red banner 'SCHEMATIC - REPLACE WITH RIG PHOTO'. The bundled font has no en dash glyph (renders tofu),
     so the dash is drawn as a bar between the two text runs."""
     left, right = text.split(" \u2013 ")
     font = _fit_text(left + " - " + right, nw - 24, max(16, nh // 12), aa=True)
     bar = font.size + 16
     y0 = 0 if caption_pos == "bottom" else nh - bar
-    d.rectangle([0, y0, nw, y0 + bar], fill=(200, 20, 20, 255))
+    d.rectangle([0, y0, nw, y0 + bar], fill=bg)
     wl, wr, gap = d.textlength(left, font=font), d.textlength(right, font=font), font.size * 1.1
     x = (nw - (wl + gap + wr)) / 2
     cy = y0 + bar / 2

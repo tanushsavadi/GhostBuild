@@ -2,7 +2,7 @@
   "guide_id": "camera_lens",
   "title": "Camera lens",
   "placeholder": true,
-  "pipeline_version": 1,
+  "pipeline_version": 2,
   "g2_format": "PNG, 8-bit greyscale, values only multiples of 17 (= 16 gray4 levels), black = transparent, <=288x144",
   "views": [
     {
@@ -19,6 +19,8 @@
       },
       "placeholder": true,
       "fov_note": "Placeholder: replace with a photo of the real station showing the camera lens",
+      "asset_kind": "unspecified",
+      "reference_url": null,
       "w": 288,
       "h": 144,
       "grey_levels": 16,
@@ -47,6 +49,8 @@
       },
       "placeholder": true,
       "fov_note": null,
+      "asset_kind": "unspecified",
+      "reference_url": null,
       "w": 288,
       "h": 144,
       "grey_levels": 16,
@@ -75,6 +79,8 @@
       },
       "placeholder": true,
       "fov_note": null,
+      "asset_kind": "unspecified",
+      "reference_url": null,
       "w": 288,
       "h": 144,
       "grey_levels": 16,
@@ -106,7 +112,8 @@
           "line1": "CAMERA = ROUND LENS",
           "line2": "ON THE CAMERA MODULE"
         },
-        "fov_note": "Placeholder: replace with a photo of the real station showing the camera lens"
+        "fov_note": "Placeholder: replace with a photo of the real station showing the camera lens",
+        "reference_url": null
       },
       {
         "view": "how",
@@ -120,7 +127,8 @@
           "line1": "TAKE OFF THE COVER",
           "line2": "OR CLEAR THE LENS"
         },
-        "fov_note": null
+        "fov_note": null,
+        "reference_url": null
       },
       {
         "view": "correct",
@@ -134,7 +142,8 @@
           "line1": "LENS UNCOVERED",
           "line2": "VIEW IS BRIGHT"
         },
-        "fov_note": null
+        "fov_note": null,
+        "reference_url": null
       }
     ]
   }

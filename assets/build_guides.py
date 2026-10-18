@@ -49,6 +49,7 @@ def build_guide(gdir: Path, out_root: Path, write: bool = True) -> tuple[dict, d
             "image": f"{rel}/{v.view}.png", "phone_image": f"{rel}/{v.view}.phone.png",
             "provenance": v.provenance, "depicts": v.depicts, "fallback": v.fallback,
             "placeholder": v.placeholder, "fov_note": v.fov_note,
+            "asset_kind": v.asset_kind, "reference_url": v.reference_url,
             "w": g2.width, "h": g2.height, "grey_levels": len(levels), "sha256": gi.sha256_hex(g2_b), "bytes": len(g2_b),
             "phone_w": phone.width, "phone_h": phone.height, "phone_sha256": gi.sha256_hex(ph_b), "phone_bytes": len(ph_b),
             "source": f"assets/sources/{spec.guide_id}/{v.source}", "source_sha256": src_bytes_hash,
@@ -63,7 +64,7 @@ def build_guide(gdir: Path, out_root: Path, write: bool = True) -> tuple[dict, d
         "guide": {"id": spec.guide_id, "title": spec.title[:64], "views": [
             {"view": x["view"], "step_id": x["step_id"], "title": x["title"], "image": x["image"],
              "phone_image": x["phone_image"], "provenance": x["provenance"], "depicts": x["depicts"],
-             "fallback": x["fallback"], "fov_note": x["fov_note"]} for x in views]},
+             "fallback": x["fallback"], "fov_note": x["fov_note"], "reference_url": x["reference_url"]} for x in views]},
     }
     files["manifest.json"] = (json.dumps(manifest, indent=2, ensure_ascii=False) + "\n").encode()
     if write:
@@ -80,7 +81,9 @@ def inventory_md(manifests: list[dict], errors: dict[str, str]) -> str:
             "| guide | view | step_id | file | provenance | placeholder? | status |", "|---|---|---|---|---|---|---|"]
     for m in manifests:
         for v in m["views"]:
-            status = "PLACEHOLDER schematic - needs real photo" if v["placeholder"] else "built from real photo"
+            status = "PLACEHOLDER schematic - needs real photo" if v["placeholder"] else {
+                "photograph": "built from photograph", "original_diagram": "original instructional diagram (not a photo)",
+            }.get(v.get("asset_kind"), "source type unspecified (not verified as a photo)")
             rows.append(f"| {m['guide_id']} | {v['view']} | {v['step_id']} | `{v['image']}` ({v['w']}x{v['h']}, {v['bytes']} B) "
                         f"| {v['provenance']} | {'yes' if v['placeholder'] else 'no'} | {status} |")
     for gid, err in errors.items():

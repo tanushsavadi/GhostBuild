@@ -1,8 +1,8 @@
 {
   "guide_id": "cup_fold_half",
   "title": "FOLD IN HALF",
-  "placeholder": true,
-  "pipeline_version": 1,
+  "placeholder": false,
+  "pipeline_version": 2,
   "g2_format": "PNG, 8-bit greyscale, values only multiples of 17 (= 16 gray4 levels), black = transparent, <=288x144",
   "views": [
     {
@@ -12,26 +12,28 @@
       "image": "knowledge/guides/cup_fold_half/where.png",
       "phone_image": "knowledge/guides/cup_fold_half/where.phone.png",
       "provenance": "AUTHORED DEMO METADATA",
-      "depicts": "SCHEMATIC stand-in: a square sheet seen as a diamond, bottom corner circled (generic drawing, not a photo)",
+      "depicts": "Original instructional diagram: square paper in diamond orientation, bottom tip highlighted. Not a photo or a live observation.",
       "fallback": {
-        "line1": "BOTTOM CORNER OF THE",
-        "line2": "DIAMOND"
+        "line1": "BOTTOM TIP OF DIAMOND",
+        "line2": "WHITE SIDE UP"
       },
-      "placeholder": true,
+      "placeholder": false,
       "fov_note": null,
+      "asset_kind": "original_diagram",
+      "reference_url": "https://origami.me/cup/",
       "w": 288,
       "h": 144,
-      "grey_levels": 10,
-      "sha256": "9121867259870f5c90a26499dab3ea28ce7cc8cf068d984bd1d557fb3873aeae",
-      "bytes": 837,
-      "phone_w": 1280,
+      "grey_levels": 16,
+      "sha256": "adc552c9347724eaef7826f0beb084c340853d2a2c4eee9e3f84744427103171",
+      "bytes": 1045,
+      "phone_w": 1140,
       "phone_h": 640,
-      "phone_sha256": "5ad9bc3bce19e95351bbb2d20c2d61e746a8893261d5589e95deae1d198955a5",
-      "phone_bytes": 45636,
+      "phone_sha256": "c680ab9aca7065fbb9d0cf8f520bbe28d0093142bd47e25d75fb9925fba2f51f",
+      "phone_bytes": 51429,
       "source": "assets/sources/cup_fold_half/where.src.png",
-      "source_sha256": "561a6d6cde0d97fa4871ab5ae05014d831a2a534193a69503d07bc85f4353907",
+      "source_sha256": "692ddef0f9b890b3b4c39e8d6b327a6e78da7f6ab0c7f2c448737be1e09fb913",
       "annotation": "circle",
-      "caption": "BOTTOM CORNER"
+      "caption": "BOTTOM TIP"
     },
     {
       "view": "how",
@@ -40,26 +42,28 @@
       "image": "knowledge/guides/cup_fold_half/how.png",
       "phone_image": "knowledge/guides/cup_fold_half/how.phone.png",
       "provenance": "AUTHORED DEMO METADATA",
-      "depicts": "SCHEMATIC stand-in: arrow from the bottom corner up to the top corner, dashed line = where the fold lies (generic drawing, not a photo)",
+      "depicts": "Original instructional diagram: bottom tip moves to top tip; dashed horizontal line marks the fold. Not a photo or a live observation.",
       "fallback": {
-        "line1": "FOLD BOTTOM CORNER UP",
-        "line2": "TO MEET THE TOP CORNER"
+        "line1": "BRING BOTTOM TIP UP",
+        "line2": "TO THE TOP TIP"
       },
-      "placeholder": true,
+      "placeholder": false,
       "fov_note": null,
+      "asset_kind": "original_diagram",
+      "reference_url": "https://origami.me/cup/",
       "w": 288,
       "h": 144,
       "grey_levels": 16,
-      "sha256": "6b228588ce201cc27e52e88751ac164c8d93be77ada928c59d7f4d617074f4e3",
-      "bytes": 1227,
-      "phone_w": 1280,
+      "sha256": "d381f84b542224e67e114d07467327b0dcda5f067e66c7410d33d2a77943462c",
+      "bytes": 1288,
+      "phone_w": 1140,
       "phone_h": 640,
-      "phone_sha256": "67678ea035abe207f600d2456063f61f9afceca180360ed71c3b3d4f8d2c7456",
-      "phone_bytes": 48034,
+      "phone_sha256": "c809c08cb3a8a07956ff6a97af1316c83b66f7a5835a196b282242e25337d6a0",
+      "phone_bytes": 49401,
       "source": "assets/sources/cup_fold_half/how.src.png",
-      "source_sha256": "4613d8ad30a326050418a8e5e08cc312453840abecd16c7aafb8c0d509b69569",
+      "source_sha256": "4d10a4ea01ef760506a593e0714fb8e1c661bd24a6b5d22a1e46a8ff3dbeb38a",
       "annotation": "arrow",
-      "caption": "BOTTOM TO TOP CORNER"
+      "caption": "BRING TIPS TOGETHER"
     },
     {
       "view": "correct",
@@ -68,26 +72,28 @@
       "image": "knowledge/guides/cup_fold_half/correct.png",
       "phone_image": "knowledge/guides/cup_fold_half/correct.phone.png",
       "provenance": "AUTHORED DEMO METADATA",
-      "depicts": "SCHEMATIC stand-in: the folded shape, a triangle (generic drawing, not a photo)",
+      "depicts": "Original instructional diagram: two-layer triangular result with the closed bottom edge highlighted. Not a photo or a live observation.",
       "fallback": {
-        "line1": "A FOLDED TRIANGLE",
-        "line2": "FOLD EDGE AT THE BASE"
+        "line1": "TRIANGLE WITH TWO LAYERS",
+        "line2": "CLOSED FOLD AT BOTTOM"
       },
-      "placeholder": true,
+      "placeholder": false,
       "fov_note": null,
+      "asset_kind": "original_diagram",
+      "reference_url": "https://origami.me/cup/",
       "w": 288,
       "h": 144,
-      "grey_levels": 5,
-      "sha256": "a285b956ee1cd4491fd0920b6202de25a81e67a2bd590047c1e5d7e04129fcc7",
-      "bytes": 684,
-      "phone_w": 1280,
+      "grey_levels": 13,
+      "sha256": "7add6d7b9e147feff4496d220b64adc6eb97afde0e357f39deca5230879b8dc7",
+      "bytes": 955,
+      "phone_w": 1140,
       "phone_h": 640,
-      "phone_sha256": "6301ed4c7a2222b0e32082edcd2e3a8b9af7f9feb2213fdb7f33475f9ca7835e",
-      "phone_bytes": 27491,
+      "phone_sha256": "6442cf1846462f3716071ccdeb06736c608909b175538587d11ee992a8dd5fc3",
+      "phone_bytes": 50999,
       "source": "assets/sources/cup_fold_half/correct.src.png",
-      "source_sha256": "ab9750c747d4405f513b2c05a49a050a79b5f34a934cd65bf724c64a25f0d0f2",
+      "source_sha256": "8d96922f8cda06f6082eece3c895136e9d074840c3be0ec7f660dd6a3206adba",
       "annotation": "rect",
-      "caption": "FOLDED TRIANGLE"
+      "caption": "TRIANGLE; BASE CLOSED"
     }
   ],
   "guide": {
@@ -101,12 +107,13 @@
         "image": "knowledge/guides/cup_fold_half/where.png",
         "phone_image": "knowledge/guides/cup_fold_half/where.phone.png",
         "provenance": "AUTHORED DEMO METADATA",
-        "depicts": "SCHEMATIC stand-in: a square sheet seen as a diamond, bottom corner circled (generic drawing, not a photo)",
+        "depicts": "Original instructional diagram: square paper in diamond orientation, bottom tip highlighted. Not a photo or a live observation.",
         "fallback": {
-          "line1": "BOTTOM CORNER OF THE",
-          "line2": "DIAMOND"
+          "line1": "BOTTOM TIP OF DIAMOND",
+          "line2": "WHITE SIDE UP"
         },
-        "fov_note": null
+        "fov_note": null,
+        "reference_url": "https://origami.me/cup/"
       },
       {
         "view": "how",
@@ -115,12 +122,13 @@
         "image": "knowledge/guides/cup_fold_half/how.png",
         "phone_image": "knowledge/guides/cup_fold_half/how.phone.png",
         "provenance": "AUTHORED DEMO METADATA",
-        "depicts": "SCHEMATIC stand-in: arrow from the bottom corner up to the top corner, dashed line = where the fold lies (generic drawing, not a photo)",
+        "depicts": "Original instructional diagram: bottom tip moves to top tip; dashed horizontal line marks the fold. Not a photo or a live observation.",
         "fallback": {
-          "line1": "FOLD BOTTOM CORNER UP",
-          "line2": "TO MEET THE TOP CORNER"
+          "line1": "BRING BOTTOM TIP UP",
+          "line2": "TO THE TOP TIP"
         },
-        "fov_note": null
+        "fov_note": null,
+        "reference_url": "https://origami.me/cup/"
       },
       {
         "view": "correct",
@@ -129,12 +137,13 @@
         "image": "knowledge/guides/cup_fold_half/correct.png",
         "phone_image": "knowledge/guides/cup_fold_half/correct.phone.png",
         "provenance": "AUTHORED DEMO METADATA",
-        "depicts": "SCHEMATIC stand-in: the folded shape, a triangle (generic drawing, not a photo)",
+        "depicts": "Original instructional diagram: two-layer triangular result with the closed bottom edge highlighted. Not a photo or a live observation.",
         "fallback": {
-          "line1": "A FOLDED TRIANGLE",
-          "line2": "FOLD EDGE AT THE BASE"
+          "line1": "TRIANGLE WITH TWO LAYERS",
+          "line2": "CLOSED FOLD AT BOTTOM"
         },
-        "fov_note": null
+        "fov_note": null,
+        "reference_url": "https://origami.me/cup/"
       }
     ]
   }

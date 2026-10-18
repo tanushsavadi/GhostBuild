@@ -1,8 +1,9 @@
 {
   "guide_id": "cup_fold_half",
   "title": "FOLD IN HALF",
-  "placeholder": true,
-  "banner": "SCHEMATIC – REPLACE WITH PHOTO",
+  "placeholder": false,
+  "asset_kind": "original_diagram",
+  "reference_url": "https://origami.me/cup/",
   "units": "px",
   "views": [
     {
@@ -11,24 +12,27 @@
       "title": "WHERE",
       "source": "where.src.png",
       "crop": [
-        100,
-        30,
-        1500,
-        730
+        0,
+        0,
+        1200,
+        600
       ],
       "annotation": {
         "type": "circle",
-        "cx": 800,
-        "cy": 555,
-        "r": 55
+        "cx": 600,
+        "cy": 465,
+        "r": 40
       },
-      "caption": "BOTTOM CORNER",
+      "caption": "BOTTOM TIP",
+      "autocontrast": 0,
+      "contrast": 1.05,
+      "gamma": 1,
       "provenance": "AUTHORED DEMO METADATA",
-      "depicts": "SCHEMATIC stand-in: a square sheet seen as a diamond, bottom corner circled (generic drawing, not a photo)",
       "fallback_cue": {
-        "line1": "BOTTOM CORNER OF THE",
-        "line2": "DIAMOND"
-      }
+        "line1": "BOTTOM TIP OF DIAMOND",
+        "line2": "WHITE SIDE UP"
+      },
+      "depicts": "Original instructional diagram: square paper in diamond orientation, bottom tip highlighted. Not a photo or a live observation."
     },
     {
       "view": "how",
@@ -36,29 +40,32 @@
       "title": "HOW",
       "source": "how.src.png",
       "crop": [
-        100,
-        30,
-        1500,
-        730
+        0,
+        0,
+        1200,
+        600
       ],
       "annotation": {
         "type": "arrow",
         "from": [
-          800,
-          540
+          600,
+          450
         ],
         "to": [
-          800,
-          115
+          600,
+          78
         ]
       },
-      "caption": "BOTTOM TO TOP CORNER",
+      "caption": "BRING TIPS TOGETHER",
+      "autocontrast": 0,
+      "contrast": 1.05,
+      "gamma": 1,
       "provenance": "AUTHORED DEMO METADATA",
-      "depicts": "SCHEMATIC stand-in: arrow from the bottom corner up to the top corner, dashed line = where the fold lies (generic drawing, not a photo)",
       "fallback_cue": {
-        "line1": "FOLD BOTTOM CORNER UP",
-        "line2": "TO MEET THE TOP CORNER"
-      }
+        "line1": "BRING BOTTOM TIP UP",
+        "line2": "TO THE TOP TIP"
+      },
+      "depicts": "Original instructional diagram: bottom tip moves to top tip; dashed horizontal line marks the fold. Not a photo or a live observation."
     },
     {
       "view": "correct",
@@ -66,25 +73,28 @@
       "title": "CORRECT",
       "source": "correct.src.png",
       "crop": [
-        100,
-        30,
-        1500,
-        730
+        0,
+        0,
+        1200,
+        600
       ],
       "annotation": {
         "type": "rect",
-        "x0": 530,
-        "y0": 60,
-        "x1": 1070,
-        "y1": 350
+        "x0": 170,
+        "y0": 450,
+        "x1": 1030,
+        "y1": 487
       },
-      "caption": "FOLDED TRIANGLE",
+      "caption": "TRIANGLE; BASE CLOSED",
+      "autocontrast": 0,
+      "contrast": 1.05,
+      "gamma": 1,
       "provenance": "AUTHORED DEMO METADATA",
-      "depicts": "SCHEMATIC stand-in: the folded shape, a triangle (generic drawing, not a photo)",
       "fallback_cue": {
-        "line1": "A FOLDED TRIANGLE",
-        "line2": "FOLD EDGE AT THE BASE"
-      }
+        "line1": "TRIANGLE WITH TWO LAYERS",
+        "line2": "CLOSED FOLD AT BOTTOM"
+      },
+      "depicts": "Original instructional diagram: two-layer triangular result with the closed bottom edge highlighted. Not a photo or a live observation."
     }
   ]
 }

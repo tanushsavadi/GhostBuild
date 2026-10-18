@@ -1,8 +1,9 @@
 {
   "guide_id": "cup_pinch",
-  "title": "PINCH THE EDGE",
-  "placeholder": true,
-  "banner": "SCHEMATIC – REPLACE WITH PHOTO",
+  "title": "MARK THE REFERENCE",
+  "placeholder": false,
+  "asset_kind": "original_diagram",
+  "reference_url": "https://origami.me/cup/",
   "units": "px",
   "views": [
     {
@@ -11,25 +12,32 @@
       "title": "WHERE",
       "source": "where.src.png",
       "crop": [
-        400,
-        10,
+        0,
+        0,
         1200,
-        410
+        600
       ],
       "annotation": {
-        "type": "rect",
-        "x0": 535,
-        "y0": 65,
-        "x1": 800,
-        "y1": 345
+        "type": "arrow",
+        "from": [
+          290,
+          83
+        ],
+        "to": [
+          364,
+          276
+        ]
       },
-      "caption": "LEFT EDGE",
+      "caption": "TOP LAYER: LEFT EDGE",
+      "autocontrast": 0,
+      "contrast": 1.05,
+      "gamma": 1,
       "provenance": "AUTHORED DEMO METADATA",
-      "depicts": "SCHEMATIC stand-in: the folded triangle with its left edge boxed; the pinch position is NOT drawn (generic drawing, not a photo)",
       "fallback_cue": {
-        "line1": "LEFT EDGE OF THE",
-        "line2": "FOLDED TRIANGLE"
-      }
+        "line1": "TOP LAYER LEFT EDGE",
+        "line2": "LEAVE LOWER LAYER FLAT"
+      },
+      "depicts": "Original instructional diagram: left sloping edge of the top triangle layer identified. Not a photo or a live observation."
     },
     {
       "view": "how",
@@ -37,29 +45,60 @@
       "title": "HOW",
       "source": "how.src.png",
       "crop": [
-        400,
-        10,
+        0,
+        0,
         1200,
-        410
+        600
       ],
       "annotation": {
         "type": "arrow",
         "from": [
-          675,
-          205
+          536,
+          117
         ],
         "to": [
-          760,
-          322
+          729,
+          444
         ]
       },
-      "caption": "LEFT EDGE TO BOTTOM EDGE",
+      "caption": "ALIGN; PINCH ONLY",
+      "autocontrast": 0,
+      "contrast": 1.05,
+      "gamma": 1,
       "provenance": "AUTHORED DEMO METADATA",
-      "depicts": "SCHEMATIC stand-in: arrow from the left edge down toward the bottom edge; only a small pinch is made, its position is NOT drawn (generic drawing, not a photo)",
       "fallback_cue": {
-        "line1": "FOLD LEFT EDGE DOWN",
-        "line2": "ONLY A SMALL MARK"
-      }
+        "line1": "LOWER LEFT EDGE TO BASE",
+        "line2": "PINCH RIGHT EDGE ONLY"
+      },
+      "depicts": "Original instructional diagram: temporary angle-bisector fold bringing the left edge onto the bottom edge; pinch is where the guide meets the right edge. Not a photo or a live observation."
+    },
+    {
+      "view": "correct",
+      "step_id": "cup_pinch.correct",
+      "title": "CORRECT",
+      "source": "correct.src.png",
+      "crop": [
+        0,
+        0,
+        1200,
+        600
+      ],
+      "annotation": {
+        "type": "circle",
+        "cx": 778,
+        "cy": 218,
+        "r": 38
+      },
+      "caption": "UNFOLD; KEEP ONE MARK",
+      "autocontrast": 0,
+      "contrast": 1.05,
+      "gamma": 1,
+      "provenance": "AUTHORED DEMO METADATA",
+      "fallback_cue": {
+        "line1": "UNFOLD BACK TO TRIANGLE",
+        "line2": "SMALL MARK ON RIGHT EDGE"
+      },
+      "depicts": "Original instructional diagram: triangle reopened after the temporary fold; the precise small reference pinch is highlighted on the right edge. Not a photo or a live observation."
     }
   ]
 }

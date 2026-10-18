@@ -1,0 +1,100 @@
+{
+  "guide_id": "cup_right_corner",
+  "title": "FOLD THE OTHER SIDE",
+  "placeholder": false,
+  "asset_kind": "original_diagram",
+  "reference_url": "https://origami.me/cup/",
+  "units": "px",
+  "views": [
+    {
+      "view": "where",
+      "step_id": "cup_right_corner.where",
+      "title": "WHERE",
+      "source": "where.src.png",
+      "crop": [
+        0,
+        0,
+        1200,
+        600
+      ],
+      "annotation": {
+        "type": "circle",
+        "cx": 1030,
+        "cy": 470,
+        "r": 42
+      },
+      "caption": "RIGHT TIP IS STILL FREE",
+      "autocontrast": 0,
+      "contrast": 1.05,
+      "gamma": 1,
+      "provenance": "AUTHORED DEMO METADATA",
+      "fallback_cue": {
+        "line1": "FIND FREE RIGHT TIP",
+        "line2": "KEEP FIRST FLAP FLAT"
+      },
+      "depicts": "Original instructional diagram: unfolded right base tip highlighted after the left side fold. Not a photo or a live observation."
+    },
+    {
+      "view": "how",
+      "step_id": "cup_right_corner.how",
+      "title": "HOW",
+      "source": "how.src.png",
+      "crop": [
+        0,
+        0,
+        1200,
+        600
+      ],
+      "annotation": {
+        "type": "arrow",
+        "from": [
+          1008,
+          457
+        ],
+        "to": [
+          435,
+          227
+        ]
+      },
+      "caption": "RIGHT TIP TO LEFT EDGE",
+      "autocontrast": 0,
+      "contrast": 1.05,
+      "gamma": 1,
+      "provenance": "AUTHORED DEMO METADATA",
+      "fallback_cue": {
+        "line1": "FOLD RIGHT TIP ACROSS",
+        "line2": "MATCH FIRST FLAP HEIGHT"
+      },
+      "depicts": "Original instructional diagram: right tip crosses to the left end of the horizontal first-flap edge. Not a photo or a live observation."
+    },
+    {
+      "view": "correct",
+      "step_id": "cup_right_corner.correct",
+      "title": "CORRECT",
+      "source": "correct.src.png",
+      "crop": [
+        0,
+        0,
+        1200,
+        600
+      ],
+      "annotation": {
+        "type": "rect",
+        "x0": 410,
+        "y0": 200,
+        "x1": 790,
+        "y1": 236
+      },
+      "caption": "MATCH THE TOP EDGES",
+      "autocontrast": 0,
+      "contrast": 1.05,
+      "gamma": 1,
+      "provenance": "AUTHORED DEMO METADATA",
+      "fallback_cue": {
+        "line1": "BOTH SIDE FLAPS FOLDED",
+        "line2": "TOP EDGES AT SAME HEIGHT"
+      },
+      "depicts": "Original instructional diagram: both side flaps overlap with aligned horizontal upper edges and the upper triangle still free. Not a photo or a live observation."
+    }
+  ]
+}

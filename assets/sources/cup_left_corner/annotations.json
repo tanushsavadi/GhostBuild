@@ -1,0 +1,100 @@
+{
+  "guide_id": "cup_left_corner",
+  "title": "LEFT TIP TO THE MARK",
+  "placeholder": false,
+  "asset_kind": "original_diagram",
+  "reference_url": "https://origami.me/cup/",
+  "units": "px",
+  "views": [
+    {
+      "view": "where",
+      "step_id": "cup_left_corner.where",
+      "title": "WHERE",
+      "source": "where.src.png",
+      "crop": [
+        0,
+        0,
+        1200,
+        600
+      ],
+      "annotation": {
+        "type": "circle",
+        "cx": 170,
+        "cy": 470,
+        "r": 42
+      },
+      "caption": "LEFT TIP + RIGHT MARK",
+      "autocontrast": 0,
+      "contrast": 1.05,
+      "gamma": 1,
+      "provenance": "AUTHORED DEMO METADATA",
+      "fallback_cue": {
+        "line1": "FIND THE LEFT TIP",
+        "line2": "RIGHT EDGE HAS THE MARK"
+      },
+      "depicts": "Original instructional diagram: left base tip highlighted, small reference mark visible on the opposite sloping edge. Not a photo or a live observation."
+    },
+    {
+      "view": "how",
+      "step_id": "cup_left_corner.how",
+      "title": "HOW",
+      "source": "how.src.png",
+      "crop": [
+        0,
+        0,
+        1200,
+        600
+      ],
+      "annotation": {
+        "type": "arrow",
+        "from": [
+          192,
+          457
+        ],
+        "to": [
+          765,
+          227
+        ]
+      },
+      "caption": "LEFT TIP TO THE MARK",
+      "autocontrast": 0,
+      "contrast": 1.05,
+      "gamma": 1,
+      "provenance": "AUTHORED DEMO METADATA",
+      "fallback_cue": {
+        "line1": "BRING LEFT TIP TO MARK",
+        "line2": "CREASE THE NEW FOLD"
+      },
+      "depicts": "Original instructional diagram: left tip moves to the right-edge reference mark; dashed line gives the resulting crease. Not a photo or a live observation."
+    },
+    {
+      "view": "correct",
+      "step_id": "cup_left_corner.correct",
+      "title": "CORRECT",
+      "source": "correct.src.png",
+      "crop": [
+        0,
+        0,
+        1200,
+        600
+      ],
+      "annotation": {
+        "type": "rect",
+        "x0": 410,
+        "y0": 200,
+        "x1": 790,
+        "y1": 236
+      },
+      "caption": "FLAP TOP IS LEVEL",
+      "autocontrast": 0,
+      "contrast": 1.05,
+      "gamma": 1,
+      "provenance": "AUTHORED DEMO METADATA",
+      "fallback_cue": {
+        "line1": "TIP MEETS RIGHT MARK",
+        "line2": "FLAP TOP EDGE LEVEL"
+      },
+      "depicts": "Original instructional diagram: first side flap folded across the triangle with a horizontal upper edge. Not a photo or a live observation."
+    }
+  ]
+}
