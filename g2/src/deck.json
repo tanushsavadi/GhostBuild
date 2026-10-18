@@ -27,7 +27,7 @@
       "video": "https://player.vimeo.com/video/345970023"
     },
     {
-      "id": "you", "gloss": "YOU", "words": ["you", "your"],
+      "id": "you", "gloss": "YOU", "words": ["you"],
       "handshape": "1",
       "how": ["Index finger out", "Point at the person"],
       "status": "UNCHECKED",

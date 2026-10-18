@@ -1,0 +1,111 @@
+{
+  "_about": "Common English sentences signed as an ASL sentence: ASL word order (question words usually last) and the facial expression that carries the grammar. Drafted by AI (Claude); UNCHECKED. Each step is a word looked up like any other (deck.json, then ASL-LEX), or an inline sign for one ASL-LEX lacks. English variants are matched after contractions are expanded and skipped words (is, are, do, did, the...) are dropped.",
+  "phrases": [
+    {
+      "en": ["how are you", "how are you doing", "how have you been", "how is it going"],
+      "asl": ["how", "you"],
+      "face": "Brows up, friendly (question)"
+    },
+    {
+      "en": ["what is up", "sup", "wassup"],
+      "asl": [{ "gloss": "WHAT'S-UP", "handshape": "open_8", "how": ["Both middle fingers on chest", "Flick up and out together"], "wikt": "WHATS-UP" }],
+      "face": "Brows up, friendly (question)"
+    },
+    {
+      "en": ["what is your name", "what your name"],
+      "asl": ["your", "name", "what"],
+      "face": "Brows down (what-question)"
+    },
+    {
+      "en": ["what did you say", "what was that", "what you say", "what did they say", "what did he say", "what did she say"],
+      "asl": ["you", { "gloss": "SAY", "handshape": "1", "how": ["Index finger at your lips", "Small circle forward, outward"] }, "what"],
+      "face": "Brows down (what-question)"
+    },
+    {
+      "en": ["can you repeat that", "can you say that again", "say that again", "please repeat", "repeat please", "again please", "come again"],
+      "asl": ["again", "please"],
+      "face": "Brows up (asking)"
+    },
+    {
+      "en": ["please sign slower", "can you sign slower", "sign slower please", "slow down", "please slow down", "can you slow down"],
+      "asl": ["sign", "slow", "please"],
+      "face": "Brows up (asking)"
+    },
+    {
+      "en": ["i do not understand", "i don't understand", "i not understand"],
+      "asl": ["me", "not understand"],
+      "face": "Shake your head slightly"
+    },
+    {
+      "en": ["i do not know", "i don't know", "not sure", "i am not sure"],
+      "asl": ["dont know"],
+      "face": "Shake your head slightly"
+    },
+    {
+      "en": ["do you understand", "do you understand me", "you understand"],
+      "asl": ["you", "understand"],
+      "face": "Brows up (yes/no question)"
+    },
+    {
+      "en": ["where is the bathroom", "where is the restroom", "where is the toilet", "where bathroom"],
+      "asl": ["bathroom", "where"],
+      "face": "Brows down (where-question)"
+    },
+    {
+      "en": ["where are you from"],
+      "asl": ["you", "from", "where"],
+      "face": "Brows down (where-question)"
+    },
+    {
+      "en": ["are you deaf", "you deaf"],
+      "asl": ["you", "deaf"],
+      "face": "Brows up (yes/no question)"
+    },
+    {
+      "en": ["i am hearing", "i can hear"],
+      "asl": ["me", "hearing"]
+    },
+    {
+      "en": ["i am learning sign language", "i am learning asl", "i am learning to sign", "i learn sign language"],
+      "asl": ["me", "learn", "sign language"]
+    },
+    {
+      "en": ["see you later", "see you soon", "see ya"],
+      "asl": ["see", "you", "later"]
+    },
+    {
+      "en": ["thank you very much", "thanks a lot", "thank you so much"],
+      "asl": ["thank you"],
+      "face": "Smile, nod; sign it bigger"
+    },
+    {
+      "en": ["excuse me"],
+      "asl": ["excuse"],
+      "face": "Polite, slight lean in"
+    },
+    {
+      "en": ["what time is it", "what is the time"],
+      "asl": ["time"],
+      "face": "Brows down (question)"
+    },
+    {
+      "en": ["can you help me", "please help me", "help me please", "i need help", "help me"],
+      "asl": ["help", "me", "please"],
+      "face": "Brows up (asking)"
+    },
+    {
+      "en": ["can you write it down", "please write it down", "write it down", "can you write that down"],
+      "asl": ["write", "please"],
+      "face": "Brows up (asking)"
+    },
+    {
+      "en": ["good morning"],
+      "asl": ["good", "morning"]
+    },
+    {
+      "en": ["nice to meet you too", "nice to meet you"],
+      "asl": ["nice", "meet", "you"],
+      "face": "Smile"
+    }
+  ]
+}

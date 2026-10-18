@@ -55,12 +55,16 @@ function showOnPhone(card: Card | undefined, n: number, total: number): void {
     phoneCard.textContent = 'No phrase yet.'
     return
   }
-  const parts: Node[] = [
+  const parts: Node[] = []
+  if (card.sentence) {
+    parts.push(el('small', `ASL order: ${card.sentence}${card.face ? ` · Face: ${card.face}` : ''} (AI-drafted, unchecked)`), el('br'))
+  }
+  parts.push(
     el('b', card.title), document.createTextNode(` ${n}/${total}`), el('br'),
     document.createTextNode(card.how[0]), el('br'),
     document.createTextNode(card.how[1]), el('br'),
     el('small', card.label),
-  ]
+  )
   if (card.detail) {
     const credit = el('small')
     credit.append('Description: ', link(card.detail.url, 'Wiktionary'), ', CC BY-SA 4.0')
@@ -137,7 +141,8 @@ function lensText(): string {
     `${card.title}   ${index + 1}/${cards.length}`,
     card.how[0],
     card.how[1],
-    ...(long ? [] : ['']),
+    // In a known sentence the face carries the grammar, so it takes the spacer's place.
+    ...(card.face ? [`FACE: ${card.face}`] : long ? [] : ['']),
     card.detail ? `${card.label} · ▼ HOW` : card.label,
     next ? `NEXT ${next.title.split('  ')[0]}` : 'LAST · TAP TO REPEAT',
   ].join('\n')

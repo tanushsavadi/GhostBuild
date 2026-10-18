@@ -331,5 +331,17 @@
   "down": [
     "Index finger",
     "Point downward"
+  ],
+  "your": [
+    "Flat hand, palm toward them",
+    "Push it slightly toward them"
+  ],
+  "cannot": [
+    "Both index fingers, one above",
+    "Top one strikes down past other"
+  ],
+  "hear": [
+    "Index finger",
+    "Point to your ear"
   ]
 }
