@@ -1,0 +1,969 @@
+{
+  "$defs": {
+    "Check": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/Cue"
+        },
+        "cites": {
+          "items": {
+            "$ref": "#/$defs/Cite"
+          },
+          "title": "Cites",
+          "type": "array"
+        },
+        "guide_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Guide Id"
+        },
+        "when": {
+          "items": {
+            "$ref": "#/$defs/Predicate"
+          },
+          "title": "When",
+          "type": "array"
+        },
+        "why": {
+          "title": "Why",
+          "type": "string"
+        }
+      },
+      "required": [
+        "action",
+        "why"
+      ],
+      "title": "Check",
+      "type": "object"
+    },
+    "Choice": {
+      "additionalProperties": false,
+      "description": "One answer to a diagnostic question step. Choosing it records what the person reported (HUMAN CONFIRMED observation,\nnever a measurement) and moves to `next`.",
+      "properties": {
+        "id": {
+          "maxLength": 40,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "description": "glasses option text, ALL CAPS",
+          "maxLength": 26,
+          "title": "Label",
+          "type": "string"
+        },
+        "next": {
+          "description": "step id to continue with",
+          "title": "Next",
+          "type": "string"
+        },
+        "records": {
+          "default": "",
+          "description": "the observation this answer records, in plain words",
+          "maxLength": 160,
+          "title": "Records",
+          "type": "string"
+        },
+        "say": {
+          "description": "lowercase phrases a person might say for this answer",
+          "items": {
+            "type": "string"
+          },
+          "title": "Say",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "next"
+      ],
+      "title": "Choice",
+      "type": "object"
+    },
+    "Cite": {
+      "additionalProperties": false,
+      "properties": {
+        "loc": {
+          "description": "page/section, or a timestamp like t=00:12:34 for video",
+          "title": "Loc",
+          "type": "string"
+        },
+        "quote": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Quote"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "deep link (e.g. video &t=754s, repo file#L10)",
+          "title": "Url"
+        }
+      },
+      "required": [
+        "source",
+        "loc"
+      ],
+      "title": "Cite",
+      "type": "object"
+    },
+    "Cue": {
+      "additionalProperties": false,
+      "properties": {
+        "line1": {
+          "maxLength": 24,
+          "minLength": 1,
+          "title": "Line1",
+          "type": "string"
+        },
+        "line2": {
+          "default": "",
+          "maxLength": 26,
+          "title": "Line2",
+          "type": "string"
+        }
+      },
+      "required": [
+        "line1"
+      ],
+      "title": "Cue",
+      "type": "object"
+    },
+    "Faq": {
+      "additionalProperties": false,
+      "properties": {
+        "a": {
+          "$ref": "#/$defs/Cue"
+        },
+        "q": {
+          "description": "how a confused beginner would ASK it out loud, lowercase, e.g. 'which leg is longer'",
+          "title": "Q",
+          "type": "string"
+        }
+      },
+      "required": [
+        "q",
+        "a"
+      ],
+      "title": "Faq",
+      "type": "object"
+    },
+    "Functional": {
+      "additionalProperties": false,
+      "description": "Post-repair functional demonstration. Success is a measured camera fact; the LED is only COMMANDED.",
+      "properties": {
+        "expect_commanded": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Predicate"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "ok": {
+          "$ref": "#/$defs/Cue"
+        },
+        "prompt": {
+          "$ref": "#/$defs/Cue"
+        },
+        "trigger": {
+          "items": {
+            "$ref": "#/$defs/Predicate"
+          },
+          "title": "Trigger",
+          "type": "array"
+        },
+        "within_ms": {
+          "minimum": 0,
+          "title": "Within Ms",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "trigger",
+        "prompt",
+        "ok",
+        "within_ms"
+      ],
+      "title": "Functional",
+      "type": "object"
+    },
+    "Guide": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "views": {
+          "items": {
+            "$ref": "#/$defs/GuideView"
+          },
+          "maxItems": 3,
+          "minItems": 1,
+          "title": "Views",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "views"
+      ],
+      "title": "Guide",
+      "type": "object"
+    },
+    "GuideView": {
+      "additionalProperties": false,
+      "properties": {
+        "depicts": {
+          "title": "Depicts",
+          "type": "string"
+        },
+        "fallback": {
+          "$ref": "#/$defs/Cue"
+        },
+        "fov_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "what part of the Pi's fixed field of view this refers to",
+          "title": "Fov Note"
+        },
+        "image": {
+          "description": "repo path to the G2-ready PNG (<=288x144, 4-bit grey)",
+          "title": "Image",
+          "type": "string"
+        },
+        "phone_image": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "repo path to the high-res phone asset",
+          "title": "Phone Image"
+        },
+        "provenance": {
+          "enum": [
+            "MEASURED LIVE",
+            "INFERRED",
+            "COMMANDED",
+            "DETERMINISTIC",
+            "HUMAN CONFIRMED",
+            "MANUFACTURER DOC",
+            "AUTHORED PROJECT SPEC",
+            "AI-EXTRACTED \u00b7 HUMAN-REVIEWED",
+            "AUTHORED DEMO METADATA",
+            "WEB TUTORIAL",
+            "VIDEO TUTORIAL",
+            "GITHUB SOURCE",
+            "REPLAY",
+            "SIMULATED"
+          ],
+          "title": "Provenance",
+          "type": "string"
+        },
+        "reference_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "link to a source image/video frame this view should be recreated from by a human; never auto-used on the glasses",
+          "title": "Reference Url"
+        },
+        "step_id": {
+          "title": "Step Id",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 24,
+          "title": "Title",
+          "type": "string"
+        },
+        "view": {
+          "enum": [
+            "where",
+            "how",
+            "correct"
+          ],
+          "title": "View",
+          "type": "string"
+        }
+      },
+      "required": [
+        "view",
+        "step_id",
+        "title",
+        "image",
+        "provenance",
+        "depicts",
+        "fallback"
+      ],
+      "title": "GuideView",
+      "type": "object"
+    },
+    "Part": {
+      "additionalProperties": false,
+      "description": "A part or fastener a step uses, exactly as the source (a manual, a parts list) prints it. Never a guess: qty is null when the source prints none.",
+      "properties": {
+        "avoid": {
+          "default": false,
+          "description": "the source explicitly marks this part as NOT for this step",
+          "title": "Avoid",
+          "type": "boolean"
+        },
+        "id": {
+          "description": "the part number as printed, e.g. 101344",
+          "maxLength": 24,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "default": "",
+          "description": "short common name; descriptive, never a brand claim",
+          "maxLength": 60,
+          "title": "Name",
+          "type": "string"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "maxLength": 160,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "what the source says about it here, e.g. 'crossed out in this step: do not use'",
+          "title": "Note"
+        },
+        "qty": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "quantity printed for this step; null when the source gives none",
+          "title": "Qty"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "Part",
+      "type": "object"
+    },
+    "Predicate": {
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "enum": [
+            "lt",
+            "gt",
+            "eq",
+            "is_null",
+            "not_null"
+          ],
+          "title": "Op",
+          "type": "string"
+        },
+        "signal": {
+          "description": "dotted path into Observation, e.g. camera.mean_luma",
+          "title": "Signal",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        }
+      },
+      "required": [
+        "signal",
+        "op"
+      ],
+      "title": "Predicate",
+      "type": "object"
+    },
+    "Source_": {
+      "additionalProperties": false,
+      "properties": {
+        "file": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "File"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "MEASURED LIVE",
+            "INFERRED",
+            "COMMANDED",
+            "DETERMINISTIC",
+            "HUMAN CONFIRMED",
+            "MANUFACTURER DOC",
+            "AUTHORED PROJECT SPEC",
+            "AI-EXTRACTED \u00b7 HUMAN-REVIEWED",
+            "AUTHORED DEMO METADATA",
+            "WEB TUTORIAL",
+            "VIDEO TUTORIAL",
+            "GITHUB SOURCE",
+            "REPLAY",
+            "SIMULATED"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "title"
+      ],
+      "title": "Source_",
+      "type": "object"
+    },
+    "Step": {
+      "additionalProperties": false,
+      "properties": {
+        "choices": {
+          "description": "answers for a question step",
+          "items": {
+            "$ref": "#/$defs/Choice"
+          },
+          "maxItems": 4,
+          "title": "Choices",
+          "type": "array"
+        },
+        "cites": {
+          "description": "where in a source this step comes from (e.g. manual page); phone shows the link",
+          "items": {
+            "$ref": "#/$defs/Cite"
+          },
+          "title": "Cites",
+          "type": "array"
+        },
+        "cue": {
+          "$ref": "#/$defs/Cue",
+          "description": "the glasses text for this step: one action"
+        },
+        "detail": {
+          "default": "",
+          "description": "phone-only full explanation",
+          "maxLength": 600,
+          "title": "Detail",
+          "type": "string"
+        },
+        "expected": {
+          "default": "",
+          "description": "how the person can tell this step worked, from the source",
+          "maxLength": 300,
+          "title": "Expected",
+          "type": "string"
+        },
+        "faq": {
+          "items": {
+            "$ref": "#/$defs/Faq"
+          },
+          "title": "Faq",
+          "type": "array"
+        },
+        "guide_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Guide Id"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "instruction": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Cue"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "authored plain-language action and method for the main step; exact identifiers stay in parts/detail. Legacy cue is the fallback; preserve safety quantities/values."
+        },
+        "kind": {
+          "default": "action",
+          "description": "question = diagnostic choice; outcome = a branch result; stop = stop safely / get professional help",
+          "enum": [
+            "action",
+            "question",
+            "outcome",
+            "stop"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "next": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "step id after this action (branching guides); default is the following step",
+          "title": "Next"
+        },
+        "parts": {
+          "description": "parts/fasteners this step uses, as the source prints them (assembly manuals, parts lists)",
+          "items": {
+            "$ref": "#/$defs/Part"
+          },
+          "title": "Parts",
+          "type": "array"
+        },
+        "requires": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Requires",
+          "type": "array"
+        },
+        "risk": {
+          "default": "low",
+          "description": "hazard = deliberate double confirmation before it can be marked done",
+          "enum": [
+            "low",
+            "caution",
+            "hazard"
+          ],
+          "title": "Risk",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 28,
+          "title": "Title",
+          "type": "string"
+        },
+        "tools": {
+          "description": "tools/materials this step needs, as the source names them",
+          "items": {
+            "type": "string"
+          },
+          "title": "Tools",
+          "type": "array"
+        },
+        "troubleshoot": {
+          "items": {
+            "$ref": "#/$defs/Check"
+          },
+          "title": "Troubleshoot",
+          "type": "array"
+        },
+        "verify": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StepVerify"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        },
+        "where": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Cue"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "why": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Cue"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "cue"
+      ],
+      "title": "Step",
+      "type": "object"
+    },
+    "StepVerify": {
+      "additionalProperties": false,
+      "description": "Optional evidence check. Without it a step is manual: only the wearer can confirm it (HUMAN CONFIRMED, never VERIFIED).",
+      "properties": {
+        "hold_ms": {
+          "default": 1500,
+          "minimum": 0,
+          "title": "Hold Ms",
+          "type": "integer"
+        },
+        "ok": {
+          "$ref": "#/$defs/Cue",
+          "description": "shown once when measured evidence satisfies the step"
+        },
+        "when": {
+          "items": {
+            "$ref": "#/$defs/Predicate"
+          },
+          "minItems": 1,
+          "title": "When",
+          "type": "array"
+        }
+      },
+      "required": [
+        "when",
+        "ok"
+      ],
+      "title": "StepVerify",
+      "type": "object"
+    },
+    "Test": {
+      "additionalProperties": false,
+      "properties": {
+        "checks": {
+          "items": {
+            "$ref": "#/$defs/Check"
+          },
+          "minItems": 1,
+          "title": "Checks",
+          "type": "array"
+        },
+        "fact": {
+          "$ref": "#/$defs/Cue"
+        },
+        "fail_after_ms": {
+          "minimum": 0,
+          "title": "Fail After Ms",
+          "type": "integer"
+        },
+        "fail_when": {
+          "description": "ALL must hold for the window to count as failing",
+          "items": {
+            "$ref": "#/$defs/Predicate"
+          },
+          "minItems": 1,
+          "title": "Fail When",
+          "type": "array"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "offer_help_after_ms": {
+          "default": 8000,
+          "description": "gentle PRESS FOR PICTURE offer; once per fault",
+          "minimum": 0,
+          "title": "Offer Help After Ms",
+          "type": "integer"
+        },
+        "ok": {
+          "$ref": "#/$defs/Cue"
+        },
+        "pass_after_ms": {
+          "minimum": 0,
+          "title": "Pass After Ms",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "fail_when",
+        "fail_after_ms",
+        "pass_after_ms",
+        "fact",
+        "ok",
+        "checks"
+      ],
+      "title": "Test",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "aliases": {
+      "description": "lowercase phrases the deterministic goal resolver matches, e.g. 'camera', 'inspection station'",
+      "items": {
+        "type": "string"
+      },
+      "title": "Aliases",
+      "type": "array"
+    },
+    "card_id": {
+      "title": "Card Id",
+      "type": "string"
+    },
+    "functional": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Functional"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "goal_mode": {
+      "default": "fix",
+      "description": "fix = repair/diagnose; build = guided supported setup",
+      "enum": [
+        "fix",
+        "build"
+      ],
+      "title": "Goal Mode",
+      "type": "string"
+    },
+    "guides": {
+      "items": {
+        "$ref": "#/$defs/Guide"
+      },
+      "title": "Guides",
+      "type": "array"
+    },
+    "provenance": {
+      "enum": [
+        "MEASURED LIVE",
+        "INFERRED",
+        "COMMANDED",
+        "DETERMINISTIC",
+        "HUMAN CONFIRMED",
+        "MANUFACTURER DOC",
+        "AUTHORED PROJECT SPEC",
+        "AI-EXTRACTED \u00b7 HUMAN-REVIEWED",
+        "AUTHORED DEMO METADATA",
+        "WEB TUTORIAL",
+        "VIDEO TUTORIAL",
+        "GITHUB SOURCE",
+        "REPLAY",
+        "SIMULATED"
+      ],
+      "title": "Provenance",
+      "type": "string"
+    },
+    "review": {
+      "anyOf": [
+        {
+          "maxLength": 400,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "who checked this card against its sources, how, and when",
+      "title": "Review"
+    },
+    "sources": {
+      "items": {
+        "$ref": "#/$defs/Source_"
+      },
+      "title": "Sources",
+      "type": "array"
+    },
+    "step_image": {
+      "anyOf": [
+        {
+          "enum": [
+            "where",
+            "how",
+            "correct"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "show this authored guide view with each step by default; navigation and evidence rules are unchanged",
+      "title": "Step Image"
+    },
+    "steps": {
+      "description": "a playbook: ordered steps navigated by the wearer; tests (fault mode) and steps may coexist",
+      "items": {
+        "$ref": "#/$defs/Step"
+      },
+      "title": "Steps",
+      "type": "array"
+    },
+    "task_kind": {
+      "anyOf": [
+        {
+          "enum": [
+            "assembly",
+            "diagnosis",
+            "repair",
+            "configuration",
+            "identification"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Task Kind"
+    },
+    "tests": {
+      "items": {
+        "$ref": "#/$defs/Test"
+      },
+      "title": "Tests",
+      "type": "array"
+    },
+    "title": {
+      "title": "Title",
+      "type": "string"
+    },
+    "v": {
+      "const": 2,
+      "default": 2,
+      "title": "V",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "card_id",
+    "title",
+    "provenance",
+    "sources"
+  ],
+  "title": "Card",
+  "type": "object"
+}

@@ -1,0 +1,10 @@
+{
+  "ok": true,
+  "uptime_s": 120.5,
+  "pi_link": "up",
+  "pi_last_seq": 813,
+  "pi_age_ms": 90,
+  "source": "pi_live",
+  "camera": "ok",
+  "g2_clients": 1
+}

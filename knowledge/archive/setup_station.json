@@ -1,0 +1,178 @@
+{
+  "v": 2,
+  "card_id": "setup_station",
+  "title": "Set up the Pi inspection station",
+  "provenance": "AUTHORED DEMO METADATA",
+  "goal_mode": "build",
+  "aliases": [
+    "set up",
+    "setup",
+    "build station",
+    "install",
+    "new station"
+  ],
+  "sources": [
+    {
+      "id": "picam_docs",
+      "kind": "MANUFACTURER DOC",
+      "title": "Raspberry Pi camera documentation",
+      "url": "https://www.raspberrypi.com/documentation/accessories/camera.html",
+      "file": "knowledge/sources/picam_docs.md"
+    },
+    {
+      "id": "team_notes",
+      "kind": "AUTHORED PROJECT SPEC",
+      "title": "GhostBuild PIVOT section 0A (supported setup scope)",
+      "url": null,
+      "file": "docs/PIVOT_GHOSTBUILD.md"
+    }
+  ],
+  "tests": [
+    {
+      "id": "camera_frames",
+      "fail_when": [
+        {
+          "signal": "camera",
+          "op": "is_null",
+          "value": null
+        }
+      ],
+      "fail_after_ms": 1500,
+      "pass_after_ms": 1000,
+      "fact": {
+        "line1": "CAMERA NOT FOUND",
+        "line2": "CHECK CAMERA CONNECTION"
+      },
+      "ok": {
+        "line1": "● CAMERA LIVE",
+        "line2": ""
+      },
+      "checks": [
+        {
+          "when": [],
+          "action": {
+            "line1": "CHECK CAMERA",
+            "line2": "CONNECTION"
+          },
+          "why": "No camera frames arrived from the Pi. The fetched Raspberry Pi page covers camera installation, but its cable wording was not verified verbatim, so the cue stays generic.",
+          "cites": [
+            {
+              "source": "picam_docs",
+              "loc": "camera installation section",
+              "quote": null
+            }
+          ],
+          "guide_id": null
+        }
+      ],
+      "offer_help_after_ms": 8000
+    },
+    {
+      "id": "scene_visible",
+      "fail_when": [
+        {
+          "signal": "camera.mean_luma",
+          "op": "lt",
+          "value": 25
+        }
+      ],
+      "fail_after_ms": 1500,
+      "pass_after_ms": 1000,
+      "fact": {
+        "line1": "CAMERA VIEW DARK",
+        "line2": "CHECK CAMERA LENS"
+      },
+      "ok": {
+        "line1": "● SCENE VISIBLE",
+        "line2": ""
+      },
+      "checks": [
+        {
+          "when": [],
+          "action": {
+            "line1": "CHECK CAMERA LENS",
+            "line2": ""
+          },
+          "why": "The fixed field of view is dark. The lens may be covered. Placeholder threshold, calibrate on the Pi spike.",
+          "cites": [],
+          "guide_id": "camera_lens"
+        }
+      ],
+      "offer_help_after_ms": 8000
+    }
+  ],
+  "functional": {
+    "id": "led_on_motion",
+    "trigger": [
+      {
+        "signal": "camera.motion",
+        "op": "gt",
+        "value": 0.15
+      }
+    ],
+    "prompt": {
+      "line1": "WAVE IN FRONT",
+      "line2": "OF THE CAMERA"
+    },
+    "expect_commanded": {
+      "signal": "led.commanded_on",
+      "op": "eq",
+      "value": true
+    },
+    "ok": {
+      "line1": "● LED COMMANDED",
+      "line2": ""
+    },
+    "within_ms": 1500
+  },
+  "guides": [
+    {
+      "id": "camera_lens",
+      "title": "Camera lens",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "camera_lens.where",
+          "title": "WHERE",
+          "image": "knowledge/guides/camera_lens/where.png",
+          "phone_image": "knowledge/guides/camera_lens/where.phone.png",
+          "provenance": "AUTHORED DEMO METADATA",
+          "depicts": "Inspection station with the Pi camera lens area circled",
+          "fallback": {
+            "line1": "CAMERA LENS",
+            "line2": "IN FIXED VIEW"
+          },
+          "fov_note": "Refers to the camera's fixed field of view only."
+        },
+        {
+          "view": "how",
+          "step_id": "camera_lens.how",
+          "title": "HOW",
+          "image": "knowledge/guides/camera_lens/how.png",
+          "phone_image": "knowledge/guides/camera_lens/how.phone.png",
+          "provenance": "AUTHORED DEMO METADATA",
+          "depicts": "Lens cover or paper flap being lifted away from the lens",
+          "fallback": {
+            "line1": "REMOVE COVER OR",
+            "line2": "PAPER FLAP"
+          },
+          "fov_note": "Refers to the camera's fixed field of view only."
+        },
+        {
+          "view": "correct",
+          "step_id": "camera_lens.correct",
+          "title": "CORRECT",
+          "image": "knowledge/guides/camera_lens/correct.png",
+          "phone_image": "knowledge/guides/camera_lens/correct.phone.png",
+          "provenance": "AUTHORED DEMO METADATA",
+          "depicts": "Lens uncovered with the fixed field of view clear",
+          "fallback": {
+            "line1": "LENS CLEAR IN",
+            "line2": "CAMERA VIEW"
+          },
+          "fov_note": "Refers to the camera's fixed field of view only."
+        }
+      ]
+    }
+  ]
+}

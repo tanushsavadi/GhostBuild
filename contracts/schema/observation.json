@@ -1,0 +1,203 @@
+{
+  "$defs": {
+    "CameraObs": {
+      "additionalProperties": false,
+      "description": "What the Pi measured from the latest frame. Features only; the core decides what they mean.",
+      "properties": {
+        "detail": {
+          "description": "variance of Laplacian (focus/detail); low when covered or defocused",
+          "minimum": 0,
+          "title": "Detail",
+          "type": "number"
+        },
+        "frame_age_ms": {
+          "description": "age of the frame when this observation was built",
+          "minimum": 0,
+          "title": "Frame Age Ms",
+          "type": "integer"
+        },
+        "frame_seq": {
+          "description": "increments once per NEW frame; a stuck value means a frozen feed",
+          "minimum": 0,
+          "title": "Frame Seq",
+          "type": "integer"
+        },
+        "luma_std": {
+          "description": "contrast; a covered lens is dark AND flat",
+          "minimum": 0,
+          "title": "Luma Std",
+          "type": "number"
+        },
+        "marker_found": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "fiducial/marker seen in the fixed field of view; null = not evaluated",
+          "title": "Marker Found"
+        },
+        "marker_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Marker Id"
+        },
+        "mean_luma": {
+          "maximum": 255,
+          "minimum": 0,
+          "title": "Mean Luma",
+          "type": "number"
+        },
+        "motion": {
+          "description": "fraction of ROI pixels changed vs the previous frame",
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Motion",
+          "type": "number"
+        }
+      },
+      "required": [
+        "frame_seq",
+        "frame_age_ms",
+        "mean_luma",
+        "luma_std",
+        "detail",
+        "motion"
+      ],
+      "title": "CameraObs",
+      "type": "object"
+    },
+    "LedObs": {
+      "additionalProperties": false,
+      "description": "COMMANDED state only. GPIO high is not measured light.",
+      "properties": {
+        "cmd_seq": {
+          "minimum": 0,
+          "title": "Cmd Seq",
+          "type": "integer"
+        },
+        "commanded_on": {
+          "title": "Commanded On",
+          "type": "boolean"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "e.g. motion_in_roi, manual",
+          "title": "Reason"
+        }
+      },
+      "required": [
+        "commanded_on",
+        "cmd_seq"
+      ],
+      "title": "LedObs",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "at": {
+      "description": "device wall clock, epoch ms (advisory)",
+      "minimum": 0,
+      "title": "At",
+      "type": "integer"
+    },
+    "camera": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CameraObs"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "null = camera unavailable. Never treated as success."
+    },
+    "dev": {
+      "minLength": 1,
+      "title": "Dev",
+      "type": "string"
+    },
+    "error": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "short machine-readable reason when camera is null",
+      "title": "Error"
+    },
+    "led": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/LedObs"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "ms": {
+      "description": "device monotonic ms",
+      "minimum": 0,
+      "title": "Ms",
+      "type": "integer"
+    },
+    "seq": {
+      "description": "monotonic per device boot; core drops seq <= last",
+      "minimum": 0,
+      "title": "Seq",
+      "type": "integer"
+    },
+    "source": {
+      "enum": [
+        "pi_live",
+        "replay",
+        "simulated",
+        "manual"
+      ],
+      "title": "Source",
+      "type": "string"
+    },
+    "v": {
+      "const": 2,
+      "default": 2,
+      "title": "V",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "dev",
+    "seq",
+    "ms",
+    "at",
+    "source",
+    "camera"
+  ],
+  "title": "Observation",
+  "type": "object"
+}

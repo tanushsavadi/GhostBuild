@@ -1,0 +1,60 @@
+{
+  "guide_id": "mac_display_colors_check_color_filters",
+  "title": "Check color filters",
+  "placeholder": false,
+  "pipeline_version": 2,
+  "g2_format": "PNG, 8-bit greyscale, values only multiples of 17 (= 16 gray4 levels), black = transparent, <=288x144",
+  "views": [
+    {
+      "view": "where",
+      "step_id": "mac_display_colors_check_color_filters.where",
+      "title": "WHERE TO CLICK",
+      "image": "knowledge/guides/mac_display_colors_check_color_filters/where.png",
+      "phone_image": "knowledge/guides/mac_display_colors_check_color_filters/where.phone.png",
+      "provenance": "DETERMINISTIC",
+      "depicts": "GhostBuild drawing of the path the source names (Apple menu > System Settings > Accessibility). Not a screenshot.",
+      "fallback": {
+        "line1": "SYSTEM SETTINGS > ACCESS",
+        "line2": "PATH ON YOUR PHONE"
+      },
+      "placeholder": false,
+      "fov_note": null,
+      "asset_kind": "original_diagram",
+      "reference_url": "https://support.apple.com/guide/mac-help/change-display-settings-for-accessibility-unac089/mac",
+      "w": 288,
+      "h": 144,
+      "grey_levels": 16,
+      "sha256": "5c007f12be1426dcea8715e1dce862c9b24528289bf31f71267e637e6d0466cc",
+      "bytes": 1987,
+      "phone_w": 1140,
+      "phone_h": 640,
+      "phone_sha256": "0b5aed4642935d3bb65b97235f1697e49ab303818bfe948d3bb8d9a285fcb1b5",
+      "phone_bytes": 56807,
+      "source": "assets/sources/mac_display_colors_check_color_filters/where.src.png",
+      "source_sha256": "76a28a26a040219e157a607aadfc99dea324d2a1fbee345a7b00ad50449fd170",
+      "annotation": "rect",
+      "caption": ""
+    }
+  ],
+  "guide": {
+    "id": "mac_display_colors_check_color_filters",
+    "title": "Check color filters",
+    "views": [
+      {
+        "view": "where",
+        "step_id": "mac_display_colors_check_color_filters.where",
+        "title": "WHERE TO CLICK",
+        "image": "knowledge/guides/mac_display_colors_check_color_filters/where.png",
+        "phone_image": "knowledge/guides/mac_display_colors_check_color_filters/where.phone.png",
+        "provenance": "DETERMINISTIC",
+        "depicts": "GhostBuild drawing of the path the source names (Apple menu > System Settings > Accessibility). Not a screenshot.",
+        "fallback": {
+          "line1": "SYSTEM SETTINGS > ACCESS",
+          "line2": "PATH ON YOUR PHONE"
+        },
+        "fov_note": null,
+        "reference_url": "https://support.apple.com/guide/mac-help/change-display-settings-for-accessibility-unac089/mac"
+      }
+    ]
+  }
+}

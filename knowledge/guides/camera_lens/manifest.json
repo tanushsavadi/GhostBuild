@@ -1,0 +1,150 @@
+{
+  "guide_id": "camera_lens",
+  "title": "Camera lens",
+  "placeholder": true,
+  "pipeline_version": 2,
+  "g2_format": "PNG, 8-bit greyscale, values only multiples of 17 (= 16 gray4 levels), black = transparent, <=288x144",
+  "views": [
+    {
+      "view": "where",
+      "step_id": "camera_lens.where",
+      "title": "WHERE",
+      "image": "knowledge/guides/camera_lens/where.png",
+      "phone_image": "knowledge/guides/camera_lens/where.phone.png",
+      "provenance": "AUTHORED DEMO METADATA",
+      "depicts": "SCHEMATIC stand-in: generic camera module on a stand, lens circled (not the team's rig)",
+      "fallback": {
+        "line1": "CAMERA = ROUND LENS",
+        "line2": "ON THE CAMERA MODULE"
+      },
+      "placeholder": true,
+      "fov_note": "Placeholder: replace with a photo of the real station showing the camera lens",
+      "asset_kind": "unspecified",
+      "reference_url": null,
+      "w": 288,
+      "h": 144,
+      "grey_levels": 16,
+      "sha256": "120659bd88330c745721221c315785363760ef353fd6160e600c31651abdb8a5",
+      "bytes": 1793,
+      "phone_w": 1280,
+      "phone_h": 640,
+      "phone_sha256": "de0d89ee2f61a9f94ac668f031522acf5381581e7ac365e458433516fb7dc156",
+      "phone_bytes": 99073,
+      "source": "assets/sources/camera_lens/where.src.png",
+      "source_sha256": "7c9cb086c1b516ed1538431eebdd532907bf44db72d1311f334b1329de59012a",
+      "annotation": "circle",
+      "caption": "CAMERA LENS"
+    },
+    {
+      "view": "how",
+      "step_id": "camera_lens.how",
+      "title": "HOW",
+      "image": "knowledge/guides/camera_lens/how.png",
+      "phone_image": "knowledge/guides/camera_lens/how.phone.png",
+      "provenance": "AUTHORED DEMO METADATA",
+      "depicts": "SCHEMATIC stand-in: removable cover over the lens, arrow to the pull tab (not the team's rig)",
+      "fallback": {
+        "line1": "TAKE OFF THE COVER",
+        "line2": "OR CLEAR THE LENS"
+      },
+      "placeholder": true,
+      "fov_note": null,
+      "asset_kind": "unspecified",
+      "reference_url": null,
+      "w": 288,
+      "h": 144,
+      "grey_levels": 16,
+      "sha256": "7acd3c7776db0706e76a263450cb2af41e54beb8a798a839c2827e3d2a567126",
+      "bytes": 1179,
+      "phone_w": 1280,
+      "phone_h": 640,
+      "phone_sha256": "953333f47c768dbe6f23c2ef0506216c856ffb9fb5eae0257424200d3d843943",
+      "phone_bytes": 46497,
+      "source": "assets/sources/camera_lens/how.src.png",
+      "source_sha256": "df50965c8188eda9b14e6d905c2f55618fe0ced66c5f698afb33f2fb33c36a6c",
+      "annotation": "arrow",
+      "caption": "REMOVE COVER"
+    },
+    {
+      "view": "correct",
+      "step_id": "camera_lens.correct",
+      "title": "CORRECT",
+      "image": "knowledge/guides/camera_lens/correct.png",
+      "phone_image": "knowledge/guides/camera_lens/correct.phone.png",
+      "provenance": "AUTHORED DEMO METADATA",
+      "depicts": "SCHEMATIC stand-in: lens uncovered and a bright, clear view (not the team's rig)",
+      "fallback": {
+        "line1": "LENS UNCOVERED",
+        "line2": "VIEW IS BRIGHT"
+      },
+      "placeholder": true,
+      "fov_note": null,
+      "asset_kind": "unspecified",
+      "reference_url": null,
+      "w": 288,
+      "h": 144,
+      "grey_levels": 16,
+      "sha256": "4b42207ac8adfe3137596b679df360e297b4c737cb7cc5062a569b6ec64c4a39",
+      "bytes": 2312,
+      "phone_w": 1280,
+      "phone_h": 640,
+      "phone_sha256": "ff537daea1cfa73aafb47bd51b9a6c1f9c4b91a0808d7c1db3cbac2fc837155f",
+      "phone_bytes": 89149,
+      "source": "assets/sources/camera_lens/correct.src.png",
+      "source_sha256": "bca16f0a3db0ffcd1df9fa9652e1e917334f76983d6f4532eed2a51306822f33",
+      "annotation": "rect",
+      "caption": "VIEW IS CLEAR"
+    }
+  ],
+  "guide": {
+    "id": "camera_lens",
+    "title": "Camera lens",
+    "views": [
+      {
+        "view": "where",
+        "step_id": "camera_lens.where",
+        "title": "WHERE",
+        "image": "knowledge/guides/camera_lens/where.png",
+        "phone_image": "knowledge/guides/camera_lens/where.phone.png",
+        "provenance": "AUTHORED DEMO METADATA",
+        "depicts": "SCHEMATIC stand-in: generic camera module on a stand, lens circled (not the team's rig)",
+        "fallback": {
+          "line1": "CAMERA = ROUND LENS",
+          "line2": "ON THE CAMERA MODULE"
+        },
+        "fov_note": "Placeholder: replace with a photo of the real station showing the camera lens",
+        "reference_url": null
+      },
+      {
+        "view": "how",
+        "step_id": "camera_lens.how",
+        "title": "HOW",
+        "image": "knowledge/guides/camera_lens/how.png",
+        "phone_image": "knowledge/guides/camera_lens/how.phone.png",
+        "provenance": "AUTHORED DEMO METADATA",
+        "depicts": "SCHEMATIC stand-in: removable cover over the lens, arrow to the pull tab (not the team's rig)",
+        "fallback": {
+          "line1": "TAKE OFF THE COVER",
+          "line2": "OR CLEAR THE LENS"
+        },
+        "fov_note": null,
+        "reference_url": null
+      },
+      {
+        "view": "correct",
+        "step_id": "camera_lens.correct",
+        "title": "CORRECT",
+        "image": "knowledge/guides/camera_lens/correct.png",
+        "phone_image": "knowledge/guides/camera_lens/correct.phone.png",
+        "provenance": "AUTHORED DEMO METADATA",
+        "depicts": "SCHEMATIC stand-in: lens uncovered and a bright, clear view (not the team's rig)",
+        "fallback": {
+          "line1": "LENS UNCOVERED",
+          "line2": "VIEW IS BRIGHT"
+        },
+        "fov_note": null,
+        "reference_url": null
+      }
+    ]
+  }
+}

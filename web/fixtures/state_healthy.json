@@ -1,0 +1,57 @@
+{
+  "v": 2,
+  "engine": "HEALTHY",
+  "card_id": "camera_lens",
+  "test": "camera_view",
+  "step_id": null,
+  "check": null,
+  "help_view": null,
+  "source": "pi_live",
+  "health": {
+    "ok": true,
+    "uptime_s": 120.5,
+    "pi_link": "up",
+    "pi_last_seq": 813,
+    "pi_age_ms": 90,
+    "source": "pi_live",
+    "camera": "ok",
+    "g2_clients": 1
+  },
+  "hud": {
+    "type": "hud",
+    "v": 2,
+    "seq": 4,
+    "mode": "quiet",
+    "cue": null,
+    "image": null,
+    "menu": null,
+    "cue_id": null,
+    "ttl_ms": null,
+    "source": "pi_live",
+    "stale": false
+  },
+  "events": [
+    {
+      "at": 1792283000000,
+      "text": "frames flowing: seq 810, luma 112.4, contrast 41.8",
+      "label": "MEASURED LIVE",
+      "evidence": {
+        "mean_luma": 112.4,
+        "luma_std": 41.8
+      }
+    },
+    {
+      "at": 1792283000200,
+      "text": "view treated as clear (luma>=25 or contrast>=8)",
+      "label": "INFERRED",
+      "evidence": {}
+    }
+  ],
+  "session": {
+    "id": "s-1",
+    "phase": "task",
+    "goal": "fix",
+    "card_id": "camera_lens",
+    "welcome_shown": true
+  }
+}

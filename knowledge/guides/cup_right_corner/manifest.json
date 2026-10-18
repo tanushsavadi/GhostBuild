@@ -1,0 +1,150 @@
+{
+  "guide_id": "cup_right_corner",
+  "title": "FOLD THE OTHER SIDE",
+  "placeholder": false,
+  "pipeline_version": 2,
+  "g2_format": "PNG, 8-bit greyscale, values only multiples of 17 (= 16 gray4 levels), black = transparent, <=288x144",
+  "views": [
+    {
+      "view": "where",
+      "step_id": "cup_right_corner.where",
+      "title": "WHERE",
+      "image": "knowledge/guides/cup_right_corner/where.png",
+      "phone_image": "knowledge/guides/cup_right_corner/where.phone.png",
+      "provenance": "AUTHORED DEMO METADATA",
+      "depicts": "Original instructional diagram: unfolded right base tip highlighted after the left side fold. Not a photo or a live observation.",
+      "fallback": {
+        "line1": "FIND FREE RIGHT TIP",
+        "line2": "KEEP FIRST FLAP FLAT"
+      },
+      "placeholder": false,
+      "fov_note": null,
+      "asset_kind": "original_diagram",
+      "reference_url": "https://origami.me/cup/",
+      "w": 288,
+      "h": 144,
+      "grey_levels": 15,
+      "sha256": "20cd7210a913c44122f732b429c640dc1b5f95a687f2aae8d93829cb1ad567b7",
+      "bytes": 1332,
+      "phone_w": 1140,
+      "phone_h": 640,
+      "phone_sha256": "cfda79ab573410bb969a1266453694fbbcce1758580fc9365b7b0d8e5b4dfe28",
+      "phone_bytes": 59475,
+      "source": "assets/sources/cup_right_corner/where.src.png",
+      "source_sha256": "cf8f7628722b8306418c745f9cc41150c21191e615e25842727e97f502eb0fae",
+      "annotation": "circle",
+      "caption": "RIGHT TIP IS STILL FREE"
+    },
+    {
+      "view": "how",
+      "step_id": "cup_right_corner.how",
+      "title": "HOW",
+      "image": "knowledge/guides/cup_right_corner/how.png",
+      "phone_image": "knowledge/guides/cup_right_corner/how.phone.png",
+      "provenance": "AUTHORED DEMO METADATA",
+      "depicts": "Original instructional diagram: right tip crosses to the left end of the horizontal first-flap edge. Not a photo or a live observation.",
+      "fallback": {
+        "line1": "FOLD RIGHT TIP ACROSS",
+        "line2": "MATCH FIRST FLAP HEIGHT"
+      },
+      "placeholder": false,
+      "fov_note": null,
+      "asset_kind": "original_diagram",
+      "reference_url": "https://origami.me/cup/",
+      "w": 288,
+      "h": 144,
+      "grey_levels": 15,
+      "sha256": "d82258d36b8e62084876f3498b76926298eee7f36d40b1e86a588e8ebabac12e",
+      "bytes": 1548,
+      "phone_w": 1140,
+      "phone_h": 640,
+      "phone_sha256": "f353386c87c1dc8da51bf0b6523e5bc39848b662c9fd24164bedee8505be7dbd",
+      "phone_bytes": 61160,
+      "source": "assets/sources/cup_right_corner/how.src.png",
+      "source_sha256": "cf8f7628722b8306418c745f9cc41150c21191e615e25842727e97f502eb0fae",
+      "annotation": "arrow",
+      "caption": "RIGHT TIP TO LEFT EDGE"
+    },
+    {
+      "view": "correct",
+      "step_id": "cup_right_corner.correct",
+      "title": "CORRECT",
+      "image": "knowledge/guides/cup_right_corner/correct.png",
+      "phone_image": "knowledge/guides/cup_right_corner/correct.phone.png",
+      "provenance": "AUTHORED DEMO METADATA",
+      "depicts": "Original instructional diagram: both side flaps overlap with aligned horizontal upper edges and the upper triangle still free. Not a photo or a live observation.",
+      "fallback": {
+        "line1": "BOTH SIDE FLAPS FOLDED",
+        "line2": "TOP EDGES AT SAME HEIGHT"
+      },
+      "placeholder": false,
+      "fov_note": null,
+      "asset_kind": "original_diagram",
+      "reference_url": "https://origami.me/cup/",
+      "w": 288,
+      "h": 144,
+      "grey_levels": 15,
+      "sha256": "3c727dfc204f16700a5e97408db52843d9fac6f3cca87e60c1baff3a0b741f29",
+      "bytes": 1364,
+      "phone_w": 1140,
+      "phone_h": 640,
+      "phone_sha256": "111166ec9731787173fa9d68e8bc5377953dcd4df4fd725557388f0af5caf0c2",
+      "phone_bytes": 54337,
+      "source": "assets/sources/cup_right_corner/correct.src.png",
+      "source_sha256": "5bdf0cc716fd0e2bab29e5f1be026c7621464e9e801f9314b5995739d4c6b04d",
+      "annotation": "rect",
+      "caption": "MATCH THE TOP EDGES"
+    }
+  ],
+  "guide": {
+    "id": "cup_right_corner",
+    "title": "FOLD THE OTHER SIDE",
+    "views": [
+      {
+        "view": "where",
+        "step_id": "cup_right_corner.where",
+        "title": "WHERE",
+        "image": "knowledge/guides/cup_right_corner/where.png",
+        "phone_image": "knowledge/guides/cup_right_corner/where.phone.png",
+        "provenance": "AUTHORED DEMO METADATA",
+        "depicts": "Original instructional diagram: unfolded right base tip highlighted after the left side fold. Not a photo or a live observation.",
+        "fallback": {
+          "line1": "FIND FREE RIGHT TIP",
+          "line2": "KEEP FIRST FLAP FLAT"
+        },
+        "fov_note": null,
+        "reference_url": "https://origami.me/cup/"
+      },
+      {
+        "view": "how",
+        "step_id": "cup_right_corner.how",
+        "title": "HOW",
+        "image": "knowledge/guides/cup_right_corner/how.png",
+        "phone_image": "knowledge/guides/cup_right_corner/how.phone.png",
+        "provenance": "AUTHORED DEMO METADATA",
+        "depicts": "Original instructional diagram: right tip crosses to the left end of the horizontal first-flap edge. Not a photo or a live observation.",
+        "fallback": {
+          "line1": "FOLD RIGHT TIP ACROSS",
+          "line2": "MATCH FIRST FLAP HEIGHT"
+        },
+        "fov_note": null,
+        "reference_url": "https://origami.me/cup/"
+      },
+      {
+        "view": "correct",
+        "step_id": "cup_right_corner.correct",
+        "title": "CORRECT",
+        "image": "knowledge/guides/cup_right_corner/correct.png",
+        "phone_image": "knowledge/guides/cup_right_corner/correct.phone.png",
+        "provenance": "AUTHORED DEMO METADATA",
+        "depicts": "Original instructional diagram: both side flaps overlap with aligned horizontal upper edges and the upper triangle still free. Not a photo or a live observation.",
+        "fallback": {
+          "line1": "BOTH SIDE FLAPS FOLDED",
+          "line2": "TOP EDGES AT SAME HEIGHT"
+        },
+        "fov_note": null,
+        "reference_url": "https://origami.me/cup/"
+      }
+    ]
+  }
+}

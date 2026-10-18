@@ -1,0 +1,12 @@
+{
+  "type": "hud",
+  "v": 2,
+  "seq": 7,
+  "mode": "quiet",
+  "cue": null,
+  "image": null,
+  "cue_id": null,
+  "ttl_ms": null,
+  "source": "pi_live",
+  "stale": false
+}

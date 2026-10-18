@@ -1,0 +1,15 @@
+{
+  "v": 2,
+  "session_id": "s-7",
+  "status": "supported",
+  "mode": "build",
+  "card_id": "flatpack_shelf",
+  "task_title": "Assemble a flat-pack shelf (fixture)",
+  "cue": {
+    "line1": "BUILD: FLAT-PACK SHELF",
+    "line2": "4 STEPS"
+  },
+  "detail": "Supported: a reviewed 4-step playbook. You confirm each manual step; nothing here is measured.",
+  "alternatives": [],
+  "research_queued": false
+}

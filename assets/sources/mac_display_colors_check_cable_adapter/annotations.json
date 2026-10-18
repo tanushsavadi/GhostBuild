@@ -1,0 +1,36 @@
+{
+  "guide_id": "mac_display_colors_check_cable_adapter",
+  "title": "Check cable and adapter",
+  "units": "frac",
+  "views": [
+    {
+      "view": "where",
+      "step_id": "mac_display_colors_check_cable_adapter.where",
+      "title": "WHERE TO CLICK",
+      "source": "where.src.png",
+      "crop": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "annotation": {
+        "type": "rect",
+        "x0": 0.005,
+        "y0": 0.005,
+        "x1": 0.995,
+        "y1": 0.995
+      },
+      "caption": "",
+      "autocontrast": 0,
+      "provenance": "DETERMINISTIC",
+      "asset_kind": "original_diagram",
+      "depicts": "GhostBuild drawing of the path the source names (Apple menu > System Settings). Not a screenshot.",
+      "fallback_cue": {
+        "line1": "APPLE MENU > SYSTEM SETT",
+        "line2": "PATH ON YOUR PHONE"
+      },
+      "reference_url": "https://support.apple.com/guide/mac-help/mac-recognize-external-display-mchla25b377d/14.0/mac/14.0"
+    }
+  ]
+}

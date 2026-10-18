@@ -1,0 +1,47 @@
+{
+  "v": 2,
+  "session": {
+    "id": "s-2",
+    "phase": "task",
+    "goal": "build",
+    "card_id": "led_breadboard",
+    "welcome_shown": true
+  },
+  "engine": "PLAYBOOK",
+  "card_id": "led_breadboard",
+  "test": null,
+  "step_id": "led",
+  "check": null,
+  "help_view": null,
+  "source": null,
+  "health": {
+    "ok": true,
+    "uptime_s": 5.0,
+    "pi_link": "down",
+    "pi_last_seq": null,
+    "pi_age_ms": null,
+    "source": null,
+    "camera": "unknown",
+    "g2_clients": 1,
+    "voice": "off"
+  },
+  "hud": null,
+  "playbook": {
+    "card_id": "led_breadboard",
+    "step_index": 1,
+    "step_count": 3,
+    "step_id": "led",
+    "confirmed": [
+      "parts"
+    ],
+    "verified": []
+  },
+  "events": [
+    {
+      "at": 1792283000000,
+      "text": "step parts confirmed by wearer",
+      "label": "HUMAN CONFIRMED",
+      "evidence": {}
+    }
+  ]
+}

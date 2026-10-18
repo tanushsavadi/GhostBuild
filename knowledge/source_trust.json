@@ -1,0 +1,39 @@
+{
+ "_note": "Ranking and labelling hints for discovered sources. Manufacturer domains are labelled MANUFACTURER DOC; specialists rank next. Add domains here; no code change needed.",
+ "manufacturers": [
+  "apple.com",
+  "prusa3d.com",
+  "ikea.com",
+  "raspberrypi.com",
+  "samsung.com",
+  "dell.com",
+  "hp.com",
+  "lenovo.com",
+  "bosch.com",
+  "bosch-home.com",
+  "makita.com",
+  "dewalt.com",
+  "shimano.com",
+  "sram.com",
+  "logitech.com",
+  "canon.com",
+  "epson.com",
+  "lg.com",
+  "sony.com",
+  "dyson.com",
+  "whirlpool.com",
+  "ge.com",
+  "geappliances.com",
+  "brother.com",
+  "microsoft.com",
+  "google.com",
+  "garmin.com",
+  "bambulab.com",
+  "creality.com"
+ ],
+ "specialists": [
+  "parktool.com",
+  "ifixit.com",
+  "sheldonbrown.com"
+ ]
+}

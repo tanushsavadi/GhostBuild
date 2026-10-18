@@ -1,0 +1,16 @@
+{
+  "v": 2,
+  "session_id": "s-1",
+  "status": "unsupported",
+  "mode": "fix",
+  "card_id": null,
+  "task_title": null,
+  "cue": {
+    "line1": "NOT SUPPORTED YET",
+    "line2": "TRY PI CAMERA"
+  },
+  "detail": "GhostBuild only has a verified repair card for the Pi inspection station.",
+  "alternatives": [
+    "Pi camera view"
+  ]
+}

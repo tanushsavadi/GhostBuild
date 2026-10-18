@@ -1,0 +1,618 @@
+{
+  "status": "PASS",
+  "scope": "Official simulator 0.9.5; actual core; cached product photos and manual; no physical G2 or microphone",
+  "checks": [
+    {
+      "name": "01-photo-shortlist",
+      "frame": {
+        "type": "hud",
+        "v": 2,
+        "seq": 2,
+        "mode": "visual",
+        "cue": {
+          "line1": "1/5 MICKE WHITE",
+          "line2": "PRESS: ENLARGE PHOTO"
+        },
+        "image": {
+          "guide_id": "product_matches",
+          "view": "where",
+          "index": 0,
+          "count": 1,
+          "title": "PRODUCT MATCHES",
+          "url": "/discovery/shortlist/ec4ff0c50f59c002397eddc407904757a7f942443590a54678eabcb9ae0121fb.png",
+          "w": 288,
+          "h": 144,
+          "sha256": "ec4ff0c50f59c002397eddc407904757a7f942443590a54678eabcb9ae0121fb",
+          "provenance": "MANUFACTURER DOC",
+          "step_id": "product_matches"
+        },
+        "menu": null,
+        "step": null,
+        "cue_id": null,
+        "ttl_ms": null,
+        "source": "manual",
+        "session_id": "s-0f3e7abc",
+        "stale": false
+      }
+    },
+    {
+      "name": "02-highlight-second",
+      "frame": {
+        "type": "hud",
+        "v": 2,
+        "seq": 3,
+        "mode": "visual",
+        "cue": {
+          "line1": "2/5 ALEX WHITE",
+          "line2": "PRESS: ENLARGE PHOTO"
+        },
+        "image": {
+          "guide_id": "product_matches",
+          "view": "where",
+          "index": 0,
+          "count": 1,
+          "title": "PRODUCT MATCHES",
+          "url": "/discovery/shortlist/42fc5860826ed04433e84e358136351da64ce211f579b81025328277940f4dd3.png",
+          "w": 288,
+          "h": 144,
+          "sha256": "42fc5860826ed04433e84e358136351da64ce211f579b81025328277940f4dd3",
+          "provenance": "MANUFACTURER DOC",
+          "step_id": "product_matches"
+        },
+        "menu": null,
+        "step": null,
+        "cue_id": null,
+        "ttl_ms": null,
+        "source": "manual",
+        "session_id": "s-0f3e7abc",
+        "stale": false
+      }
+    },
+    {
+      "name": "03-full-product-photo",
+      "frame": {
+        "type": "hud",
+        "v": 2,
+        "seq": 5,
+        "mode": "visual",
+        "cue": {
+          "line1": "1/5 MICKE",
+          "line2": "PRESS: THIS ONE"
+        },
+        "image": {
+          "guide_id": "product_ikea_80213074",
+          "view": "where",
+          "index": 0,
+          "count": 1,
+          "title": "MICKE",
+          "url": "/discovery/img/ikea/80213074.g2.png",
+          "w": 288,
+          "h": 144,
+          "sha256": "023d352fc6ac655b206067906f435715d76eb398e2bdd4733733bb506c0e6f14",
+          "provenance": "MANUFACTURER DOC",
+          "step_id": "product"
+        },
+        "menu": null,
+        "step": null,
+        "cue_id": null,
+        "ttl_ms": null,
+        "source": "manual",
+        "session_id": "s-0f3e7abc",
+        "stale": false
+      }
+    },
+    {
+      "name": "04-back-to-photo-shortlist",
+      "frame": {
+        "type": "hud",
+        "v": 2,
+        "seq": 6,
+        "mode": "visual",
+        "cue": {
+          "line1": "1/5 MICKE WHITE",
+          "line2": "PRESS: ENLARGE PHOTO"
+        },
+        "image": {
+          "guide_id": "product_matches",
+          "view": "where",
+          "index": 0,
+          "count": 1,
+          "title": "PRODUCT MATCHES",
+          "url": "/discovery/shortlist/ec4ff0c50f59c002397eddc407904757a7f942443590a54678eabcb9ae0121fb.png",
+          "w": 288,
+          "h": 144,
+          "sha256": "ec4ff0c50f59c002397eddc407904757a7f942443590a54678eabcb9ae0121fb",
+          "provenance": "MANUFACTURER DOC",
+          "step_id": "product_matches"
+        },
+        "menu": null,
+        "step": null,
+        "cue_id": null,
+        "ttl_ms": null,
+        "source": "manual",
+        "session_id": "s-0f3e7abc",
+        "stale": false
+      }
+    },
+    {
+      "name": "05-cabinet-question",
+      "frame": {
+        "type": "hud",
+        "v": 2,
+        "seq": 8,
+        "mode": "menu",
+        "cue": {
+          "line1": "CABINET SIDE?",
+          "line2": "SWIPE · PRESS"
+        },
+        "image": null,
+        "menu": {
+          "prompt": "CABINET SIDE?",
+          "options": [
+            "CABINET ON THE LEFT",
+            "CABINET ON THE RIGHT"
+          ],
+          "selected": 0
+        },
+        "step": null,
+        "cue_id": null,
+        "ttl_ms": null,
+        "source": "manual",
+        "session_id": "s-0f3e7abc",
+        "stale": false
+      }
+    },
+    {
+      "name": "06-first-step",
+      "frame": {
+        "type": "hud",
+        "v": 2,
+        "seq": 9,
+        "mode": "step",
+        "cue": {
+          "line1": "SCREW IN 2 CAM BOLTS",
+          "line2": "PART 118331"
+        },
+        "image": null,
+        "menu": null,
+        "step": {
+          "index": 0,
+          "count": 35,
+          "step_id": "s01",
+          "check": "manual",
+          "confirmed": false
+        },
+        "cue_id": "ikea_80213074_cabinet_left/s01",
+        "ttl_ms": null,
+        "source": "manual",
+        "session_id": "s-0f3e7abc",
+        "stale": false
+      }
+    },
+    {
+      "name": "07-manual-step14",
+      "frame": {
+        "type": "hud",
+        "v": 2,
+        "seq": 10,
+        "mode": "step",
+        "cue": {
+          "line1": "FIT 8 CAM LOCKS",
+          "line2": "PART 103430 ONLY"
+        },
+        "image": null,
+        "menu": null,
+        "step": {
+          "index": 13,
+          "count": 35,
+          "step_id": "s14",
+          "check": "manual",
+          "confirmed": false
+        },
+        "cue_id": "ikea_80213074_cabinet_left/s14",
+        "ttl_ms": null,
+        "source": "manual",
+        "session_id": "s-0f3e7abc",
+        "stale": false
+      }
+    },
+    {
+      "name": "08-manual-where",
+      "frame": {
+        "type": "hud",
+        "v": 2,
+        "seq": 11,
+        "mode": "visual",
+        "cue": {
+          "line1": "WHERE: STEP 14",
+          "line2": "PRESS FOR HOW"
+        },
+        "image": {
+          "guide_id": "ikea80213074_left_s14",
+          "view": "where",
+          "index": 0,
+          "count": 2,
+          "title": "WHERE",
+          "url": "/guides/ikea80213074_left_s14/where.png",
+          "w": 288,
+          "h": 144,
+          "sha256": "b603d5bca03364a2715377c62f30e8dcc71ea625f9c1bc648260dc7a0842cc52",
+          "provenance": "MANUFACTURER DOC",
+          "step_id": "s14.where"
+        },
+        "menu": null,
+        "step": {
+          "index": 13,
+          "count": 35,
+          "step_id": "s14",
+          "check": "manual",
+          "confirmed": false
+        },
+        "cue_id": "ikea_80213074_cabinet_left/s14",
+        "ttl_ms": null,
+        "source": "manual",
+        "session_id": "s-0f3e7abc",
+        "stale": false
+      }
+    },
+    {
+      "name": "09-manual-parts",
+      "frame": {
+        "type": "hud",
+        "v": 2,
+        "seq": 12,
+        "mode": "visual",
+        "cue": {
+          "line1": "PARTS: STEP 14",
+          "line2": "PRESS TO GO BACK"
+        },
+        "image": {
+          "guide_id": "ikea80213074_left_s14",
+          "view": "how",
+          "index": 1,
+          "count": 2,
+          "title": "PARTS",
+          "url": "/guides/ikea80213074_left_s14/how.png",
+          "w": 288,
+          "h": 144,
+          "sha256": "505afd974125f99047ac92a4e242b7f21815acf80e10e777ef775e7d5758c53d",
+          "provenance": "MANUFACTURER DOC",
+          "step_id": "s14.how"
+        },
+        "menu": null,
+        "step": {
+          "index": 13,
+          "count": 35,
+          "step_id": "s14",
+          "check": "manual",
+          "confirmed": false
+        },
+        "cue_id": "ikea_80213074_cabinet_left/s14",
+        "ttl_ms": null,
+        "source": "manual",
+        "session_id": "s-0f3e7abc",
+        "stale": false
+      }
+    },
+    {
+      "name": "10-closeup-stays-open",
+      "frame": {
+        "type": "hud",
+        "v": 2,
+        "seq": 12,
+        "mode": "visual",
+        "cue": {
+          "line1": "PARTS: STEP 14",
+          "line2": "PRESS TO GO BACK"
+        },
+        "image": {
+          "guide_id": "ikea80213074_left_s14",
+          "view": "how",
+          "index": 1,
+          "count": 2,
+          "title": "PARTS",
+          "url": "/guides/ikea80213074_left_s14/how.png",
+          "w": 288,
+          "h": 144,
+          "sha256": "505afd974125f99047ac92a4e242b7f21815acf80e10e777ef775e7d5758c53d",
+          "provenance": "MANUFACTURER DOC",
+          "step_id": "s14.how"
+        },
+        "menu": null,
+        "step": {
+          "index": 13,
+          "count": 35,
+          "step_id": "s14",
+          "check": "manual",
+          "confirmed": false
+        },
+        "cue_id": "ikea_80213074_cabinet_left/s14",
+        "ttl_ms": null,
+        "source": "manual",
+        "session_id": "s-0f3e7abc",
+        "stale": false
+      }
+    },
+    {
+      "name": "11-confirm-next",
+      "frame": {
+        "type": "hud",
+        "v": 2,
+        "seq": 13,
+        "mode": "step",
+        "cue": {
+          "line1": "SCREW RUNNER ON",
+          "line2": "USE SCREW 100365"
+        },
+        "image": null,
+        "menu": null,
+        "step": {
+          "index": 14,
+          "count": 35,
+          "step_id": "s15",
+          "check": "manual",
+          "confirmed": false
+        },
+        "cue_id": "ikea_80213074_cabinet_left/s15",
+        "ttl_ms": null,
+        "source": "manual",
+        "session_id": "s-0f3e7abc",
+        "stale": false
+      }
+    }
+  ],
+  "logs": [
+    {
+      "id": 135,
+      "level": "log",
+      "message": "[Simulator] Flutter Bridge intercepted: evenAppMessage",
+      "ts": 1792320768637
+    },
+    {
+      "id": 136,
+      "level": "log",
+      "message": "[Simulator] Flutter Bridge intercepted: evenAppMessage",
+      "ts": 1792320768639
+    },
+    {
+      "id": 137,
+      "level": "log",
+      "message": "[ghostbuild] image shown /discovery/shortlist/ec4ff0c50f59c002397eddc407904757a7f942443590a54678eabcb9ae0121fb.png result=success fetch=0ms rebuild=3ms send=3ms total=6ms bytes=2340",
+      "ts": 1792320768642
+    },
+    {
+      "id": 138,
+      "level": "log",
+      "message": "[EvenAppBridge] EvenHub event: {\"jsonData\":{\"containerID\":1,\"containerName\":\"cue\",\"eventType\":2},\"textEvent\":{\"containerID\":1,\"containerName\":\"cue\",\"eventType\":2}}",
+      "ts": 1792320769681
+    },
+    {
+      "id": 139,
+      "level": "log",
+      "message": "[Simulator] Flutter Bridge intercepted: evenAppMessage",
+      "ts": 1792320769686
+    },
+    {
+      "id": 140,
+      "level": "log",
+      "message": "[Simulator] Flutter Bridge intercepted: evenAppMessage",
+      "ts": 1792320769690
+    },
+    {
+      "id": 141,
+      "level": "log",
+      "message": "[ghostbuild] image shown /discovery/shortlist/42fc5860826ed04433e84e358136351da64ce211f579b81025328277940f4dd3.png result=success fetch=0ms rebuild=0ms send=10ms total=13ms bytes=2349",
+      "ts": 1792320769698
+    },
+    {
+      "id": 142,
+      "level": "log",
+      "message": "[EvenAppBridge] EvenHub event: {\"jsonData\":{\"containerID\":1,\"containerName\":\"cue\",\"eventType\":1},\"textEvent\":{\"containerID\":1,\"containerName\":\"cue\",\"eventType\":1}}",
+      "ts": 1792320771363
+    },
+    {
+      "id": 143,
+      "level": "log",
+      "message": "[Simulator] Flutter Bridge intercepted: evenAppMessage",
+      "ts": 1792320771366
+    },
+    {
+      "id": 144,
+      "level": "log",
+      "message": "[Simulator] Flutter Bridge intercepted: evenAppMessage",
+      "ts": 1792320771367
+    },
+    {
+      "id": 145,
+      "level": "log",
+      "message": "[ghostbuild] image shown /discovery/shortlist/ec4ff0c50f59c002397eddc407904757a7f942443590a54678eabcb9ae0121fb.png result=success fetch=0ms rebuild=0ms send=4ms total=6ms bytes=2340",
+      "ts": 1792320771372
+    },
+    {
+      "id": 146,
+      "level": "log",
+      "message": "[EvenAppBridge] EvenHub event: {\"jsonData\":{\"eventSource\":1},\"sysEvent\":{\"eventSource\":1}}",
+      "ts": 1792320772015
+    },
+    {
+      "id": 147,
+      "level": "log",
+      "message": "[Simulator] Flutter Bridge intercepted: evenAppMessage",
+      "ts": 1792320772018
+    },
+    {
+      "id": 148,
+      "level": "log",
+      "message": "[Simulator] Flutter Bridge intercepted: evenAppMessage",
+      "ts": 1792320772020
+    },
+    {
+      "id": 149,
+      "level": "log",
+      "message": "[ghostbuild] image shown /discovery/img/ikea/80213074.g2.png result=success fetch=0ms rebuild=0ms send=4ms total=6ms bytes=954",
+      "ts": 1792320772023
+    },
+    {
+      "id": 150,
+      "level": "log",
+      "message": "[EvenAppBridge] EvenHub event: {\"jsonData\":{\"containerID\":1,\"containerName\":\"cue\",\"eventType\":1},\"textEvent\":{\"containerID\":1,\"containerName\":\"cue\",\"eventType\":1}}",
+      "ts": 1792320773713
+    },
+    {
+      "id": 151,
+      "level": "log",
+      "message": "[Simulator] Flutter Bridge intercepted: evenAppMessage",
+      "ts": 1792320773717
+    },
+    {
+      "id": 152,
+      "level": "log",
+      "message": "[Simulator] Flutter Bridge intercepted: evenAppMessage",
+      "ts": 1792320773720
+    },
+    {
+      "id": 153,
+      "level": "log",
+      "message": "[ghostbuild] image shown /discovery/shortlist/ec4ff0c50f59c002397eddc407904757a7f942443590a54678eabcb9ae0121fb.png result=success fetch=0ms rebuild=0ms send=6ms total=9ms bytes=2340",
+      "ts": 1792320773726
+    },
+    {
+      "id": 154,
+      "level": "log",
+      "message": "[EvenAppBridge] EvenHub event: {\"jsonData\":{\"eventSource\":1},\"sysEvent\":{\"eventSource\":1}}",
+      "ts": 1792320775388
+    },
+    {
+      "id": 155,
+      "level": "log",
+      "message": "[Simulator] Flutter Bridge intercepted: evenAppMessage",
+      "ts": 1792320775390
+    },
+    {
+      "id": 156,
+      "level": "log",
+      "message": "[Simulator] Flutter Bridge intercepted: evenAppMessage",
+      "ts": 1792320775393
+    },
+    {
+      "id": 157,
+      "level": "log",
+      "message": "[ghostbuild] image shown /discovery/img/ikea/80213074.g2.png result=success fetch=0ms rebuild=0ms send=4ms total=6ms bytes=954",
+      "ts": 1792320775396
+    },
+    {
+      "id": 158,
+      "level": "log",
+      "message": "[EvenAppBridge] EvenHub event: {\"jsonData\":{\"eventSource\":1},\"sysEvent\":{\"eventSource\":1}}",
+      "ts": 1792320776740
+    },
+    {
+      "id": 159,
+      "level": "log",
+      "message": "[Simulator] Flutter Bridge intercepted: evenAppMessage",
+      "ts": 1792320776744
+    },
+    {
+      "id": 160,
+      "level": "log",
+      "message": "[EvenAppBridge] EvenHub event: {\"jsonData\":{\"eventSource\":1},\"sysEvent\":{\"eventSource\":1}}",
+      "ts": 1792320778403
+    },
+    {
+      "id": 161,
+      "level": "log",
+      "message": "[Simulator] Flutter Bridge intercepted: evenAppMessage",
+      "ts": 1792320778406
+    },
+    {
+      "id": 162,
+      "level": "log",
+      "message": "[Simulator] Flutter Bridge intercepted: evenAppMessage",
+      "ts": 1792320778406
+    },
+    {
+      "id": 163,
+      "level": "log",
+      "message": "[Simulator] Flutter Bridge intercepted: evenAppMessage",
+      "ts": 1792320780079
+    },
+    {
+      "id": 164,
+      "level": "log",
+      "message": "[Simulator] Flutter Bridge intercepted: evenAppMessage",
+      "ts": 1792320780079
+    },
+    {
+      "id": 165,
+      "level": "log",
+      "message": "[EvenAppBridge] EvenHub event: {\"jsonData\":{\"eventSource\":1},\"sysEvent\":{\"eventSource\":1}}",
+      "ts": 1792320781093
+    },
+    {
+      "id": 166,
+      "level": "log",
+      "message": "[Simulator] Flutter Bridge intercepted: evenAppMessage",
+      "ts": 1792320781095
+    },
+    {
+      "id": 167,
+      "level": "log",
+      "message": "[Simulator] Flutter Bridge intercepted: evenAppMessage",
+      "ts": 1792320781095
+    },
+    {
+      "id": 168,
+      "level": "log",
+      "message": "[ghostbuild] image shown /guides/ikea80213074_left_s14/where.png result=success fetch=0ms rebuild=1ms send=2ms total=3ms bytes=3609",
+      "ts": 1792320781097
+    },
+    {
+      "id": 169,
+      "level": "log",
+      "message": "[EvenAppBridge] EvenHub event: {\"jsonData\":{\"eventSource\":1},\"sysEvent\":{\"eventSource\":1}}",
+      "ts": 1792320782764
+    },
+    {
+      "id": 170,
+      "level": "log",
+      "message": "[ghostbuild] image fetched /guides/ikea80213074_left_s14/how.png 3809B 288x144 in 5ms",
+      "ts": 1792320782771
+    },
+    {
+      "id": 171,
+      "level": "log",
+      "message": "[Simulator] Flutter Bridge intercepted: evenAppMessage",
+      "ts": 1792320782771
+    },
+    {
+      "id": 172,
+      "level": "log",
+      "message": "[Simulator] Flutter Bridge intercepted: evenAppMessage",
+      "ts": 1792320782771
+    },
+    {
+      "id": 173,
+      "level": "log",
+      "message": "[Simulator] Flutter Bridge intercepted: evenAppMessage",
+      "ts": 1792320782772
+    },
+    {
+      "id": 174,
+      "level": "log",
+      "message": "[ghostbuild] image shown /guides/ikea80213074_left_s14/how.png result=success fetch=5ms rebuild=0ms send=2ms total=9ms bytes=3809",
+      "ts": 1792320782774
+    },
+    {
+      "id": 175,
+      "level": "log",
+      "message": "[EvenAppBridge] EvenHub event: {\"jsonData\":{\"containerID\":1,\"containerName\":\"cue\",\"eventType\":2},\"textEvent\":{\"containerID\":1,\"containerName\":\"cue\",\"eventType\":2}}",
+      "ts": 1792320785448
+    },
+    {
+      "id": 176,
+      "level": "log",
+      "message": "[Simulator] Flutter Bridge intercepted: evenAppMessage",
+      "ts": 1792320785449
+    }
+  ]
+}

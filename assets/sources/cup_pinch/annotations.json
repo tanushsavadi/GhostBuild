@@ -1,0 +1,104 @@
+{
+  "guide_id": "cup_pinch",
+  "title": "MARK THE REFERENCE",
+  "placeholder": false,
+  "asset_kind": "original_diagram",
+  "reference_url": "https://origami.me/cup/",
+  "units": "px",
+  "views": [
+    {
+      "view": "where",
+      "step_id": "cup_pinch.where",
+      "title": "WHERE",
+      "source": "where.src.png",
+      "crop": [
+        0,
+        0,
+        1200,
+        600
+      ],
+      "annotation": {
+        "type": "arrow",
+        "from": [
+          290,
+          83
+        ],
+        "to": [
+          364,
+          276
+        ]
+      },
+      "caption": "TOP LAYER: LEFT EDGE",
+      "autocontrast": 0,
+      "contrast": 1.05,
+      "gamma": 1,
+      "provenance": "AUTHORED DEMO METADATA",
+      "fallback_cue": {
+        "line1": "TOP LAYER LEFT EDGE",
+        "line2": "LEAVE LOWER LAYER FLAT"
+      },
+      "depicts": "Original instructional diagram: left sloping edge of the top triangle layer identified. Not a photo or a live observation."
+    },
+    {
+      "view": "how",
+      "step_id": "cup_pinch.how",
+      "title": "HOW",
+      "source": "how.src.png",
+      "crop": [
+        0,
+        0,
+        1200,
+        600
+      ],
+      "annotation": {
+        "type": "arrow",
+        "from": [
+          536,
+          117
+        ],
+        "to": [
+          729,
+          444
+        ]
+      },
+      "caption": "ALIGN; PINCH ONLY",
+      "autocontrast": 0,
+      "contrast": 1.05,
+      "gamma": 1,
+      "provenance": "AUTHORED DEMO METADATA",
+      "fallback_cue": {
+        "line1": "LOWER LEFT EDGE TO BASE",
+        "line2": "PINCH RIGHT EDGE ONLY"
+      },
+      "depicts": "Original instructional diagram: temporary angle-bisector fold bringing the left edge onto the bottom edge; pinch is where the guide meets the right edge. Not a photo or a live observation."
+    },
+    {
+      "view": "correct",
+      "step_id": "cup_pinch.correct",
+      "title": "CORRECT",
+      "source": "correct.src.png",
+      "crop": [
+        0,
+        0,
+        1200,
+        600
+      ],
+      "annotation": {
+        "type": "circle",
+        "cx": 778,
+        "cy": 218,
+        "r": 38
+      },
+      "caption": "UNFOLD; KEEP ONE MARK",
+      "autocontrast": 0,
+      "contrast": 1.05,
+      "gamma": 1,
+      "provenance": "AUTHORED DEMO METADATA",
+      "fallback_cue": {
+        "line1": "UNFOLD BACK TO TRIANGLE",
+        "line2": "SMALL MARK ON RIGHT EDGE"
+      },
+      "depicts": "Original instructional diagram: triangle reopened after the temporary fold; the precise small reference pinch is highlighted on the right edge. Not a photo or a live observation."
+    }
+  ]
+}

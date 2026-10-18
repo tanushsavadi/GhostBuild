@@ -1,0 +1,11 @@
+{
+  "v": 2,
+  "dev": "pi-01",
+  "seq": 814,
+  "ms": 40413,
+  "at": 1792283000200,
+  "source": "pi_live",
+  "camera": null,
+  "led": null,
+  "error": "camera_open_failed"
+}

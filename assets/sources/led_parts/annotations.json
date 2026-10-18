@@ -1,0 +1,100 @@
+{
+  "guide_id": "led_parts",
+  "title": "PLACE LED + RESISTOR",
+  "placeholder": false,
+  "asset_kind": "original_diagram",
+  "reference_url": "https://www.raspberrypi.com/documentation/computers/raspberry-pi.html",
+  "units": "px",
+  "views": [
+    {
+      "view": "where",
+      "step_id": "led_parts.where",
+      "title": "WHERE",
+      "source": "schematic.src.png",
+      "crop": [
+        660,
+        500,
+        1300,
+        820
+      ],
+      "annotation": {
+        "type": "rect",
+        "x0": 700,
+        "y0": 600,
+        "x1": 1280,
+        "y1": 724
+      },
+      "caption": "LED + RESISTOR ROW",
+      "autocontrast": 0,
+      "contrast": 1.15,
+      "gamma": 1,
+      "provenance": "AI-EXTRACTED · HUMAN-REVIEWED",
+      "fallback_cue": {
+        "line1": "ON THE BREADBOARD",
+        "line2": "RESISTOR THEN LED"
+      },
+      "depicts": "Generated wiring schematic (CREAO research agent, deterministic SVG; human-checked against the sourced pinout). Resistor and LED placed in series on the breadboard. Not a photo of your hardware."
+    },
+    {
+      "view": "how",
+      "step_id": "led_parts.how",
+      "title": "HOW",
+      "source": "schematic.src.png",
+      "crop": [
+        940,
+        520,
+        1420,
+        760
+      ],
+      "annotation": {
+        "type": "arrow",
+        "from": [
+          1000,
+          590
+        ],
+        "to": [
+          1108,
+          650
+        ]
+      },
+      "caption": "LONG LEG TO RESISTOR",
+      "autocontrast": 0,
+      "contrast": 1.15,
+      "gamma": 1,
+      "provenance": "AI-EXTRACTED · HUMAN-REVIEWED",
+      "fallback_cue": {
+        "line1": "LONG LEG TO RESISTOR",
+        "line2": "FLAT SIDE TOWARD GND"
+      },
+      "depicts": "Generated wiring schematic (CREAO research agent, deterministic SVG; human-checked against the sourced pinout). LED symbol: anode (long leg) on the resistor side, cathode (flat side) toward ground. Not a photo of your hardware."
+    },
+    {
+      "view": "correct",
+      "step_id": "led_parts.correct",
+      "title": "CORRECT",
+      "source": "schematic.src.png",
+      "crop": [
+        660,
+        500,
+        1300,
+        820
+      ],
+      "annotation": {
+        "type": "circle",
+        "cx": 1164,
+        "cy": 660,
+        "r": 62
+      },
+      "caption": "ANODE SIDE TO RESISTOR",
+      "autocontrast": 0,
+      "contrast": 1.15,
+      "gamma": 1,
+      "provenance": "AI-EXTRACTED · HUMAN-REVIEWED",
+      "fallback_cue": {
+        "line1": "RESISTOR THEN LED",
+        "line2": "LONG LEG ON RESISTOR SIDE"
+      },
+      "depicts": "Generated wiring schematic (CREAO research agent, deterministic SVG; human-checked against the sourced pinout). Resistor in line with the LED anode; cathode toward ground. Not a photo of your hardware."
+    }
+  ]
+}

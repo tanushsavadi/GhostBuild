@@ -1,0 +1,5 @@
+# Laptop only: run `uv run pytest -q pi/tests` from the repo root (uv installs these from pyproject).
+-r requirements.txt
+pytest
+pillow
+pydantic>=2   # tests validate observations against contracts/models.py

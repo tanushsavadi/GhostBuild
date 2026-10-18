@@ -1,0 +1,21 @@
+[
+ {
+  "said": "now I want to fix my bike tire instead",
+  "took_s": 4.06,
+  "assistant": "Sure, let's switch to your bike tire. What's going on with it: is it flat or slowly losing air, or is it something else like a cut, a bulge or a wobble? I have a tested guide for flat inner tubes, so this tells me whether we can start it right away.",
+  "decision": "ASK_QUESTION"
+ },
+ {
+  "shot": "bike-00-after-switch",
+  "mode": "intervene",
+  "cue": {
+   "line1": "BIKE TIRE: WHAT'S WRONG?",
+   "line2": "FLAT, LEAKING, OR OTHER?"
+  },
+  "menu": null,
+  "phase": "menu",
+  "card": "mac_display_colors",
+  "step": null,
+  "observations": null
+ }
+]

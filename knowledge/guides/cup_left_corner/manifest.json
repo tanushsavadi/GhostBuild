@@ -1,0 +1,150 @@
+{
+  "guide_id": "cup_left_corner",
+  "title": "LEFT TIP TO THE MARK",
+  "placeholder": false,
+  "pipeline_version": 2,
+  "g2_format": "PNG, 8-bit greyscale, values only multiples of 17 (= 16 gray4 levels), black = transparent, <=288x144",
+  "views": [
+    {
+      "view": "where",
+      "step_id": "cup_left_corner.where",
+      "title": "WHERE",
+      "image": "knowledge/guides/cup_left_corner/where.png",
+      "phone_image": "knowledge/guides/cup_left_corner/where.phone.png",
+      "provenance": "AUTHORED DEMO METADATA",
+      "depicts": "Original instructional diagram: left base tip highlighted, small reference mark visible on the opposite sloping edge. Not a photo or a live observation.",
+      "fallback": {
+        "line1": "FIND THE LEFT TIP",
+        "line2": "RIGHT EDGE HAS THE MARK"
+      },
+      "placeholder": false,
+      "fov_note": null,
+      "asset_kind": "original_diagram",
+      "reference_url": "https://origami.me/cup/",
+      "w": 288,
+      "h": 144,
+      "grey_levels": 16,
+      "sha256": "f74bf9579005d0c69b179e6da7e2988f59bde35c19bd2cc39320a75de7913a1c",
+      "bytes": 1047,
+      "phone_w": 1140,
+      "phone_h": 640,
+      "phone_sha256": "e61a67d31486fd29e385fc8c33b6d05a2f77895c9de6d1d8c36fc6c043582b13",
+      "phone_bytes": 54076,
+      "source": "assets/sources/cup_left_corner/where.src.png",
+      "source_sha256": "1db25a0b4b1da8022e6675efad0442dd1f157fa1e6cff7372cf457f7f5ec8050",
+      "annotation": "circle",
+      "caption": "LEFT TIP + RIGHT MARK"
+    },
+    {
+      "view": "how",
+      "step_id": "cup_left_corner.how",
+      "title": "HOW",
+      "image": "knowledge/guides/cup_left_corner/how.png",
+      "phone_image": "knowledge/guides/cup_left_corner/how.phone.png",
+      "provenance": "AUTHORED DEMO METADATA",
+      "depicts": "Original instructional diagram: left tip moves to the right-edge reference mark; dashed line gives the resulting crease. Not a photo or a live observation.",
+      "fallback": {
+        "line1": "BRING LEFT TIP TO MARK",
+        "line2": "CREASE THE NEW FOLD"
+      },
+      "placeholder": false,
+      "fov_note": null,
+      "asset_kind": "original_diagram",
+      "reference_url": "https://origami.me/cup/",
+      "w": 288,
+      "h": 144,
+      "grey_levels": 16,
+      "sha256": "2671832d54ac81f5c77af5d7ba951c22f42c8b08e8b886344ca52e24ff1c0393",
+      "bytes": 1349,
+      "phone_w": 1140,
+      "phone_h": 640,
+      "phone_sha256": "e7d2f0d3f1108bc7c64c502870bb719b7922d0b4ce313ac2b590635e5f97c998",
+      "phone_bytes": 59681,
+      "source": "assets/sources/cup_left_corner/how.src.png",
+      "source_sha256": "b17131cefd077be8f731e504a21d3d698375b794f23f8a5094a8efe39d41609d",
+      "annotation": "arrow",
+      "caption": "LEFT TIP TO THE MARK"
+    },
+    {
+      "view": "correct",
+      "step_id": "cup_left_corner.correct",
+      "title": "CORRECT",
+      "image": "knowledge/guides/cup_left_corner/correct.png",
+      "phone_image": "knowledge/guides/cup_left_corner/correct.phone.png",
+      "provenance": "AUTHORED DEMO METADATA",
+      "depicts": "Original instructional diagram: first side flap folded across the triangle with a horizontal upper edge. Not a photo or a live observation.",
+      "fallback": {
+        "line1": "TIP MEETS RIGHT MARK",
+        "line2": "FLAP TOP EDGE LEVEL"
+      },
+      "placeholder": false,
+      "fov_note": null,
+      "asset_kind": "original_diagram",
+      "reference_url": "https://origami.me/cup/",
+      "w": 288,
+      "h": 144,
+      "grey_levels": 15,
+      "sha256": "50eafd6336be7b0c137898d91d71fc86542c2885f8cf0c8e6daa4c8155743f76",
+      "bytes": 1168,
+      "phone_w": 1140,
+      "phone_h": 640,
+      "phone_sha256": "afdb90dc9e57b39c57ffcc74f09de897a8581beab3663295d9f8a1b84a885c75",
+      "phone_bytes": 54120,
+      "source": "assets/sources/cup_left_corner/correct.src.png",
+      "source_sha256": "cf8f7628722b8306418c745f9cc41150c21191e615e25842727e97f502eb0fae",
+      "annotation": "rect",
+      "caption": "FLAP TOP IS LEVEL"
+    }
+  ],
+  "guide": {
+    "id": "cup_left_corner",
+    "title": "LEFT TIP TO THE MARK",
+    "views": [
+      {
+        "view": "where",
+        "step_id": "cup_left_corner.where",
+        "title": "WHERE",
+        "image": "knowledge/guides/cup_left_corner/where.png",
+        "phone_image": "knowledge/guides/cup_left_corner/where.phone.png",
+        "provenance": "AUTHORED DEMO METADATA",
+        "depicts": "Original instructional diagram: left base tip highlighted, small reference mark visible on the opposite sloping edge. Not a photo or a live observation.",
+        "fallback": {
+          "line1": "FIND THE LEFT TIP",
+          "line2": "RIGHT EDGE HAS THE MARK"
+        },
+        "fov_note": null,
+        "reference_url": "https://origami.me/cup/"
+      },
+      {
+        "view": "how",
+        "step_id": "cup_left_corner.how",
+        "title": "HOW",
+        "image": "knowledge/guides/cup_left_corner/how.png",
+        "phone_image": "knowledge/guides/cup_left_corner/how.phone.png",
+        "provenance": "AUTHORED DEMO METADATA",
+        "depicts": "Original instructional diagram: left tip moves to the right-edge reference mark; dashed line gives the resulting crease. Not a photo or a live observation.",
+        "fallback": {
+          "line1": "BRING LEFT TIP TO MARK",
+          "line2": "CREASE THE NEW FOLD"
+        },
+        "fov_note": null,
+        "reference_url": "https://origami.me/cup/"
+      },
+      {
+        "view": "correct",
+        "step_id": "cup_left_corner.correct",
+        "title": "CORRECT",
+        "image": "knowledge/guides/cup_left_corner/correct.png",
+        "phone_image": "knowledge/guides/cup_left_corner/correct.phone.png",
+        "provenance": "AUTHORED DEMO METADATA",
+        "depicts": "Original instructional diagram: first side flap folded across the triangle with a horizontal upper edge. Not a photo or a live observation.",
+        "fallback": {
+          "line1": "TIP MEETS RIGHT MARK",
+          "line2": "FLAP TOP EDGE LEVEL"
+        },
+        "fov_note": null,
+        "reference_url": "https://origami.me/cup/"
+      }
+    ]
+  }
+}

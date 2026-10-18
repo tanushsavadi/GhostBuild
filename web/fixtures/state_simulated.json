@@ -1,0 +1,74 @@
+{
+  "v": 2,
+  "engine": "FAULT",
+  "card_id": "camera_lens",
+  "test": "camera_view",
+  "step_id": "camera_lens.where",
+  "check": 0,
+  "help_view": "where",
+  "source": "simulated",
+  "health": {
+    "ok": true,
+    "uptime_s": 120.5,
+    "pi_link": "up",
+    "pi_last_seq": 813,
+    "pi_age_ms": 90,
+    "source": "simulated",
+    "camera": "ok",
+    "g2_clients": 1
+  },
+  "hud": {
+    "type": "hud",
+    "v": 2,
+    "seq": 9,
+    "mode": "intervene",
+    "cue": {
+      "line1": "CAMERA VIEW LOST",
+      "line2": "CHECK CAMERA LENS"
+    },
+    "image": null,
+    "cue_id": null,
+    "ttl_ms": null,
+    "source": "simulated",
+    "stale": false
+  },
+  "events": [
+    {
+      "at": 1792283000000,
+      "text": "frames flowing: seq 810, luma 112.4, contrast 41.8",
+      "label": "SIMULATED",
+      "evidence": {
+        "mean_luma": 112.4,
+        "luma_std": 41.8
+      }
+    },
+    {
+      "at": 1792283005200,
+      "text": "mean luma 6.2, contrast 1.1 for 1.5 s",
+      "label": "SIMULATED",
+      "evidence": {
+        "mean_luma": 6.2,
+        "luma_std": 1.1
+      }
+    },
+    {
+      "at": 1792283005300,
+      "text": "view treated as blocked (luma<25 and contrast<8)",
+      "label": "INFERRED",
+      "evidence": {}
+    },
+    {
+      "at": 1792283005400,
+      "text": "cue shown: CAMERA VIEW LOST / CHECK CAMERA LENS",
+      "label": "DETERMINISTIC",
+      "evidence": {}
+    }
+  ],
+  "session": {
+    "id": "s-1",
+    "phase": "task",
+    "goal": "fix",
+    "card_id": "camera_lens",
+    "welcome_shown": true
+  }
+}

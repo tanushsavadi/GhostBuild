@@ -1,0 +1,827 @@
+{
+  "$defs": {
+    "AnswerPage": {
+      "additionalProperties": false,
+      "description": "One complete readable page of an answer. Swipes page; press returns without completing a step.",
+      "properties": {
+        "count": {
+          "minimum": 1,
+          "title": "Count",
+          "type": "integer"
+        },
+        "grounding": {
+          "default": "guide",
+          "enum": [
+            "guide",
+            "general",
+            "unsure",
+            "deterministic"
+          ],
+          "title": "Grounding",
+          "type": "string"
+        },
+        "index": {
+          "minimum": 0,
+          "title": "Index",
+          "type": "integer"
+        },
+        "label": {
+          "default": "INFERRED",
+          "enum": [
+            "MEASURED LIVE",
+            "INFERRED",
+            "COMMANDED",
+            "DETERMINISTIC",
+            "HUMAN CONFIRMED",
+            "MANUFACTURER DOC",
+            "AUTHORED PROJECT SPEC",
+            "AI-EXTRACTED \u00b7 HUMAN-REVIEWED",
+            "AUTHORED DEMO METADATA",
+            "WEB TUTORIAL",
+            "VIDEO TUTORIAL",
+            "GITHUB SOURCE",
+            "REPLAY",
+            "SIMULATED"
+          ],
+          "title": "Label",
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 320,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text",
+        "index",
+        "count"
+      ],
+      "title": "AnswerPage",
+      "type": "object"
+    },
+    "Cue": {
+      "additionalProperties": false,
+      "properties": {
+        "line1": {
+          "maxLength": 24,
+          "minLength": 1,
+          "title": "Line1",
+          "type": "string"
+        },
+        "line2": {
+          "default": "",
+          "maxLength": 26,
+          "title": "Line2",
+          "type": "string"
+        }
+      },
+      "required": [
+        "line1"
+      ],
+      "title": "Cue",
+      "type": "object"
+    },
+    "Evidence": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "description": "core epoch ms",
+          "title": "At",
+          "type": "integer"
+        },
+        "evidence": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "Evidence",
+          "type": "object"
+        },
+        "label": {
+          "enum": [
+            "MEASURED LIVE",
+            "INFERRED",
+            "COMMANDED",
+            "DETERMINISTIC",
+            "HUMAN CONFIRMED",
+            "MANUFACTURER DOC",
+            "AUTHORED PROJECT SPEC",
+            "AI-EXTRACTED \u00b7 HUMAN-REVIEWED",
+            "AUTHORED DEMO METADATA",
+            "WEB TUTORIAL",
+            "VIDEO TUTORIAL",
+            "GITHUB SOURCE",
+            "REPLAY",
+            "SIMULATED"
+          ],
+          "title": "Label",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "at",
+        "text",
+        "label"
+      ],
+      "title": "Evidence",
+      "type": "object"
+    },
+    "Health": {
+      "additionalProperties": false,
+      "properties": {
+        "camera": {
+          "default": "unknown",
+          "enum": [
+            "ok",
+            "unavailable",
+            "frozen",
+            "unknown"
+          ],
+          "title": "Camera",
+          "type": "string"
+        },
+        "g2_clients": {
+          "minimum": 0,
+          "title": "G2 Clients",
+          "type": "integer"
+        },
+        "ok": {
+          "title": "Ok",
+          "type": "boolean"
+        },
+        "pi_age_ms": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pi Age Ms"
+        },
+        "pi_last_seq": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pi Last Seq"
+        },
+        "pi_link": {
+          "enum": [
+            "up",
+            "stale",
+            "down"
+          ],
+          "title": "Pi Link",
+          "type": "string"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "enum": [
+                "pi_live",
+                "replay",
+                "simulated",
+                "manual"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source"
+        },
+        "uptime_s": {
+          "title": "Uptime S",
+          "type": "number"
+        },
+        "voice": {
+          "default": "off",
+          "enum": [
+            "off",
+            "on"
+          ],
+          "title": "Voice",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ok",
+        "uptime_s",
+        "pi_link",
+        "g2_clients"
+      ],
+      "title": "Health",
+      "type": "object"
+    },
+    "HudFrame": {
+      "additionalProperties": false,
+      "description": "The only thing G2 renders. Written by core/ghostbuild_core/hud.py and nothing else.",
+      "properties": {
+        "answer": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AnswerPage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "persistent answer page in ask mode; press returns to the same step"
+        },
+        "cue": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Cue"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "null in quiet mode (render blank)"
+        },
+        "cue_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cue Id"
+        },
+        "image": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ImageRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "present only in visual mode; cue is the text fallback"
+        },
+        "menu": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Menu"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "present only in menu mode; cue is the text fallback"
+        },
+        "mode": {
+          "enum": [
+            "quiet",
+            "welcome",
+            "menu",
+            "step",
+            "intervene",
+            "visual",
+            "ask",
+            "verified",
+            "uncertain",
+            "error"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "seq": {
+          "description": "monotonic; unchanged frames are never re-sent",
+          "minimum": 0,
+          "title": "Seq",
+          "type": "integer"
+        },
+        "session_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "current session; the plugin stores it and sends it in G2Hello on reconnect so the welcome never repeats",
+          "title": "Session Id"
+        },
+        "source": {
+          "enum": [
+            "pi_live",
+            "replay",
+            "simulated",
+            "manual"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "stale": {
+          "default": false,
+          "description": "true if backed by data older than the staleness limit; plugin shows ERROR instead",
+          "title": "Stale",
+          "type": "boolean"
+        },
+        "step": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StepRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "present in step mode and in visual mode opened from a step"
+        },
+        "ttl_ms": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "plugin clears locally after this as a fallback",
+          "title": "Ttl Ms"
+        },
+        "type": {
+          "const": "hud",
+          "default": "hud",
+          "title": "Type",
+          "type": "string"
+        },
+        "v": {
+          "const": 2,
+          "default": 2,
+          "title": "V",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "seq",
+        "mode",
+        "source"
+      ],
+      "title": "HudFrame",
+      "type": "object"
+    },
+    "ImageRef": {
+      "additionalProperties": false,
+      "properties": {
+        "count": {
+          "minimum": 1,
+          "title": "Count",
+          "type": "integer"
+        },
+        "guide_id": {
+          "title": "Guide Id",
+          "type": "string"
+        },
+        "h": {
+          "maximum": 144,
+          "minimum": 1,
+          "title": "H",
+          "type": "integer"
+        },
+        "index": {
+          "minimum": 0,
+          "title": "Index",
+          "type": "integer"
+        },
+        "provenance": {
+          "enum": [
+            "MEASURED LIVE",
+            "INFERRED",
+            "COMMANDED",
+            "DETERMINISTIC",
+            "HUMAN CONFIRMED",
+            "MANUFACTURER DOC",
+            "AUTHORED PROJECT SPEC",
+            "AI-EXTRACTED \u00b7 HUMAN-REVIEWED",
+            "AUTHORED DEMO METADATA",
+            "WEB TUTORIAL",
+            "VIDEO TUTORIAL",
+            "GITHUB SOURCE",
+            "REPLAY",
+            "SIMULATED"
+          ],
+          "title": "Provenance",
+          "type": "string"
+        },
+        "sha256": {
+          "title": "Sha256",
+          "type": "string"
+        },
+        "step_id": {
+          "title": "Step Id",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 24,
+          "title": "Title",
+          "type": "string"
+        },
+        "url": {
+          "description": "path on core, e.g. /guides/camera_lens/where.png (G2-ready 4-bit grey PNG)",
+          "title": "Url",
+          "type": "string"
+        },
+        "view": {
+          "enum": [
+            "where",
+            "how",
+            "correct"
+          ],
+          "title": "View",
+          "type": "string"
+        },
+        "w": {
+          "maximum": 288,
+          "minimum": 1,
+          "title": "W",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "guide_id",
+        "view",
+        "index",
+        "count",
+        "title",
+        "url",
+        "w",
+        "h",
+        "sha256",
+        "provenance",
+        "step_id"
+      ],
+      "title": "ImageRef",
+      "type": "object"
+    },
+    "Menu": {
+      "additionalProperties": false,
+      "description": "Onboarding choice. swipe moves `selected`, press confirms (core tracks it; a selection is a goal, never a repair commit).",
+      "properties": {
+        "options": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 4,
+          "minItems": 2,
+          "title": "Options",
+          "type": "array"
+        },
+        "prompt": {
+          "maxLength": 24,
+          "title": "Prompt",
+          "type": "string"
+        },
+        "selected": {
+          "minimum": 0,
+          "title": "Selected",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "prompt",
+        "options",
+        "selected"
+      ],
+      "title": "Menu",
+      "type": "object"
+    },
+    "PlaybookState": {
+      "additionalProperties": false,
+      "properties": {
+        "card_id": {
+          "title": "Card Id",
+          "type": "string"
+        },
+        "confirmed": {
+          "description": "HUMAN CONFIRMED step ids",
+          "items": {
+            "type": "string"
+          },
+          "title": "Confirmed",
+          "type": "array"
+        },
+        "observations": {
+          "description": "what the person reported at question steps (HUMAN CONFIRMED, not measured)",
+          "items": {
+            "type": "string"
+          },
+          "title": "Observations",
+          "type": "array"
+        },
+        "step_count": {
+          "minimum": 1,
+          "title": "Step Count",
+          "type": "integer"
+        },
+        "step_id": {
+          "title": "Step Id",
+          "type": "string"
+        },
+        "step_index": {
+          "minimum": 0,
+          "title": "Step Index",
+          "type": "integer"
+        },
+        "verified": {
+          "description": "step ids satisfied by measured evidence",
+          "items": {
+            "type": "string"
+          },
+          "title": "Verified",
+          "type": "array"
+        }
+      },
+      "required": [
+        "card_id",
+        "step_index",
+        "step_count",
+        "step_id"
+      ],
+      "title": "PlaybookState",
+      "type": "object"
+    },
+    "Session": {
+      "additionalProperties": false,
+      "properties": {
+        "card_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Card Id"
+        },
+        "goal": {
+          "anyOf": [
+            {
+              "enum": [
+                "fix",
+                "build"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Goal"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "phase": {
+          "enum": [
+            "welcome",
+            "menu",
+            "task"
+          ],
+          "title": "Phase",
+          "type": "string"
+        },
+        "welcome_shown": {
+          "default": false,
+          "title": "Welcome Shown",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "phase"
+      ],
+      "title": "Session",
+      "type": "object"
+    },
+    "StepRef": {
+      "additionalProperties": false,
+      "description": "Where the wearer is in a playbook. Rendered as a small counter next to the action line.",
+      "properties": {
+        "check": {
+          "description": "manual = the wearer confirms (HUMAN CONFIRMED); measured = evidence verifies it",
+          "enum": [
+            "manual",
+            "measured"
+          ],
+          "title": "Check",
+          "type": "string"
+        },
+        "confirmed": {
+          "default": false,
+          "title": "Confirmed",
+          "type": "boolean"
+        },
+        "count": {
+          "minimum": 1,
+          "title": "Count",
+          "type": "integer"
+        },
+        "index": {
+          "minimum": 0,
+          "title": "Index",
+          "type": "integer"
+        },
+        "step_id": {
+          "title": "Step Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "index",
+        "count",
+        "step_id",
+        "check"
+      ],
+      "title": "StepRef",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "card_id": {
+      "title": "Card Id",
+      "type": "string"
+    },
+    "check": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Check"
+    },
+    "engine": {
+      "enum": [
+        "NO_LINK",
+        "HEALTHY",
+        "FAULT",
+        "EXHAUSTED",
+        "AWAIT_FUNC",
+        "PLAYBOOK"
+      ],
+      "title": "Engine",
+      "type": "string"
+    },
+    "events": {
+      "items": {
+        "$ref": "#/$defs/Evidence"
+      },
+      "title": "Events",
+      "type": "array"
+    },
+    "health": {
+      "$ref": "#/$defs/Health"
+    },
+    "help_view": {
+      "anyOf": [
+        {
+          "enum": [
+            "where",
+            "how",
+            "correct"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Help View"
+    },
+    "hud": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/HudFrame"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "playbook": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PlaybookState"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "session": {
+      "$ref": "#/$defs/Session"
+    },
+    "source": {
+      "anyOf": [
+        {
+          "enum": [
+            "pi_live",
+            "replay",
+            "simulated",
+            "manual"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source"
+    },
+    "step_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Step Id"
+    },
+    "test": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Test"
+    },
+    "v": {
+      "const": 2,
+      "default": 2,
+      "title": "V",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "session",
+    "engine",
+    "card_id",
+    "health"
+  ],
+  "title": "State",
+  "type": "object"
+}

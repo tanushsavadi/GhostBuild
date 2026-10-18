@@ -1,0 +1,45 @@
+{
+  "status": "PASS",
+  "browser": "Chromium",
+  "qa_backend": "Explicitly labelled delayed FakeBrain in temporary harness; real app/runtime/API, cached photos and official diagrams; no paid calls.",
+  "viewports": [
+    [
+      1440,
+      1100
+    ],
+    [
+      390,
+      844
+    ]
+  ],
+  "checks": {
+    "five_photos_loaded": true,
+    "hint_focuses_input": true,
+    "left_step_right_conversation": true,
+    "unchanged_step_and_diagram_DOM_while_pending_and_answering": true,
+    "dismiss_restores_same_step_diagram": true,
+    "late_reply_stays_on_original_step": true,
+    "return_restores_thread": true,
+    "reload_preserves_conversation": true,
+    "mobile_no_overflow": true,
+    "offline_keeps_step_visible": true,
+    "reconnect_recovers": true
+  },
+  "saved_answer": {
+    "one_observed_ui_ms": 25,
+    "fake_calls_after_first": 1,
+    "fake_calls_after_repeat": 1
+  },
+  "normal_question_flow": {
+    "page_exceptions": 0,
+    "http_errors": 0
+  },
+  "expected_failure_probes": "Forced offline/backend restart generated browser resource/socket errors, separate from clean normal flow.",
+  "not_verified": [
+    "real model quality in follow-up",
+    "physical G2",
+    "microphone",
+    "BLE latency",
+    "human MICKE text review"
+  ]
+}

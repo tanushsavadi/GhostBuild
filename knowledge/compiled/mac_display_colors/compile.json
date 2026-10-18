@@ -1,0 +1,63 @@
+{
+  "compile_s": 76.43,
+  "rounds": 2,
+  "errors": [],
+  "model": "claude-opus-5-5",
+  "output_tokens": 4541,
+  "fetch_s": 0.03,
+  "images_s": 7.82,
+  "total_s": 84.88,
+  "notes": [
+    "safe_mode: vision check says picture 0 does not show this step; not used",
+    "uncovered: The sources do not explain what causes a green tint or name any specific cause.",
+    "uncovered: How to leave safe mode afterwards is not described in the provided text.",
+    "uncovered: What to do if the problem disappears in safe mode (which startup items to remove) is not covered.",
+    "uncovered: Display calibration steps are only mentioned, not described.",
+    "uncovered: Models using built-in reference modes (Pro Display XDR, Studio Display, 14/16-inch MacBook Pro 2021 or later) are referred to Displays settings without further detail.",
+    "uncovered: For third-party external displays, only a pointer to the maker's documentation is given; no service guidance for non-Apple displays."
+  ],
+  "sources": [
+    {
+      "url": "https://support.apple.com/guide/mac-help/if-your-display-doesnt-look-right-mchlp2906/12.0/mac/12.0",
+      "title": "If your Mac display doesn’t look right - Apple Support",
+      "kind": "MANUFACTURER DOC",
+      "blocks": 149,
+      "pictures": 2
+    },
+    {
+      "url": "https://support.apple.com/guide/mac-help/change-display-settings-for-accessibility-unac089/mac",
+      "title": "Change Display settings for accessibility on Mac - Apple Support",
+      "kind": "MANUFACTURER DOC",
+      "blocks": 235,
+      "pictures": 2
+    },
+    {
+      "url": "https://support.apple.com/guide/mac-help/change-your-displays-color-profile-mchlf3ddc60d/mac",
+      "title": "Change your Mac display’s color profile - Apple Support",
+      "kind": "MANUFACTURER DOC",
+      "blocks": 192,
+      "pictures": 2
+    },
+    {
+      "url": "https://support.apple.com/guide/mac-help/mac-recognize-external-display-mchla25b377d/14.0/mac/14.0",
+      "title": "If your Mac doesn’t recognize an external display - Apple Support",
+      "kind": "MANUFACTURER DOC",
+      "blocks": 140,
+      "pictures": 3
+    },
+    {
+      "url": "https://support.apple.com/guide/mac-help/start-up-your-mac-in-safe-mode-mh21245/mac",
+      "title": "Start up your Mac in safe mode - Apple Support",
+      "kind": "MANUFACTURER DOC",
+      "blocks": 212,
+      "pictures": 1
+    },
+    {
+      "url": "https://support.apple.com/en-us/102550",
+      "title": "Use Apple Diagnostics to test your Mac - Apple Support",
+      "kind": "MANUFACTURER DOC",
+      "blocks": 27,
+      "pictures": 0
+    }
+  ]
+}

@@ -1,0 +1,97 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "camera": {
+      "default": "unknown",
+      "enum": [
+        "ok",
+        "unavailable",
+        "frozen",
+        "unknown"
+      ],
+      "title": "Camera",
+      "type": "string"
+    },
+    "g2_clients": {
+      "minimum": 0,
+      "title": "G2 Clients",
+      "type": "integer"
+    },
+    "ok": {
+      "title": "Ok",
+      "type": "boolean"
+    },
+    "pi_age_ms": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Pi Age Ms"
+    },
+    "pi_last_seq": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Pi Last Seq"
+    },
+    "pi_link": {
+      "enum": [
+        "up",
+        "stale",
+        "down"
+      ],
+      "title": "Pi Link",
+      "type": "string"
+    },
+    "source": {
+      "anyOf": [
+        {
+          "enum": [
+            "pi_live",
+            "replay",
+            "simulated",
+            "manual"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source"
+    },
+    "uptime_s": {
+      "title": "Uptime S",
+      "type": "number"
+    },
+    "voice": {
+      "default": "off",
+      "enum": [
+        "off",
+        "on"
+      ],
+      "title": "Voice",
+      "type": "string"
+    }
+  },
+  "required": [
+    "ok",
+    "uptime_s",
+    "pi_link",
+    "g2_clients"
+  ],
+  "title": "Health",
+  "type": "object"
+}

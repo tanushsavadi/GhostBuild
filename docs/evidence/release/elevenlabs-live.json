@@ -1,0 +1,93 @@
+{
+  "scope": "Real ElevenLabs through existing isolated backend pathways; synthetic macOS say input; no microphone, physical G2 or audible playback verification",
+  "provider_attempt_limit": {
+    "stt_sessions": 1,
+    "tts_requests": 1
+  },
+  "source_commit": "4cab4ef5eb0a3e7783716889a16b2a82302cedf2",
+  "consent": true,
+  "input": {
+    "text": "Where exactly is that?",
+    "origin": "macOS say synthetic sample",
+    "format": "PCM16 little-endian, mono, 16000 Hz"
+  },
+  "stt": {
+    "status": "FAIL",
+    "backend_websocket_http_upgrade": 101,
+    "elapsed_ms": 5012.58,
+    "after_release_ms": 3384.22,
+    "backend_result": {
+      "type": "unavailable"
+    },
+    "provider_session_attempts": 1,
+    "backend_reason": "start failed: VoiceProviderError",
+    "provider_http_status": "not surfaced by bounded transport",
+    "transcript": null,
+    "retry_attempts": 0,
+    "diagnosis": {
+      "known": "Failure occurred inside provider connection startup, before transcript processing. The outer asyncio.wait_for limit is 5.0 seconds; observed backend response was 5012.58 ms after send-start.",
+      "inference": "Timing is consistent with the 5-second startup timeout, but original exception class and provider HTTP status were discarded, so timeout/network cannot be proven over auth/permission failure.",
+      "api_compatibility": "Installed websockets 17.2 accepts additional_headers; default internal open_timeout is 10 seconds, overridden in practice by outer 5-second wait_for. No unsupported-call defect identified.",
+      "auth": "TTS success confirms this key can generate TTS, not that its STT scope/account entitlement is valid. No STT auth status is available.",
+      "observability_gap": "client.py catches all startup Exceptions and raises generic VoiceProviderError from None; voice.py logs only VoiceProviderError. Future safe diagnostics should record original exception class and integer HTTP status only, never exception strings/headers/URLs.",
+      "additional_provider_calls": 0
+    }
+  },
+  "tts": {
+    "status": "PASS",
+    "http_status": 200,
+    "content_type": "audio/mpeg",
+    "bytes": 12556,
+    "elapsed_ms": 1391.38,
+    "provider_request_attempts": 1,
+    "text": "Your place is kept. Check the picture on your phone.",
+    "audio_parse": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "mp3",
+          "sample_rate": "22050",
+          "channels": 1
+        }
+      ],
+      "format": {
+        "format_name": "mp3",
+        "duration": "3.018594",
+        "size": "12556"
+      }
+    },
+    "playback_verified": false
+  },
+  "hello_http": 200,
+  "goal_http": 200,
+  "position_http": 200,
+  "before": {
+    "card": "paper_cup",
+    "step": "fold_half",
+    "confirmed": [
+      "square"
+    ],
+    "verified": []
+  },
+  "voice_status": {
+    "stt": true,
+    "tts": true,
+    "provider": "ElevenLabs",
+    "conversation": false,
+    "notice": "Audio is sent to ElevenLabs for processing. Recordings are not retained by GhostBuild."
+  },
+  "after_stt": {
+    "card": "paper_cup",
+    "step": "fold_half",
+    "confirmed": [
+      "square"
+    ],
+    "verified": [],
+    "hud_mode": "ask",
+    "hud_image": null
+  },
+  "voice_status_is_configuration_only": true,
+  "fallback": "After the error TTL, GET /hud returned paper_cup/fold_half step; unchanged confirmed list [square], verified []",
+  "overall": "PARTIAL: TTS provider generation and audio parsing pass; STT provider connection startup fails in this attempt"
+}

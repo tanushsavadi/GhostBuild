@@ -1,0 +1,24 @@
+{
+  "type": "hud",
+  "v": 2,
+  "seq": 20,
+  "mode": "step",
+  "cue": {
+    "line1": "PUSH LED INTO BOARD",
+    "line2": "LONG LEG TO THE RIGHT"
+  },
+  "image": null,
+  "menu": null,
+  "step": {
+    "index": 1,
+    "count": 3,
+    "step_id": "led",
+    "check": "manual",
+    "confirmed": false
+  },
+  "cue_id": "led_breadboard/led",
+  "ttl_ms": null,
+  "source": "simulated",
+  "session_id": null,
+  "stale": false
+}

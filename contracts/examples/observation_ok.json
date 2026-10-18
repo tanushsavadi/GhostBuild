@@ -1,0 +1,24 @@
+{
+  "v": 2,
+  "dev": "pi-01",
+  "seq": 812,
+  "ms": 40213,
+  "at": 1792283000000,
+  "source": "pi_live",
+  "camera": {
+    "frame_seq": 3011,
+    "frame_age_ms": 40,
+    "mean_luma": 118.4,
+    "luma_std": 41.2,
+    "detail": 260.0,
+    "motion": 0.01,
+    "marker_found": null,
+    "marker_id": null
+  },
+  "led": {
+    "commanded_on": false,
+    "cmd_seq": 0,
+    "reason": null
+  },
+  "error": null
+}

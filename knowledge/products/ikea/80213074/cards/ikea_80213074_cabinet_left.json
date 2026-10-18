@@ -1,0 +1,2516 @@
+{
+  "v": 2,
+  "card_id": "ikea_80213074_cabinet_left",
+  "title": "MICKE - cabinet left",
+  "provenance": "MANUFACTURER DOC",
+  "goal_mode": "build",
+  "aliases": [],
+  "sources": [
+    {
+      "id": "manual",
+      "kind": "MANUFACTURER DOC",
+      "title": "IKEA MICKE AA-476615-12",
+      "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf"
+    },
+    {
+      "id": "product",
+      "kind": "MANUFACTURER DOC",
+      "title": "MICKE 802.130.74",
+      "url": "https://www.ikea.com/us/en/p/micke-desk-white-80213074/"
+    }
+  ],
+  "steps": [
+    {
+      "id": "s01",
+      "title": "Screw in 2 cam bolts",
+      "cue": {
+        "line1": "SCREW IN 2 CAM BOLTS",
+        "line2": "PART 118331"
+      },
+      "detail": "Screw two cam bolts 118331 into the holes in the ends of the long piece, using a screwdriver. The picture at the top of the page shows the drawer that steps 1 to 8 build.",
+      "parts": [
+        {
+          "id": "118331",
+          "qty": 2,
+          "name": "cam bolt",
+          "note": null,
+          "avoid": false
+        }
+      ],
+      "warnings": [],
+      "where": {
+        "line1": "SEE THE PICTURE",
+        "line2": "MANUAL PAGE 6"
+      },
+      "guide_id": "ikea80213074_s01",
+      "cites": [
+        {
+          "source": "manual",
+          "loc": "Step 1, page 6",
+          "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=6"
+        }
+      ],
+      "instruction": {
+        "line1": "SCREW IN 2 CONNECTORS",
+        "line2": "USE THE END HOLES"
+      }
+    },
+    {
+      "id": "s02",
+      "title": "Fit 2 dowels, join the sides",
+      "cue": {
+        "line1": "FIT 2 DOWELS",
+        "line2": "PART 101344"
+      },
+      "detail": "Press two wooden dowels 101344 into the holes shown, then join the two upright side pieces to the long piece.",
+      "parts": [
+        {
+          "id": "101344",
+          "qty": 2,
+          "name": "wooden dowel",
+          "note": null,
+          "avoid": false
+        }
+      ],
+      "warnings": [],
+      "where": {
+        "line1": "SEE THE PICTURE",
+        "line2": "MANUAL PAGE 6"
+      },
+      "guide_id": "ikea80213074_s02",
+      "cites": [
+        {
+          "source": "manual",
+          "loc": "Step 2, page 6",
+          "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=6"
+        }
+      ],
+      "instruction": {
+        "line1": "JOIN THE SIDE PIECES",
+        "line2": "ADD 2 WOODEN PEGS FIRST"
+      }
+    },
+    {
+      "id": "s03",
+      "title": "Fit 2 cam locks",
+      "cue": {
+        "line1": "FIT 2 CAM LOCKS",
+        "line2": "PART 103114 ONLY"
+      },
+      "detail": "Press a cam lock 103114 into each side piece and turn it with a screwdriver as shown. The picture crosses out cam locks 110126 and 103430 for this step.",
+      "parts": [
+        {
+          "id": "103114",
+          "qty": 2,
+          "name": "cam lock",
+          "note": null,
+          "avoid": false
+        },
+        {
+          "id": "110126",
+          "qty": null,
+          "name": "cam lock",
+          "note": "crossed out in this step",
+          "avoid": true
+        },
+        {
+          "id": "103430",
+          "qty": null,
+          "name": "cam lock",
+          "note": "crossed out in this step",
+          "avoid": true
+        }
+      ],
+      "warnings": [
+        "Cam locks 110126 and 103430 are crossed out in this step: use only 103114."
+      ],
+      "where": {
+        "line1": "SEE THE PICTURE",
+        "line2": "MANUAL PAGE 7"
+      },
+      "guide_id": "ikea80213074_s03",
+      "cites": [
+        {
+          "source": "manual",
+          "loc": "Step 3, page 7",
+          "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=7"
+        }
+      ],
+      "instruction": {
+        "line1": "FIT 2 ROUND METAL LOCKS",
+        "line2": "TURN WITH A SCREWDRIVER"
+      }
+    },
+    {
+      "id": "s04",
+      "title": "Raise sides, slide in base",
+      "cue": {
+        "line1": "SWING SIDES UP, SLIDE",
+        "line2": "IN THE BASE PANEL"
+      },
+      "detail": "Swing the side pieces up as the curved arrow shows, then slide the thin base panel in as the straight arrow shows. The close-up shows the panel's rough surface; match it to the manual's picture.",
+      "parts": [],
+      "warnings": [],
+      "where": {
+        "line1": "SEE THE PICTURE",
+        "line2": "MANUAL PAGE 7"
+      },
+      "guide_id": "ikea80213074_s04",
+      "cites": [
+        {
+          "source": "manual",
+          "loc": "Step 4, page 7",
+          "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=7"
+        }
+      ],
+      "instruction": {
+        "line1": "RAISE THE SIDE PANELS",
+        "line2": "SLIDE IN THE THIN BASE"
+      }
+    },
+    {
+      "id": "s05",
+      "title": "Fit the front panel",
+      "cue": {
+        "line1": "FIT THE FRONT PANEL",
+        "line2": "ONTO THE FRAME"
+      },
+      "detail": "Swing the front panel up onto the frame as the arrow shows. The close-up shows the panel's edge seated in the groove.",
+      "parts": [],
+      "warnings": [],
+      "where": {
+        "line1": "SEE THE PICTURE",
+        "line2": "MANUAL PAGE 8"
+      },
+      "guide_id": "ikea80213074_s05",
+      "cites": [
+        {
+          "source": "manual",
+          "loc": "Step 5, page 8",
+          "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=8"
+        }
+      ],
+      "instruction": {
+        "line1": "RAISE THE FRONT PANEL",
+        "line2": "SEAT EDGE IN THE GROOVE"
+      }
+    },
+    {
+      "id": "s06",
+      "title": "Hammer in 2 bolts",
+      "cue": {
+        "line1": "HAMMER IN 2 BOLTS",
+        "line2": "PART 110519"
+      },
+      "detail": "Tap two bolts 110519 into the holes shown with a hammer. The small picture at the corner shows where the hammer is used.",
+      "parts": [
+        {
+          "id": "110519",
+          "qty": 2,
+          "name": "hammer-in bolt",
+          "note": null,
+          "avoid": false
+        }
+      ],
+      "warnings": [],
+      "where": {
+        "line1": "SEE THE PICTURE",
+        "line2": "MANUAL PAGE 8"
+      },
+      "guide_id": "ikea80213074_s06",
+      "cites": [
+        {
+          "source": "manual",
+          "loc": "Step 6, page 8",
+          "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=8"
+        }
+      ],
+      "instruction": {
+        "line1": "TAP IN THE 2 METAL PINS",
+        "line2": "USE A HAMMER AS SHOWN"
+      }
+    },
+    {
+      "id": "s07",
+      "title": "Place the drawer runners",
+      "cue": {
+        "line1": "PLACE THE RUNNERS",
+        "line2": "ON THE DRAWER SIDES"
+      },
+      "detail": "Lower the two drawer runners onto the sides of the drawer as the arrows show. The runners are the parts on manual page 4 (112482, 2x). No fasteners in this step.",
+      "parts": [],
+      "warnings": [],
+      "where": {
+        "line1": "SEE THE PICTURE",
+        "line2": "MANUAL PAGE 9"
+      },
+      "guide_id": "ikea80213074_s07",
+      "cites": [
+        {
+          "source": "manual",
+          "loc": "Step 7, page 9",
+          "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=9"
+        }
+      ],
+      "instruction": {
+        "line1": "PLACE THE DRAWER SLIDES",
+        "line2": "LOWER ONE ON EACH SIDE"
+      }
+    },
+    {
+      "id": "s08",
+      "title": "Screw on the runners",
+      "cue": {
+        "line1": "SCREW ON THE RUNNERS",
+        "line2": "4X 100365"
+      },
+      "detail": "Fix each runner with screws 100365 (4x in total). The picture crosses out screw 113287.",
+      "parts": [
+        {
+          "id": "100365",
+          "qty": 4,
+          "name": "small screw",
+          "note": null,
+          "avoid": false
+        },
+        {
+          "id": "113287",
+          "qty": null,
+          "name": "wide-head screw",
+          "note": "crossed out in this step",
+          "avoid": true
+        }
+      ],
+      "warnings": [
+        "Screw 113287 is crossed out in this step: use only 100365."
+      ],
+      "where": {
+        "line1": "SEE THE PICTURE",
+        "line2": "MANUAL PAGE 9"
+      },
+      "guide_id": "ikea80213074_s08",
+      "cites": [
+        {
+          "source": "manual",
+          "loc": "Step 8, page 9",
+          "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=9"
+        }
+      ],
+      "instruction": {
+        "line1": "SCREW ON BOTH SLIDES",
+        "line2": "USE 4 SCREWS IN TOTAL"
+      }
+    },
+    {
+      "id": "s09",
+      "title": "Fit 2 dowels",
+      "cue": {
+        "line1": "FIT 2 DOWELS",
+        "line2": "PART 101344"
+      },
+      "detail": "Press two dowels 101344 into the narrow panel's edge as shown on the carpet. From this step the pages follow the side you chose for the cabinet.",
+      "parts": [
+        {
+          "id": "101344",
+          "qty": 2,
+          "name": "wooden dowel",
+          "note": null,
+          "avoid": false
+        }
+      ],
+      "warnings": [],
+      "where": {
+        "line1": "SEE THE PICTURE",
+        "line2": "MANUAL PAGE 10"
+      },
+      "guide_id": "ikea80213074_left_s09",
+      "cites": [
+        {
+          "source": "manual",
+          "loc": "Step 9, page 10",
+          "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=10"
+        }
+      ],
+      "instruction": {
+        "line1": "PUSH IN 2 WOODEN PEGS",
+        "line2": "USE THE NARROW PANEL EDGE"
+      }
+    },
+    {
+      "id": "s10",
+      "title": "Fit 2 dowels in the rail",
+      "cue": {
+        "line1": "FIT 2 DOWELS IN RAIL",
+        "line2": "HOLE SIDE AS SHOWN"
+      },
+      "detail": "Press two dowels 101344 into the ends of the rail. The two small pictures show which way the holes must face; the crossed-out one is the orientation to avoid.",
+      "parts": [
+        {
+          "id": "101344",
+          "qty": 2,
+          "name": "wooden dowel",
+          "note": null,
+          "avoid": false
+        }
+      ],
+      "warnings": [
+        "Check the two small pictures: the crossed-out hole orientation must not be used."
+      ],
+      "where": {
+        "line1": "SEE THE PICTURE",
+        "line2": "MANUAL PAGE 11"
+      },
+      "guide_id": "ikea80213074_left_s10",
+      "cites": [
+        {
+          "source": "manual",
+          "loc": "Step 10, page 11",
+          "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=11"
+        }
+      ],
+      "instruction": {
+        "line1": "ADD 2 PEGS TO THE RAIL",
+        "line2": "MATCH THE HOLE DIRECTION"
+      }
+    },
+    {
+      "id": "s11",
+      "title": "Screw in 8 cam bolts",
+      "cue": {
+        "line1": "SCREW IN 8 CAM BOLTS",
+        "line2": "PART 118331"
+      },
+      "detail": "Screw eight cam bolts 118331 into the edges of the two panels as shown, using a screwdriver.",
+      "parts": [
+        {
+          "id": "118331",
+          "qty": 8,
+          "name": "cam bolt",
+          "note": null,
+          "avoid": false
+        }
+      ],
+      "warnings": [],
+      "where": {
+        "line1": "SEE THE PICTURE",
+        "line2": "MANUAL PAGE 11"
+      },
+      "guide_id": "ikea80213074_left_s11",
+      "cites": [
+        {
+          "source": "manual",
+          "loc": "Step 11, page 11",
+          "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=11"
+        }
+      ],
+      "instruction": {
+        "line1": "SCREW IN 8 CONNECTORS",
+        "line2": "USE THE PANEL EDGES SHOWN"
+      }
+    },
+    {
+      "id": "s12",
+      "title": "Screw runners onto panels",
+      "cue": {
+        "line1": "SCREW RUNNERS ON",
+        "line2": "USE SCREW 100365"
+      },
+      "detail": "Fix one runner to each of the two panels with screws 100365. The picture crosses out screw 113287. The manual prints 1x for each runner and no screw count.",
+      "parts": [
+        {
+          "id": "100365",
+          "qty": null,
+          "name": "small screw",
+          "note": "quantity not printed in the manual",
+          "avoid": false
+        },
+        {
+          "id": "113287",
+          "qty": null,
+          "name": "wide-head screw",
+          "note": "crossed out in this step",
+          "avoid": true
+        }
+      ],
+      "warnings": [
+        "Screw 113287 is crossed out in this step: use only 100365."
+      ],
+      "where": {
+        "line1": "SEE THE PICTURE",
+        "line2": "MANUAL PAGE 12"
+      },
+      "guide_id": "ikea80213074_left_s12",
+      "cites": [
+        {
+          "source": "manual",
+          "loc": "Step 12, page 12",
+          "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=12"
+        }
+      ],
+      "instruction": {
+        "line1": "ATTACH THE DRAWER SLIDES",
+        "line2": "SCREW ONE TO EACH PANEL"
+      }
+    },
+    {
+      "id": "s13",
+      "title": "Fit dowels, raise the sides",
+      "cue": {
+        "line1": "FIT 2 DOWELS",
+        "line2": "THEN RAISE THE SIDES"
+      },
+      "detail": "Press two dowels 101344 into the rail ends, then raise the side panels as the arrows show.",
+      "parts": [
+        {
+          "id": "101344",
+          "qty": 2,
+          "name": "wooden dowel",
+          "note": null,
+          "avoid": false
+        }
+      ],
+      "warnings": [],
+      "where": {
+        "line1": "SEE THE PICTURE",
+        "line2": "MANUAL PAGE 13"
+      },
+      "guide_id": "ikea80213074_left_s13",
+      "cites": [
+        {
+          "source": "manual",
+          "loc": "Step 13, page 13",
+          "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=13"
+        }
+      ],
+      "instruction": {
+        "line1": "ADD PEGS TO THE RAIL",
+        "line2": "THEN RAISE THE SIDE PANELS"
+      }
+    },
+    {
+      "id": "s14",
+      "title": "Fit 8 cam locks",
+      "cue": {
+        "line1": "FIT 8 CAM LOCKS",
+        "line2": "PART 103430 ONLY"
+      },
+      "detail": "Press eight cam locks 103430 into the holes shown and turn each a quarter turn with a screwdriver. The picture crosses out cam lock 110126.",
+      "parts": [
+        {
+          "id": "103430",
+          "qty": 8,
+          "name": "cam lock",
+          "note": null,
+          "avoid": false
+        },
+        {
+          "id": "110126",
+          "qty": null,
+          "name": "cam lock",
+          "note": "crossed out in this step",
+          "avoid": true
+        }
+      ],
+      "warnings": [
+        "Cam lock 110126 is crossed out in this step: use only 103430."
+      ],
+      "where": {
+        "line1": "SEE THE PICTURE",
+        "line2": "MANUAL PAGE 13"
+      },
+      "guide_id": "ikea80213074_left_s14",
+      "cites": [
+        {
+          "source": "manual",
+          "loc": "Step 14, page 13",
+          "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=13"
+        }
+      ],
+      "instruction": {
+        "line1": "FIT 8 ROUND METAL LOCKS",
+        "line2": "TURN EACH A QUARTER TURN"
+      }
+    },
+    {
+      "id": "s15",
+      "title": "Screw runner onto panel",
+      "cue": {
+        "line1": "SCREW RUNNER ON",
+        "line2": "USE SCREW 100365"
+      },
+      "detail": "Fix the runner to the panel with screws 100365, as in step 12. The picture crosses out screw 113287.",
+      "parts": [
+        {
+          "id": "100365",
+          "qty": null,
+          "name": "small screw",
+          "note": "quantity not printed in the manual",
+          "avoid": false
+        },
+        {
+          "id": "113287",
+          "qty": null,
+          "name": "wide-head screw",
+          "note": "crossed out in this step",
+          "avoid": true
+        }
+      ],
+      "warnings": [
+        "Screw 113287 is crossed out in this step: use only 100365."
+      ],
+      "where": {
+        "line1": "SEE THE PICTURE",
+        "line2": "MANUAL PAGE 14"
+      },
+      "guide_id": "ikea80213074_left_s15",
+      "cites": [
+        {
+          "source": "manual",
+          "loc": "Step 15, page 14",
+          "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=14"
+        }
+      ],
+      "instruction": {
+        "line1": "ATTACH THE DRAWER SLIDE",
+        "line2": "SCREW IT ONTO THE PANEL"
+      }
+    },
+    {
+      "id": "s16",
+      "title": "Fit 2 hinge plates",
+      "cue": {
+        "line1": "FIT 2 HINGE PLATES",
+        "line2": "109221, SCREW 113287"
+      },
+      "detail": "Fix two hinge plates 109221 with screws 113287; the plate's A mark is shown in the close-up. The picture crosses out screw 100365 for this step.",
+      "parts": [
+        {
+          "id": "109221",
+          "qty": 2,
+          "name": "hinge plate",
+          "note": null,
+          "avoid": false
+        },
+        {
+          "id": "113287",
+          "qty": null,
+          "name": "wide-head screw",
+          "note": "quantity not printed in the manual",
+          "avoid": false
+        },
+        {
+          "id": "100365",
+          "qty": null,
+          "name": "small screw",
+          "note": "crossed out in this step",
+          "avoid": true
+        }
+      ],
+      "warnings": [
+        "Screw 100365 is crossed out in this step: use 113287."
+      ],
+      "where": {
+        "line1": "SEE THE PICTURE",
+        "line2": "MANUAL PAGE 15"
+      },
+      "guide_id": "ikea80213074_left_s16",
+      "cites": [
+        {
+          "source": "manual",
+          "loc": "Step 16, page 15",
+          "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=15"
+        }
+      ],
+      "instruction": {
+        "line1": "FIT THE 2 HINGE PLATES",
+        "line2": "MATCH THE CLOSE-UP PICTURE"
+      }
+    },
+    {
+      "id": "s17",
+      "title": "Screw in 4 cam bolts",
+      "cue": {
+        "line1": "SCREW IN 4 CAM BOLTS",
+        "line2": "PART 118331"
+      },
+      "detail": "Screw four cam bolts 118331 into the panel edges shown, using a screwdriver.",
+      "parts": [
+        {
+          "id": "118331",
+          "qty": 4,
+          "name": "cam bolt",
+          "note": null,
+          "avoid": false
+        }
+      ],
+      "warnings": [],
+      "where": {
+        "line1": "SEE THE PICTURE",
+        "line2": "MANUAL PAGE 15"
+      },
+      "guide_id": "ikea80213074_left_s17",
+      "cites": [
+        {
+          "source": "manual",
+          "loc": "Step 17, page 15",
+          "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=15"
+        }
+      ],
+      "instruction": {
+        "line1": "SCREW IN 4 CONNECTORS",
+        "line2": "USE THE PANEL EDGES SHOWN"
+      }
+    },
+    {
+      "id": "s18",
+      "title": "Slide in the back panel",
+      "cue": {
+        "line1": "SLIDE IN BACK PANEL",
+        "line2": "SEE ROUGH-SIDE NOTE"
+      },
+      "detail": "Slide the thin back panel in as the arrow shows. The picture crosses out the rough, textured side: check which side the manual shows.",
+      "parts": [],
+      "warnings": [
+        "The rough, textured side is crossed out in the picture."
+      ],
+      "where": {
+        "line1": "SEE THE PICTURE",
+        "line2": "MANUAL PAGE 16"
+      },
+      "guide_id": "ikea80213074_left_s18",
+      "cites": [
+        {
+          "source": "manual",
+          "loc": "Step 18, page 16",
+          "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=16"
+        }
+      ],
+      "instruction": {
+        "line1": "SLIDE IN THE BACK PANEL",
+        "line2": "CHECK WHICH SIDE FACES OUT"
+      }
+    },
+    {
+      "id": "s19",
+      "title": "Fit 2 cam locks",
+      "cue": {
+        "line1": "FIT 2 CAM LOCKS",
+        "line2": "PART 110126"
+      },
+      "detail": "Press two cam locks 110126 into the holes shown and turn each with a screwdriver.",
+      "parts": [
+        {
+          "id": "110126",
+          "qty": 2,
+          "name": "cam lock",
+          "note": null,
+          "avoid": false
+        }
+      ],
+      "warnings": [],
+      "where": {
+        "line1": "SEE THE PICTURE",
+        "line2": "MANUAL PAGE 16"
+      },
+      "guide_id": "ikea80213074_left_s19",
+      "cites": [
+        {
+          "source": "manual",
+          "loc": "Step 19, page 16",
+          "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=16"
+        }
+      ],
+      "instruction": {
+        "line1": "FIT 2 ROUND METAL LOCKS",
+        "line2": "TURN WITH A SCREWDRIVER"
+      }
+    },
+    {
+      "id": "s20",
+      "title": "Fit 4 dowels",
+      "cue": {
+        "line1": "FIT 4 DOWELS",
+        "line2": "PART 101344"
+      },
+      "detail": "Press four dowels 101344 into the edges of the small panel as shown. The close-up shows the panel's edge.",
+      "parts": [
+        {
+          "id": "101344",
+          "qty": 4,
+          "name": "wooden dowel",
+          "note": null,
+          "avoid": false
+        }
+      ],
+      "warnings": [],
+      "where": {
+        "line1": "SEE THE PICTURE",
+        "line2": "MANUAL PAGE 17"
+      },
+      "guide_id": "ikea80213074_left_s20",
+      "cites": [
+        {
+          "source": "manual",
+          "loc": "Step 20, page 17",
+          "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=17"
+        }
+      ],
+      "instruction": {
+        "line1": "PUSH IN 4 WOODEN PEGS",
+        "line2": "USE THE SMALL PANEL EDGES"
+      }
+    },
+    {
+      "id": "s21",
+      "title": "Raise the side panel",
+      "cue": {
+        "line1": "RAISE THE SIDE PANEL",
+        "line2": "ONTO THE DOWELS"
+      },
+      "detail": "Swing the side panel up as the arrow shows so its dowels enter their holes.",
+      "parts": [],
+      "warnings": [],
+      "where": {
+        "line1": "SEE THE PICTURE",
+        "line2": "MANUAL PAGE 17"
+      },
+      "guide_id": "ikea80213074_left_s21",
+      "cites": [
+        {
+          "source": "manual",
+          "loc": "Step 21, page 17",
+          "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=17"
+        }
+      ],
+      "instruction": {
+        "line1": "RAISE THE SIDE PANEL",
+        "line2": "GUIDE THE PEGS INTO HOLES"
+      }
+    },
+    {
+      "id": "s22",
+      "title": "Fit 2 cam locks",
+      "cue": {
+        "line1": "FIT 2 CAM LOCKS",
+        "line2": "PART 110126"
+      },
+      "detail": "Press two cam locks 110126 into the holes shown and turn each with a screwdriver.",
+      "parts": [
+        {
+          "id": "110126",
+          "qty": 2,
+          "name": "cam lock",
+          "note": null,
+          "avoid": false
+        }
+      ],
+      "warnings": [],
+      "where": {
+        "line1": "SEE THE PICTURE",
+        "line2": "MANUAL PAGE 18"
+      },
+      "guide_id": "ikea80213074_left_s22",
+      "cites": [
+        {
+          "source": "manual",
+          "loc": "Step 22, page 18",
+          "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=18"
+        }
+      ],
+      "instruction": {
+        "line1": "FIT 2 ROUND METAL LOCKS",
+        "line2": "TURN WITH A SCREWDRIVER"
+      }
+    },
+    {
+      "id": "s23",
+      "title": "Fit 6 dowels",
+      "cue": {
+        "line1": "FIT 6 DOWELS",
+        "line2": "PART 101344"
+      },
+      "detail": "Press six dowels 101344 into the holes shown along the panel edges.",
+      "parts": [
+        {
+          "id": "101344",
+          "qty": 6,
+          "name": "wooden dowel",
+          "note": null,
+          "avoid": false
+        }
+      ],
+      "warnings": [],
+      "where": {
+        "line1": "SEE THE PICTURE",
+        "line2": "MANUAL PAGE 18"
+      },
+      "guide_id": "ikea80213074_left_s23",
+      "cites": [
+        {
+          "source": "manual",
+          "loc": "Step 23, page 18",
+          "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=18"
+        }
+      ],
+      "instruction": {
+        "line1": "PUSH IN 6 WOODEN PEGS",
+        "line2": "USE THE EDGE HOLES SHOWN"
+      }
+    },
+    {
+      "id": "s24",
+      "title": "Bolt on the leg frame",
+      "cue": {
+        "line1": "BOLT ON THE LEG FRAME",
+        "line2": "3X 100086, HEX KEY"
+      },
+      "detail": "Attach the metal leg frame with three long bolts 100086, turned with hex key 100092. The small picture at the top shows how the hex key 100092 fits into strip 121030.",
+      "parts": [
+        {
+          "id": "100086",
+          "qty": 3,
+          "name": "long bolt",
+          "note": null,
+          "avoid": false
+        },
+        {
+          "id": "100092",
+          "qty": null,
+          "name": "hex key",
+          "note": "tool shown; quantity not printed for this step",
+          "avoid": false
+        },
+        {
+          "id": "121030",
+          "qty": null,
+          "name": "tool strip",
+          "note": "tool shown; quantity not printed for this step",
+          "avoid": false
+        }
+      ],
+      "warnings": [],
+      "where": {
+        "line1": "SEE THE PICTURE",
+        "line2": "MANUAL PAGE 19"
+      },
+      "guide_id": "ikea80213074_left_s24",
+      "cites": [
+        {
+          "source": "manual",
+          "loc": "Step 24, page 19",
+          "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=19"
+        }
+      ],
+      "instruction": {
+        "line1": "ATTACH THE METAL LEGS",
+        "line2": "TIGHTEN 3 LONG BOLTS"
+      }
+    },
+    {
+      "id": "s25",
+      "title": "Screw in 6 cam bolts",
+      "cue": {
+        "line1": "SCREW IN 6 CAM BOLTS",
+        "line2": "PART 118331"
+      },
+      "detail": "Screw six cam bolts 118331 into the large panel lying on the carpet, using a screwdriver.",
+      "parts": [
+        {
+          "id": "118331",
+          "qty": 6,
+          "name": "cam bolt",
+          "note": null,
+          "avoid": false
+        }
+      ],
+      "warnings": [],
+      "where": {
+        "line1": "SEE THE PICTURE",
+        "line2": "MANUAL PAGE 19"
+      },
+      "guide_id": "ikea80213074_left_s25",
+      "cites": [
+        {
+          "source": "manual",
+          "loc": "Step 25, page 19",
+          "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=19"
+        }
+      ],
+      "instruction": {
+        "line1": "SCREW IN 6 CONNECTORS",
+        "line2": "USE THE LARGE PANEL HOLES"
+      }
+    },
+    {
+      "id": "s26",
+      "title": "Join the frame and the panel",
+      "cue": {
+        "line1": "JOIN FRAME AND PANEL",
+        "line2": "AS THE ARROW SHOWS"
+      },
+      "detail": "Move the assembled frame and the large panel together as the arrow shows, lining the cam bolts up with their holes.",
+      "parts": [],
+      "warnings": [],
+      "where": {
+        "line1": "SEE THE PICTURE",
+        "line2": "MANUAL PAGE 20"
+      },
+      "guide_id": "ikea80213074_left_s26",
+      "cites": [
+        {
+          "source": "manual",
+          "loc": "Step 26, page 20",
+          "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=20"
+        }
+      ],
+      "instruction": {
+        "line1": "JOIN FRAME TO THE PANEL",
+        "line2": "LINE UP CONNECTOR HOLES"
+      }
+    },
+    {
+      "id": "s27",
+      "title": "Fit 6 cam locks",
+      "cue": {
+        "line1": "FIT 6 CAM LOCKS",
+        "line2": "PART 110126"
+      },
+      "detail": "Press six cam locks 110126 into the holes shown and turn each with a screwdriver.",
+      "parts": [
+        {
+          "id": "110126",
+          "qty": 6,
+          "name": "cam lock",
+          "note": null,
+          "avoid": false
+        }
+      ],
+      "warnings": [],
+      "where": {
+        "line1": "SEE THE PICTURE",
+        "line2": "MANUAL PAGE 20"
+      },
+      "guide_id": "ikea80213074_left_s27",
+      "cites": [
+        {
+          "source": "manual",
+          "loc": "Step 27, page 20",
+          "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=20"
+        }
+      ],
+      "instruction": {
+        "line1": "FIT 6 ROUND METAL LOCKS",
+        "line2": "TURN WITH A SCREWDRIVER"
+      }
+    },
+    {
+      "id": "s28",
+      "title": "Fit 4 plastic fittings",
+      "cue": {
+        "line1": "FIT 4 PLASTIC FITTINGS",
+        "line2": "PART 153549"
+      },
+      "detail": "Push four plastic fittings 153549 into the holes shown, as the close-up pictures.",
+      "parts": [
+        {
+          "id": "153549",
+          "qty": 4,
+          "name": "plastic fitting",
+          "note": null,
+          "avoid": false
+        }
+      ],
+      "warnings": [],
+      "where": {
+        "line1": "SEE THE PICTURE",
+        "line2": "MANUAL PAGE 21"
+      },
+      "guide_id": "ikea80213074_left_s28",
+      "cites": [
+        {
+          "source": "manual",
+          "loc": "Step 28, page 21",
+          "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=21"
+        }
+      ],
+      "instruction": {
+        "line1": "PUSH IN 4 PLASTIC PLUGS",
+        "line2": "MATCH THE CLOSE-UP PICTURE"
+      }
+    },
+    {
+      "id": "s29",
+      "title": "Press in 2 hexagon covers",
+      "cue": {
+        "line1": "PRESS IN 2 HEX COVERS",
+        "line2": "PART 10081375"
+      },
+      "detail": "Press the hexagon covers 10081375 into the holes of the leg frame, by hand. The picture crosses out the round covers 112519 and 121338 for this step.",
+      "parts": [
+        {
+          "id": "10081375",
+          "qty": 2,
+          "name": "hexagon cover",
+          "note": null,
+          "avoid": false
+        },
+        {
+          "id": "112519",
+          "qty": null,
+          "name": "round cover",
+          "note": "crossed out in this step",
+          "avoid": true
+        },
+        {
+          "id": "121338",
+          "qty": null,
+          "name": "round cover",
+          "note": "crossed out in this step",
+          "avoid": true
+        }
+      ],
+      "warnings": [
+        "The round covers 112519 and 121338 are crossed out in this step."
+      ],
+      "where": {
+        "line1": "SEE THE PICTURE",
+        "line2": "MANUAL PAGE 21"
+      },
+      "guide_id": "ikea80213074_left_s29",
+      "cites": [
+        {
+          "source": "manual",
+          "loc": "Step 29, page 21",
+          "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=21"
+        }
+      ],
+      "instruction": {
+        "line1": "PRESS IN THE 2 HEX CAPS",
+        "line2": "USE YOUR HAND AS SHOWN"
+      }
+    },
+    {
+      "id": "s30",
+      "title": "Hang the drawer",
+      "cue": {
+        "line1": "HANG THE DRAWER",
+        "line2": "ON ITS RUNNERS"
+      },
+      "detail": "Tilt the drawer up and let its runners catch the rails as the arrow and the top close-up show, then slide it in.",
+      "parts": [],
+      "warnings": [],
+      "where": {
+        "line1": "SEE THE PICTURE",
+        "line2": "MANUAL PAGE 22"
+      },
+      "guide_id": "ikea80213074_left_s30",
+      "cites": [
+        {
+          "source": "manual",
+          "loc": "Step 30, page 22",
+          "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=22"
+        }
+      ],
+      "instruction": {
+        "line1": "HANG THE DRAWER",
+        "line2": "HOOK THE SLIDES THEN PUSH"
+      }
+    },
+    {
+      "id": "s31",
+      "title": "Fit 2 hinges on the door",
+      "cue": {
+        "line1": "FIT 2 HINGES ON DOOR",
+        "line2": "109338, SCREW 100365"
+      },
+      "detail": "Lay the door flat and fix two hinges 109338 with screws 100365, as the close-up shows.",
+      "parts": [
+        {
+          "id": "109338",
+          "qty": 2,
+          "name": "hinge",
+          "note": null,
+          "avoid": false
+        },
+        {
+          "id": "100365",
+          "qty": null,
+          "name": "small screw",
+          "note": "quantity not printed in the manual",
+          "avoid": false
+        }
+      ],
+      "warnings": [],
+      "where": {
+        "line1": "SEE THE PICTURE",
+        "line2": "MANUAL PAGE 22"
+      },
+      "guide_id": "ikea80213074_left_s31",
+      "cites": [
+        {
+          "source": "manual",
+          "loc": "Step 31, page 22",
+          "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=22"
+        }
+      ],
+      "instruction": {
+        "line1": "FIT 2 HINGES TO THE DOOR",
+        "line2": "LAY IT FLAT AND SCREW ON"
+      }
+    },
+    {
+      "id": "s32",
+      "title": "Hang the door",
+      "cue": {
+        "line1": "HANG THE DOOR",
+        "line2": "CLIP ON, TIGHTEN SCREW"
+      },
+      "detail": "Clip each hinge onto its plate as the arrow shows, then tighten the hinge screw with a screwdriver. Manual page 40 shows how to adjust the door; it is the third picture for this step.",
+      "parts": [
+        {
+          "id": "109338",
+          "qty": 2,
+          "name": "hinge",
+          "note": "already fixed to the door in step 31",
+          "avoid": false
+        }
+      ],
+      "warnings": [],
+      "where": {
+        "line1": "SEE THE PICTURE",
+        "line2": "MANUAL PAGE 23"
+      },
+      "guide_id": "ikea80213074_left_s32",
+      "cites": [
+        {
+          "source": "manual",
+          "loc": "Step 32, page 23",
+          "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=23"
+        }
+      ],
+      "instruction": {
+        "line1": "HANG THE DOOR",
+        "line2": "CLIP ON THEN TIGHTEN"
+      }
+    },
+    {
+      "id": "s33",
+      "title": "Fit 8 shelf pins and shelves",
+      "cue": {
+        "line1": "FIT 8 SHELF PINS",
+        "line2": "PART 101514"
+      },
+      "detail": "Push eight shelf pins 101514 into the holes and rest the two shelves on them, as the arrows show.",
+      "parts": [
+        {
+          "id": "101514",
+          "qty": 8,
+          "name": "shelf pin",
+          "note": null,
+          "avoid": false
+        }
+      ],
+      "warnings": [],
+      "where": {
+        "line1": "SEE THE PICTURE",
+        "line2": "MANUAL PAGE 23"
+      },
+      "guide_id": "ikea80213074_left_s33",
+      "cites": [
+        {
+          "source": "manual",
+          "loc": "Step 33, page 23",
+          "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=23"
+        }
+      ],
+      "instruction": {
+        "line1": "FIT 8 SHELF SUPPORT PINS",
+        "line2": "REST BOTH SHELVES ON THEM"
+      }
+    },
+    {
+      "id": "s34",
+      "title": "Stick on 2 bumpers",
+      "cue": {
+        "line1": "STICK ON 2 BUMPERS",
+        "line2": "PART 104663"
+      },
+      "detail": "Stick two adhesive bumpers 104663 where the close-up shows.",
+      "parts": [
+        {
+          "id": "104663",
+          "qty": 2,
+          "name": "adhesive bumper",
+          "note": null,
+          "avoid": false
+        }
+      ],
+      "warnings": [],
+      "where": {
+        "line1": "SEE THE PICTURE",
+        "line2": "MANUAL PAGE 24"
+      },
+      "guide_id": "ikea80213074_left_s34",
+      "cites": [
+        {
+          "source": "manual",
+          "loc": "Step 34, page 24",
+          "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=24"
+        }
+      ],
+      "instruction": {
+        "line1": "STICK ON THE 2 BUMPERS",
+        "line2": "MATCH THE CLOSE-UP PICTURE"
+      }
+    },
+    {
+      "id": "s35",
+      "title": "Fit the grommet and covers",
+      "cue": {
+        "line1": "FIT GROMMET + 4 COVERS",
+        "line2": "121304 AND 112519"
+      },
+      "detail": "Press the cable grommet into the hole in the top and the four round covers over the holes shown. The manual prints alternate numbers for these parts: grommet 121208, 121186 or 10060533; covers 121338 or 130521.",
+      "parts": [
+        {
+          "id": "121304",
+          "qty": 1,
+          "name": "cable grommet",
+          "note": "alternate numbers printed: 121208, 121186, 10060533",
+          "avoid": false
+        },
+        {
+          "id": "112519",
+          "qty": 4,
+          "name": "round cover",
+          "note": "alternate numbers printed: 121338, 130521",
+          "avoid": false
+        }
+      ],
+      "warnings": [],
+      "where": {
+        "line1": "SEE THE PICTURE",
+        "line2": "MANUAL PAGE 24"
+      },
+      "guide_id": "ikea80213074_left_s35",
+      "cites": [
+        {
+          "source": "manual",
+          "loc": "Step 35, page 24",
+          "url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=24"
+        }
+      ],
+      "instruction": {
+        "line1": "COVER THE CABLE HOLE",
+        "line2": "PRESS IN 4 ROUND CAPS"
+      }
+    }
+  ],
+  "guides": [
+    {
+      "id": "ikea80213074_s01",
+      "title": "STEP 1",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "s01.where",
+          "title": "WHERE",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_s01/where.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_s01/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 1, cabinet left, page 6. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 6"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=6"
+        },
+        {
+          "view": "how",
+          "step_id": "s01.how",
+          "title": "PARTS",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_s01/how.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_s01/how.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 1, cabinet left, page 6. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 6"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=6"
+        }
+      ]
+    },
+    {
+      "id": "ikea80213074_s02",
+      "title": "STEP 2",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "s02.where",
+          "title": "WHERE",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_s02/where.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_s02/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 2, cabinet left, page 6. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 6"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=6"
+        },
+        {
+          "view": "how",
+          "step_id": "s02.how",
+          "title": "PARTS",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_s02/how.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_s02/how.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 2, cabinet left, page 6. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 6"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=6"
+        }
+      ]
+    },
+    {
+      "id": "ikea80213074_s03",
+      "title": "STEP 3",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "s03.where",
+          "title": "WHERE",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_s03/where.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_s03/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 3, cabinet left, page 7. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 7"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=7"
+        },
+        {
+          "view": "how",
+          "step_id": "s03.how",
+          "title": "PARTS",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_s03/how.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_s03/how.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 3, cabinet left, page 7. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 7"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=7"
+        }
+      ]
+    },
+    {
+      "id": "ikea80213074_s04",
+      "title": "STEP 4",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "s04.where",
+          "title": "WHERE",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_s04/where.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_s04/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 4, cabinet left, page 7. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 7"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=7"
+        },
+        {
+          "view": "how",
+          "step_id": "s04.how",
+          "title": "PARTS",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_s04/how.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_s04/how.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 4, cabinet left, page 7. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 7"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=7"
+        }
+      ]
+    },
+    {
+      "id": "ikea80213074_s05",
+      "title": "STEP 5",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "s05.where",
+          "title": "WHERE",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_s05/where.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_s05/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 5, cabinet left, page 8. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 8"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=8"
+        },
+        {
+          "view": "how",
+          "step_id": "s05.how",
+          "title": "PARTS",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_s05/how.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_s05/how.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 5, cabinet left, page 8. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 8"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=8"
+        }
+      ]
+    },
+    {
+      "id": "ikea80213074_s06",
+      "title": "STEP 6",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "s06.where",
+          "title": "WHERE",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_s06/where.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_s06/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 6, cabinet left, page 8. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 8"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=8"
+        },
+        {
+          "view": "how",
+          "step_id": "s06.how",
+          "title": "PARTS",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_s06/how.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_s06/how.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 6, cabinet left, page 8. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 8"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=8"
+        }
+      ]
+    },
+    {
+      "id": "ikea80213074_s07",
+      "title": "STEP 7",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "s07.where",
+          "title": "WHERE",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_s07/where.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_s07/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 7, cabinet left, page 9. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 9"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=9"
+        },
+        {
+          "view": "how",
+          "step_id": "s07.how",
+          "title": "PARTS",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_s07/how.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_s07/how.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 7, cabinet left, page 9. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 9"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=9"
+        }
+      ]
+    },
+    {
+      "id": "ikea80213074_s08",
+      "title": "STEP 8",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "s08.where",
+          "title": "WHERE",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_s08/where.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_s08/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 8, cabinet left, page 9. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 9"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=9"
+        },
+        {
+          "view": "how",
+          "step_id": "s08.how",
+          "title": "PARTS",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_s08/how.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_s08/how.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 8, cabinet left, page 9. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 9"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=9"
+        }
+      ]
+    },
+    {
+      "id": "ikea80213074_left_s09",
+      "title": "STEP 9",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "s09.where",
+          "title": "WHERE",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s09/where.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s09/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 9, cabinet left, page 10. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 10"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=10"
+        },
+        {
+          "view": "how",
+          "step_id": "s09.how",
+          "title": "PARTS",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s09/how.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s09/how.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 9, cabinet left, page 10. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 10"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=10"
+        }
+      ]
+    },
+    {
+      "id": "ikea80213074_left_s10",
+      "title": "STEP 10",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "s10.where",
+          "title": "WHERE",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s10/where.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s10/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 10, cabinet left, page 11. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 11"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=11"
+        },
+        {
+          "view": "how",
+          "step_id": "s10.how",
+          "title": "PARTS",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s10/how.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s10/how.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 10, cabinet left, page 11. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 11"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=11"
+        }
+      ]
+    },
+    {
+      "id": "ikea80213074_left_s11",
+      "title": "STEP 11",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "s11.where",
+          "title": "WHERE",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s11/where.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s11/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 11, cabinet left, page 11. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 11"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=11"
+        },
+        {
+          "view": "how",
+          "step_id": "s11.how",
+          "title": "PARTS",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s11/how.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s11/how.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 11, cabinet left, page 11. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 11"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=11"
+        }
+      ]
+    },
+    {
+      "id": "ikea80213074_left_s12",
+      "title": "STEP 12",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "s12.where",
+          "title": "WHERE",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s12/where.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s12/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 12, cabinet left, page 12. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 12"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=12"
+        },
+        {
+          "view": "how",
+          "step_id": "s12.how",
+          "title": "PARTS",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s12/how.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s12/how.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 12, cabinet left, page 12. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 12"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=12"
+        }
+      ]
+    },
+    {
+      "id": "ikea80213074_left_s13",
+      "title": "STEP 13",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "s13.where",
+          "title": "WHERE",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s13/where.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s13/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 13, cabinet left, page 13. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 13"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=13"
+        },
+        {
+          "view": "how",
+          "step_id": "s13.how",
+          "title": "PARTS",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s13/how.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s13/how.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 13, cabinet left, page 13. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 13"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=13"
+        }
+      ]
+    },
+    {
+      "id": "ikea80213074_left_s14",
+      "title": "STEP 14",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "s14.where",
+          "title": "WHERE",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s14/where.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s14/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 14, cabinet left, page 13. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 13"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=13"
+        },
+        {
+          "view": "how",
+          "step_id": "s14.how",
+          "title": "PARTS",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s14/how.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s14/how.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 14, cabinet left, page 13. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 13"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=13"
+        }
+      ]
+    },
+    {
+      "id": "ikea80213074_left_s15",
+      "title": "STEP 15",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "s15.where",
+          "title": "WHERE",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s15/where.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s15/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 15, cabinet left, page 14. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 14"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=14"
+        },
+        {
+          "view": "how",
+          "step_id": "s15.how",
+          "title": "PARTS",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s15/how.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s15/how.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 15, cabinet left, page 14. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 14"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=14"
+        }
+      ]
+    },
+    {
+      "id": "ikea80213074_left_s16",
+      "title": "STEP 16",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "s16.where",
+          "title": "WHERE",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s16/where.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s16/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 16, cabinet left, page 15. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 15"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=15"
+        },
+        {
+          "view": "how",
+          "step_id": "s16.how",
+          "title": "PARTS",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s16/how.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s16/how.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 16, cabinet left, page 15. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 15"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=15"
+        }
+      ]
+    },
+    {
+      "id": "ikea80213074_left_s17",
+      "title": "STEP 17",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "s17.where",
+          "title": "WHERE",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s17/where.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s17/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 17, cabinet left, page 15. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 15"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=15"
+        },
+        {
+          "view": "how",
+          "step_id": "s17.how",
+          "title": "PARTS",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s17/how.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s17/how.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 17, cabinet left, page 15. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 15"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=15"
+        }
+      ]
+    },
+    {
+      "id": "ikea80213074_left_s18",
+      "title": "STEP 18",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "s18.where",
+          "title": "WHERE",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s18/where.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s18/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 18, cabinet left, page 16. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 16"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=16"
+        },
+        {
+          "view": "how",
+          "step_id": "s18.how",
+          "title": "PARTS",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s18/how.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s18/how.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 18, cabinet left, page 16. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 16"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=16"
+        }
+      ]
+    },
+    {
+      "id": "ikea80213074_left_s19",
+      "title": "STEP 19",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "s19.where",
+          "title": "WHERE",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s19/where.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s19/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 19, cabinet left, page 16. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 16"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=16"
+        },
+        {
+          "view": "how",
+          "step_id": "s19.how",
+          "title": "PARTS",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s19/how.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s19/how.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 19, cabinet left, page 16. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 16"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=16"
+        }
+      ]
+    },
+    {
+      "id": "ikea80213074_left_s20",
+      "title": "STEP 20",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "s20.where",
+          "title": "WHERE",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s20/where.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s20/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 20, cabinet left, page 17. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 17"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=17"
+        },
+        {
+          "view": "how",
+          "step_id": "s20.how",
+          "title": "PARTS",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s20/how.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s20/how.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 20, cabinet left, page 17. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 17"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=17"
+        }
+      ]
+    },
+    {
+      "id": "ikea80213074_left_s21",
+      "title": "STEP 21",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "s21.where",
+          "title": "WHERE",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s21/where.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s21/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 21, cabinet left, page 17. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 17"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=17"
+        },
+        {
+          "view": "how",
+          "step_id": "s21.how",
+          "title": "PARTS",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s21/how.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s21/how.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 21, cabinet left, page 17. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 17"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=17"
+        }
+      ]
+    },
+    {
+      "id": "ikea80213074_left_s22",
+      "title": "STEP 22",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "s22.where",
+          "title": "WHERE",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s22/where.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s22/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 22, cabinet left, page 18. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 18"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=18"
+        },
+        {
+          "view": "how",
+          "step_id": "s22.how",
+          "title": "PARTS",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s22/how.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s22/how.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 22, cabinet left, page 18. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 18"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=18"
+        }
+      ]
+    },
+    {
+      "id": "ikea80213074_left_s23",
+      "title": "STEP 23",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "s23.where",
+          "title": "WHERE",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s23/where.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s23/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 23, cabinet left, page 18. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 18"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=18"
+        },
+        {
+          "view": "how",
+          "step_id": "s23.how",
+          "title": "PARTS",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s23/how.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s23/how.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 23, cabinet left, page 18. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 18"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=18"
+        }
+      ]
+    },
+    {
+      "id": "ikea80213074_left_s24",
+      "title": "STEP 24",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "s24.where",
+          "title": "WHERE",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s24/where.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s24/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 24, cabinet left, page 19. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 19"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=19"
+        },
+        {
+          "view": "how",
+          "step_id": "s24.how",
+          "title": "PARTS",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s24/how.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s24/how.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 24, cabinet left, page 19. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 19"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=19"
+        }
+      ]
+    },
+    {
+      "id": "ikea80213074_left_s25",
+      "title": "STEP 25",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "s25.where",
+          "title": "WHERE",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s25/where.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s25/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 25, cabinet left, page 19. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 19"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=19"
+        },
+        {
+          "view": "how",
+          "step_id": "s25.how",
+          "title": "PARTS",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s25/how.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s25/how.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 25, cabinet left, page 19. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 19"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=19"
+        }
+      ]
+    },
+    {
+      "id": "ikea80213074_left_s26",
+      "title": "STEP 26",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "s26.where",
+          "title": "WHERE",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s26/where.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s26/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 26, cabinet left, page 20. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 20"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=20"
+        },
+        {
+          "view": "how",
+          "step_id": "s26.how",
+          "title": "PARTS",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s26/how.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s26/how.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 26, cabinet left, page 20. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 20"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=20"
+        }
+      ]
+    },
+    {
+      "id": "ikea80213074_left_s27",
+      "title": "STEP 27",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "s27.where",
+          "title": "WHERE",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s27/where.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s27/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 27, cabinet left, page 20. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 20"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=20"
+        },
+        {
+          "view": "how",
+          "step_id": "s27.how",
+          "title": "PARTS",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s27/how.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s27/how.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 27, cabinet left, page 20. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 20"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=20"
+        }
+      ]
+    },
+    {
+      "id": "ikea80213074_left_s28",
+      "title": "STEP 28",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "s28.where",
+          "title": "WHERE",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s28/where.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s28/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 28, cabinet left, page 21. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 21"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=21"
+        },
+        {
+          "view": "how",
+          "step_id": "s28.how",
+          "title": "PARTS",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s28/how.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s28/how.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 28, cabinet left, page 21. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 21"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=21"
+        }
+      ]
+    },
+    {
+      "id": "ikea80213074_left_s29",
+      "title": "STEP 29",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "s29.where",
+          "title": "WHERE",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s29/where.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s29/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 29, cabinet left, page 21. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 21"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=21"
+        },
+        {
+          "view": "how",
+          "step_id": "s29.how",
+          "title": "PARTS",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s29/how.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s29/how.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 29, cabinet left, page 21. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 21"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=21"
+        }
+      ]
+    },
+    {
+      "id": "ikea80213074_left_s30",
+      "title": "STEP 30",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "s30.where",
+          "title": "WHERE",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s30/where.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s30/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 30, cabinet left, page 22. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 22"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=22"
+        },
+        {
+          "view": "how",
+          "step_id": "s30.how",
+          "title": "PARTS",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s30/how.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s30/how.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 30, cabinet left, page 22. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 22"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=22"
+        }
+      ]
+    },
+    {
+      "id": "ikea80213074_left_s31",
+      "title": "STEP 31",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "s31.where",
+          "title": "WHERE",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s31/where.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s31/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 31, cabinet left, page 22. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 22"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=22"
+        },
+        {
+          "view": "how",
+          "step_id": "s31.how",
+          "title": "PARTS",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s31/how.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s31/how.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 31, cabinet left, page 22. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 22"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=22"
+        }
+      ]
+    },
+    {
+      "id": "ikea80213074_left_s32",
+      "title": "STEP 32",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "s32.where",
+          "title": "WHERE",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s32/where.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s32/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 32, cabinet left, page 23. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 23"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=23"
+        },
+        {
+          "view": "how",
+          "step_id": "s32.how",
+          "title": "PARTS",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s32/how.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s32/how.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 32, cabinet left, page 23. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 23"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=23"
+        },
+        {
+          "view": "correct",
+          "step_id": "s32.correct",
+          "title": "ADJUST",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s32/correct.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s32/correct.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 32, cabinet left, page 40. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 40"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=40"
+        }
+      ]
+    },
+    {
+      "id": "ikea80213074_left_s33",
+      "title": "STEP 33",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "s33.where",
+          "title": "WHERE",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s33/where.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s33/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 33, cabinet left, page 23. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 23"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=23"
+        },
+        {
+          "view": "how",
+          "step_id": "s33.how",
+          "title": "PARTS",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s33/how.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s33/how.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 33, cabinet left, page 23. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 23"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=23"
+        }
+      ]
+    },
+    {
+      "id": "ikea80213074_left_s34",
+      "title": "STEP 34",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "s34.where",
+          "title": "WHERE",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s34/where.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s34/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 34, cabinet left, page 24. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 24"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=24"
+        },
+        {
+          "view": "how",
+          "step_id": "s34.how",
+          "title": "PARTS",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s34/how.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s34/how.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 34, cabinet left, page 24. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 24"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=24"
+        }
+      ]
+    },
+    {
+      "id": "ikea80213074_left_s35",
+      "title": "STEP 35",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "s35.where",
+          "title": "WHERE",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s35/where.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s35/where.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 35, cabinet left, page 24. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 24"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=24"
+        },
+        {
+          "view": "how",
+          "step_id": "s35.how",
+          "title": "PARTS",
+          "image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s35/how.png",
+          "phone_image": "knowledge/products/ikea/80213074/guides/ikea80213074_left_s35/how.phone.png",
+          "provenance": "MANUFACTURER DOC",
+          "depicts": "Official manual diagram, step 35, cabinet left, page 24. Authored text needs human spot-check.",
+          "fallback": {
+            "line1": "SEE THE MANUAL DIAGRAM",
+            "line2": "PAGE 24"
+          },
+          "reference_url": "https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf#page=24"
+        }
+      ]
+    }
+  ],
+  "step_image": "where"
+}

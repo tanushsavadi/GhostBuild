@@ -1,0 +1,7 @@
+# Runtime deps for the Pi station. On Raspberry Pi OS prefer apt for the heavy ones (see README):
+#   sudo apt install -y python3-picamera2 python3-gpiozero python3-numpy python3-pil
+# and create the venv with --system-site-packages so those are visible. Then:
+numpy
+httpx
+# Optional on the Pi: Pillow is only used to decode rpicam-still output and to save spike JPEGs.
+# picamera2 / gpiozero / RPi.GPIO come from apt, not pip.

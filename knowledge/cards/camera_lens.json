@@ -1,0 +1,152 @@
+{
+  "v": 2,
+  "card_id": "camera_lens",
+  "title": "Pi camera view",
+  "provenance": "AUTHORED DEMO METADATA",
+  "goal_mode": "fix",
+  "aliases": [
+    "camera",
+    "camera view",
+    "lens",
+    "pi camera",
+    "inspection station",
+    "black screen",
+    "dark"
+  ],
+  "sources": [
+    {
+      "id": "picam_docs",
+      "kind": "MANUFACTURER DOC",
+      "title": "Raspberry Pi camera documentation",
+      "url": "https://www.raspberrypi.com/documentation/accessories/camera.html",
+      "file": "knowledge/sources/picam_docs.md"
+    },
+    {
+      "id": "team_notes",
+      "kind": "AUTHORED PROJECT SPEC",
+      "title": "GhostBuild PIVOT section 0A (camera view lost scenario)",
+      "url": null,
+      "file": "docs/PIVOT_GHOSTBUILD.md"
+    }
+  ],
+  "tests": [
+    {
+      "id": "camera_view",
+      "fail_when": [
+        {
+          "signal": "camera.mean_luma",
+          "op": "lt",
+          "value": 25
+        },
+        {
+          "signal": "camera.luma_std",
+          "op": "lt",
+          "value": 8
+        }
+      ],
+      "fail_after_ms": 1500,
+      "pass_after_ms": 1000,
+      "fact": {
+        "line1": "CAMERA VIEW LOST",
+        "line2": "CHECK CAMERA LENS"
+      },
+      "ok": {
+        "line1": "● CAMERA VIEW BACK",
+        "line2": ""
+      },
+      "checks": [
+        {
+          "when": [
+            {
+              "signal": "camera.mean_luma",
+              "op": "lt",
+              "value": 25
+            }
+          ],
+          "action": {
+            "line1": "CAMERA VIEW LOST",
+            "line2": "CHECK CAMERA LENS"
+          },
+          "why": "Dark and flat frames mean little light reaches the sensor. A lens cover or paper flap is the first thing to check. Placeholder threshold, calibrate on the Pi spike.",
+          "cites": [],
+          "guide_id": "camera_lens"
+        }
+      ],
+      "offer_help_after_ms": 8000
+    }
+  ],
+  "functional": {
+    "id": "led_on_motion",
+    "trigger": [
+      {
+        "signal": "camera.motion",
+        "op": "gt",
+        "value": 0.15
+      }
+    ],
+    "prompt": {
+      "line1": "WAVE IN FRONT",
+      "line2": "OF THE CAMERA"
+    },
+    "expect_commanded": {
+      "signal": "led.commanded_on",
+      "op": "eq",
+      "value": true
+    },
+    "ok": {
+      "line1": "● LED COMMANDED",
+      "line2": ""
+    },
+    "within_ms": 1500
+  },
+  "guides": [
+    {
+      "id": "camera_lens",
+      "title": "Camera lens",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "camera_lens.where",
+          "title": "WHERE",
+          "image": "knowledge/guides/camera_lens/where.png",
+          "phone_image": "knowledge/guides/camera_lens/where.phone.png",
+          "provenance": "AUTHORED DEMO METADATA",
+          "depicts": "Inspection station with the Pi camera lens area circled",
+          "fallback": {
+            "line1": "CAMERA LENS",
+            "line2": "IN FIXED VIEW"
+          },
+          "fov_note": "Refers to the camera's fixed field of view only."
+        },
+        {
+          "view": "how",
+          "step_id": "camera_lens.how",
+          "title": "HOW",
+          "image": "knowledge/guides/camera_lens/how.png",
+          "phone_image": "knowledge/guides/camera_lens/how.phone.png",
+          "provenance": "AUTHORED DEMO METADATA",
+          "depicts": "Lens cover or paper flap being lifted away from the lens",
+          "fallback": {
+            "line1": "REMOVE COVER OR",
+            "line2": "PAPER FLAP"
+          },
+          "fov_note": "Refers to the camera's fixed field of view only."
+        },
+        {
+          "view": "correct",
+          "step_id": "camera_lens.correct",
+          "title": "CORRECT",
+          "image": "knowledge/guides/camera_lens/correct.png",
+          "phone_image": "knowledge/guides/camera_lens/correct.phone.png",
+          "provenance": "AUTHORED DEMO METADATA",
+          "depicts": "Lens uncovered with the fixed field of view clear",
+          "fallback": {
+            "line1": "LENS CLEAR IN",
+            "line2": "CAMERA VIEW"
+          },
+          "fov_note": "Refers to the camera's fixed field of view only."
+        }
+      ]
+    }
+  ]
+}

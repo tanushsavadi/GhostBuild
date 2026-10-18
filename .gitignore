@@ -28,6 +28,7 @@ dist/
 # --- node / g2 / twin ---
 node_modules/
 *.ehpk
+g2/app.local.json
 .vite/
 *.tsbuildinfo
 
@@ -48,9 +49,25 @@ tmp/
 .DS_Store
 .local/
 .playwright-mcp/
+.playwright-cli/
 .idea/
 .vscode/
 *.swp
 
 # --- archives / caches (LDraw zip, doc exports) ---
 *.zip
+.worktrees/
+knowledge/drafts/
+knowledge/requests/
+
+# CREAO raw responses and run table (local only; also covered by knowledge/requests/)
+knowledge/requests/creao_raw/
+knowledge/requests/creao_runs.json
+
+knowledge/live/
+
+# Runtime product lookups and downloaded source PDFs
+knowledge/products/ikea/cache/
+
+# Screenshots that embed third-party guide photos stay local (licensing)
+docs/evidence/framework/bike-*.png

@@ -1,0 +1,44 @@
+{
+  "compile_s": 83.98,
+  "rounds": 2,
+  "errors": [],
+  "model": "claude-opus-5-5",
+  "output_tokens": 4972,
+  "fetch_s": 4.08,
+  "images_s": 23.56,
+  "total_s": 111.98,
+  "notes": [
+    "q_broke: vision check says picture 9 does not show this step; not used",
+    "pliers: vision check says picture 10 does not show this step; not used",
+    "clean_gears: vision check says picture 8 does not show this step; not used",
+    "motor_result: vision check says picture 13 does not show this step; not used",
+    "uncovered: The sources never say when to contact Prusa support; the stop step uses the source's own conclusion that the nozzle most likely needs replacing.",
+    "uncovered: Nozzle replacement, the gearbox alignment procedure and the dedicated MK4 clogged hotend article are referenced but not included.",
+    "uncovered: The acupuncture needle method (non High Flow nozzle only) is described but left out of this guide; it is not stated how to tell HF from non-HF nozzles.",
+    "uncovered: Exact screw or part locations for opening the idler and removing the gearbox are not given in the text.",
+    "uncovered: What to do after finding harsh resistance in the Nextruder motor is not stated."
+  ],
+  "sources": [
+    {
+      "url": "https://help.prusa3d.com/article/clogged-nozzle-core-one-core-one-l-xl-mk4-s-mk3-9-s_411823",
+      "title": "Clogged nozzle (CORE One, CORE One L, XL, MK4/S, MK3.9/S) | Prusa Knowledge BasePrusaPrusaPrusa",
+      "kind": "MANUFACTURER DOC",
+      "blocks": 231,
+      "pictures": 16
+    },
+    {
+      "url": "https://help.prusa3d.com/article/clogged-nozzle-core-one-core-one-l-xl-mk4-s-mk3-9-s_411823",
+      "title": "Clogged nozzle (CORE One, CORE One L, XL, MK4/S, MK3.9/S) | Prusa Knowledge BasePrusaPrusaPrusa",
+      "kind": "MANUFACTURER DOC",
+      "blocks": 231,
+      "pictures": 16
+    },
+    {
+      "url": "https://help.prusa3d.com/article/cold-pull-26702-mk4s-13702-mk4-28702-mk3-9s-21702-mk3-9-23702-mk3-5-28702-mk3-5s-17702-xl_445071",
+      "title": "Cold pull #26702 (MK4S) #13702 (MK4) #28702 (MK3.9S) #21702… | Prusa Knowledge BasePrusaPrusaPrusa",
+      "kind": "MANUFACTURER DOC",
+      "blocks": 58,
+      "pictures": 17
+    }
+  ]
+}

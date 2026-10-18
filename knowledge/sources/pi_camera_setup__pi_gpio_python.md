@@ -1,0 +1,108 @@
+# Source text: pi_camera_setup__pi_gpio_python
+
+URL: https://www.raspberrypi.com/documentation/computers/os.html
+Fetched: 2026-10-17 (Pacific) by the knowledge lane. Text is the raw AsciiDoc source of that official page, taken byte-exact from the official docs repository
+https://github.com/raspberrypi/documentation (branch master, commit ddea98e98dafe9419feb4fd82710c2fbdef7dc44), file documentation/asciidoc/computers/os/using-gpio.adoc
+(CC BY-SA 4.0). It was fetched this way because www.raspberrypi.com returns HTTP 403 to curl. The rendered page was also opened with WebFetch
+(model-summarised) only to confirm the page and section headings exist. AsciiDoc markup (xref:, +, *, ==) is part of the text below, so cite
+only sentences that do not span markup.
+Page: Use GPIO from Python (computers/os)
+
+---
+
+== Use GPIO from Python
+
+Using the https://gpiozero.readthedocs.io/[GPIO Zero] library makes it easy to control GPIO devices with Python. The library is comprehensively documented at https://gpiozero.readthedocs.io/[gpiozero.readthedocs.io].
+
+For information about GPIO hardware, see xref:../computers/raspberry-pi.adoc#gpio[GPIO hardware].
+
+=== LED control
+
+The following example code controls an LED connected to GPIO17:
+
+[,python]
+----
+from gpiozero import LED
+from time import sleep
+
+led = LED(17)
+
+while True:
+    led.on()
+    sleep(1)
+    led.off()
+    sleep(1)
+----
+
+Run this in an IDE like Thonny, and the LED will blink on and off repeatedly.
+
+LED methods include `on()`, `off()`, `toggle()`, and `blink()`.
+
+=== Read button state
+
+The following example code reads the state of a button connected to GPIO2:
+
+[,python]
+----
+from gpiozero import Button
+from time import sleep
+
+button = Button(2)
+
+while True:
+    if button.is_pressed:
+        print("Pressed")
+    else:
+        print("Released")
+    sleep(1)
+----
+
+Button functionality includes the properties `is_pressed` and `is_held`; callbacks `when_pressed`, `when_released`, and `when_held`; and methods `wait_for_press()` and `wait_for_release`.
+
+=== Control an LED with a button
+
+The following example code reads the state of a button connected to GPIO2, and lights an LED connected to GPIO17 when the button is pressed:
+
+[source,python]
+----
+from gpiozero import LED, Button
+
+led = LED(17)
+button = Button(2)
+
+while True:
+    if button.is_pressed:
+        led.on()
+    else:
+        led.off()
+----
+
+Alternatively:
+
+[source,python]
+----
+from gpiozero import LED, Button
+
+led = LED(17)
+button = Button(2)
+
+while True:
+    button.wait_for_press()
+    led.on()
+    button.wait_for_release()
+    led.off()
+----
+
+or:
+
+[source,python]
+----
+from gpiozero import LED, Button
+
+led = LED(17)
+button = Button(2)
+
+button.when_pressed = led.on
+button.when_released = led.off
+----
+

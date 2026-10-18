@@ -1,0 +1,47 @@
+{
+  "compile_s": 53.93,
+  "rounds": 1,
+  "errors": [],
+  "model": "claude-opus-5-5",
+  "output_tokens": 6387,
+  "fetch_s": 2.79,
+  "images_s": 60.61,
+  "total_s": 117.99,
+  "notes": [
+    "uncovered: Removing and reinstalling the wheel on the bike is only referenced (separate Wheel Removal article), not described here.",
+    "uncovered: Correct tire pressure values are not given; read the recommendation on the tire sidewall.",
+    "uncovered: Repairing tubeless tires (plug tool use, VP-1 on butyl-lined UST tires) is not covered in this guide.",
+    "uncovered: Choosing the right replacement tube size: bead diameter standards are many and not interchangeable; fit details are in a separate article.",
+    "uncovered: Full vulcanizing (VP-1 glue) patch procedure is shortened here; only the pre-glued patch steps are listed."
+  ],
+  "sources": [
+    {
+      "url": "https://www.parktool.com/en-us/blog/repair-help/tire-and-tube-removal-and-installation",
+      "title": "Tire and Tube Removal and Installation | Park Tool",
+      "kind": "WEB TUTORIAL",
+      "blocks": 91,
+      "pictures": 29
+    },
+    {
+      "url": "https://www.parktool.com/en-us/blog/repair-help/inner-tube-repair",
+      "title": "How to Patch a Tire and Tube | Park Tool",
+      "kind": "WEB TUTORIAL",
+      "blocks": 54,
+      "pictures": 17
+    },
+    {
+      "url": "https://www.parktool.com/en-us/blog/repair-help/tubeless-tire-compatibility",
+      "title": "Tubeless Tire Compatibility | Park Tool",
+      "kind": "WEB TUTORIAL",
+      "blocks": 35,
+      "pictures": 5
+    },
+    {
+      "url": "https://www.parktool.com/en-us/blog/repair-help/tubeless-tire-mounting-and-repair",
+      "title": "Tubeless Tire Removal and Installation | Park Tool",
+      "kind": "WEB TUTORIAL",
+      "blocks": 62,
+      "pictures": 10
+    }
+  ]
+}

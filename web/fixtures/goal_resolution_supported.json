@@ -1,0 +1,14 @@
+{
+  "v": 2,
+  "session_id": "s-1",
+  "status": "supported",
+  "mode": "fix",
+  "card_id": "camera_lens",
+  "task_title": "Pi camera view",
+  "cue": {
+    "line1": "FIX: PI CAMERA",
+    "line2": "WATCHING NOW"
+  },
+  "detail": "Supported: the Pi inspection station camera view and LED.",
+  "alternatives": []
+}

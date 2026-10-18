@@ -1,0 +1,100 @@
+{
+  "guide_id": "cup_fold_half",
+  "title": "FOLD IN HALF",
+  "placeholder": false,
+  "asset_kind": "original_diagram",
+  "reference_url": "https://origami.me/cup/",
+  "units": "px",
+  "views": [
+    {
+      "view": "where",
+      "step_id": "cup_fold_half.where",
+      "title": "WHERE",
+      "source": "where.src.png",
+      "crop": [
+        0,
+        0,
+        1200,
+        600
+      ],
+      "annotation": {
+        "type": "circle",
+        "cx": 600,
+        "cy": 465,
+        "r": 40
+      },
+      "caption": "BOTTOM TIP",
+      "autocontrast": 0,
+      "contrast": 1.05,
+      "gamma": 1,
+      "provenance": "AUTHORED DEMO METADATA",
+      "fallback_cue": {
+        "line1": "BOTTOM TIP OF DIAMOND",
+        "line2": "WHITE SIDE UP"
+      },
+      "depicts": "Original instructional diagram: square paper in diamond orientation, bottom tip highlighted. Not a photo or a live observation."
+    },
+    {
+      "view": "how",
+      "step_id": "cup_fold_half.how",
+      "title": "HOW",
+      "source": "how.src.png",
+      "crop": [
+        0,
+        0,
+        1200,
+        600
+      ],
+      "annotation": {
+        "type": "arrow",
+        "from": [
+          600,
+          450
+        ],
+        "to": [
+          600,
+          78
+        ]
+      },
+      "caption": "BRING TIPS TOGETHER",
+      "autocontrast": 0,
+      "contrast": 1.05,
+      "gamma": 1,
+      "provenance": "AUTHORED DEMO METADATA",
+      "fallback_cue": {
+        "line1": "BRING BOTTOM TIP UP",
+        "line2": "TO THE TOP TIP"
+      },
+      "depicts": "Original instructional diagram: bottom tip moves to top tip; dashed horizontal line marks the fold. Not a photo or a live observation."
+    },
+    {
+      "view": "correct",
+      "step_id": "cup_fold_half.correct",
+      "title": "CORRECT",
+      "source": "correct.src.png",
+      "crop": [
+        0,
+        0,
+        1200,
+        600
+      ],
+      "annotation": {
+        "type": "rect",
+        "x0": 170,
+        "y0": 450,
+        "x1": 1030,
+        "y1": 487
+      },
+      "caption": "TRIANGLE; BASE CLOSED",
+      "autocontrast": 0,
+      "contrast": 1.05,
+      "gamma": 1,
+      "provenance": "AUTHORED DEMO METADATA",
+      "fallback_cue": {
+        "line1": "TRIANGLE WITH TWO LAYERS",
+        "line2": "CLOSED FOLD AT BOTTOM"
+      },
+      "depicts": "Original instructional diagram: two-layer triangular result with the closed bottom edge highlighted. Not a photo or a live observation."
+    }
+  ]
+}

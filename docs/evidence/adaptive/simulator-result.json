@@ -1,0 +1,200 @@
+{
+ "scope": "Official evenhub-simulator + real core (labelled delayed FakeBrain QA harness for answers; cached product photos and official manual). No physical G2.",
+ "steps": [
+  {
+   "name": "sim-00-connected",
+   "mode": "intervene",
+   "cue": {
+    "line1": "WHAT DO YOU NEED?",
+    "line2": "TYPE ON YOUR PHONE"
+   },
+   "answer": null,
+   "step": 13,
+   "confirmed": [],
+   "session": "s-df93b2a3"
+  },
+  {
+   "name": "sim-01-vague-shortlist",
+   "mode": "visual",
+   "cue": {
+    "line1": "1/5 MICKE WHITE",
+    "line2": "PRESS: ENLARGE PHOTO"
+   },
+   "answer": null,
+   "step": 13,
+   "confirmed": [],
+   "session": "s-df93b2a3"
+  },
+  {
+   "name": "sim-02-highlight-2",
+   "mode": "visual",
+   "cue": {
+    "line1": "2/5 ALEX WHITE",
+    "line2": "PRESS: ENLARGE PHOTO"
+   },
+   "answer": null,
+   "step": 13,
+   "confirmed": [],
+   "session": "s-df93b2a3"
+  },
+  {
+   "name": "sim-03-enlarged",
+   "mode": "visual",
+   "cue": {
+    "line1": "1/5 MICKE",
+    "line2": "PRESS: THIS ONE"
+   },
+   "answer": null,
+   "step": 13,
+   "confirmed": [],
+   "session": "s-df93b2a3"
+  },
+  {
+   "name": "sim-04-step1-side-remembered",
+   "mode": "visual",
+   "cue": {
+    "line1": "SCREW IN 2 CONNECTORS",
+    "line2": "USE THE END HOLES"
+   },
+   "answer": null,
+   "step": 0,
+   "confirmed": [],
+   "session": "s-df93b2a3"
+  },
+  {
+   "name": "sim-05-step1-parts-picture",
+   "mode": "visual",
+   "cue": {
+    "line1": "PARTS: STEP 1",
+    "line2": "PRESS TO GO BACK"
+   },
+   "answer": null,
+   "step": 0,
+   "confirmed": [],
+   "session": "s-df93b2a3"
+  },
+  {
+   "name": "sim-06-step14",
+   "mode": "visual",
+   "cue": {
+    "line1": "FIT 8 ROUND METAL LOCKS",
+    "line2": "TURN EACH A QUARTER TURN"
+   },
+   "answer": null,
+   "step": 13,
+   "confirmed": [],
+   "session": "s-df93b2a3"
+  },
+  {
+   "name": "sim-07-answer-p1",
+   "mode": "ask",
+   "cue": {
+    "line1": "CAM LOCKS PULL PANELS",
+    "line2": "TURN A QUARTER TURN"
+   },
+   "answer": {
+    "index": 0,
+    "count": 4
+   },
+   "step": 13,
+   "confirmed": [],
+   "session": "s-df93b2a3"
+  },
+  {
+   "name": "sim-08-answer-p2",
+   "mode": "ask",
+   "cue": {
+    "line1": "CAM LOCKS PULL PANELS",
+    "line2": "TURN A QUARTER TURN"
+   },
+   "answer": {
+    "index": 1,
+    "count": 4
+   },
+   "step": 13,
+   "confirmed": [],
+   "session": "s-df93b2a3"
+  },
+  {
+   "name": "sim-09-answer-p4",
+   "mode": "ask",
+   "cue": {
+    "line1": "CAM LOCKS PULL PANELS",
+    "line2": "TURN A QUARTER TURN"
+   },
+   "answer": {
+    "index": 3,
+    "count": 4
+   },
+   "step": 13,
+   "confirmed": [],
+   "session": "s-df93b2a3"
+  },
+  {
+   "name": "sim-10-answer-end-clamped",
+   "mode": "ask",
+   "cue": {
+    "line1": "CAM LOCKS PULL PANELS",
+    "line2": "TURN A QUARTER TURN"
+   },
+   "answer": {
+    "index": 3,
+    "count": 4
+   },
+   "step": 13,
+   "confirmed": [],
+   "session": "s-df93b2a3"
+  },
+  {
+   "name": "sim-11-answer-p3",
+   "mode": "ask",
+   "cue": {
+    "line1": "CAM LOCKS PULL PANELS",
+    "line2": "TURN A QUARTER TURN"
+   },
+   "answer": {
+    "index": 2,
+    "count": 4
+   },
+   "step": 13,
+   "confirmed": [],
+   "session": "s-df93b2a3"
+  },
+  {
+   "name": "sim-12-press-back-step14",
+   "mode": "visual",
+   "cue": {
+    "line1": "FIT 8 ROUND METAL LOCKS",
+    "line2": "TURN EACH A QUARTER TURN"
+   },
+   "answer": null,
+   "step": 13,
+   "confirmed": [],
+   "session": "s-df93b2a3"
+  },
+  {
+   "name": "sim-13-thinking",
+   "mode": "ask",
+   "cue": {
+    "line1": "THINKING",
+    "line2": ""
+   },
+   "answer": null,
+   "step": 13,
+   "confirmed": [],
+   "session": "s-df93b2a3"
+  },
+  {
+   "name": "sim-14-after-thinking-press-answer-stays-on-phone",
+   "mode": "visual",
+   "cue": {
+    "line1": "FIT 8 ROUND METAL LOCKS",
+    "line2": "TURN EACH A QUARTER TURN"
+   },
+   "answer": null,
+   "step": 13,
+   "confirmed": [],
+   "session": "s-df93b2a3"
+  }
+ ]
+}

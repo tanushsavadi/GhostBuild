@@ -1,0 +1,238 @@
+{
+  "v": 2,
+  "card_id": "flatpack_shelf",
+  "title": "Assemble a flat-pack shelf (fixture)",
+  "provenance": "AI-EXTRACTED · HUMAN-REVIEWED",
+  "sources": [
+    {
+      "id": "leaflet",
+      "kind": "MANUFACTURER DOC",
+      "title": "Shelf assembly leaflet (fixture)",
+      "url": "https://example.com/docs/shelf-leaflet.pdf",
+      "file": null
+    },
+    {
+      "id": "blog",
+      "kind": "WEB TUTORIAL",
+      "title": "Flat-pack assembly walkthrough (fixture)",
+      "url": "https://example.com/blog/flat-pack-shelf",
+      "file": null
+    },
+    {
+      "id": "video",
+      "kind": "VIDEO TUTORIAL",
+      "title": "Shelf build video (fixture)",
+      "url": "https://example.com/watch?v=FIXTURE",
+      "file": null
+    },
+    {
+      "id": "repo",
+      "kind": "GITHUB SOURCE",
+      "title": "Community assembly notes (fixture)",
+      "url": "https://github.com/example/shelf-notes/blob/main/steps.md",
+      "file": null
+    }
+  ],
+  "tests": [],
+  "steps": [
+    {
+      "id": "frame",
+      "title": "Lay out the frame",
+      "cue": {
+        "line1": "LAY OUT THE FRAME",
+        "line2": "SIDES ON THE FLOOR"
+      },
+      "detail": "Unpack the two side panels and the top rail and lay them flat on a soft surface, printed side down. Check the parts against the leaflet before you start. Fixture text for the phone page.",
+      "why": {
+        "line1": "FLAT PARTS DONT SCRATCH",
+        "line2": ""
+      },
+      "where": {
+        "line1": "ON A BLANKET OR CARPET",
+        "line2": ""
+      },
+      "warnings": [
+        "Keep the small bag of fixings closed until step 2."
+      ],
+      "faq": [
+        {
+          "q": "which side faces down",
+          "a": {
+            "line1": "PRINTED SIDE DOWN",
+            "line2": ""
+          }
+        }
+      ],
+      "troubleshoot": [],
+      "guide_id": null,
+      "verify": null,
+      "requires": []
+    },
+    {
+      "id": "cams",
+      "title": "Fit the cam locks",
+      "cue": {
+        "line1": "PRESS CAM LOCKS IN",
+        "line2": "ARROW TOWARD THE EDGE"
+      },
+      "detail": "Press each cam lock into its round hole with the arrow pointing at the nearest panel edge. Do not turn it yet; turning happens when the bolt is in. Fixture text for the phone page.",
+      "why": {
+        "line1": "ARROW DECIDES THE GRIP",
+        "line2": ""
+      },
+      "where": {
+        "line1": "ROUND HOLES ON THE EDGES",
+        "line2": ""
+      },
+      "warnings": [
+        "Do not overtighten: a quarter turn is enough."
+      ],
+      "faq": [
+        {
+          "q": "how tight should it be",
+          "a": {
+            "line1": "QUARTER TURN, THEN STOP",
+            "line2": ""
+          }
+        },
+        {
+          "q": "what if the arrow is wrong",
+          "a": {
+            "line1": "LIFT IT OUT, TURN IT",
+            "line2": ""
+          }
+        }
+      ],
+      "troubleshoot": [
+        {
+          "when": [],
+          "action": {
+            "line1": "CHECK ARROW DIRECTION",
+            "line2": ""
+          },
+          "why": "A cam lock that points away from the edge will not catch the bolt.",
+          "cites": [
+            {
+              "source": "video",
+              "loc": "t=00:12:34",
+              "quote": "the arrow has to face the edge",
+              "url": "https://example.com/watch?v=FIXTURE&t=754s"
+            },
+            {
+              "source": "leaflet",
+              "loc": "page 3, figure 2",
+              "quote": null,
+              "url": null
+            }
+          ],
+          "guide_id": "cam_lock"
+        }
+      ],
+      "guide_id": "cam_lock",
+      "verify": null,
+      "requires": []
+    },
+    {
+      "id": "shelf",
+      "title": "Slide in the shelf",
+      "cue": {
+        "line1": "SLIDE THE SHELF IN",
+        "line2": "UNTIL IT CLICKS"
+      },
+      "detail": "Slide the shelf along the guides until the cam locks click. Fixture text.",
+      "why": null,
+      "where": null,
+      "warnings": [],
+      "faq": [],
+      "troubleshoot": [
+        {
+          "when": [],
+          "action": {
+            "line1": "CHECK THE GUIDE RAILS",
+            "line2": ""
+          },
+          "why": "A crooked shelf usually means one rail is not seated.",
+          "cites": [
+            {
+              "source": "blog",
+              "loc": "section Shelves",
+              "quote": null,
+              "url": "https://example.com/blog/flat-pack-shelf#shelves"
+            },
+            {
+              "source": "repo",
+              "loc": "steps.md L10-L18",
+              "quote": null,
+              "url": "https://github.com/example/shelf-notes/blob/main/steps.md#L10-L18"
+            }
+          ],
+          "guide_id": null
+        }
+      ],
+      "guide_id": null,
+      "verify": null,
+      "requires": []
+    },
+    {
+      "id": "back",
+      "title": "Fit the back panel",
+      "cue": {
+        "line1": "FIT THE BACK PANEL",
+        "line2": "NAIL EVERY 10 CM"
+      },
+      "detail": "Lay the back panel on the frame and nail it every 10 cm. This is the last step. Fixture text.",
+      "why": null,
+      "where": null,
+      "warnings": [],
+      "faq": [],
+      "troubleshoot": [],
+      "guide_id": null,
+      "verify": null,
+      "requires": []
+    }
+  ],
+  "functional": null,
+  "guides": [
+    {
+      "id": "cam_lock",
+      "title": "Cam lock",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "cam_lock.where",
+          "title": "WHERE",
+          "image": "knowledge/guides/cam_lock/where.png",
+          "phone_image": null,
+          "provenance": "AUTHORED DEMO METADATA",
+          "depicts": "Fixture: round hole on the panel edge",
+          "fallback": {
+            "line1": "ROUND HOLE ON EDGE",
+            "line2": ""
+          },
+          "fov_note": null
+        },
+        {
+          "view": "how",
+          "step_id": "cam_lock.how",
+          "title": "HOW",
+          "image": "knowledge/guides/cam_lock/how.png",
+          "phone_image": null,
+          "provenance": "AUTHORED DEMO METADATA",
+          "depicts": "Fixture: arrow toward the edge",
+          "fallback": {
+            "line1": "ARROW TO THE EDGE",
+            "line2": ""
+          },
+          "fov_note": null
+        }
+      ]
+    }
+  ],
+  "goal_mode": "build",
+  "aliases": [
+    "shelf",
+    "flat pack",
+    "flatpack",
+    "bookcase"
+  ]
+}

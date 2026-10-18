@@ -1,0 +1,99 @@
+{
+  "v": 2,
+  "engine": "HEALTHY",
+  "card_id": "camera_lens",
+  "test": "camera_view",
+  "step_id": null,
+  "check": null,
+  "help_view": null,
+  "source": "pi_live",
+  "health": {
+    "ok": true,
+    "uptime_s": 120.5,
+    "pi_link": "up",
+    "pi_last_seq": 813,
+    "pi_age_ms": 90,
+    "source": "pi_live",
+    "camera": "ok",
+    "g2_clients": 1
+  },
+  "hud": {
+    "type": "hud",
+    "v": 2,
+    "seq": 14,
+    "mode": "verified",
+    "cue": {
+      "line1": "● CAMERA VIEW BACK",
+      "line2": ""
+    },
+    "image": null,
+    "menu": null,
+    "cue_id": "camera_view/ok",
+    "ttl_ms": 3000,
+    "source": "pi_live",
+    "stale": false
+  },
+  "events": [
+    {
+      "at": 1792283000000,
+      "text": "frames flowing: seq 810, luma 112.4, contrast 41.8",
+      "label": "MEASURED LIVE",
+      "evidence": {
+        "mean_luma": 112.4,
+        "luma_std": 41.8
+      }
+    },
+    {
+      "at": 1792283005200,
+      "text": "mean luma 6.2, contrast 1.1 for 1.5 s",
+      "label": "MEASURED LIVE",
+      "evidence": {
+        "mean_luma": 6.2,
+        "luma_std": 1.1
+      }
+    },
+    {
+      "at": 1792283005300,
+      "text": "view treated as blocked (luma<25 and contrast<8)",
+      "label": "INFERRED",
+      "evidence": {}
+    },
+    {
+      "at": 1792283005400,
+      "text": "cue shown: CAMERA VIEW LOST / CHECK CAMERA LENS",
+      "label": "DETERMINISTIC",
+      "evidence": {}
+    },
+    {
+      "at": 1792283021000,
+      "text": "frames recovered: luma 98.0, contrast 37.5 for 1.0 s",
+      "label": "MEASURED LIVE",
+      "evidence": {
+        "mean_luma": 98.0,
+        "luma_std": 37.5
+      }
+    },
+    {
+      "at": 1792283021100,
+      "text": "view treated as clear after the fault cleared",
+      "label": "INFERRED",
+      "evidence": {}
+    },
+    {
+      "at": 1792283026000,
+      "text": "camera.motion 0.31 -> LED on requested",
+      "label": "COMMANDED",
+      "evidence": {
+        "motion": 0.31,
+        "led_commanded": true
+      }
+    }
+  ],
+  "session": {
+    "id": "s-1",
+    "phase": "task",
+    "goal": "fix",
+    "card_id": "camera_lens",
+    "welcome_shown": true
+  }
+}

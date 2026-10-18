@@ -1,0 +1,83 @@
+{
+  "v": 2,
+  "session": {
+    "id": "s-8",
+    "phase": "task",
+    "goal": "build",
+    "card_id": "led_breadboard",
+    "welcome_shown": true
+  },
+  "engine": "PLAYBOOK",
+  "card_id": "led_breadboard",
+  "test": null,
+  "step_id": "power",
+  "check": null,
+  "help_view": null,
+  "source": "pi_live",
+  "health": {
+    "ok": true,
+    "uptime_s": 88.0,
+    "pi_link": "up",
+    "pi_last_seq": 410,
+    "pi_age_ms": 120,
+    "source": "pi_live",
+    "camera": "ok",
+    "g2_clients": 1,
+    "voice": "off"
+  },
+  "hud": {
+    "type": "hud",
+    "v": 2,
+    "seq": 52,
+    "mode": "step",
+    "cue": {
+      "line1": "CONNECT BATTERY PACK",
+      "line2": ""
+    },
+    "image": null,
+    "menu": null,
+    "step": {
+      "index": 2,
+      "count": 3,
+      "step_id": "power",
+      "check": "measured",
+      "confirmed": false
+    },
+    "cue_id": null,
+    "ttl_ms": null,
+    "source": "pi_live",
+    "session_id": null,
+    "stale": false
+  },
+  "playbook": {
+    "card_id": "led_breadboard",
+    "step_index": 2,
+    "step_count": 3,
+    "step_id": "power",
+    "confirmed": [
+      "parts",
+      "led"
+    ],
+    "verified": []
+  },
+  "events": [
+    {
+      "at": 1792283000000,
+      "text": "step parts confirmed by wearer",
+      "label": "HUMAN CONFIRMED",
+      "evidence": {}
+    },
+    {
+      "at": 1792283020000,
+      "text": "step led confirmed by wearer",
+      "label": "HUMAN CONFIRMED",
+      "evidence": {}
+    },
+    {
+      "at": 1792283031000,
+      "text": "waiting for measured evidence: led.commanded_on == true",
+      "label": "DETERMINISTIC",
+      "evidence": {}
+    }
+  ]
+}

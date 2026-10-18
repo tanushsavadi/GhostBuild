@@ -1,0 +1,145 @@
+{
+ "C_mac_screen": [
+  {
+   "user": "my mac screen is acting weird",
+   "decision": "ASK_QUESTION",
+   "say": "Sorry it's acting up. What exactly is the screen doing, for example flickering, lines across it, going dark, or showing odd colors? That tells me whether this is something safe to check yourself or something for a repair shop.",
+   "critical_unknowns": [
+    "specific screen symptom",
+    "Mac model (laptop or desktop, model year)",
+    "whether there is physical damage or liquid exposure"
+   ],
+   "facts": [
+    [
+     "product",
+     "Mac computer screen",
+     "user"
+    ],
+    [
+     "symptom",
+     "screen acting weird, unspecified",
+     "user"
+    ]
+   ],
+   "phase": "menu",
+   "card": null
+  },
+  {
+   "user": "only the external monitor, the laptop screen is fine",
+   "decision": "ASK_QUESTION",
+   "say": "Good to know the laptop screen is fine, that points toward the external monitor, its cable, or the connection rather than the Mac itself. What is the external monitor actually doing, for example flickering, going black, showing lines, wrong colors, or the wrong resolution? That decides which checks make sense.",
+   "critical_unknowns": [
+    "specific external monitor symptom",
+    "how the monitor is connected (cable or adapter type)",
+    "Mac model and macOS version"
+   ],
+   "facts": [
+    [
+     "symptom",
+     "screen acting weird, unspecified",
+     "user"
+    ],
+    [
+     "product",
+     "Mac laptop with an external monitor",
+     "user"
+    ],
+    [
+     "symptom",
+     "Problem limited to external monitor; built-in laptop screen works normally",
+     "user"
+    ],
+    [
+     "branch",
+     "External display issue, likely cable, adapter, port or display settings",
+     "inferred"
+    ]
+   ],
+   "phase": "menu",
+   "card": null
+  }
+ ],
+ "D_F_bike_unknown": [
+  {
+   "user": "fix my bike tyre",
+   "decision": "ASK_QUESTION",
+   "say": "Happy to help with your bike tyre. What's going on with it, is it flat or losing air, or is something else wrong like a bulge, a cut or it slipping off the rim?",
+   "critical_unknowns": [
+    "symptom: what is wrong with the tyre",
+    "valve type and tyre setup (tube or tubeless)",
+    "which wheel"
+   ],
+   "facts": [
+    [
+     "product",
+     "bicycle tyre",
+     "user"
+    ]
+   ],
+   "phase": "menu",
+   "card": null
+  },
+  {
+   "user": "I don't know",
+   "decision": "ASK_QUESTION",
+   "say": "No problem, let's figure it out together. Give the tyre a firm squeeze with your thumb. Does it feel soft or squishy compared to normal, or does it feel hard and fully pumped up?",
+   "critical_unknowns": [
+    "symptom: whether the tyre is losing pressure or has another problem",
+    "valve type and tyre setup (tube or tubeless)",
+    "which wheel"
+   ],
+   "facts": [
+    [
+     "product",
+     "bicycle tyre",
+     "user"
+    ],
+    [
+     "symptom",
+     "user does not know what is wrong with the tyre",
+     "user"
+    ]
+   ],
+   "phase": "menu",
+   "card": null
+  }
+ ],
+ "H_new_goal": [
+  {
+   "user": "actually I want to build a bookshelf instead",
+   "decision": "IDENTIFY_PRODUCT",
+   "say": "A bookshelf, got it. Is it a flat-pack kit from a brand like IKEA, and if so, what is the product name or number on the box or manual? That decides which assembly manual we follow.",
+   "critical_unknowns": [
+    "whether it is a branded flat-pack kit or a from-scratch build",
+    "brand and model or product number if a kit"
+   ],
+   "facts": [
+    [
+     "product",
+     "bookshelf",
+     "user"
+    ]
+   ],
+   "phase": "menu",
+   "card": null
+  }
+ ],
+ "STEP_explain": {
+  "question": "How do these round metal locks work, and how far should I turn them?",
+  "routed": "assistant",
+  "answer": "Each round metal lock is a cam lock. It sits in the round hole in the panel face and grabs the head of the cam bolt you screwed into the matching edge earlier. Press cam lock 103430 into each hole shown, with its open side facing the bolt so the bolt head can slide in. Then turn it with a screwdriver. The guide says a quarter turn, and that pulls the panels snugly together. Don't force it past where it firmly stops. Use only 103430 here. The guide crosses out cam lock 110126 for this step.",
+  "grounding": "guide",
+  "glasses_pages": 3,
+  "step_after": 13,
+  "confirmed": []
+ },
+ "anthropic_http_requests": 6,
+ "latency_ms": [
+  2869,
+  2941,
+  1916,
+  2345,
+  2279,
+  4252
+ ]
+}

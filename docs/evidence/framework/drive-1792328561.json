@@ -1,0 +1,42 @@
+[
+ {
+  "said": "My MacBook screen suddenly turned green",
+  "took_s": 3.68,
+  "assistant": "A sudden green tint is usually a settings or software issue, so we'll start with safe checks for color settings and display profiles. Hands free, step by step.",
+  "decision": "START_GUIDE"
+ },
+ {
+  "shot": "mac-01-question",
+  "mode": "intervene",
+  "cue": {
+   "line1": "FIX: MAC SCREEN LOOKS",
+   "line2": "SWIPE DOWN WHEN DONE"
+  },
+  "menu": null,
+  "phase": "task",
+  "card": "mac_display_colors",
+  "step": "q_which_display",
+  "observations": []
+ },
+ {
+  "said": "only on my external monitor, the laptop screen is fine",
+  "took_s": 0.01,
+  "assistant": "Noted: Wrong colors on an external display only.",
+  "decision": "START_GUIDE"
+ },
+ {
+  "shot": "mac-02-guide-start",
+  "mode": "intervene",
+  "cue": {
+   "line1": "FIX: MAC SCREEN LOOKS",
+   "line2": "SWIPE DOWN WHEN DONE"
+  },
+  "menu": null,
+  "phase": "task",
+  "card": "mac_display_colors",
+  "step": "reconnect_external",
+  "observations": [
+   "Wrong colors on an external display only"
+  ]
+ }
+]

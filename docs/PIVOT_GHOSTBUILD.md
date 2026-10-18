@@ -1,6 +1,34 @@
 # GhostBuild — PIVOT (authoritative from Sat 2026-10-17 15:45 PDT)
 
+---
+## §0A. HARDWARE/UX AMENDMENT — Sat 2026-10-17 18:30 PDT — **THIS SECTION WINS**
+
+**Final release amendment — Sun 2026-10-18:** GhostBuild guides general BUILD/FIX tasks through structured, source-grounded action graphs. Product identification, conversational intake, contextual answers and optional asynchronous live compilation are now in scope. `GB_LIVE_RESEARCH=1` explicitly permits validated AI-compiled guides before human review; they remain labelled **AI-RESEARCHED · NOT HUMAN-REVIEWED** and are not promoted to human-approved knowledge. The default source compiler uses Anthropic and official/specialist documents; CREAO is an alternate asynchronous research adapter. Neither provider decides measured completion. Cached/manual guidance, gestures and text remain available without a live provider. These release behaviors supersede the earlier blanket prohibition on runtime guide compilation and the obsolete Pi-only BUILD/FIX menu. Product/model corrections invalidate the old guide and its pictures; uncertain answer corrections ask again. The hardware and evidence-honesty rules below remain binding. Physical G2/BLE/microphone validation and an Even Beta upload are separate from a passing software build.
+
+**Why:** the Arduino kit (Uno, HC-SR04, SG90, end-stop, power switch) is **not available**. Confirmed hardware: physical **Even G2** + paired phone, **Raspberry Pi + Pi camera module + one LED**, team laptops, printable/paper/cardboard props. The camera is external with a fixed field of view. G2 has no camera and no speaker.
+
+**Superseded (kept as history, do not implement):** the gate/servo/ultrasonic/end-stop hero, `firmware/barrier`, the serial `observation` line, `card_barrier.json`, F1–F4/V0/V1 gate cues, §3 hardware and fault list, §9 borrow list, §8 acceptance steps 4–9 as worded. **Kept:** product principle (the fix is the input), quiet-by-design, single HUD writer, deterministic engine, card-gated text, G2 transport/lifecycle plan (§5.8 minus the gate cues), source labels, judge-defence answers where still true, the §13 workshop addendum.
+
+**New hero (candidate; a hardware spike by C confirms or replaces it):** a Pi inspection station. The camera view is obstructed (lens cover/paper flap). Camera frames are measured; the engine infers "view lost". G2: `CAMERA VIEW LOST / CHECK CAMERA LENS`. One press → a real annotated picture (WHERE), swipe → HOW → CORRECT. The judge removes the obstruction; measured frames recover; G2 shows one `● CAMERA VIEW BACK`, then blank. A hand wave in the camera's field of view makes the Pi command the LED on (COMMANDED, plus the human watches the LED). G2 shows `● LED COMMANDED`, then blank. Replace the scenario only with one that uses the same hardware and passes a spike (observable, repeatable, useful).
+
+**Evidence rules:** frame received = MEASURED LIVE · unobstructed = INFERRED from frame features · GPIO high = COMMANDED, never "verified light" or "independently verified" · camera null/stale/frozen = error, never success · no prerecorded scene is ever presented as live; all non-live data carries SIMULATED/REPLAY on the frame, phone and logs.
+
+**Modes (G2):** 0 QUIET (blank when healthy) · 1 INTERVENTION (fact + one action) · 2 VISUAL ASSIST (one real annotated image, 288x144 4-bit grey, text fallback) · 3 MULTI-VIEW (WHERE → HOW → CORRECT, one at a time) · 4 ASK (flagged, optional voice/short grounded answers) · 5 RECOVERY (one evidence-backed line then blank) · 6 ERROR/UNCERTAIN (honest, never stale success).
+**Gestures (validate on hardware, no invented semantics):** press = fault→open WHERE / in help→back to cue / healthy→`ALL TESTS PASSING` (recheck); swipe down/up = next/previous view or back to cue; long-press hold-to-ask only if hardware-validated, otherwise a documented fallback; **double press = system exit, never hijacked**; IMU/R1 optional, never confirm a repair.
+**Escalation:** help is on demand or evidence-triggered: after a fault persists `offer_help_after_ms`, one gentle `PRESS FOR PICTURE` line, once per fault; a failed fix may offer the next documented check. Never repeats.
+**Contract v2:** `contracts/models.py` (Observation, HudFrame, G2Input, State, Health, Card). Core serves guide images at `/guides/<id>/<view>.png`. Runtime still needs no internet; voice/LLM Q&A is optional, flagged, backend-keyed, consent-gated, never on the cue path.
+**Milestones:** M1 real Pi observation → core → physical G2 cue → physical fix → HUD updates/clears. M2 press → real guide image on G2. M3 swipe → second image, return keeps context. M4 optional voice. M5 Beta, rehearsal, submission (Devpost by 10:30, Beta QA by 11:00, deadline 12:00 Sun).
+**Cut order:** decorative effects → IMU → third image → voice Q&A → sponsor work → generalized manual ingestion. **Never cut:** real hardware observation, physical G2, one genuinely helpful visual, robust gestures, honest transitions, packaging/submission.
+
+---
+
+# GhostBuild — PIVOT (authoritative from Sat 2026-10-17 15:45 PDT)
+
 > This document supersedes docs/00–21 wherever they conflict. Those docs are **historical**: the LEGO rocket/rover, perception, CAD, spatial/RealityKit, twin, minimap and every sponsor integration are **cut**. The old docs are still useful for G2 platform notes (08 §2–§6 text and glyph rules) and the honesty labels. Times below are PDT. Deadline: **Sun 12:00**.
+
+**Scope update (Sat night): GhostBuild is general purpose.** Tasks are `Card` data: `steps` (playbook: step cue, pictures, why/where/faq/troubleshoot, optional `verify` evidence) and/or `tests` (telemetry fault checks). Manual steps are confirmed by the wearer (swipe down = next = HUMAN CONFIRMED, shown as `✓ DONE (you confirmed)`); measured steps advance only on evidence. Unknown requests are honestly unsupported and can be queued for async research (CREAO). The Pi camera/LED is an optional verifier demo, not a dependency of navigation.
+
+**Session onboarding (P0 UX, after M1 transport; never delays Beta packaging):** new session → `GHOSTBUILD` welcome (2.5 s) → menu `BUILD OR FIX?` (swipe moves, press selects; double press still exits) → goal resolved by a **deterministic resolver against Repair Card `aliases`/`goal_mode`** (never an LLM on the cue path) → task starts with a concise cue → context kept across help requests → verified → blank. Voice goal input only if real mic capture works (flag), else the phone `/phone` text box (`POST /session/goal`) — a non-voice path always exists. Unsupported/ambiguous goals get an honest `NOT SUPPORTED YET` fallback plus the supported list on the phone; no invented diagnostics. **FIX** is implemented fully for the verified Pi scenario; **BUILD** only guides the supported "set up the Pi inspection station" workflow and never implies universal building. Welcome appears only for a new session (`g2_hello.session_id` unknown); reconnects resume the current task; a press in a healthy task state shows status. Selection is a goal, never a physical completion.
 
 ---
 
@@ -145,7 +173,7 @@
 | Arduino resets on servo move | Capacitor; otherwise a 4×AA pack for the servo with common ground. |
 | Phone background breaks the plugin | Phone face down with **screen on** (auto-lock off). Same experience. |
 | Venue Wi-Fi down | Laptop joins the phone hotspot. Runtime needs **no internet**: the card is precompiled and the engine is local. Backend URL is configurable in the plugin's phone settings. |
-| G2 dead or disconnected | `evenhub-simulator` on the laptop, fed the same live frames. Labelled SIMULATOR. The hardware loop stays real. |
+| G2 dead or disconnected | The simulator is already running beside the glasses (§13) and gets the same live frames. Labelled SIMULATOR. The hardware loop stays real. |
 | Backend crash | `make demo` restarts in under 5 s. State rebuilds from live telemetry in about 2 s. |
 | Everything else | The through-the-lens video of a real run (clearly a recording). |
 
@@ -358,3 +386,54 @@ GhostBuild becomes a **closed-loop repair copilot**. The device under repair tes
 **THINGS WE WILL NOT BUILD:** see §11.
 
 **Does it meet the Even "Quiet Tech" bar? Yes, with one condition.** The healthy state is literally an empty lens. Each cue is a single action that exists only while its fault is real and disappears because of a physical event. The intelligence (reading docs, choosing checks, verifying) is all off-lens. The condition is that this only holds if B proves at 17:00 that the plugin receives frames with the phone face down. If it doesn't, we use the screen-on face-down fallback and say so.
+
+---
+
+## 13. Workshop alignment addendum (Sat 16:30 PDT; no scope change, product direction frozen)
+
+Even's workshop guidance confirms the product. It adds the following deltas and nothing else.
+
+| Workshop finding | Where it is already met | Delta |
+|---|---|---|
+| Contextual computing | Cues fire only on a failed test (§2.6) | none |
+| Quiet tech | Healthy = blank; no telemetry, progress or chat on G2 (§2.10) | none |
+| Phone as filter | Evidence, wiring and sources live on `/phone`; the hero loop never needs it (§4) | none |
+| Physical device first | Acceptance is on physical G2 (§8, §10) | none |
+| Simulator beside the glasses | §3 had it only as a fallback | **D1** below |
+| Single font, black = transparent, minimal text, throttled updates | Glyph whitelist, 2 lines, ≤ 1 new cue / 2 s, blank = `" "` | none |
+| No invented capabilities | Inputs are press, double press, swipe only (§2.8) | none |
+| Offline | No runtime LLM; card precompiled (§5.5, §7) | none |
+| Modular and independently testable | One contract per boundary | **D4** below |
+
+**D1. Simulator runs beside the glasses at every judging block.** `server.py` broadcasts every hud frame to all connected displays (`/ws?role=g2`, any number of clients), so the physical G2 and `evenhub-simulator` always show the same frames. The simulator window carries a SIMULATOR label. Physical G2 stays the acceptance device; the simulator is never the pass criterion.
+
+**D2. Honest single press (P1).** `ALL TESTS PASSING` appears only when no test is pending. During `AWAIT_FUNC` a press repeats K1 (`SENSOR OK` / `WAVE TO TEST GATE`). P1 line 2 reads `LIVE` only when `source` is `serial`; otherwise it reads `SIMULATED` or `REPLAY`. This is a recheck, never a commit, and it is the one-press "app is alive" check.
+
+**D3. Optional work never delays the loop.** Order of proof, each with its gate:
+1. Backend → physical G2 transport (17:00 gate, B2).
+2. Real Arduino telemetry changes the HUD (M1, 19:30).
+3. A physical repair changes the observed state, F2 → K1 (M1).
+4. The end-stop independently confirms gate movement, V1 (M2, 21:00).
+5. The display clears by itself and stays blank through more successful tests (§8 steps 7–9; session log shows 0 frames).
+
+Only after 1–5: phone evidence polish, then the AI card (23:00 gate). The CREAO spike and Devin work stay outside `core/`, `g2/` and `firmware/`. They never enter the cue path, never replace the engine, add no screens, and the offline hardware demo never depends on them. They are inactive unless D approves after the P0 freeze. §11 still bans sponsor integrations.
+
+**D4. Independent test entry points.** Each lane proves itself without the others:
+- firmware: `tools/serial_probe.py` against the contract;
+- core: pytest plus `--simulate`, with no hardware and no G2;
+- g2: vitest plus `evenhub-simulator` fed by D's stub server;
+- phone: `/phone` against a recorded `/state` fixture.
+
+### 8b. Judge handoff acceptance test (run before every judging block)
+Pre-flight (operator, 30 s): `/health` shows `link: up, source: serial`. The simulator is visible and labelled. G2 battery is above 30%. One press shows `ALL TESTS PASSING` / `LIVE`, then blank in 3 s. Labels on the rig (ECHO, TRIG, 10, 9, 6, POWER) are readable at arm's length.
+
+1. **First-time wearer.** The judge has never worn G2. The operator says only the §4 sentence. Pass if the judge reaches `● GATE VERIFIED` in ≤ 60 s without asking what a cue means and without touching the phone.
+2. **Observer log.** A teammate notes any phone glance, any pause over 5 s, and any wrong-wire attempt. Any phone glance fails the run. Pauses and wrong wires are fixes for the 01:00 wearer session.
+3. **Quiet after success.** Two more waves after V1 produce zero hud frames. This is checked in the session log, not by eye.
+4. **Press.** The judge's single press shows `ALL TESTS PASSING`, then blank. It is not a flood of information.
+5. **Simulator parity.** The simulator showed the same frame sequence as the glasses. Any difference fails the run.
+6. **Reset (≤ 15 s).** The operator powers off, pulls the next fault wire (A → B → C), powers on, and wipes the lens. The backend detects the fault by itself. Nobody restarts the app or the backend.
+7. **Next judge immediately.** The first frame judge 2 sees is for the new fault. No stale `VERIFIED`, `SENSOR OK` or old `CHECK`. Time from judge 1 removing the glasses to judge 2's first cue is ≤ 30 s.
+8. **Healthy display is genuinely blank.** Between judges, with all tests passing, G2 renders nothing for 60 s. Check the session log for 0 frames.
+
+Report each run honestly: pass or fail per item, with the session log filename.

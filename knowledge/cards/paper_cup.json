@@ -1,0 +1,619 @@
+{
+  "v": 2,
+  "card_id": "paper_cup",
+  "title": "Fold a paper cup",
+  "provenance": "AUTHORED DEMO METADATA",
+  "sources": [
+    {
+      "id": "origami_me_cup",
+      "kind": "WEB TUTORIAL",
+      "title": "origami.me: How to Make an Easy Origami Cup",
+      "url": "https://origami.me/cup/",
+      "file": "knowledge/sources/paper_cup__origami_me_cup.md"
+    },
+    {
+      "id": "origami_me_square",
+      "kind": "WEB TUTORIAL",
+      "title": "origami.me: How to Make Rectangular Paper into a Square",
+      "url": "https://origami.me/rectangle-paper-to-square/",
+      "file": "knowledge/sources/paper_cup__origami_me_square.md"
+    }
+  ],
+  "tests": [],
+  "steps": [
+    {
+      "id": "square",
+      "title": "Start with a square sheet",
+      "cue": {
+        "line1": "USE A SQUARE SHEET",
+        "line2": "NOT SQUARE? SEE PHONE"
+      },
+      "detail": "The tutorial says: Any square sheet will work. If you only have a rectangular sheet of printer paper, the origami.me page 'How to Make Rectangular Paper into a Square' does it in three steps: fold the left edge down to the bottom edge and pinch at the top right corner, then unfold; fold the right edge over using the pinch as a guide, crease and unfold; cut off the right strip along the crease. That page says it needs a cut, so have scissors ready. UNCERTAIN: the cup page itself does not describe squaring.",
+      "why": {
+        "line1": "THE CUP PAGE ASSUMES",
+        "line2": "A SQUARE SHEET"
+      },
+      "where": {
+        "line1": "PAPER ON A FLAT TABLE",
+        "line2": ""
+      },
+      "warnings": [
+        "Scissors are needed only if you must square a rectangular sheet."
+      ],
+      "faq": [
+        {
+          "q": "what if my paper is not square",
+          "a": {
+            "line1": "MAKE IT SQUARE FIRST",
+            "line2": "SEE THE PHONE STEPS"
+          }
+        },
+        {
+          "q": "can i use printer paper",
+          "a": {
+            "line1": "YES, MAKE IT SQUARE",
+            "line2": "SOURCE SAYS IT WORKS"
+          }
+        }
+      ],
+      "troubleshoot": [
+        {
+          "when": [],
+          "action": {
+            "line1": "CHECK SHEET SQUARE",
+            "line2": "ALL SIDES EQUAL"
+          },
+          "why": "The cup tutorial is written for a square sheet.",
+          "cites": [
+            {
+              "source": "origami_me_cup",
+              "loc": "Recommended Paper",
+              "quote": "Any square sheet will work.",
+              "url": "https://origami.me/cup/"
+            },
+            {
+              "source": "origami_me_square",
+              "loc": "Intro",
+              "quote": "You can easily use regular printer paper instead.",
+              "url": "https://origami.me/rectangle-paper-to-square/"
+            }
+          ],
+          "guide_id": null
+        }
+      ],
+      "guide_id": null,
+      "verify": null,
+      "requires": []
+    },
+    {
+      "id": "fold_half",
+      "title": "Fold in half diagonally",
+      "cue": {
+        "line1": "FOLD BOTTOM CORNER UP",
+        "line2": "TO THE TOP CORNER"
+      },
+      "detail": "Start with the white side of the paper facing up, positioned like a diamond. Fold the paper in half diagonally by bringing the bottom corner up to meet the top corner. (Source: origami.me, Step 1.)",
+      "why": {
+        "line1": "UNCERTAIN: WHICH SIDE",
+        "line2": "IF PAPER HAS NO WHITE"
+      },
+      "where": {
+        "line1": "WHITE SIDE UP, DIAMOND",
+        "line2": ""
+      },
+      "warnings": [],
+      "faq": [
+        {
+          "q": "which side faces up",
+          "a": {
+            "line1": "WHITE SIDE FACES UP",
+            "line2": "SOURCE PAPER HAS ONE"
+          }
+        }
+      ],
+      "troubleshoot": [
+        {
+          "when": [],
+          "action": {
+            "line1": "CHECK WHITE SIDE UP",
+            "line2": "SHEET LIKE A DIAMOND"
+          },
+          "why": "The source starts this way.",
+          "cites": [
+            {
+              "source": "origami_me_cup",
+              "loc": "Step 1",
+              "quote": "Start with the white side of the paper facing up, positioned like a diamond.",
+              "url": "https://origami.me/cup/"
+            }
+          ],
+          "guide_id": "cup_fold_half"
+        }
+      ],
+      "guide_id": "cup_fold_half",
+      "verify": null,
+      "requires": [
+        "square"
+      ]
+    },
+    {
+      "id": "pinch",
+      "title": "Pinch the left edge",
+      "cue": {
+        "line1": "FOLD LEFT EDGE DOWN",
+        "line2": "ONLY PINCH AT RIGHT EDGE"
+      },
+      "detail": "Temporarily bring the top layer's left sloping edge onto the triangle's bottom edge. Make only a short pinch where that temporary fold reaches the right sloping edge, then reopen the layer. The original diagrams show the reference mark; they do not show your actual paper. Based on origami.me, Step 2.",
+      "why": {
+        "line1": "MAKES A SMALL",
+        "line2": "REFERENCE POINT"
+      },
+      "where": {
+        "line1": "TOP LAYER, LEFT EDGE",
+        "line2": ""
+      },
+      "warnings": [],
+      "faq": [
+        {
+          "q": "what is a pinch",
+          "a": {
+            "line1": "ONLY A SMALL MARK",
+            "line2": "NOT A FULL CREASE"
+          }
+        }
+      ],
+      "troubleshoot": [
+        {
+          "when": [],
+          "action": {
+            "line1": "CHECK ONLY A PINCH",
+            "line2": "NOT A FULL FOLD"
+          },
+          "why": "The source says to pinch, which makes a small reference point.",
+          "cites": [
+            {
+              "source": "origami_me_cup",
+              "loc": "Step 2",
+              "quote": "but only pinch at the right edge level. This creates a small reference point.",
+              "url": "https://origami.me/cup/"
+            }
+          ],
+          "guide_id": "cup_pinch"
+        }
+      ],
+      "guide_id": "cup_pinch",
+      "verify": null,
+      "requires": [
+        "fold_half"
+      ]
+    },
+    {
+      "id": "left_corner",
+      "title": "Fold left corner to pinch",
+      "cue": {
+        "line1": "FOLD LEFT CORNER TO",
+        "line2": "THE PINCH. CREASE WELL"
+      },
+      "detail": "Fold the left corner to the pinch made in the previous step. Then, crease well. (Source: origami.me, Step 3.)",
+      "why": null,
+      "where": null,
+      "warnings": [],
+      "faq": [
+        {
+          "q": "how hard do i crease",
+          "a": {
+            "line1": "SOURCE SAYS CREASE WELL",
+            "line2": ""
+          }
+        }
+      ],
+      "troubleshoot": [
+        {
+          "when": [],
+          "action": {
+            "line1": "CHECK CORNER MEETS PINCH",
+            "line2": ""
+          },
+          "why": "The source folds the left corner to the pinch.",
+          "cites": [
+            {
+              "source": "origami_me_cup",
+              "loc": "Step 3",
+              "quote": "Fold the left corner to the pinch made in the previous step.",
+              "url": "https://origami.me/cup/"
+            }
+          ],
+          "guide_id": "cup_left_corner"
+        }
+      ],
+      "guide_id": "cup_left_corner",
+      "verify": null,
+      "requires": [
+        "pinch"
+      ]
+    },
+    {
+      "id": "right_corner",
+      "title": "Fold right corner up",
+      "cue": {
+        "line1": "FOLD RIGHT CORNER UP",
+        "line2": "TO MEET LEFT CORNER"
+      },
+      "detail": "Bring the free right tip across to the left end of the first flap's horizontal top edge. Match the height of that edge and crease. The two side flaps overlap; leave the upper triangle free for the next step. Original diagrams clarify the geometry of origami.me, Step 4. Compare against the source if your paper differs.",
+      "why": null,
+      "where": null,
+      "warnings": [],
+      "faq": [],
+      "troubleshoot": [
+        {
+          "when": [],
+          "action": {
+            "line1": "CHECK CORNERS MEET",
+            "line2": "THEN CREASE WELL"
+          },
+          "why": "The source folds the right corner up to meet the left corner.",
+          "cites": [
+            {
+              "source": "origami_me_cup",
+              "loc": "Step 4",
+              "quote": "Fold the right corner up to meet the left corner.",
+              "url": "https://origami.me/cup/"
+            }
+          ],
+          "guide_id": "cup_right_corner"
+        }
+      ],
+      "guide_id": "cup_right_corner",
+      "verify": null,
+      "requires": [
+        "left_corner"
+      ]
+    },
+    {
+      "id": "flap_down",
+      "title": "Fold top flap corner down",
+      "cue": {
+        "line1": "FOLD FLAP CORNER DOWN",
+        "line2": "ALIGN WITH CUP TOP EDGE"
+      },
+      "detail": "Fold the top flap's top corner down, aligning it with the top edge of the cup. (Source: origami.me, Step 5.)",
+      "why": null,
+      "where": {
+        "line1": "TOP FLAP OF THE FOLD",
+        "line2": ""
+      },
+      "warnings": [],
+      "faq": [],
+      "troubleshoot": [
+        {
+          "when": [],
+          "action": {
+            "line1": "CHECK FLAP ALIGNS WITH",
+            "line2": "THE CUP TOP EDGE"
+          },
+          "why": "The source aligns the folded corner with the top edge of the cup.",
+          "cites": [
+            {
+              "source": "origami_me_cup",
+              "loc": "Step 5",
+              "quote": "aligning it with the top edge of the cup.",
+              "url": "https://origami.me/cup/"
+            }
+          ],
+          "guide_id": null
+        }
+      ],
+      "guide_id": null,
+      "verify": null,
+      "requires": [
+        "right_corner"
+      ]
+    },
+    {
+      "id": "flap_back",
+      "title": "Mountain fold triangle back",
+      "cue": {
+        "line1": "MOUNTAIN FOLD TOP",
+        "line2": "TRIANGLE TO THE BACK"
+      },
+      "detail": "Mountain fold the top triangle to the back, aligning it with the top edge of the cup. (Source: origami.me, Step 6.) Tip from the source: tuck that flap inside the cup to show off more of the patterned side.",
+      "why": null,
+      "where": null,
+      "warnings": [],
+      "faq": [
+        {
+          "q": "what is a mountain fold",
+          "a": {
+            "line1": "FOLD IT TO THE BACK",
+            "line2": "AWAY FROM YOU"
+          }
+        }
+      ],
+      "troubleshoot": [
+        {
+          "when": [],
+          "action": {
+            "line1": "CHECK TRIANGLE FOLDED",
+            "line2": "BACK, ALIGNED WITH TOP"
+          },
+          "why": "The source folds the top triangle to the back, aligned with the top edge.",
+          "cites": [
+            {
+              "source": "origami_me_cup",
+              "loc": "Step 6",
+              "quote": "Mountain fold the top triangle to the back, aligning it with the top edge of the cup.",
+              "url": "https://origami.me/cup/"
+            }
+          ],
+          "guide_id": null
+        }
+      ],
+      "guide_id": null,
+      "verify": null,
+      "requires": [
+        "flap_down"
+      ]
+    },
+    {
+      "id": "open",
+      "title": "Open the cup",
+      "cue": {
+        "line1": "OPEN THE TOP LAYERS",
+        "line2": "PRESS BOTTOM FLAT"
+      },
+      "detail": "Open the top layers of the cup and press down on the bottom to flatten it. (Source: origami.me, Step 7.) The source then says the cup is ready to use.",
+      "why": null,
+      "where": null,
+      "warnings": [],
+      "faq": [
+        {
+          "q": "how do i know it is done",
+          "a": {
+            "line1": "COMPARE TO THE PHOTO",
+            "line2": "ON THE SOURCE PAGE"
+          }
+        }
+      ],
+      "troubleshoot": [
+        {
+          "when": [],
+          "action": {
+            "line1": "CHECK TOP LAYERS OPEN",
+            "line2": "BOTTOM PRESSED FLAT"
+          },
+          "why": "The source opens the top layers and presses the bottom flat.",
+          "cites": [
+            {
+              "source": "origami_me_cup",
+              "loc": "Step 7",
+              "quote": "Open the top layers of the cup and press down on the bottom to flatten it.",
+              "url": "https://origami.me/cup/"
+            }
+          ],
+          "guide_id": null
+        }
+      ],
+      "guide_id": null,
+      "verify": null,
+      "requires": [
+        "flap_back"
+      ]
+    }
+  ],
+  "functional": null,
+  "guides": [
+    {
+      "id": "cup_fold_half",
+      "title": "FOLD IN HALF",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "cup_fold_half.where",
+          "title": "WHERE",
+          "image": "knowledge/guides/cup_fold_half/where.png",
+          "phone_image": "knowledge/guides/cup_fold_half/where.phone.png",
+          "provenance": "AUTHORED DEMO METADATA",
+          "depicts": "Original instructional diagram: square paper in diamond orientation, bottom tip highlighted. Not a photo or a live observation.",
+          "fallback": {
+            "line1": "BOTTOM TIP OF DIAMOND",
+            "line2": "WHITE SIDE UP"
+          },
+          "fov_note": null,
+          "reference_url": "https://origami.me/cup/"
+        },
+        {
+          "view": "how",
+          "step_id": "cup_fold_half.how",
+          "title": "HOW",
+          "image": "knowledge/guides/cup_fold_half/how.png",
+          "phone_image": "knowledge/guides/cup_fold_half/how.phone.png",
+          "provenance": "AUTHORED DEMO METADATA",
+          "depicts": "Original instructional diagram: bottom tip moves to top tip; dashed horizontal line marks the fold. Not a photo or a live observation.",
+          "fallback": {
+            "line1": "BRING BOTTOM TIP UP",
+            "line2": "TO THE TOP TIP"
+          },
+          "fov_note": null,
+          "reference_url": "https://origami.me/cup/"
+        },
+        {
+          "view": "correct",
+          "step_id": "cup_fold_half.correct",
+          "title": "CORRECT",
+          "image": "knowledge/guides/cup_fold_half/correct.png",
+          "phone_image": "knowledge/guides/cup_fold_half/correct.phone.png",
+          "provenance": "AUTHORED DEMO METADATA",
+          "depicts": "Original instructional diagram: two-layer triangular result with the closed bottom edge highlighted. Not a photo or a live observation.",
+          "fallback": {
+            "line1": "TRIANGLE WITH TWO LAYERS",
+            "line2": "CLOSED FOLD AT BOTTOM"
+          },
+          "fov_note": null,
+          "reference_url": "https://origami.me/cup/"
+        }
+      ]
+    },
+    {
+      "id": "cup_pinch",
+      "title": "MARK THE REFERENCE",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "cup_pinch.where",
+          "title": "WHERE",
+          "image": "knowledge/guides/cup_pinch/where.png",
+          "phone_image": "knowledge/guides/cup_pinch/where.phone.png",
+          "provenance": "AUTHORED DEMO METADATA",
+          "depicts": "Original instructional diagram: left sloping edge of the top triangle layer identified. Not a photo or a live observation.",
+          "fallback": {
+            "line1": "TOP LAYER LEFT EDGE",
+            "line2": "LEAVE LOWER LAYER FLAT"
+          },
+          "fov_note": null,
+          "reference_url": "https://origami.me/cup/"
+        },
+        {
+          "view": "how",
+          "step_id": "cup_pinch.how",
+          "title": "HOW",
+          "image": "knowledge/guides/cup_pinch/how.png",
+          "phone_image": "knowledge/guides/cup_pinch/how.phone.png",
+          "provenance": "AUTHORED DEMO METADATA",
+          "depicts": "Original instructional diagram: temporary angle-bisector fold bringing the left edge onto the bottom edge; pinch is where the guide meets the right edge. Not a photo or a live observation.",
+          "fallback": {
+            "line1": "LOWER LEFT EDGE TO BASE",
+            "line2": "PINCH RIGHT EDGE ONLY"
+          },
+          "fov_note": null,
+          "reference_url": "https://origami.me/cup/"
+        },
+        {
+          "view": "correct",
+          "step_id": "cup_pinch.correct",
+          "title": "CORRECT",
+          "image": "knowledge/guides/cup_pinch/correct.png",
+          "phone_image": "knowledge/guides/cup_pinch/correct.phone.png",
+          "provenance": "AUTHORED DEMO METADATA",
+          "depicts": "Original instructional diagram: triangle reopened after the temporary fold; the precise small reference pinch is highlighted on the right edge. Not a photo or a live observation.",
+          "fallback": {
+            "line1": "UNFOLD BACK TO TRIANGLE",
+            "line2": "SMALL MARK ON RIGHT EDGE"
+          },
+          "fov_note": null,
+          "reference_url": "https://origami.me/cup/"
+        }
+      ]
+    },
+    {
+      "id": "cup_left_corner",
+      "title": "LEFT TIP TO THE MARK",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "cup_left_corner.where",
+          "title": "WHERE",
+          "image": "knowledge/guides/cup_left_corner/where.png",
+          "phone_image": "knowledge/guides/cup_left_corner/where.phone.png",
+          "provenance": "AUTHORED DEMO METADATA",
+          "depicts": "Original instructional diagram: left base tip highlighted, small reference mark visible on the opposite sloping edge. Not a photo or a live observation.",
+          "fallback": {
+            "line1": "FIND THE LEFT TIP",
+            "line2": "RIGHT EDGE HAS THE MARK"
+          },
+          "fov_note": null,
+          "reference_url": "https://origami.me/cup/"
+        },
+        {
+          "view": "how",
+          "step_id": "cup_left_corner.how",
+          "title": "HOW",
+          "image": "knowledge/guides/cup_left_corner/how.png",
+          "phone_image": "knowledge/guides/cup_left_corner/how.phone.png",
+          "provenance": "AUTHORED DEMO METADATA",
+          "depicts": "Original instructional diagram: left tip moves to the right-edge reference mark; dashed line gives the resulting crease. Not a photo or a live observation.",
+          "fallback": {
+            "line1": "BRING LEFT TIP TO MARK",
+            "line2": "CREASE THE NEW FOLD"
+          },
+          "fov_note": null,
+          "reference_url": "https://origami.me/cup/"
+        },
+        {
+          "view": "correct",
+          "step_id": "cup_left_corner.correct",
+          "title": "CORRECT",
+          "image": "knowledge/guides/cup_left_corner/correct.png",
+          "phone_image": "knowledge/guides/cup_left_corner/correct.phone.png",
+          "provenance": "AUTHORED DEMO METADATA",
+          "depicts": "Original instructional diagram: first side flap folded across the triangle with a horizontal upper edge. Not a photo or a live observation.",
+          "fallback": {
+            "line1": "TIP MEETS RIGHT MARK",
+            "line2": "FLAP TOP EDGE LEVEL"
+          },
+          "fov_note": null,
+          "reference_url": "https://origami.me/cup/"
+        }
+      ]
+    },
+    {
+      "id": "cup_right_corner",
+      "title": "FOLD THE OTHER SIDE",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "cup_right_corner.where",
+          "title": "WHERE",
+          "image": "knowledge/guides/cup_right_corner/where.png",
+          "phone_image": "knowledge/guides/cup_right_corner/where.phone.png",
+          "provenance": "AUTHORED DEMO METADATA",
+          "depicts": "Original instructional diagram: unfolded right base tip highlighted after the left side fold. Not a photo or a live observation.",
+          "fallback": {
+            "line1": "FIND FREE RIGHT TIP",
+            "line2": "KEEP FIRST FLAP FLAT"
+          },
+          "fov_note": null,
+          "reference_url": "https://origami.me/cup/"
+        },
+        {
+          "view": "how",
+          "step_id": "cup_right_corner.how",
+          "title": "HOW",
+          "image": "knowledge/guides/cup_right_corner/how.png",
+          "phone_image": "knowledge/guides/cup_right_corner/how.phone.png",
+          "provenance": "AUTHORED DEMO METADATA",
+          "depicts": "Original instructional diagram: right tip crosses to the left end of the horizontal first-flap edge. Not a photo or a live observation.",
+          "fallback": {
+            "line1": "FOLD RIGHT TIP ACROSS",
+            "line2": "MATCH FIRST FLAP HEIGHT"
+          },
+          "fov_note": null,
+          "reference_url": "https://origami.me/cup/"
+        },
+        {
+          "view": "correct",
+          "step_id": "cup_right_corner.correct",
+          "title": "CORRECT",
+          "image": "knowledge/guides/cup_right_corner/correct.png",
+          "phone_image": "knowledge/guides/cup_right_corner/correct.phone.png",
+          "provenance": "AUTHORED DEMO METADATA",
+          "depicts": "Original instructional diagram: both side flaps overlap with aligned horizontal upper edges and the upper triangle still free. Not a photo or a live observation.",
+          "fallback": {
+            "line1": "BOTH SIDE FLAPS FOLDED",
+            "line2": "TOP EDGES AT SAME HEIGHT"
+          },
+          "fov_note": null,
+          "reference_url": "https://origami.me/cup/"
+        }
+      ]
+    }
+  ],
+  "goal_mode": "build",
+  "aliases": [
+    "paper cup",
+    "origami cup",
+    "origami",
+    "fold",
+    "cup",
+    "paper"
+  ]
+}

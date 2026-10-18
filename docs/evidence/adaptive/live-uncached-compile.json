@@ -1,0 +1,112 @@
+{
+ "goal": "clean the filter on my Bosch dishwasher",
+ "took_s": 32.8,
+ "last": {
+  "run_id": "c-aa4f8baa",
+  "goal": "clean the filter on my Bosch dishwasher",
+  "ok": true,
+  "status": "compiled",
+  "engine": "compile",
+  "card_id": "clean_the_filter_on_a_bosch_dishwasher_86c6",
+  "took_s": 32.3,
+  "sources": [
+   "https://www.bosch-home.com/us/owner-support/get-support/support-selfhelp-dishwashers-cleaning-dishwasher-filter",
+   "https://www.bosch-home.com/qa/en/service/get-support/26_support_selfhelp_dishwashers_cleaning_dishwasher_filter",
+   "https://www.bosch-home.com/us/en/c/spotlight/bltfe72f63a668ed734"
+  ],
+  "stats": {
+   "compile_s": 18.17,
+   "fetch_s": 3.76,
+   "rounds": 1
+  },
+  "at": 1792328578.381442
+ },
+ "phase": "task",
+ "card": "clean_the_filter_on_a_bosch_dishwasher_86c6",
+ "first_screen": {
+  "type": "hud",
+  "v": 2,
+  "seq": 18,
+  "mode": "intervene",
+  "cue": {
+   "line1": "FIX: CLEAN THE FILTER ON",
+   "line2": "COMPILED FROM SOURCES"
+  },
+  "image": null,
+  "menu": null,
+  "step": null,
+  "cue_id": "task_start",
+  "ttl_ms": 2500,
+  "source": "pi_live",
+  "session_id": "s-ef21b709",
+  "stale": false,
+  "answer": null
+ },
+ "steps": [
+  [
+   "remove_rack",
+   "action",
+   "TAKE OUT BOTTOM RACK",
+   "SET IT ASIDE"
+  ],
+  [
+   "remove_spray_arm",
+   "action",
+   "TAKE OUT SPRAY ARM",
+   "IF YOUR MANUAL SAYS SO"
+  ],
+  [
+   "remove_filter",
+   "action",
+   "TURN FILTER KNOB LEFT",
+   "THEN LIFT FILTER OUT"
+  ],
+  [
+   "rinse_filter",
+   "action",
+   "RINSE FILTER",
+   "UNDER RUNNING WATER"
+  ],
+  [
+   "check_dirty",
+   "question",
+   "FILTER STILL VERY DIRTY?",
+   "SAY YES OR NO"
+  ],
+  [
+   "scrub_filter",
+   "action",
+   "SCRUB FILTER",
+   "WARM SOAPY WATER + BRUSH"
+  ],
+  [
+   "separate_screen",
+   "action",
+   "TAKE FILTER OFF SCREEN",
+   "CLEAN EACH PIECE"
+  ],
+  [
+   "dry_filter",
+   "action",
+   "DRY FILTER",
+   "PUT IT BACK FIRMLY"
+  ],
+  [
+   "refit_arm",
+   "action",
+   "PUT SPRAY ARM BACK",
+   "THEN THE BOTTOM RACK"
+  ],
+  [
+   "done",
+   "outcome",
+   "FILTER IS CLEAN",
+   "REPEAT EVERY FEW MONTHS"
+  ]
+ ],
+ "sources": [
+  "https://www.bosch-home.com/us/owner-support/get-support/support-selfhelp-dishwashers-cleaning-dishwasher-filter",
+  "https://www.bosch-home.com/qa/en/service/get-support/26_support_selfhelp_dishwashers_cleaning_dishwasher_filter",
+  "https://www.bosch-home.com/us/en/c/spotlight/bltfe72f63a668ed734"
+ ]
+}

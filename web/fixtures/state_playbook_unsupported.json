@@ -1,0 +1,55 @@
+{
+  "v": 2,
+  "session": {
+    "id": "s-9",
+    "phase": "menu",
+    "goal": null,
+    "card_id": null,
+    "welcome_shown": true
+  },
+  "engine": "NO_LINK",
+  "card_id": "flatpack_shelf",
+  "test": null,
+  "step_id": null,
+  "check": null,
+  "help_view": null,
+  "source": null,
+  "health": {
+    "ok": true,
+    "uptime_s": 42.0,
+    "pi_link": "down",
+    "pi_last_seq": null,
+    "pi_age_ms": null,
+    "source": null,
+    "camera": "unknown",
+    "g2_clients": 1,
+    "voice": "off"
+  },
+  "hud": {
+    "type": "hud",
+    "v": 2,
+    "seq": 12,
+    "mode": "uncertain",
+    "cue": {
+      "line1": "NOT SUPPORTED YET",
+      "line2": "SEE PHONE"
+    },
+    "image": null,
+    "menu": null,
+    "step": null,
+    "cue_id": null,
+    "ttl_ms": null,
+    "source": "pi_live",
+    "session_id": null,
+    "stale": false
+  },
+  "playbook": null,
+  "events": [
+    {
+      "at": 1792283000000,
+      "text": "goal not matched to any card: saved for async research",
+      "label": "DETERMINISTIC",
+      "evidence": {}
+    }
+  ]
+}

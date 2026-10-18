@@ -1,0 +1,69 @@
+{
+  "scope": "One live Anthropic web_search request through ProductDiscoveryService; official-page GET and PDF HEAD validation. No CREAO run.",
+  "query": "Help me assemble a small IKEA red metal cabinet with two doors",
+  "cached_path": {
+    "samples": 10,
+    "min_ms": 3.956,
+    "median_ms": 4.21,
+    "max_ms": 9.697,
+    "source": "54 validated pre-index records; no provider call"
+  },
+  "initial_return_ms": 3.836,
+  "live_wall_ms": 14334.652,
+  "state": {
+    "session_id": "s-918a64e7",
+    "phase": "no_match",
+    "source": "ikea",
+    "source_label": "IKEA",
+    "query": "red cabinet with drawer with cabinet",
+    "attrs": {
+      "category": "cabinet",
+      "color": "red",
+      "features": {
+        "drawer": true,
+        "cabinet": true
+      },
+      "name_hint": null,
+      "words": [
+        "white",
+        "ikea",
+        "desk",
+        "drawer",
+        "cabinet",
+        "small",
+        "red",
+        "metal",
+        "two",
+        "doors"
+      ]
+    },
+    "candidates": [],
+    "page": 0,
+    "focus": null,
+    "question": null,
+    "pending": null,
+    "selected": null,
+    "config_question": null,
+    "config": {},
+    "card_id": null,
+    "notice": "",
+    "search_mode": "live",
+    "live_state": "done",
+    "timings": {
+      "total_ms": 14309,
+      "exact_ms": null,
+      "cache_ms": 3,
+      "search_ms": 10338,
+      "validate_ms": 3932,
+      "provider": "anthropic web_search (claude-opus-5-5, web_search_20250305, allowed_domains=ikea.com)"
+    },
+    "seen": [],
+    "message": "No validated match. Try another detail, an article number or an official product link.",
+    "updated_ms": 14361
+  },
+  "new_articles": [
+    "20625025",
+    "40537179",
+    "30574596"
+  ]
+}

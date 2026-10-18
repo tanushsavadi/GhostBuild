@@ -1,0 +1,35 @@
+{
+  "name": "ghostbuild-g2",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "stub": "node tools/stub-server.mjs",
+    "stub:playbook": "node tools/stub-server.mjs --flow playbook",
+    "simulate": "evenhub-simulator \"http://localhost:5173/?surface=simulator\" --automation-port 9898",
+    "sim:smoke": "node tools/sim-smoke.mjs sim-shots",
+    "sim:playbook": "node tools/sim-playbook.mjs sim-shots",
+    "app-json": "node tools/gen-app-json.mjs app.local.json",
+    "pack": "npm run build && evenhub pack app.json dist -o ghostbuild.ehpk --sdk-ver 0.0.16",
+    "pack:lan": "npm run build && npm run app-json && evenhub pack app.local.json dist -o ghostbuild.ehpk --sdk-ver 0.0.16",
+    "sim:core": "node tools/sim-core.mjs"
+  },
+  "dependencies": {
+    "@evenrealities/even_hub_sdk": "0.0.16"
+  },
+  "devDependencies": {
+    "@evenrealities/evenhub-cli": "^0.1.14",
+    "@evenrealities/evenhub-simulator": "^0.9.5",
+    "@types/node": "^22.20.5",
+    "ajv": "^8.20.0",
+    "typescript": "^5.7.0",
+    "vite": "^5.4.0",
+    "vitest": "^2.1.9",
+    "ws": "^8.22.0"
+  }
+}

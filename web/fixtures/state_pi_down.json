@@ -1,0 +1,81 @@
+{
+  "v": 2,
+  "engine": "NO_LINK",
+  "card_id": "camera_lens",
+  "test": "camera_view",
+  "step_id": null,
+  "check": null,
+  "help_view": null,
+  "source": "pi_live",
+  "health": {
+    "ok": false,
+    "uptime_s": 300.0,
+    "pi_link": "down",
+    "pi_last_seq": 813,
+    "pi_age_ms": 9200,
+    "source": "pi_live",
+    "camera": "unknown",
+    "g2_clients": 1
+  },
+  "hud": {
+    "type": "hud",
+    "v": 2,
+    "seq": 20,
+    "mode": "error",
+    "cue": {
+      "line1": "PI LINK LOST",
+      "line2": "CHECK PI POWER/WIFI"
+    },
+    "image": null,
+    "menu": null,
+    "cue_id": null,
+    "ttl_ms": null,
+    "source": "pi_live",
+    "stale": true
+  },
+  "events": [
+    {
+      "at": 1792283000000,
+      "text": "frames flowing: seq 810, luma 112.4, contrast 41.8",
+      "label": "MEASURED LIVE",
+      "evidence": {
+        "mean_luma": 112.4,
+        "luma_std": 41.8
+      }
+    },
+    {
+      "at": 1792283005200,
+      "text": "mean luma 6.2, contrast 1.1 for 1.5 s",
+      "label": "MEASURED LIVE",
+      "evidence": {
+        "mean_luma": 6.2,
+        "luma_std": 1.1
+      }
+    },
+    {
+      "at": 1792283005300,
+      "text": "view treated as blocked (luma<25 and contrast<8)",
+      "label": "INFERRED",
+      "evidence": {}
+    },
+    {
+      "at": 1792283005400,
+      "text": "cue shown: CAMERA VIEW LOST / CHECK CAMERA LENS",
+      "label": "DETERMINISTIC",
+      "evidence": {}
+    },
+    {
+      "at": 1792283012000,
+      "text": "no observation for 9.2 s: link treated as down",
+      "label": "DETERMINISTIC",
+      "evidence": {}
+    }
+  ],
+  "session": {
+    "id": "s-1",
+    "phase": "task",
+    "goal": "fix",
+    "card_id": "camera_lens",
+    "welcome_shown": true
+  }
+}

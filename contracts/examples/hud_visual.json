@@ -1,0 +1,27 @@
+{
+  "type": "hud",
+  "v": 2,
+  "seq": 9,
+  "mode": "visual",
+  "cue": {
+    "line1": "WHERE: CAMERA LENS",
+    "line2": "SWIPE FOR HOW"
+  },
+  "image": {
+    "guide_id": "camera_lens",
+    "view": "where",
+    "index": 0,
+    "count": 3,
+    "title": "WHERE",
+    "url": "/guides/camera_lens/where.png",
+    "w": 288,
+    "h": 144,
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "provenance": "AUTHORED DEMO METADATA",
+    "step_id": "camera_lens.where"
+  },
+  "cue_id": "camera_view/0",
+  "ttl_ms": null,
+  "source": "pi_live",
+  "stale": false
+}
