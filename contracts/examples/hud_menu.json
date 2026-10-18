@@ -1,0 +1,23 @@
+{
+  "type": "hud",
+  "v": 2,
+  "seq": 2,
+  "mode": "menu",
+  "cue": {
+    "line1": "BUILD OR FIX?",
+    "line2": "SWIPE · PRESS"
+  },
+  "image": null,
+  "menu": {
+    "prompt": "BUILD OR FIX?",
+    "options": [
+      "FIX",
+      "BUILD"
+    ],
+    "selected": 0
+  },
+  "cue_id": null,
+  "ttl_ms": null,
+  "source": "pi_live",
+  "stale": false
+}

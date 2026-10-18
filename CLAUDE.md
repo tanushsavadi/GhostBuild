@@ -1,13 +1,15 @@
 # GhostBuild — project rules
-24 h hackathon. Live-demo reliability > features. **docs/PIVOT_GHOSTBUILD.md is the only execution authority**; docs/00–21 are historical (read them only for G2 platform notes, never for scope).
-- Product: closed-loop repair copilot. Device tests → deterministic engine → one G2 cue → the physical fix clears it.
-- Scope: only what PIVOT §5 builds; follow its cut order when behind; never build PIVOT §11 items (3D/CAD, spatial, LEGO, perception, voice, sponsor integrations, runtime LLM on the cue path).
-- Only core/ghostbuild_core/hud.py writes HUD frames. No model output reaches G2 except through the reviewed Repair Card. A G2 press is a recheck, never a commit.
-- Never show VERIFIED without the measured end-stop; never phrase a cue as a diagnosis (use CHECK …); unknown state never yields a confident physical instruction.
-- core/ and contracts/ are device-agnostic (make lint-generic); device facts live in knowledge/cards/ and firmware/.
-- Contracts: D owns; lock Sat 17:00; later shared-schema changes need D + every consuming owner. Run `make contracts`.
-- Label sources: MEASURED LIVE, COMMANDED, DETERMINISTIC, MANUFACTURER DOC, AUTHORED PROJECT SPEC, AI-EXTRACTED · HUMAN-REVIEWED, AUTHORED DEMO METADATA, REPLAY, SIMULATED. Never demo replay/simulated data as live.
-- Pins live in hardware/WIRING.md; a pin change updates WIRING.md, the card and web/assets/wiring.svg together.
-- Even G2: verify every SDK call via the everything-evenhub skills + hub.evenrealities.com/docs (SDK 0.0.16). No API keys in g2/.
-- Claude API: official `anthropic` SDK + the claude-api skill; claude-opus-5-5; structured outputs, not forced tool_choice; build time only (knowledge/).
-- `make test` before merging; every feature behind its flag. P0 freeze Sun 02:00; product feature freeze 04:00.
+24 h hackathon. Live-demo reliability > features. **docs/PIVOT_GHOSTBUILD.md is the only execution authority** (its §0A hardware/UX amendment, Sat 2026-10-17 18:30 PDT, overrides everything below it where they conflict); docs/00–21 are historical (read them only for G2 platform notes, never for scope).
+- Product: closed-loop repair copilot. Device observations → deterministic engine → one G2 cue → the physical fix clears it. On request, G2 shows a real annotated picture (WHERE / HOW / CORRECT).
+- **Hardware is a Raspberry Pi + Pi camera (external, fixed field of view) + one LED + G2 + phone. There is NO Arduino, servo, ultrasonic sensor or end-stop.** Arduino material in PIVOT §1–§13 is SUPERSEDED. G2 has no camera and no speaker.
+- Scope: PIVOT §0A. Follow its cut order when behind. Never build: 3D/CAD, spatial anchoring, LEGO, runtime LLM on the cue path, sponsor integrations inside core/g2/pi (sponsor work lives outside them and is conditional).
+- Only core/ghostbuild_core/hud.py writes HUD frames. No model output reaches G2 except through the reviewed Repair Card (cue text and guide images are card data). A G2 press/swipe/voice is a recheck or navigation, never a commit.
+- Evidence honesty: camera frame received = MEASURED LIVE; "view unobstructed" = INFERRED from frame features; GPIO command = COMMANDED (never "verified light"); `camera: null` or stale data is never success. Never show a recovery/verified frame without measured camera evidence. Cues say CHECK … (never a diagnosis). Never claim the glasses see the wearer's surroundings; only claim what the Pi camera's fixed field of view shows.
+- core/ and contracts/ are device-agnostic (make lint-generic); device facts live in knowledge/cards/ and pi/.
+- Contracts v2 (contracts/models.py): D owns; changes need D + every consuming owner; additive optional fields only after lock. Run `make contracts`.
+- Label sources: MEASURED LIVE, INFERRED, COMMANDED, DETERMINISTIC, HUMAN CONFIRMED, MANUFACTURER DOC, AUTHORED PROJECT SPEC, AI-EXTRACTED · HUMAN-REVIEWED, AUTHORED DEMO METADATA, REPLAY, SIMULATED. Never demo replay/simulated data as live.
+- Pins/GPIO live in hardware/WIRING.md (what was actually wired and verified, never assumed); a change updates WIRING.md and the card together.
+- Even G2: verify every SDK call against the installed SDK .d.ts + the everything-evenhub skills + hub.evenrealities.com/docs. No API keys in g2/. Images: ≤288x144, ≤4 per page, serialized awaited sends, text fallback always.
+- Claude API (build time and optional backend Q&A only): official `anthropic` SDK + claude-api skill; claude-opus-5-5; structured outputs; keys on the backend only. Voice is behind a flag and never blocks the text/visual path.
+- Parallel work: one worktree per lane under .worktrees/. Ownership: B g2/, C pi/ + hardware/, A web/ + visual assets + submission docs, D core/ + contracts/ + knowledge/ writer, lead owns merges and shared docs (CLAUDE.md, Makefile, pyproject.toml/uv.lock, contracts/models.py).
+- `make test` before merging; every feature behind its flag. Submission deadline Sun 2026-10-18 12:00 PDT; Devpost done by 10:30, final Beta QA by 11:00.

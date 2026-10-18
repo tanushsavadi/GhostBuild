@@ -1,6 +1,30 @@
 # GhostBuild — PIVOT (authoritative from Sat 2026-10-17 15:45 PDT)
 
+---
+## §0A. HARDWARE/UX AMENDMENT — Sat 2026-10-17 18:30 PDT — **THIS SECTION WINS**
+
+**Why:** the Arduino kit (Uno, HC-SR04, SG90, end-stop, power switch) is **not available**. Confirmed hardware: physical **Even G2** + paired phone, **Raspberry Pi + Pi camera module + one LED**, team laptops, printable/paper/cardboard props. The camera is external with a fixed field of view. G2 has no camera and no speaker.
+
+**Superseded (kept as history, do not implement):** the gate/servo/ultrasonic/end-stop hero, `firmware/barrier`, the serial `observation` line, `card_barrier.json`, F1–F4/V0/V1 gate cues, §3 hardware and fault list, §9 borrow list, §8 acceptance steps 4–9 as worded. **Kept:** product principle (the fix is the input), quiet-by-design, single HUD writer, deterministic engine, card-gated text, G2 transport/lifecycle plan (§5.8 minus the gate cues), source labels, judge-defence answers where still true, the §13 workshop addendum.
+
+**New hero (candidate; a hardware spike by C confirms or replaces it):** a Pi inspection station. The camera view is obstructed (lens cover/paper flap). Camera frames are measured; the engine infers "view lost". G2: `CAMERA VIEW LOST / CHECK CAMERA LENS`. One press → a real annotated picture (WHERE), swipe → HOW → CORRECT. The judge removes the obstruction; measured frames recover; G2 shows one `● CAMERA VIEW BACK`, then blank. A hand wave in the camera's field of view makes the Pi command the LED on (COMMANDED, plus the human watches the LED). G2 shows `● LED COMMANDED`, then blank. Replace the scenario only with one that uses the same hardware and passes a spike (observable, repeatable, useful).
+
+**Evidence rules:** frame received = MEASURED LIVE · unobstructed = INFERRED from frame features · GPIO high = COMMANDED, never "verified light" or "independently verified" · camera null/stale/frozen = error, never success · no prerecorded scene is ever presented as live; all non-live data carries SIMULATED/REPLAY on the frame, phone and logs.
+
+**Modes (G2):** 0 QUIET (blank when healthy) · 1 INTERVENTION (fact + one action) · 2 VISUAL ASSIST (one real annotated image, 288x144 4-bit grey, text fallback) · 3 MULTI-VIEW (WHERE → HOW → CORRECT, one at a time) · 4 ASK (flagged, optional voice/short grounded answers) · 5 RECOVERY (one evidence-backed line then blank) · 6 ERROR/UNCERTAIN (honest, never stale success).
+**Gestures (validate on hardware, no invented semantics):** press = fault→open WHERE / in help→back to cue / healthy→`ALL TESTS PASSING` (recheck); swipe down/up = next/previous view or back to cue; long-press hold-to-ask only if hardware-validated, otherwise a documented fallback; **double press = system exit, never hijacked**; IMU/R1 optional, never confirm a repair.
+**Escalation:** help is on demand or evidence-triggered: after a fault persists `offer_help_after_ms`, one gentle `PRESS FOR PICTURE` line, once per fault; a failed fix may offer the next documented check. Never repeats.
+**Contract v2:** `contracts/models.py` (Observation, HudFrame, G2Input, State, Health, Card). Core serves guide images at `/guides/<id>/<view>.png`. Runtime still needs no internet; voice/LLM Q&A is optional, flagged, backend-keyed, consent-gated, never on the cue path.
+**Milestones:** M1 real Pi observation → core → physical G2 cue → physical fix → HUD updates/clears. M2 press → real guide image on G2. M3 swipe → second image, return keeps context. M4 optional voice. M5 Beta, rehearsal, submission (Devpost by 10:30, Beta QA by 11:00, deadline 12:00 Sun).
+**Cut order:** decorative effects → IMU → third image → voice Q&A → sponsor work → generalized manual ingestion. **Never cut:** real hardware observation, physical G2, one genuinely helpful visual, robust gestures, honest transitions, packaging/submission.
+
+---
+
+# GhostBuild — PIVOT (authoritative from Sat 2026-10-17 15:45 PDT)
+
 > This document supersedes docs/00–21 wherever they conflict. Those docs are **historical**: the LEGO rocket/rover, perception, CAD, spatial/RealityKit, twin, minimap and every sponsor integration are **cut**. The old docs are still useful for G2 platform notes (08 §2–§6 text and glyph rules) and the honesty labels. Times below are PDT. Deadline: **Sun 12:00**.
+
+**Session onboarding (P0 UX, after M1 transport; never delays Beta packaging):** new session → `GHOSTBUILD` welcome (2.5 s) → menu `BUILD OR FIX?` (swipe moves, press selects; double press still exits) → goal resolved by a **deterministic resolver against Repair Card `aliases`/`goal_mode`** (never an LLM on the cue path) → task starts with a concise cue → context kept across help requests → verified → blank. Voice goal input only if real mic capture works (flag), else the phone `/phone` text box (`POST /session/goal`) — a non-voice path always exists. Unsupported/ambiguous goals get an honest `NOT SUPPORTED YET` fallback plus the supported list on the phone; no invented diagnostics. **FIX** is implemented fully for the verified Pi scenario; **BUILD** only guides the supported "set up the Pi inspection station" workflow and never implies universal building. Welcome appears only for a new session (`g2_hello.session_id` unknown); reconnects resume the current task; a press in a healthy task state shows status. Selection is a goal, never a physical completion.
 
 ---
 

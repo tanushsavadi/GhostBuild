@@ -1,0 +1,48 @@
+{
+  "additionalProperties": false,
+  "description": "First message on every (re)connect. Core replies with the current frame. Welcome shows only when session_id is null/unknown.",
+  "properties": {
+    "client_id": {
+      "title": "Client Id",
+      "type": "string"
+    },
+    "session_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Session Id"
+    },
+    "surface": {
+      "default": "g2",
+      "enum": [
+        "g2",
+        "simulator"
+      ],
+      "title": "Surface",
+      "type": "string"
+    },
+    "type": {
+      "const": "g2_hello",
+      "default": "g2_hello",
+      "title": "Type",
+      "type": "string"
+    },
+    "v": {
+      "const": 2,
+      "default": 2,
+      "title": "V",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "client_id"
+  ],
+  "title": "G2Hello",
+  "type": "object"
+}

@@ -1,0 +1,24 @@
+{
+  "v": 2,
+  "dev": "pi-01",
+  "seq": 900,
+  "ms": 50000,
+  "at": 1792283010000,
+  "source": "simulated",
+  "camera": {
+    "frame_seq": 3200,
+    "frame_age_ms": 40,
+    "mean_luma": 120.0,
+    "luma_std": 40.0,
+    "detail": 255.0,
+    "motion": 0.35,
+    "marker_found": null,
+    "marker_id": null
+  },
+  "led": {
+    "commanded_on": true,
+    "cmd_seq": 4,
+    "reason": "motion_in_roi"
+  },
+  "error": null
+}

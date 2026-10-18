@@ -1,0 +1,53 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "mode": {
+      "enum": [
+        "fix",
+        "build"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
+    "session_id": {
+      "title": "Session Id",
+      "type": "string"
+    },
+    "text": {
+      "anyOf": [
+        {
+          "maxLength": 300,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "free text from voice transcript or phone; null for a bare menu choice",
+      "title": "Text"
+    },
+    "v": {
+      "const": 2,
+      "default": 2,
+      "title": "V",
+      "type": "integer"
+    },
+    "via": {
+      "enum": [
+        "g2_menu",
+        "voice",
+        "phone_text"
+      ],
+      "title": "Via",
+      "type": "string"
+    }
+  },
+  "required": [
+    "session_id",
+    "mode",
+    "via"
+  ],
+  "title": "GoalRequest",
+  "type": "object"
+}

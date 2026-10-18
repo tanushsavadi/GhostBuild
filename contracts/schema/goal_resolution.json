@@ -1,0 +1,105 @@
+{
+  "$defs": {
+    "Cue": {
+      "additionalProperties": false,
+      "properties": {
+        "line1": {
+          "maxLength": 24,
+          "minLength": 1,
+          "title": "Line1",
+          "type": "string"
+        },
+        "line2": {
+          "default": "",
+          "maxLength": 26,
+          "title": "Line2",
+          "type": "string"
+        }
+      },
+      "required": [
+        "line1"
+      ],
+      "title": "Cue",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Never pretends. `unsupported` carries an honest fallback; no diagnostics are invented.",
+  "properties": {
+    "alternatives": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Alternatives",
+      "type": "array"
+    },
+    "card_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Card Id"
+    },
+    "cue": {
+      "$ref": "#/$defs/Cue"
+    },
+    "detail": {
+      "description": "phone-side explanation: what is supported and what is not",
+      "title": "Detail",
+      "type": "string"
+    },
+    "mode": {
+      "enum": [
+        "fix",
+        "build"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
+    "session_id": {
+      "title": "Session Id",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "supported",
+        "unsupported",
+        "ambiguous"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "task_title": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Task Title"
+    },
+    "v": {
+      "const": 2,
+      "default": 2,
+      "title": "V",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "session_id",
+    "status",
+    "mode",
+    "cue",
+    "detail"
+  ],
+  "title": "GoalResolution",
+  "type": "object"
+}

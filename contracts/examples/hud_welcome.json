@@ -1,0 +1,16 @@
+{
+  "type": "hud",
+  "v": 2,
+  "seq": 1,
+  "mode": "welcome",
+  "cue": {
+    "line1": "GHOSTBUILD",
+    "line2": "BUILD OR FIX?"
+  },
+  "image": null,
+  "menu": null,
+  "cue_id": null,
+  "ttl_ms": 2500,
+  "source": "pi_live",
+  "stale": false
+}

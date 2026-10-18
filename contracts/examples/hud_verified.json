@@ -1,0 +1,15 @@
+{
+  "type": "hud",
+  "v": 2,
+  "seq": 10,
+  "mode": "verified",
+  "cue": {
+    "line1": "● CAMERA VIEW BACK",
+    "line2": ""
+  },
+  "image": null,
+  "cue_id": null,
+  "ttl_ms": 3000,
+  "source": "pi_live",
+  "stale": false
+}

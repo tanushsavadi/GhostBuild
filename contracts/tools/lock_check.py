@@ -23,15 +23,15 @@ EXAMPLES = CONTRACTS / "examples"
 SCHEMA_DIR = CONTRACTS / "schema"
 
 # docs/PIVOT_GHOSTBUILD.md §5.3. Exact files, plus globs that must match at least one file.
-REQUIRED_FILES = ["card_barrier.json"]
-REQUIRED_GLOBS = ["observation_*.json", "hud_*.json", "g2_input_*.json", "state_*.json"]
+REQUIRED_FILES = ["card_camera_lens.json"]
+REQUIRED_GLOBS = ["observation_*.json", "hud_*.json", "g2_input_*.json", "state_*.json", "health_*.json"]
 
 
 def main() -> int:
     problems: list[str] = []
 
     if not (CONTRACTS / "models.py").exists():
-        print("RED  contracts/models.py does not exist (D authors it by the Sat 17:00 lock per docs/PIVOT_GHOSTBUILD.md §5.3)")
+        print("RED  contracts/models.py does not exist (contract v2, see docs/PIVOT_GHOSTBUILD.md §0 amendment)")
         return 1
 
     sys.path.insert(0, str(ROOT))

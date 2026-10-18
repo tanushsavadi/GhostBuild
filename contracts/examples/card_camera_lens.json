@@ -1,0 +1,107 @@
+{
+  "v": 2,
+  "card_id": "camera_lens",
+  "title": "Pi camera view (example fixture)",
+  "provenance": "AUTHORED DEMO METADATA",
+  "sources": [
+    {
+      "id": "picam_docs",
+      "kind": "MANUFACTURER DOC",
+      "title": "Raspberry Pi camera documentation",
+      "url": "https://www.raspberrypi.com/documentation/accessories/camera.html",
+      "file": null
+    }
+  ],
+  "tests": [
+    {
+      "id": "camera_view",
+      "fail_when": [
+        {
+          "signal": "camera.mean_luma",
+          "op": "lt",
+          "value": 25
+        },
+        {
+          "signal": "camera.luma_std",
+          "op": "lt",
+          "value": 8
+        }
+      ],
+      "fail_after_ms": 1500,
+      "pass_after_ms": 1000,
+      "fact": {
+        "line1": "CAMERA VIEW LOST",
+        "line2": "CHECK CAMERA LENS"
+      },
+      "ok": {
+        "line1": "● CAMERA VIEW BACK",
+        "line2": ""
+      },
+      "checks": [
+        {
+          "when": [],
+          "action": {
+            "line1": "CAMERA VIEW LOST",
+            "line2": "CHECK CAMERA LENS"
+          },
+          "why": "A dark, flat frame means light is not reaching the sensor.",
+          "cites": [
+            {
+              "source": "picam_docs",
+              "loc": "camera module overview",
+              "quote": null
+            }
+          ],
+          "guide_id": "camera_lens"
+        }
+      ],
+      "offer_help_after_ms": 8000
+    }
+  ],
+  "functional": {
+    "id": "led_on_motion",
+    "trigger": [
+      {
+        "signal": "camera.motion",
+        "op": "gt",
+        "value": 0.15
+      }
+    ],
+    "prompt": {
+      "line1": "WAVE IN FRONT",
+      "line2": "OF THE CAMERA"
+    },
+    "expect_commanded": {
+      "signal": "led.commanded_on",
+      "op": "eq",
+      "value": true
+    },
+    "ok": {
+      "line1": "● LED COMMANDED",
+      "line2": ""
+    },
+    "within_ms": 1500
+  },
+  "guides": [
+    {
+      "id": "camera_lens",
+      "title": "Camera lens",
+      "views": [
+        {
+          "view": "where",
+          "step_id": "camera_lens.where",
+          "title": "WHERE",
+          "image": "knowledge/guides/camera_lens/where.png",
+          "phone_image": null,
+          "provenance": "AUTHORED DEMO METADATA",
+          "depicts": "Station with the camera module circled",
+          "fallback": {
+            "line1": "CAMERA = SMALL LENS",
+            "line2": "ON THE BOARD EDGE"
+          },
+          "fov_note": null
+        }
+      ]
+    }
+  ]
+}

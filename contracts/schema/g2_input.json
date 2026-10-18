@@ -1,0 +1,50 @@
+{
+  "additionalProperties": false,
+  "description": "Double press is handled locally (system exit) and never sent. A press is a recheck/help request, never a commit.",
+  "properties": {
+    "gesture": {
+      "enum": [
+        "press",
+        "swipe_down",
+        "swipe_up",
+        "hold_start",
+        "hold_end"
+      ],
+      "title": "Gesture",
+      "type": "string"
+    },
+    "seq_seen": {
+      "description": "last hud seq the plugin had rendered",
+      "minimum": 0,
+      "title": "Seq Seen",
+      "type": "integer"
+    },
+    "surface": {
+      "default": "g2",
+      "enum": [
+        "g2",
+        "simulator"
+      ],
+      "title": "Surface",
+      "type": "string"
+    },
+    "type": {
+      "const": "g2_input",
+      "default": "g2_input",
+      "title": "Type",
+      "type": "string"
+    },
+    "v": {
+      "const": 2,
+      "default": 2,
+      "title": "V",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "gesture",
+    "seq_seen"
+  ],
+  "title": "G2Input",
+  "type": "object"
+}

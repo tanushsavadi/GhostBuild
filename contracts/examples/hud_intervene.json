@@ -1,0 +1,15 @@
+{
+  "type": "hud",
+  "v": 2,
+  "seq": 8,
+  "mode": "intervene",
+  "cue": {
+    "line1": "CAMERA VIEW LOST",
+    "line2": "CHECK CAMERA LENS"
+  },
+  "image": null,
+  "cue_id": "camera_view/0",
+  "ttl_ms": null,
+  "source": "pi_live",
+  "stale": false
+}

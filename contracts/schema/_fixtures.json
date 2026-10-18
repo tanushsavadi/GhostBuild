@@ -1,0 +1,11 @@
+{
+  "card_*.json": "#/$defs/Card",
+  "g2_hello_*.json": "#/$defs/G2Hello",
+  "g2_input_*.json": "#/$defs/G2Input",
+  "goal_request_*.json": "#/$defs/GoalRequest",
+  "goal_resolution_*.json": "#/$defs/GoalResolution",
+  "health_*.json": "#/$defs/Health",
+  "hud_*.json": "#/$defs/HudFrame",
+  "observation_*.json": "#/$defs/Observation",
+  "state_*.json": "#/$defs/State"
+}
