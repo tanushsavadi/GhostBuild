@@ -13,14 +13,29 @@ from fastapi import FastAPI, HTTPException, Query, Request, Response, WebSocket,
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
-from contracts.models import G2Hello, G2Input, GoalRequest, HudFrame, Observation
+from contracts.models import G2Hello, G2Input, GoalMode, GoalRequest, HudFrame, Observation
 
 from .cards_api import mount_cards_api
 from .runtime import Runtime
 
 log = logging.getLogger("ghostbuild.server")
+
+
+class ResearchRequestBody(BaseModel):
+    """POST /research/request body (core-local; not a cross-lane contract)."""
+
+    model_config = ConfigDict(extra="forbid")
+    session_id: str = Field(min_length=1, max_length=64)
+    mode: GoalMode
+    text: str = Field(min_length=1, max_length=300)
+
+
+class AskBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    session_id: str = Field(default="", max_length=64)
+    text: str = Field(min_length=1, max_length=300)
 
 
 def _json(model, status: int = 200) -> Response:
@@ -200,7 +215,7 @@ def create_app(
 
     @app.get("/card")
     async def get_card() -> Response:
-        return _json(runtime.engine.card)
+        return _json(runtime.active_card)
 
     @app.get("/session")
     async def get_session() -> Response:
@@ -216,6 +231,34 @@ def create_app(
         if res is None:
             raise HTTPException(status_code=404, detail="unknown session_id; GET /session for the current one")
         return _json(res)
+
+    @app.post("/research/request")
+    async def post_research(request: Request) -> Response:
+        """Save an unsupported request for async research. It is NOT available now and nothing is promised."""
+        try:
+            body = ResearchRequestBody.model_validate(json.loads(await request.body()))
+        except (ValidationError, ValueError) as exc:
+            raise HTTPException(status_code=422, detail=str(exc)[:500])
+        res, saved = runtime.request_research(body.session_id, body.mode, body.text.strip())
+        if res is None:
+            if saved.status == "rate_limited":
+                raise HTTPException(status_code=429, detail="one research request per 2 s per session")
+            raise HTTPException(status_code=500, detail="could not save the request")
+        return _json(res)
+
+    @app.post("/ask")
+    async def post_ask(request: Request) -> Response:
+        """Contextual follow-up for the active playbook step (phone page, tests, voice). Answers are card text only."""
+        try:
+            body = AskBody.model_validate(json.loads(await request.body()))
+        except (ValidationError, ValueError) as exc:
+            raise HTTPException(status_code=422, detail=str(exc)[:500])
+        res = runtime.ask(body.text.strip())
+        if res is None:
+            raise HTTPException(status_code=409, detail="no active playbook; start a task with steps first")
+        d = res.as_json()
+        d["session_id"] = body.session_id or runtime.session().id
+        return JSONResponse(d)
 
     @app.get("/guides/{guide_id}/{view}.png")
     async def get_guide(guide_id: str, view: str) -> Response:

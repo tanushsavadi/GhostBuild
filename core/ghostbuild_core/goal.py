@@ -23,16 +23,35 @@ def short_title(title: str, limit: int) -> str:
     return cut
 
 
+def _stem(w: str) -> str:
+    """Light, deterministic stemming so 'blinking'/'blinks' match 'blink'."""
+    for suf in ("ing", "es", "ed", "s"):
+        if w.endswith(suf) and len(w) - len(suf) >= 3:
+            return w[: -len(suf)]
+    return w
+
+
+def _words(s: str) -> list[str]:
+    return [_stem(w) for w in re.findall(r"[a-z0-9]+", s.lower())]
+
+
 def _tokens(s: str) -> set[str]:
-    return {w for w in re.findall(r"[a-z0-9]+", s.lower()) if w not in _STOP and len(w) >= 2}
+    """Content tokens (stop words removed), stemmed."""
+    return {_stem(w) for w in re.findall(r"[a-z0-9]+", s.lower()) if w not in _STOP and len(w) >= 2}
+
+
+def _has_phrase(words: list[str], phrase: list[str]) -> bool:
+    n = len(phrase)
+    return n > 0 and any(words[i : i + n] == phrase for i in range(len(words) - n + 1))
 
 
 def _score(card: Card, text: str) -> int:
-    low = text.lower()
+    """Deterministic: +3 per alias whose (stemmed) words appear in order in the text, +1 per shared title token when
+    at least two are shared (or the title has a single content token). No LLM, no network."""
+    words = _words(text)
     score = 0
     for a in card.aliases:
-        a = a.strip().lower()
-        if a and a in low:
+        if _has_phrase(words, _words(a)):
             score += 3
     title_tokens = _tokens(re.sub(r"\([^)]*\)", " ", card.title))
     hits = len(title_tokens & _tokens(text))
@@ -47,34 +66,76 @@ def _prefix(mode: str) -> str:
 
 def task_cue(card: Card, mode: str) -> Cue:
     pre = _prefix(mode)
-    return Cue(line1=pre + short_title(card.title, 24 - len(pre)), line2="WATCHING NOW" if mode == "fix" else "FOLLOW THE CUES")
+    if card.steps:
+        line2 = "SWIPE DOWN WHEN DONE"
+    else:
+        line2 = "WATCHING NOW" if mode == "fix" else "FOLLOW THE CUES"
+    return Cue(line1=pre + short_title(card.title, 24 - len(pre)), line2=line2)
+
+
+def candidates(req: GoalRequest, cards: list[Card]) -> list[Card]:
+    """Cards the goal could mean, best first (score desc, then short title, then id). Menu confirm (no text): the whole
+    goal_mode pool. Free text: the best-scoring cards only (ties kept); empty if nothing matches."""
+    pool = [c for c in cards if c.goal_mode == req.mode]
+    key = lambda c: (short_title(c.title, 40), c.card_id)  # noqa: E731
+    text = (req.text or "").strip()
+    if not text:
+        return sorted(pool, key=key)
+    scored = [(c, _score(c, text)) for c in pool]
+    best = max((s for _, s in scored), default=0)
+    if best <= 0:
+        return []
+    return sorted((c for c, s in scored if s == best), key=key)
+
+
+def option_label(card: Card, taken: set[str]) -> str:
+    base = short_title(card.title, 24)
+    label, n = base, 2
+    while label in taken:
+        suffix = f" {n}"
+        label = base[: 24 - len(suffix)].rstrip() + suffix
+        n += 1
+    taken.add(label)
+    return label
+
+
+def chooser_options(chosen: list[Card]) -> tuple[list[Card], list[str], bool]:
+    """Menu limits options to 3: up to 3 cards, or 2 cards + `MORE ON PHONE` when more than 3 are loaded."""
+    more = len(chosen) > 3
+    shown = chosen[:2] if more else chosen[:3]
+    taken: set[str] = set()
+    labels = [option_label(c, taken) for c in shown]
+    if more:
+        labels.append(MORE_ON_PHONE)
+    return shown, labels, more
+
+
+MORE_ON_PHONE = "MORE ON PHONE"
+
+
+def _supported_detail(c: Card) -> str:
+    if c.steps:
+        return f"Supported: {c.title}. {len(c.steps)} steps; swipe down on the glasses to confirm each step you finish. Steps with a check advance only on measured evidence."
+    return f"Supported: {c.title}. GhostBuild shows one cue only when a test on the connected device fails."
 
 
 def resolve(req: GoalRequest, cards: list[Card]) -> GoalResolution:
     pool = [c for c in cards if c.goal_mode == req.mode]
     supported_titles = [c.title for c in cards]
     all_list = "; ".join(f"{c.title} ({c.goal_mode})" for c in cards) or "none"
-
-    chosen: list[Card] = []
     text = (req.text or "").strip()
-    if not text:
-        chosen = pool  # exactly one => supported, several => ambiguous, none => unsupported
-    else:
-        scored = [(c, _score(c, text)) for c in pool]
-        best = max((s for _, s in scored), default=0)
-        chosen = [c for c, s in scored if s == best and s > 0]
+    chosen = candidates(req, cards)
 
     if len(chosen) == 1:
         c = chosen[0]
-        cue = task_cue(c, req.mode)
         return GoalResolution(
             session_id=req.session_id,
             status="supported",
             mode=req.mode,
             card_id=c.card_id,
             task_title=c.title,
-            cue=cue,
-            detail=f"Supported: {c.title}. GhostBuild watches the Pi camera view and LED and shows one cue only when a test fails.",
+            cue=task_cue(c, req.mode),
+            detail=_supported_detail(c),
             alternatives=[],
         )
     if len(chosen) > 1:
@@ -83,10 +144,20 @@ def resolve(req: GoalRequest, cards: list[Card]) -> GoalResolution:
             status="ambiguous",
             mode=req.mode,
             cue=Cue(line1="WHICH ONE?", line2="SEE PHONE"),
-            detail="Several supported tasks match; pick one on the phone: " + "; ".join(c.title for c in chosen),
+            detail="Several supported tasks match; pick one on the glasses menu or the phone: " + "; ".join(c.title for c in chosen),
             alternatives=[c.title for c in chosen],
         )
-    first = (pool[0] if pool else (cards[0] if cards else None))
+    if not text and not pool:
+        other = any(c.goal_mode != req.mode for c in cards)
+        return GoalResolution(
+            session_id=req.session_id,
+            status="unsupported",
+            mode=req.mode,
+            cue=Cue(line1="NOTHING LOADED YET", line2="TRY THE OTHER OPTION" if other else "SEE PHONE"),
+            detail=f"No {req.mode} task is loaded on this device. Loaded: {all_list}. Nothing is guessed.",
+            alternatives=supported_titles,
+        )
+    first = pool[0] if pool else (cards[0] if cards else None)
     try_line = ("TRY: " + short_title(first.title, 21)) if first else "TRY LATER"
     return GoalResolution(
         session_id=req.session_id,

@@ -13,7 +13,7 @@ import logging
 from dataclasses import dataclass, replace
 from typing import Callable, Optional
 
-from contracts.models import Cue, HudFrame, ImageRef, Menu, Source
+from contracts.models import Cue, HudFrame, ImageRef, Menu, Source, StepRef
 
 from .clock import Clock, as_clock
 
@@ -35,6 +35,7 @@ class Screen:
     cue: Optional[Cue] = None
     image: Optional[ImageRef] = None
     menu: Optional[Menu] = None
+    step: Optional[StepRef] = None
     cue_id: Optional[str] = None
     ttl_ms: Optional[int] = None
     immediate: bool = False
@@ -80,8 +81,13 @@ class Screen:
         )
 
     @staticmethod
-    def visual(cue: Cue, image: ImageRef, cue_id: Optional[str] = None, immediate: bool = True) -> "Screen":
-        return Screen(mode="visual", cue=clip(cue), image=image, cue_id=cue_id, immediate=immediate)
+    def visual(cue: Cue, image: ImageRef, cue_id: Optional[str] = None, immediate: bool = True, step: Optional[StepRef] = None) -> "Screen":
+        return Screen(mode="visual", cue=clip(cue), image=image, step=step, cue_id=cue_id, immediate=immediate)
+
+    @staticmethod
+    def step_screen(cue: Cue, step: StepRef, cue_id: Optional[str] = None, immediate: bool = False) -> "Screen":
+        """Playbook step: stays on screen until the wearer or measured evidence moves on (no ttl)."""
+        return Screen(mode="step", cue=clip(cue), step=step, cue_id=cue_id, immediate=immediate)
 
     def with_immediate(self, immediate: bool = True) -> "Screen":
         return replace(self, immediate=immediate)
@@ -98,7 +104,8 @@ def _frame_key(f: HudFrame) -> FrameKey:
     if f.menu is not None:
         menu = (f.menu.prompt, tuple(f.menu.options), f.menu.selected)
     cue = (f.cue.line1, f.cue.line2) if f.cue else None
-    return (f.mode, cue, img, menu, f.source, f.stale)
+    st = (f.step.index, f.step.count, f.step.step_id, f.step.check, f.step.confirmed) if f.step else None
+    return (f.mode, cue, img, menu, st, f.source, f.stale)
 
 
 class Hud:
@@ -177,6 +184,7 @@ class Hud:
                 cue=None if s.mode == "quiet" else s.cue,
                 image=s.image,
                 menu=s.menu,
+                step=s.step,
                 cue_id=s.cue_id,
                 ttl_ms=s.ttl_ms,
                 source=self.source,

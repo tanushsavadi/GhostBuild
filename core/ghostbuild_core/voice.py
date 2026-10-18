@@ -252,6 +252,9 @@ class VoiceService:
         if sess.phase != "task":
             self._goal(text, sess.id, origin)
             return
+        if self.rt.playbook is not None:
+            self._ask_playbook(text)  # a playbook task: same deterministic follow-up as POST /ask (card text only)
+            return
         intent = intent_mod.classify(text)
         if intent == "unknown" and self._goal_candidate(text, sess.id):
             self._goal(text, sess.id, origin)
@@ -276,6 +279,10 @@ class VoiceService:
         if res is not None:
             self.rt.engine.note(f"voice goal ({origin}): {res.status}. {res.detail}", "DETERMINISTIC", {"mode": chosen.mode, "heard": text})
         self._clear()
+
+    def _ask_playbook(self, text: str) -> None:
+        self._clear()  # drop the voice overlay; the playbook shows its answer on the engine layer
+        self.rt.ask(text)
 
     def _ctx(self) -> intent_mod.Ctx:
         e = self.rt.engine
