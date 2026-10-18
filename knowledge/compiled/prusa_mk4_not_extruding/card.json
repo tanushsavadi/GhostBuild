@@ -476,7 +476,7 @@
           "depicts": "Printer screen showing the Cold Pull filament check with Unload, Load, Continue and Abort buttons. Source picture from Cold pull #26702 (MK4S) #13702 (MK4) #28702 (MK3.9S) #21702… | Prusa Knowledge BasePrusaPrusaPrusa (cropped and highlighted by AI vision); a real reference, not your hardware.",
           "fallback": {
             "line1": "RUN COLD PULL FROM MENU",
-            "line2": "PICTURE ON YOUR PHONE"
+            "line2": "SOURCE LINK ON PHONE"
           },
           "fov_note": null,
           "reference_url": "https://help.prusa3d.com/article/cold-pull-26702-mk4s-13702-mk4-28702-mk3-9s-21702-mk3-9-23702-mk3-5-28702-mk3-5s-17702-xl_445071"
@@ -491,7 +491,7 @@
           "depicts": "A pink filament strand with a shaped cold-pull tip at its end, the result of a cold pull. Source picture from Cold pull #26702 (MK4S) #13702 (MK4) #28702 (MK3.9S) #21702… | Prusa Knowledge BasePrusaPrusaPrusa (cropped and highlighted by AI vision); a real reference, not your hardware.",
           "fallback": {
             "line1": "RUN COLD PULL FROM MENU",
-            "line2": "PICTURE ON YOUR PHONE"
+            "line2": "SOURCE LINK ON PHONE"
           },
           "fov_note": null,
           "reference_url": "https://help.prusa3d.com/article/cold-pull-26702-mk4s-13702-mk4-28702-mk3-9s-21702-mk3-9-23702-mk3-5-28702-mk3-5s-17702-xl_445071"

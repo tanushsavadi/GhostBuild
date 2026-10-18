@@ -1,0 +1,60 @@
+{
+  "guide_id": "mac_display_colors_check_color_profile",
+  "title": "Check color profile",
+  "placeholder": false,
+  "pipeline_version": 2,
+  "g2_format": "PNG, 8-bit greyscale, values only multiples of 17 (= 16 gray4 levels), black = transparent, <=288x144",
+  "views": [
+    {
+      "view": "where",
+      "step_id": "mac_display_colors_check_color_profile.where",
+      "title": "WHERE TO CLICK",
+      "image": "knowledge/guides/mac_display_colors_check_color_profile/where.png",
+      "phone_image": "knowledge/guides/mac_display_colors_check_color_profile/where.phone.png",
+      "provenance": "DETERMINISTIC",
+      "depicts": "GhostBuild drawing of the path the source names (Apple menu > System Settings > Displays). Not a screenshot.",
+      "fallback": {
+        "line1": "SYSTEM SETTINGS > DISPLA",
+        "line2": "PATH ON YOUR PHONE"
+      },
+      "placeholder": false,
+      "fov_note": null,
+      "asset_kind": "original_diagram",
+      "reference_url": "https://support.apple.com/guide/mac-help/change-your-displays-color-profile-mchlf3ddc60d/mac",
+      "w": 288,
+      "h": 144,
+      "grey_levels": 16,
+      "sha256": "d381151cbb99fdabecb5bd6e6cf5ddd8b2e70d5889ccf5d0c663b31b6ca2c634",
+      "bytes": 1885,
+      "phone_w": 1140,
+      "phone_h": 640,
+      "phone_sha256": "bb555d1dd488b59a0eb3f65a74a6bbefcfc5e6af4a828162cafa45ae70646929",
+      "phone_bytes": 53294,
+      "source": "assets/sources/mac_display_colors_check_color_profile/where.src.png",
+      "source_sha256": "0f033aab40a9c80ae0dbb249bd7d2c714741b094ba945f1c79e00c7f8170011a",
+      "annotation": "rect",
+      "caption": ""
+    }
+  ],
+  "guide": {
+    "id": "mac_display_colors_check_color_profile",
+    "title": "Check color profile",
+    "views": [
+      {
+        "view": "where",
+        "step_id": "mac_display_colors_check_color_profile.where",
+        "title": "WHERE TO CLICK",
+        "image": "knowledge/guides/mac_display_colors_check_color_profile/where.png",
+        "phone_image": "knowledge/guides/mac_display_colors_check_color_profile/where.phone.png",
+        "provenance": "DETERMINISTIC",
+        "depicts": "GhostBuild drawing of the path the source names (Apple menu > System Settings > Displays). Not a screenshot.",
+        "fallback": {
+          "line1": "SYSTEM SETTINGS > DISPLA",
+          "line2": "PATH ON YOUR PHONE"
+        },
+        "fov_note": null,
+        "reference_url": "https://support.apple.com/guide/mac-help/change-your-displays-color-profile-mchlf3ddc60d/mac"
+      }
+    ]
+  }
+}

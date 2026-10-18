@@ -443,8 +443,8 @@
           "view": "where",
           "step_id": "mac_display_colors_check_color_profile.where",
           "title": "WHERE TO CLICK",
-          "image": "knowledge/live/compiled/guides/mac_display_colors_check_color_profile/where.png",
-          "phone_image": "knowledge/live/compiled/guides/mac_display_colors_check_color_profile/where.phone.png",
+          "image": "knowledge/guides/mac_display_colors_check_color_profile/where.png",
+          "phone_image": "knowledge/guides/mac_display_colors_check_color_profile/where.phone.png",
           "provenance": "DETERMINISTIC",
           "depicts": "GhostBuild drawing of the path the source names (Apple menu > System Settings > Displays). Not a screenshot.",
           "fallback": {
@@ -464,8 +464,8 @@
           "view": "where",
           "step_id": "mac_display_colors_check_color_filters.where",
           "title": "WHERE TO CLICK",
-          "image": "knowledge/live/compiled/guides/mac_display_colors_check_color_filters/where.png",
-          "phone_image": "knowledge/live/compiled/guides/mac_display_colors_check_color_filters/where.phone.png",
+          "image": "knowledge/guides/mac_display_colors_check_color_filters/where.png",
+          "phone_image": "knowledge/guides/mac_display_colors_check_color_filters/where.phone.png",
           "provenance": "DETERMINISTIC",
           "depicts": "GhostBuild drawing of the path the source names (Apple menu > System Settings > Accessibility). Not a screenshot.",
           "fallback": {
@@ -485,8 +485,8 @@
           "view": "where",
           "step_id": "mac_display_colors_check_cable_adapter.where",
           "title": "WHERE TO CLICK",
-          "image": "knowledge/live/compiled/guides/mac_display_colors_check_cable_adapter/where.png",
-          "phone_image": "knowledge/live/compiled/guides/mac_display_colors_check_cable_adapter/where.phone.png",
+          "image": "knowledge/guides/mac_display_colors_check_cable_adapter/where.png",
+          "phone_image": "knowledge/guides/mac_display_colors_check_cable_adapter/where.phone.png",
           "provenance": "DETERMINISTIC",
           "depicts": "GhostBuild drawing of the path the source names (Apple menu > System Settings). Not a screenshot.",
           "fallback": {
