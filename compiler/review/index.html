@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GhostBuild Review</title>
+<style>
+  :root { --bg:#f6f7f5; --card:#fff; --ink:#1b1f1c; --muted:#5f6b63; --line:#d9ded9; --accent:#1f7a46; --warn:#a14b00; --hud:#0b120d; --hudtext:#5dff8f; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#111412; --card:#1a1e1b; --ink:#e6ebe7; --muted:#9aa69e; --line:#2c332e; --accent:#4cc27c; --warn:#ffad5c; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.45 system-ui, -apple-system, sans-serif; }
+  main { max-width:1100px; margin:0 auto; padding:16px; display:grid; gap:16px; grid-template-columns:1fr; }
+  @media (min-width: 900px) { main { grid-template-columns: 1fr 360px; } }
+  h1 { font-size:20px; margin:0; } h2 { font-size:15px; margin:0 0 8px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); }
+  section { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  input[type=text] { flex:1; min-width:180px; padding:9px 10px; border:1px solid var(--line); border-radius:8px; background:var(--bg); color:var(--ink); font:inherit; }
+  button { padding:8px 12px; border:1px solid var(--line); border-radius:8px; background:var(--bg); color:var(--ink); font:inherit; cursor:pointer; }
+  button.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .item { border-top:1px solid var(--line); padding:10px 0; } .item:first-child { border-top:0; }
+  .meta { color:var(--muted); font-size:13px; }
+  .badge { display:inline-block; font-size:11px; padding:1px 7px; border-radius:99px; border:1px solid var(--line); margin-left:6px; color:var(--muted); }
+  .badge.v { color:var(--accent); border-color:var(--accent); } .badge.d { color:var(--warn); border-color:var(--warn); }
+  ol { margin:8px 0 0; padding-left:22px; } li { margin:4px 0; }
+  code, .hudline { font-family: ui-monospace, Menlo, monospace; }
+  .hud { background:var(--hud); color:var(--hudtext); border-radius:10px; padding:14px; min-height:120px; font:15px/1.6 ui-monospace, Menlo, monospace; white-space:pre; overflow:hidden; }
+  .events { font-size:12px; color:var(--muted); max-height:240px; overflow:auto; }
+  .err { color:var(--warn); }
+  aside { display:grid; gap:16px; align-content:start; }
+</style>
+</head>
+<body>
+<main>
+  <div style="display:grid;gap:16px;align-content:start">
+    <section>
+      <h1>GhostBuild review</h1>
+      <p class="meta">Compile a build with the Creao agent, review it, approve it, then load it on the glasses. Only approved procedures can run.</p>
+      <div class="row">
+        <input id="req" type="text" placeholder="What to build, or a tutorial URL (e.g. fold a paper crane)">
+        <button class="primary" id="compile">Compile with Creao</button>
+      </div>
+      <div id="compiles" class="meta" style="margin-top:8px"></div>
+    </section>
+    <section><h2>Drafts awaiting review</h2><div id="drafts" class="meta">None yet.</div></section>
+    <section><h2>Approved procedures</h2><div id="approved"></div></section>
+  </div>
+  <aside>
+    <section>
+      <h2>Glasses (live mirror)</h2>
+      <div id="hud" class="hud">connecting…</div>
+      <div class="meta" id="hudmeta" style="margin-top:6px"></div>
+      <div class="row" style="margin-top:8px">
+        <button data-say="done">done</button><button data-say="back">back</button><button data-say="help">help</button>
+        <button id="stop">stop</button>
+      </div>
+    </section>
+    <section id="simbox" hidden>
+      <h2>Simulated jig (dev only)</h2>
+      <div id="sim" class="row"></div>
+    </section>
+    <section><h2>Evidence</h2><div id="events" class="events"></div></section>
+  </aside>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+async function api(path, body) {
+  const r = await fetch(path, body === undefined ? {} : { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.detail || JSON.stringify(data));
+  return data;
+}
+
+function stepsHtml(p) {
+  return "<ol>" + p.steps.map((s) => {
+    const mode = s.check.type === "jig" ? '<span class="badge v">VERIFIED · ' + esc(s.check.jig_check) + "</span>" : '<span class="badge">GUIDED</span>';
+    const faults = Object.values(s.check.faults || {}).map((f) => '<span class="badge d">' + esc(f) + "</span>").join("");
+    return `<li><span class="hudline">${esc(s.hud)}</span>${mode}${faults}<div class="meta">${esc(s.detail)}</div></li>`;
+  }).join("") + "</ol>";
+}
+
+async function showDetail(id, el) {
+  if (el.dataset.open) { el.innerHTML = ""; delete el.dataset.open; return; }
+  const p = await api("/procedures/" + id);
+  el.dataset.open = 1;
+  el.innerHTML = `<div class="meta">Source: ${p.source.url ? `<a href="${esc(p.source.url)}" target="_blank" rel="noopener">${esc(p.source.title)}</a>` : esc(p.source.title)} · ${esc(p.source.label)}</div>` + stepsHtml(p);
+}
+
+function row(p, draft) {
+  const origin = p.origin === "agent_compiled" ? '<span class="badge d">AI-COMPILED</span>' : '<span class="badge">AUTHORED</span>';
+  const jig = p.jig_profile ? '<span class="badge v">JIG</span>' : "";
+  const act = draft
+    ? `<button class="primary" data-approve="${esc(p.id)}">Approve</button>`
+    : `<button class="primary" data-load="${esc(p.id)}">Load on glasses</button>`;
+  return `<div class="item"><div class="row"><strong style="flex:1">${esc(p.title)}</strong>${act}<button data-view="${esc(p.id)}">Steps</button></div>
+    <div class="meta">${esc(p.domain)} · ${p.steps} steps ${origin}${jig}</div><div data-detail="${esc(p.id)}"></div></div>`;
+}
+
+async function refreshProcedures() {
+  const { approved, drafts } = await api("/procedures");
+  $("approved").innerHTML = approved.map((p) => row(p, false)).join("") || "None.";
+  $("drafts").innerHTML = drafts.map((p) => row(p, true)).join("") || "None yet.";
+}
+
+document.addEventListener("click", async (ev) => {
+  const t = ev.target.closest("button"); if (!t) return;
+  try {
+    if (t.dataset.view) await showDetail(t.dataset.view, document.querySelector(`[data-detail="${t.dataset.view}"]`));
+    if (t.dataset.approve) { await api(`/procedures/${t.dataset.approve}/approve`, { reviewer: "review page" }); await refreshProcedures(); }
+    if (t.dataset.load) await api("/session/load", { procedure_id: t.dataset.load });
+    if (t.dataset.say) await api("/input", { type: "g2_input", kind: "voice", text: t.dataset.say });
+    if (t.dataset.jig) await api("/sim/jig", { [t.dataset.jig]: t.dataset.val });
+    if (t.id === "stop") await api("/session/stop", {});
+  } catch (e) { alert(e.message); }
+});
+
+$("compile").onclick = async () => {
+  const request = $("req").value.trim(); if (!request) return;
+  try { await api("/compile", { request }); $("req").value = ""; poll(); } catch (e) { $("compiles").innerHTML = `<span class="err">${esc(e.message)}</span>`; }
+};
+
+let simBuilt = false;
+async function poll() {
+  try {
+    const s = await api("/state");
+    $("events").innerHTML = s.events.slice().reverse().map((e) =>
+      `<div>${new Date(e.at * 1000).toLocaleTimeString()} · <strong>${esc(e.label)}</strong> · ${esc(e.text)}</div>`).join("");
+    $("compiles").innerHTML = (s.compiles || []).slice().reverse().map((c) =>
+      `<div>“${esc(c.request)}” — ${esc(c.status)}${c.procedure_id ? " → " + esc(c.procedure_id) : ""}</div>`).join("");
+    $("hudmeta").textContent = `jig: ${s.jig.link}${s.jig.source ? " (" + s.jig.source + ")" : ""} · ${s.engine}`;
+    if (!simBuilt && s.jig.source === "simulated") buildSim();
+    if ((s.compiles || []).some((c) => c.status === "delivered")) refreshProcedures();
+  } catch (e) { $("hudmeta").textContent = "core unreachable"; }
+}
+
+async function buildSim() {
+  simBuilt = true;
+  const jigs = await api("/jigs");
+  const prof = Object.values(jigs)[0]; if (!prof) return;
+  $("simbox").hidden = false;
+  $("sim").innerHTML = Object.entries(prof.fields).map(([f, vals]) =>
+    `<div style="width:100%" class="meta">${esc(f)}</div>` + vals.map((v) => `<button data-jig="${esc(f)}" data-val="${esc(v)}">${esc(v)}</button>`).join("")).join("");
+}
+
+function connect() {
+  const ws = new WebSocket(location.origin.replace(/^http/, "ws") + "/ws?role=mirror");
+  ws.onmessage = (m) => {
+    const f = JSON.parse(m.data); if (f.type !== "hud") return;
+    $("hud").textContent = f.lines.length ? f.lines.join("\n") : "(dark)";
+  };
+  ws.onclose = () => { $("hud").textContent = "reconnecting…"; setTimeout(connect, 1000); };
+}
+
+refreshProcedures(); poll(); setInterval(poll, 1000); connect();
+</script>
+</body>
+</html>

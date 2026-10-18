@@ -116,6 +116,7 @@ class Engine:
         self.idx = 0
         self.completed = {}
         self.complete_until = None
+        self.notice = None
         self._reset_step()
         self._event(f"loaded {proc.id} ({len(proc.steps)} steps)", "DETERMINISTIC")
         self.evaluate()
