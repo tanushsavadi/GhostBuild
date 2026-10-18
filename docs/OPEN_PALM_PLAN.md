@@ -1,67 +1,80 @@
-# Open Palm — plan (authoritative on branch test_sim, 2026-10-17)
+# Open Palm: design and decisions
 
-## Product
-A hearing person wearing Even G2 wants to talk to a Deaf person. They say an English phrase; the glasses show one card per sign: the ASL-LEX handshape image (pixelated to the lens) and two short lines on location and movement. They sign it. Hands stay free and eyes stay on the other person, which a phone cannot offer.
+Hackathon build on branch `test_sim`. Deadline Sun 2026-10-18 12:00 PDT. How to run and use it is in the [README](../README.md).
 
-Scope is level A: individual signs from a checked vocabulary, in English order. It is not ASL translation, and nobody on the team is Deaf, so cards are checked against reference videos, not by a signer.
+## Scope
+- A hearing G2 wearer gets one card per sign for a sentence they want to say to a Deaf person.
+- **Individual signs in a simplified ASL order.** It is not translation and not an interpreter.
+- No Deaf reviewer. Cards are checked against reference videos and labelled with their check status.
 
-## Demo (about 30 s)
-| Wearer says | Cards |
-|---|---|
-| "Hello, nice to meet you" | HELLO → NICE → MEET → YOU |
-| "My name is Abdul" | MY → NAME → A·B·D·U·L (name from settings) |
-| "Thank you" | THANK-YOU |
+## Lens design (agreed with the user; ask before changing)
+- **Card:** hand picture 144×144 on the left; text on the right with the sign name, two how-to lines (≤ 36 chars each) and five time dots; face 64×64 at the top right. Status, progress and sources are on the phone only.
+- **Face:** brows down = what/where/who question, brows up = yes/no question, arrows = head shake (negation). The mouth shows emotion: happy, sad or surprised. Drawn by `tools/build_faces.py`.
+- **Hands-free:** cards advance by themselves.
+  - 2.5 s per letter; about 5 s for a simple sign; up to 10 s for two hands or a complex movement.
+  - Tap pauses or resumes; reading HOW pauses until you swipe back up.
+  - The lens clears 5 s after the last sign. `?review=top` stays tap-to-advance.
+- **Menu (long-press):** Speak a sentence, Prepare a conversation, Prepared sentences, Practice signs, Close. Swipes move the cursor and a tap chooses. Speaking from the menu ends with a tap; the phone keeps hold-to-talk.
 
-Vocabulary: HELLO, NICE, MEET, YOU, MY, NAME, THANK-YOU, PLEASE, YES, NO, HELP, SORRY, plus A–Z. All 12 signs are in ASL-LEX 2.0; they use 7 handshapes (closed_b, open_b, 1, h, a, flat_h, s).
+## AI
+The AI never writes sign instructions. It only picks signs from our vocabulary, their order, the face and the emotion. Anything it names that we don't have is fingerspelled.
 
-## Lens layout
-Handshape image 144×144 on the left; text on the right: sign name and n/N, two how-to lines, the status label. Tap = next card (auto-advance as an option). Double-tap = exit.
+**Live word order: local model.**
+- Path: `/api/translate` → Ollama `qwen3.5:4b-q4_K_M`, kept loaded, about 1 s per sentence.
+- Prompt: the same rules and 4 examples as the benchmark, plus an emotion rule.
+- Server cleanup:
+  - the question word goes last;
+  - NOT-X is split into X NOT;
+  - I → ME; NOT-LIKE → DONT-LIKE;
+  - English filler words are dropped;
+  - question brows are dropped unless the English is really a question.
+- Plugin side: made-up compounds (TRAIN-TICKET) are split into signs we have, and words the model wanted spelled are signed if we have them.
+- Skipped when reviewed content already covers the sentence. Falls back to word by word after 8 s.
 
-## Steps
-| Step | Work | Done when | Status |
-|---|---|---|---|
-| 0 Go/no-go | Pixelated ASL-LEX handshapes on the real G2 at 144 px (thin / bold / 96 px bold): `/probe.html` | 5 of 5 handshapes named on the lens; send time recorded | Built; lens test pending |
-| 1 Cards | Card layout, tap = next | Works on the G2 | Built, simulator-checked |
-| 2 Deck | `g2/src/deck.json`: ASL-LEX phonology for the 12 signs; lines drafted by AI (Claude, in session) from it; a person checks each against its ASL-LEX video and sets `status` to `REF-CHECKED` | 12 signs + 26 letters, every sign card REF-CHECKED | Drafted; all UNCHECKED |
-| 2b Full vocabulary | `g2/src/asllex.json` from `uv run tools/build_deck.py`: 2,311 words from all ASL-LEX 2.0 signs, lines composed from phonology coding (AUTO · UNCHECKED); aliases such as I → ME; plural/-ing/-ed handling; M and N drawings | Everyday phrases sign instead of fingerspelling | Built, simulator-checked |
-| 2c Clear lines | `tools/howto.json`: hand-written lines for ~85 common signs (WANT, NEED, WHERE, EAT, ME…), merged by `build_deck.py` and attached to the sign, so aliases (I → ME) get them too; template lines now say when the fingers bend | No template lines in the common sample phrases | Built |
-| 2d Full descriptions | `g2/src/wiktionary.json` from `uv run tools/fetch_wiktionary.py`: Wiktionary's step-by-step "Production" text (CC BY-SA 4.0) for ~290 glosses, incl. palm direction and facial expression. Swipe down on a card pages through it, swipe up goes back; the phone shows it with credit | Every sign in the demo phrases has one | Built, simulator-checked |
-| 2e Sentences | `g2/src/phrases.json`: ~22 common sentences signed in ASL order with a face cue (e.g. "What's your name?" → YOUR NAME WHAT, brows down); contractions expanded ("can't" → CANNOT); matching ignores dropped words (is/are/do/the) | Common greetings and questions come out in ASL order | Built, simulator-checked |
-| 3 Typed phrase | Phone page text box → `matcher.ts` on the phone → cards (no laptop needed) | The 3 demo phrases give the right cards | Built, simulator-checked |
-| 4 Speech | Hold temple (or phone button) → glasses mic → laptop server → ElevenLabs scribe_v2 → phrase → cards | 9/10 spoken phrases right; first card ≤ 2 s | Built: STT 0.5–0.8 s on a synthesized sentence; hold/release flow checked in the simulator; real mic untested |
-| 5 Unknown words | Fingerspelling; AI · UNCHECKED behind a flag | No confident wrong sign | 1 h |
-| 6 Demo | Rehearse; film through the lens | Script works 3 times in a row | 30 min |
+**Model comparison** (`tools/bench_llm.py`): 18 sentences, the same prompt, RTX 3060 6 GB. Score = 0.4 signs present + 0.2 face + 0.2 order + 0.2 no filler. The references are AI-drafted, so this ranks the models rather than grading the ASL.
 
-Cut order if behind: the AI part of step 5, then step 4 (typing still works).
-
-## Run
-From `g2/`: `npm install` (then `npm rebuild @evenrealities/evenhub-simulator` if `npm run simulate` is not found), `npm run dev`, then either `npm run simulate` or `npx evenhub qr --url http://<laptop-wifi-ip>:5173`.
-- `/` is the app; `/?phrase=Thank%20you` starts a phrase on load; `/?style=thin|bold|bold96` picks the drawing style (default bold).
-- `/probe.html` is the step 0 handshape test.
-- Handshape PNGs: `uv run tools/build_handshapes.py --all` (writes `g2/public/handshapes/`). Vocabulary: `uv run tools/build_deck.py` (writes `g2/src/asllex.json`).
-- Windows: the phone can only reach the dev server if port 5173 is allowed inbound (the venue network is Public).
-
-## Live AI word order (built 2026-10-18 ~03:20)
-New sentences of 2+ words → `/api/translate` (laptop server) → Ollama qwen3.5:4b (kept loaded, ~1 s) → cleanup (WH-word last, NOT-X split, I→ME, filler dropped) → `cardsForAi` builds cards from our data, labelled AI ORDER; fallback word-by-word after 8 s. Checked in the simulator: "What time does the store close?" → TIME SHOP CLOSE WHAT, brows down, 1.1 s.
-
-## Conversation prep with CREAO (built 2026-10-18 ~04:00)
-Phone: describe the conversation -> /api/prepare -> CREAO "Open Palm conversation prep" agent (tools/creao_prep_prompt.md, CREAO_PREP_APP_ID) -> 6 sentences in ASL order + up to 4 practice signs -> cleaned and saved as the phrasebook; said or typed prepared sentences show instantly. The plan arrives as an attached JSON file behind a redirect to pre-signed S3 (fetched without the CREAO header). Real runs: "Lunch with Sam" 12 sentences in 66 s; "Ordering coffee from a Deaf barista" 6 sentences in 40 s. Opt-in history (text only, tmp/open_palm on the laptop) feeds HISTORY / HARD SIGNS into the prompt.
-
-## AI model comparison (2026-10-18 02:00, `uv run tools/bench_llm.py <models>`)
-Same prompt (rules + 4 examples), 18 test sentences, temperature 0, JSON schema; laptop RTX 3060 6 GB. Score: 0.4 signs present + 0.2 face cue + 0.2 ASL order + 0.2 no English filler. References are AI-drafted (UNCHECKED): good for ranking models, not for grading ASL.
-
-| Model | Score | Usable signs | Median latency | On GPU |
+| Model | Score | Usable signs | Latency | On GPU |
 |---|---|---|---|---|
-| qwen3.5:4b-q4_K_M | 0.94 | 97% | 3.2 s | fully |
+| **qwen3.5:4b-q4_K_M** (used) | 0.94 | 97% | 3.2 s cold / ~1 s warm | fully |
 | gemma4:e2b-it-qat | 0.93 | 91% | 2.8 s | fully |
-| qwen2.5:7b-instruct-q4_K_M | 0.93 | 94% | 4.1 s | 82% (rest on CPU) |
+| qwen2.5:7b-instruct-q4_K_M | 0.93 | 94% | 4.1 s | 82% |
 | qwen3:8b (think off) | 0.86 | 93% | 5.5 s | partly |
 | qwen3:4b-instruct-2507-q4_K_M | 0.81 | 94% | 3.1 s | fully |
 
-Shared mistakes, to fix in code after the model: question word not last, NOT-X compounds (NOT-HUNGRY), NOT-LIKE vs DONT-LIKE, spelling words we have a sign for (STORE). Plan: CREAO agent first (prompt in `tools/creao_agent_prompt.md`), local qwen3.5:4b as fallback, word-by-word last.
+On the same sentences, word by word without AI scores 0.82, and on casual sentences it scores 0.70 against the AI's 0.84.
 
-## Decisions
-- Solo branch; no Deaf reviewer; physical G2 available; no ring.
-- Speech recognition: offline Vosk on the laptop (tools/keyword_server.py proved the path once).
-- Unknown words: fingerspell names and numbers; others AI · UNCHECKED behind a flag, else fingerspell.
-- ASL-LEX 2.0 data and handshape images: CC BY-NC 4.0 with credit. The images are served from aslcdi.website through the ASL-LEX visualization; credit both. Videos: © ASL-LEX.org, view only.
+**Conversation prep: CREAO.**
+- Path: `/api/prepare` → the CREAO agent `CREAO_PREP_APP_ID`, whose instructions are in `tools/creao_prep_prompt.md`.
+- The request asks for 6 sentences, at most 4 practice signs, and an emotion per sentence. It includes the opt-in history (`HISTORY`, `HARD SIGNS`).
+- It runs in the background, about 40 s, and is polled every 3 s.
+- The answer arrives as an attached JSON file. Its link redirects to a pre-signed S3 URL, which must be fetched **without** the CREAO Authorization header.
+- CREAO isn't used for live translation: a single sentence takes 40–45 s. The API is undocumented. What works: `POST /api/v1/runs` with `appId` (the input is sent under several field names), `GET /api/v1/runs/{id}`, `Authorization: Bearer`.
+
+**Speech: ElevenLabs.**
+- Path: `/api/stt` → `scribe_v2`, sent as raw `pcm_s16le_16`, with `tag_audio_events=false`. Leftover sound tags like `[static]` are removed.
+- About 0.5–0.8 s. Audio is never stored.
+
+## Data and licences
+- **ASL-LEX 2.0:** the word → sign mapping, coding and drawings, CC BY-NC 4.0. Its videos are © ASL-LEX and are linked, never bundled.
+- **Wiktionary:** the descriptions, CC BY-SA 4.0, credited per sign.
+- **Lifeprint:** not used. Its terms forbid use in apps.
+- **ASL-LEX data quirks we handle:**
+  - Four IDs carry stray spaces (`close `, `fry `, `murder `, `santa `).
+  - Some words live under variant IDs; the most frequent variant is used.
+  - Aliases cover common gaps: I → ME, he/she/it → POINT, store → SHOP, large → BIG, sugar → SWEET, how much → MANY.
+
+## Status (Sun 05:00)
+- **Done and simulator-checked:**
+  - cards, faces, the timer and the menu;
+  - typed and spoken input;
+  - local AI order;
+  - CREAO prep;
+  - opt-in memory;
+  - the review page.
+- **Reviewed:** 50 signs confirmed; 18 fixed and waiting for a re-check.
+- **Not done:**
+  - **real-glasses test:** long-press, legibility, mic, timing;
+  - Even Hub beta upload;
+  - demo video;
+  - Devpost write-up.
+- **Risk:** if the glasses OS keeps long-press for itself, the menu needs another gesture. The phone page can do everything in the meantime.
