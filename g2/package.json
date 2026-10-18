@@ -6,9 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "preview": "vite preview",
-    "pack": "npm run build && evenhub pack app.json dist",
-    "simulate": "evenhub-simulator http://localhost:5173"
+    "simulate": "evenhub-simulator http://localhost:5173",
+    "pack": "npm run build && evenhub pack app.json dist -o ghostbuild.ehpk --sdk-ver 0.0.16"
   },
   "dependencies": {
     "@evenrealities/even_hub_sdk": "0.0.16"
