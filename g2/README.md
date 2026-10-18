@@ -23,7 +23,7 @@ the installed skills disagree with the `.d.ts`, the `.d.ts` wins (see Discrepanc
 
 | File | Role | Pure/tested |
 |---|---|---|
-| `view.ts` | `frameToView(frame)`: quiet -> `" "`; 1-2 centred lines; menu with `> FIX` / `  BUILD`; picture + caption; stale -> `STALE DATA`; non-live source tag | yes |
+| `view.ts` | `frameToView(frame)`: quiet -> `" "`; 1-2 centred lines; menu with `> FIX` / `  BUILD` (2 or 3 options); step frames = action cue + small counter on the dim tag line (`3/8`, `● 3/8` measured, `3/8 OK` confirmed); picture + caption (+ step counter when opened from a step); stale -> `STALE DATA`; non-live source tag | yes |
 | `glyphs.ts` | whitelist sanitizer (ASCII + documented glyphs, folds the rest, `VITE_GLYPHS=ascii` fallback) | yes |
 | `gestures.ts` | SDK event -> `press / swipe_up / swipe_down / hold_start / hold_end`; DOUBLE -> local exit only | yes |
 | `gate.ts` | `SeqGate` (never backwards, never a duplicate seq) + `isHudFrame` runtime guard | yes |
@@ -112,6 +112,20 @@ cd g2 && npm run dev && npm run simulate
 cd g2 && npm run sim:smoke            # scripted walk-through, PNG screenshots into g2/sim-shots/
 ```
 
+Playbook flow (generic sample task, `HudFrame.mode 'step'`; stub only, **not the real core PlaybookEngine**):
+
+```bash
+cd g2 && npm run stub:playbook        # stub --flow playbook: welcome -> menu -> chooser(3) -> step 1/4 manual -> picture -> step 2/4
+                                      #   -> measured step 3/4 -> press = NOT MET YET -> POST /admin/fix = CHECK PASSED -> step 4/4
+                                      #   -> swipe down = completion (you confirmed) -> quiet.   swipe up = previous step.
+cd g2 && npm run dev && npm run simulate
+cd g2 && npm run sim:playbook         # asserts the stub phase after every simulator input + screenshots into g2/sim-shots/
+```
+
+A measured step never advances on a gesture (press = recheck only); the stub's `POST /admin/fix` stands in for measured evidence.
+Step counter: `StepRef.index` is 0-based on the wire and shown 1-based. `✓` is not in the plugin's glyph whitelist (folded to `OK`);
+`●` is (official table), `VITE_GLYPHS=ascii` renders it as `*`.
+
 The stub speaks the same endpoints as core (`/ws?role=g2`, `/hud?after=`, `/hello`, `/input`, `/guides/camera_lens/*.png` with
 generated 288x144 4-bit PNGs) and echoes every hello/input to its console. `POST /admin/fix` stands in for the physical fix.
 `npx vite-node tools/poll-check.mts` forces the WebSocket to fail and exercises the polling fallback against any backend.
@@ -183,6 +197,15 @@ Glyphs (one frame each, read from the glasses, not the simulator):
 - [ ] Menu marker `> FIX` / `  BUILD` aligns and reads clearly; selected option is obvious.
 - [ ] Centring: two-line cue looks centred. If left or right heavy, tune `VITE_CENTER_COLS`.
 - [ ] `tag` line (`SIMULATED`, `2/3`) is legible at `textColor: 2` and not distracting. Blank stays fully dark in quiet mode.
+
+Playbook (generic step cards; physical G2 needed, none of this is hardware-verified):
+- [ ] Step frame: the action cue is readable and the small dim counter (`3/8`, `● 3/8` for a measured step, `3/8 OK` after a confirm) does not crowd it; `●` shows (else `VITE_GLYPHS=ascii` -> `*`).
+- [ ] **Swipe down confirms a manual step** (`OK DONE (YOU CONFIRMED)` for the last one) and moves to the next; swipe up goes back. Direction feels right on the touchpad and the ring.
+- [ ] **Accidental-swipe guard:** brush the temple / scroll a few times quickly; confirm how many steps a stray swipe skips and that core's guard (not this plugin) stops a double-advance. Press must NEVER confirm a step (press = open picture / recheck only).
+- [ ] A measured step does not advance on swipe; press shows `NOT MET YET`, and the step clears only when the measured evidence arrives (`● CHECK PASSED`), never from a gesture.
+- [ ] Picture opened from a step: the 288x144 picture is legible, the caption and `2/8  PIC 1/2` counter are readable under it; press or swipe up returns to the same step; a failed image fetch shows the text cue.
+- [ ] Chooser (3 options, `> ` marker): swipe moves one option per swipe, press selects, double press still exits; all three rows fit the container.
+- [ ] Double press during a step shows the system exit dialog and sends nothing to core.
 
 Input:
 - [ ] Single press arrives once (not twice). Swipe down/up map the right way (down = next view).

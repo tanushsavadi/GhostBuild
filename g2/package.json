@@ -10,8 +10,10 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "stub": "node tools/stub-server.mjs",
+    "stub:playbook": "node tools/stub-server.mjs --flow playbook",
     "simulate": "evenhub-simulator \"http://localhost:5173/?surface=simulator\" --automation-port 9898",
     "sim:smoke": "node tools/sim-smoke.mjs sim-shots",
+    "sim:playbook": "node tools/sim-playbook.mjs sim-shots",
     "app-json": "node tools/gen-app-json.mjs app.local.json",
     "pack": "npm run build && evenhub pack app.json dist -o ghostbuild.ehpk --sdk-ver 0.0.16",
     "pack:lan": "npm run build && npm run app-json && evenhub pack app.local.json dist -o ghostbuild.ehpk --sdk-ver 0.0.16"
