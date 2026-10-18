@@ -26,7 +26,7 @@ FLASH_MS = 2500
 # Quiet intelligence: a screen that only waits for the wearer rests (goes dark) so they stay present. A gesture or a hold wakes it;
 # anything that needs them (a finished guide, a failure, an answer) always wakes it.
 REST_PROMPT_MS = int(float(os.environ.get("GB_REST_PROMPT_S", "20")) * 1000)
-REST_RESEARCH_MS = int(float(os.environ.get("GB_REST_RESEARCH_S", "10")) * 1000)
+REST_RESEARCH_MS = int(float(os.environ.get("GB_REST_RESEARCH_S", "0")) * 1000)  # 0 = never: the wearer asked to watch the wait
 JOIN_WINDOW_MS = 15000  # a second surface (simulator) that says hello right after the first joins that session
 MENU_OPTIONS = ["FIX", "BUILD"]
 
@@ -392,7 +392,7 @@ class SessionManager:
             return False
         now = self.clock.now_ms()
         if self._research is not None and self._research["sid"] == s.id:
-            return now - self._awake_at >= REST_RESEARCH_MS
+            return REST_RESEARCH_MS > 0 and now - self._awake_at >= REST_RESEARCH_MS
         return self._choice is None and not self._show_list and now - self._awake_at >= REST_PROMPT_MS
 
     def wake(self) -> None:
@@ -412,7 +412,7 @@ class SessionManager:
             screen = self._flash[0]
         elif s is not None and s.phase == "welcome":
             screen = Screen.welcome(Cue(line1="GHOSTBUILD", line2="VOICE VIA ELEVENLABS" if self._voice_on() else "HANDS BUSY. MIND CLEAR."), WELCOME_MS)
-        elif s is not None and s.phase == "menu" and self._research is not None and self._research["sid"] == s.id and now - self._awake_at >= REST_RESEARCH_MS:
+        elif s is not None and s.phase == "menu" and self._research is not None and self._research["sid"] == s.id and REST_RESEARCH_MS > 0 and now - self._awake_at >= REST_RESEARCH_MS:
             screen = Screen.quiet()  # still researching, but the display rests; completion or a gesture wakes it
         elif s is not None and s.phase == "menu" and self._research is not None and self._research["sid"] == s.id:
             secs = max(0, (now - self._research["started_ms"]) // 1000) // 5 * 5  # 5 s steps: calm, and few BLE writes

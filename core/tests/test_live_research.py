@@ -172,19 +172,27 @@ def test_the_estimate_learns_from_real_run_durations(live):
     assert rt.live.expected_s() == 70.0
 
 
-def test_the_wait_screen_rests_after_a_few_seconds_a_gesture_peeks_and_completion_wakes_it(live):
+def test_the_wait_screen_stays_lit_for_the_whole_research_by_default(live):
     c, rt = live, live.rt
     ask(c, MOCK_A_REQUEST)
-    rt.clock.advance(3000)
-    rt.tick()
-    assert rt.hud.current.cue.line1.startswith("RESEARCHING ")  # shown at first so the wearer knows it is working
-    rt.clock.advance(9000)
-    rt.tick()
-    assert rt.hud.current.mode == "quiet"  # then it rests: eyes free, the surroundings stay in view
-    rt.handle_input(gi("press"))  # a gesture only peeks at the progress
-    assert rt.hud.current.cue.line1.startswith("RESEARCHING ") and rt.live.active is not None
-    rt.clock.advance(11_000)
+    for _ in range(12):  # a long wait: the wearer watches the progress, the display never goes dark on its own
+        rt.clock.advance(10_000)
+        rt.tick()
+        assert rt.hud.current.cue.line1.startswith("RESEARCHING ") and "●" in rt.hud.current.cue.line2 + "○"
+    settle_live(c)
+    assert rt.hud.current.cue.line2 == "AI RESEARCHED, UNREVIEWED"
+
+
+def test_the_wait_screen_can_be_set_to_rest_and_completion_wakes_it(live, monkeypatch):
+    from ghostbuild_core import session as session_mod
+
+    monkeypatch.setattr(session_mod, "REST_RESEARCH_MS", 10_000)  # opt-in via GB_REST_RESEARCH_S
+    c, rt = live, live.rt
+    ask(c, MOCK_A_REQUEST)
+    rt.clock.advance(12_000)
     rt.tick()
     assert rt.hud.current.mode == "quiet"
-    settle_live(c)  # the guide is ready: that always wakes the display
+    rt.handle_input(gi("press"))  # a gesture only peeks at the progress
+    assert rt.hud.current.cue.line1.startswith("RESEARCHING ")
+    settle_live(c)
     assert rt.hud.current.mode == "intervene" and rt.hud.current.cue.line2 == "AI RESEARCHED, UNREVIEWED"
