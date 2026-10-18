@@ -98,7 +98,7 @@ class LiveResearch:
         return None if act is None else estimate(self._now() - act["started"], self.expected_s())
 
     # ------------------------------------------------------------------ start (main loop)
-    def try_start(self, req: GoalRequest, *, doc_urls: Optional[list[str]] = None) -> bool:
+    def try_start(self, req: GoalRequest, *, doc_urls: Optional[list[str]] = None, builder=None) -> bool:
         """True iff research was started for this unmatched request (the caller then answers RESEARCHING)."""
         text = (req.text or "").strip()
         task = self.rt.assistant.tasks.get(req.session_id)
@@ -111,7 +111,7 @@ class LiveResearch:
         if sess is None or sess.id != req.session_id or sess.phase != "menu":
             return False
         if self.engine == "compile":
-            return self._start_compile(req, text, urls=doc_urls)
+            return self._start_compile(req, text, urls=doc_urls, builder=builder)
         if self.runs is None:
             return False
         from .research_runs import RunBody, RunRejected
@@ -161,7 +161,7 @@ class LiveResearch:
 
         threading.Thread(target=work, name="gb-prefetch", daemon=True).start()
 
-    def _start_compile(self, req: GoalRequest, text: str, urls: Optional[list[str]] = None) -> bool:
+    def _start_compile(self, req: GoalRequest, text: str, urls: Optional[list[str]] = None, builder=None) -> bool:
         """Official-source compiler as the research engine: search -> fetch -> compile -> verify, on a worker thread."""
         if self.started >= self._max():
             return False
@@ -187,6 +187,16 @@ class LiveResearch:
                 from knowledge.compile import compile_task
                 from knowledge.find_sources import find_sources
 
+                if builder is not None:  # a source-specific step builder (e.g. one picture per manual step); None = not applicable
+                    try:
+                        built = builder()
+                    except Exception as exc:
+                        log.warning("step builder failed, compiling instead: %s", exc)
+                        built = None
+                    if built is not None:
+                        out.update(card=built, stats={"builder": "manual steps"}, search={"given": True, "picked": given})
+                        self._done.put(out)
+                        return
                 if given:
                     urls, search = given, {"given": True, "picked": given}
                 elif pre_urls:

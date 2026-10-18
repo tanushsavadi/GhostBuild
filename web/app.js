@@ -208,10 +208,10 @@
     memo(tagEl, tp.join('  '), function () { tagEl.hidden = !tp.length; tagEl.textContent = tp.join('  '); });
     var note = document.querySelector('.area-mirror .gesture-note');
     if (note) {
-      var gestureNote = 'Press for a picture · Swipe up goes back · Double press: home';
-      if (hud && hud.answer) gestureNote = 'Swipe to read the answer · Press to return to your step · Double press: home';
-      else if (hud && hud.menu) gestureNote = 'Swipe to choose an answer · Press to select · Double press: home';
-      else if (hud && hud.step && hud.step.check === 'manual') gestureNote = 'Press for pictures · Swipe down confirms this step · Swipe up goes back';
+      var gestureNote = 'Swipe ▶ next · ◀ back · Tap for a picture · Double tap: home';
+      if (hud && hud.answer) gestureNote = 'Swipe ▶ ◀ to read the answer · Tap to return to your step · Double tap: home';
+      else if (hud && hud.menu) gestureNote = 'Swipe ▶ ◀ to choose · Tap ● to select · Double tap: home';
+      else if (hud && hud.step && hud.step.check === 'manual') gestureNote = 'Swipe ▶ when done · ◀ back · Tap for pictures · Double tap: home';
       note.textContent = gestureNote;
     }
     memo(meta, key + f.ok, function () {

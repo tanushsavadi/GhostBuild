@@ -75,17 +75,18 @@ export function stepCounter(frame: HudFrame, opts: ViewOptions): string {
 }
 
 /**
- * Mini gesture hint for the dim tag line, from the official glyph table (▲ ▼ ●; the ascii tier maps them to ^ v *).
- * One rule everywhere: ▼ forward, ▲ back, ● select (double press: home). Only screens whose gestures are generic:
+ * Mini gesture hint for the dim tag line, from the official glyph table (◀ ▶ ●; the ascii tier maps them to < > *).
+ * One rule everywhere: ▶ forward swipe = next, ◀ back swipe = back, ● tap = select (double tap: home). Arrows point the
+ * way the finger moves along the temple, not up/down. Only screens whose gestures are generic:
  * menus, playbook steps (also when a step shows its own picture) and pictures opened from a step (core marks their
  * cue_id with "#view"). Other screens name their own gestures in the cue.
  */
 export function gestureHint(frame: HudFrame, counter: string, opts: ViewOptions): string {
   if (opts.askHint === false || import.meta.env.VITE_FLAG_HELP_HINT === '0') return ''
   let hint = ''
-  if (frame.mode === 'menu') hint = '▲▼ MOVE ● SELECT'
-  else if (counter && frame.mode === 'visual' && (frame.cue_id ?? '').includes('#')) hint = '▲ BACK' // opened picture
-  else if (counter) hint = frame.step?.check === 'measured' ? '▲ BACK' : frame.step?.confirmed ? '▼ NEXT ▲ BACK' : '▼ DONE ▲ BACK'
+  if (frame.mode === 'menu') hint = '◀▶ MOVE ● SELECT'
+  else if (counter && frame.mode === 'visual' && (frame.cue_id ?? '').includes('#')) hint = '▶ DONE ◀ BACK' // opened picture
+  else if (counter) hint = frame.step?.check === 'measured' ? '◀ BACK' : frame.step?.confirmed ? '▶ NEXT ◀ BACK' : '▶ DONE ◀ BACK'
   return hint ? sanitizeLine(hint, opts.glyphTier) : ''
 }
 

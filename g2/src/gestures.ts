@@ -35,7 +35,7 @@ export function eventTypeOf(envelope?: { eventType?: number } | null): number | 
  *  - LONG_PRESS (9) / RELEASE (10) arrive on sysEvent (device-apis doc) -> hold_start / hold_end.
  *  - lifecycle 4..7 from sysEvent (or textEvent).
  */
-export function mapHubEvent(event: HubEventLike): GestureAction {
+export function mapHubEvent(event: HubEventLike, opts: { forwardOnTop?: boolean } = {}): GestureAction {
   const sys = eventTypeOf(event.sysEvent)
   const text = eventTypeOf(event.textEvent)
   const list = eventTypeOf(event.listEvent)
@@ -54,8 +54,12 @@ export function mapHubEvent(event: HubEventLike): GestureAction {
   if (sys === OsEventTypeList.LONG_PRESS_EVENT) return { kind: 'send', gesture: 'hold_start' }
   if (sys === OsEventTypeList.LONG_PRESS_RELEASE_EVENT) return { kind: 'send', gesture: 'hold_end' }
 
-  if (text === OsEventTypeList.SCROLL_BOTTOM_EVENT) return { kind: 'send', gesture: 'swipe_down' }
-  if (text === OsEventTypeList.SCROLL_TOP_EVENT) return { kind: 'send', gesture: 'swipe_up' }
+  // swipe_down = forward (next), swipe_up = back. On the physical temple the wearer's forward swipe arrives as SCROLL_TOP
+  // (operator report 2026-10-18), so the glasses map it with forwardOnTop; the simulator's Down key stays forward.
+  const forward = opts.forwardOnTop ? OsEventTypeList.SCROLL_TOP_EVENT : OsEventTypeList.SCROLL_BOTTOM_EVENT
+  const back = opts.forwardOnTop ? OsEventTypeList.SCROLL_BOTTOM_EVENT : OsEventTypeList.SCROLL_TOP_EVENT
+  if (text === forward) return { kind: 'send', gesture: 'swipe_down' }
+  if (text === back) return { kind: 'send', gesture: 'swipe_up' }
 
   if (sys === OsEventTypeList.CLICK_EVENT || text === OsEventTypeList.CLICK_EVENT) return { kind: 'send', gesture: 'press' }
 
@@ -69,18 +73,42 @@ export function mapHubEvent(event: HubEventLike): GestureAction {
  */
 export class GestureRouter {
   private lastPress = -Infinity
+  private lastSwipe = -Infinity
+  private pending: ReturnType<typeof setTimeout> | null = null
+  /**
+   * holdMs > 0 (the glasses): the temple reports the start of a swipe as a click, so a tap is held this long and dropped if
+   * a swipe (or a double tap) follows; a tap just after a swipe is its tail. Held taps are delivered later through `emit`.
+   */
   constructor(
     private readonly now: () => number = () => Date.now(),
     private readonly windowMs = 150,
+    private readonly forwardOnTop = false,
+    private readonly holdMs = 0,
   ) {}
 
-  route(event: HubEventLike): GestureAction {
-    const a = mapHubEvent(event)
+  route(event: HubEventLike, emit?: (a: GestureAction) => void): GestureAction {
+    const a = mapHubEvent(event, { forwardOnTop: this.forwardOnTop })
+    const t = this.now()
+    if (a.kind === 'exit' || (a.kind === 'send' && (a.gesture === 'swipe_up' || a.gesture === 'swipe_down'))) {
+      if (a.kind === 'send') this.lastSwipe = t
+      this.cancelPending() // the held tap was the start of this swipe / the first half of this double tap
+      return a
+    }
     if (a.kind === 'send' && a.gesture === 'press') {
-      const t = this.now()
       if (t - this.lastPress < this.windowMs) return { kind: 'ignore' }
+      if (this.holdMs > 0 && t - this.lastSwipe < this.holdMs) return { kind: 'ignore' }
       this.lastPress = t
+      if (this.holdMs > 0 && emit) {
+        this.cancelPending()
+        this.pending = setTimeout(() => { this.pending = null; emit(a) }, this.holdMs)
+        return { kind: 'ignore' }
+      }
     }
     return a
+  }
+
+  private cancelPending(): void {
+    if (this.pending) clearTimeout(this.pending)
+    this.pending = null
   }
 }

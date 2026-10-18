@@ -99,7 +99,9 @@ registerBackgroundState('hud', () => ({ sessionId, backend }), (saved) => {
 const ok = await renderer.init(blankView())
 log(`page created: ${ok ? 'success' : 'FAILED'}`)
 
-const router = new GestureRouter()
+// Physical temple: the forward swipe arrives as SCROLL_TOP. Simulator keys keep Down = forward. VITE_SWIPE=classic reverts.
+// Glasses: a tap is held 280 ms and dropped if a swipe follows (the temple reports a swipe's start as a click).
+const router = new GestureRouter(undefined, undefined, surface === 'g2' && env.VITE_SWIPE !== 'classic', surface === 'g2' ? 280 : 0)
 // Head shake (opt-in): shaking the head "no" starts a hands-free listen, ending on silence. Needs voice; never the only way in.
 const shake = flags.headShake
   ? new HeadShakeTrigger(bridge, () => { if (!voice.busy) voice.startHandsFree?.() }, detectorFromEnv(env as unknown as Record<string, string | undefined>))
@@ -119,7 +121,7 @@ function cleanup(): void {
 const unsubscribe = bridge.onEvenHubEvent((event) => {
   if (shake?.onEvent(event as never)) return // IMU samples are never a gesture
   if (event.audioEvent) { voice.onAudio(event.audioEvent.audioPcm); return } // PCM is never a gesture
-  const a = router.route(event)
+  const a = router.route(event, (held) => controller.onAction(held))
   if (a.kind === 'lifecycle') {
     switch (a.event) {
       case 'foreground_enter':

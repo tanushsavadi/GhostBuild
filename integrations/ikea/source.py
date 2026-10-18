@@ -128,6 +128,12 @@ class IkeaSource:
     def bundle(self, rec: ProductRecord) -> Optional[ManualBundle]:
         return load_bundle(self.base / rec.article)
 
+    def auto_card(self, rec: ProductRecord) -> Optional[dict]:
+        """No prepared bundle: build a per-step guide from the validated official manual (see auto_manual.py)."""
+        from .auto_manual import build_card
+
+        return build_card(article=rec.article, name=rec.name, pdf_url=rec.manual_url, product_url=rec.product_url, root=self.root)
+
     def lookup(self, claim: Claim, timeout_s: float = 10.0) -> LookupResult:
         t0 = time.monotonic()
         article = claim.article

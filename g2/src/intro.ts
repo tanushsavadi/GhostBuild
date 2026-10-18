@@ -19,6 +19,8 @@ export function introFrames(opts: ViewOptions): IntroFrame[] {
     ms: 280,
   }))
   frames.push({ view: textView([line(WORDMARK), line(TAGLINE)]), ms: 1500 })
+  // The whole navigation, once: the arrows point the way the finger moves along the temple.
+  frames.push({ view: textView([line('SWIPE ▶ NEXT   ◀ BACK'), line('TAP ● SELECT   ●● HOME')]), ms: 2600 })
   return frames
 }
 

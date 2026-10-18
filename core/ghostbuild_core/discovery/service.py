@@ -605,8 +605,9 @@ class ProductDiscoveryService:
                 from contracts.models import GoalRequest
 
                 req = GoalRequest(session_id=sid, mode="build", via="phone_text", text=goal)
+                auto = getattr(self.sources[s.source], "auto_card", None)
                 if self.rt.live.try_start(
-                    req, doc_urls=[rec.manual_url, rec.product_url]
+                    req, doc_urls=[rec.manual_url, rec.product_url], builder=(lambda: auto(rec)) if auto else None
                 ):
                     s.phase = "loading"  # the glasses show the research progress screen, then the guide starts itself
                     s.message = "Preparing a step-by-step guide from the official manual. It starts by itself when ready; AI-compiled, not human-reviewed."
@@ -752,7 +753,7 @@ class ProductDiscoveryService:
             data = photo(self.rt.asset_root, r, True)
             cue = Cue(
                 line1=short(f"{s.focus + 1}/{len(s.candidates)} {r.name}"),
-                line2="● PICK  ▼ NEXT  ▲ BACK",
+                line2="● PICK  ▶ NEXT  ◀ BACK",
             )
             if data:
                 return Screen.visual(
@@ -796,10 +797,10 @@ class ProductDiscoveryService:
                         line1=short(
                             f"{offset + row + 1}/{len(s.candidates)} {rec.name} {rec.color}"
                         ),
-                        line2="● ENLARGE  ▲▼ SCROLL",
+                        line2="● ENLARGE  ◀▶ SCROLL",
                     )
                 else:
-                    cue = Cue(line1=short(opts[row]), line2="● CHOOSE  ▲▼ SCROLL")
+                    cue = Cue(line1=short(opts[row]), line2="● CHOOSE  ◀▶ SCROLL")
                 digest = hashlib.sha256(data).hexdigest()
                 self.sheet_images[digest] = data
                 while len(self.sheet_images) > 64:
