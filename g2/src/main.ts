@@ -7,13 +7,15 @@ import {
   ImageRawDataUpdateResult,
   CreateStartUpPageContainer,
   OsEventTypeList,
+  AudioInputSource,
 } from '@evenrealities/even_hub_sdk'
 import { cardsFor, cardsForWord, CREDIT, type Card } from './matcher'
 import top from './top.json'
 
 // Open Palm: a phrase becomes a sequence of cards (handshape image + how-to
-// lines). Tap = next card, double-tap = exit. The phrase comes from the phone
-// page below; speech is added later (docs/OPEN_PALM_PLAN.md step 4).
+// lines). Tap = next card, double-tap = exit, hold = speak the phrase. The
+// phrase is typed on the phone page or spoken into the glasses microphone
+// (ElevenLabs speech-to-text via the laptop server, /api/stt).
 
 const DEMO_PHRASES = ['Hello, nice to meet you', 'My name is Abdul', 'Thank you']
 // Handshape drawing style; switch after the step 0 lens test (?style=thin|bold|bold96).
@@ -38,6 +40,10 @@ $<HTMLFormElement>('form').onsubmit = e => {
   e.preventDefault()
   if (phraseInput.value.trim()) start(phraseInput.value)
 }
+// Hold to talk from the phone too, in case the OS keeps the temple long-press.
+const talk = $<HTMLButtonElement>('talk')
+talk.onpointerdown = e => { e.preventDefault(); void startListening() }
+for (const ev of ['pointerup', 'pointerleave', 'pointercancel'] as const) talk.addEventListener(ev, () => void stopListening())
 
 // Built from text nodes: descriptions come from Wiktionary, so never as HTML.
 function el(tag: string, text = '', attrs: Record<string, string> = {}): HTMLElement {
@@ -122,9 +128,13 @@ function paginate(text: string, max = 190): string[] {
   return pages
 }
 
+/** Shown instead of the card while listening or transcribing. */
+let status: string | null = null
+
 function lensText(): string {
+  if (status) return status
   const card = cards[index]
-  if (!card) return 'OPEN PALM\nType or pick a phrase\non the phone.'
+  if (!card) return 'OPEN PALM\nHold the temple and say\nwhat you want to sign.\n\nOr type it on the phone.'
   if (detailPage >= 0 && card.detail) {
     const pages = paginate(card.detail.text)
     const last = detailPage >= pages.length - 1
@@ -201,8 +211,73 @@ function start(phrase: string): void {
   cards = cardsFor(phrase)
   index = 0
   detailPage = -1
+  status = null
   version++
   void render()
+}
+
+function setStatus(text: string | null): void {
+  status = text
+  version++
+  void render()
+}
+
+// ---- speech: hold to talk -----------------------------------------------------
+// Glasses mic PCM (16 kHz, 16-bit, mono) is collected while the temple (or the
+// phone button) is held, then sent once to /api/stt. Nothing is stored.
+
+const MAX_LISTEN_MS = 15_000
+let listening = false
+let chunks: Uint8Array[] = []
+let listenTimer: ReturnType<typeof setTimeout> | undefined
+
+async function startListening(): Promise<void> {
+  if (listening) return
+  listening = true
+  chunks = []
+  setStatus('LISTENING...\nSay your sentence,\nthen let go.')
+  listenTimer = setTimeout(() => void stopListening(), MAX_LISTEN_MS)
+  const ok = await bridge.audioControl(true, AudioInputSource.Glasses)
+  if (!ok) {
+    listening = false
+    clearTimeout(listenTimer)
+    setStatus('MICROPHONE NOT AVAILABLE\nType the phrase on the phone.')
+    setTimeout(() => status?.startsWith('MICROPHONE') && setStatus(null), 4000)
+  }
+}
+
+async function stopListening(): Promise<void> {
+  if (!listening) return
+  listening = false
+  clearTimeout(listenTimer)
+  await bridge.audioControl(false)
+  const pcm = new Uint8Array(chunks.reduce((n, c) => n + c.length, 0))
+  let offset = 0
+  for (const c of chunks) {
+    pcm.set(c, offset)
+    offset += c.length
+  }
+  chunks = []
+  setStatus('TRANSLATING...')
+  let text = ''
+  try {
+    const res = await fetch('/api/stt', { method: 'POST', body: pcm, headers: { 'Content-Type': 'application/octet-stream' } })
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    text = ((await res.json()) as { text: string }).text
+  } catch (err) {
+    console.error('[coach] speech-to-text failed', err)
+    setStatus("COULDN'T REACH THE LAPTOP\nType the phrase on the phone.")
+    setTimeout(() => status?.startsWith('COULDN') && setStatus(null), 4000)
+    return
+  }
+  if (!text) {
+    setStatus("DIDN'T CATCH THAT\nHold the temple and try again.")
+    setTimeout(() => status?.startsWith('DIDN') && setStatus(null), 3000)
+    return
+  }
+  phraseInput.value = text
+  console.log(`[coach] heard "${text}" from ${(pcm.length / 32000).toFixed(1)} s of audio`)
+  start(text)
 }
 
 function next(): void {
@@ -246,6 +321,10 @@ else void render()
 // A tap arrives with eventType undefined (CLICK = 0 is omitted on the wire), so
 // only read eventType from an envelope that exists.
 bridge.onEvenHubEvent(event => {
+  if (event.audioEvent) {
+    if (listening) chunks.push(event.audioEvent.audioPcm)
+    return
+  }
   const types = [event.sysEvent, event.textEvent]
     .filter(e => e !== undefined)
     .map(e => e.eventType ?? OsEventTypeList.CLICK_EVENT)
@@ -253,7 +332,10 @@ bridge.onEvenHubEvent(event => {
     bridge.shutDownPageContainer(1)
     return
   }
-  if (types.includes(OsEventTypeList.CLICK_EVENT)) next()
+  if (types.includes(OsEventTypeList.LONG_PRESS_EVENT)) void startListening()
+  else if (types.includes(OsEventTypeList.LONG_PRESS_RELEASE_EVENT)) void stopListening()
+  else if (listening) return
+  else if (types.includes(OsEventTypeList.CLICK_EVENT)) next()
   else if (types.includes(OsEventTypeList.SCROLL_BOTTOM_EVENT)) more()
   else if (types.includes(OsEventTypeList.SCROLL_TOP_EVENT)) back()
 })

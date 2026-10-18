@@ -18,6 +18,8 @@
       form { display: flex; gap: 8px; }
       input { flex: 1; font: inherit; padding: 10px; border-radius: 8px; border: 1px solid #555; background: #111; color: inherit; }
       button { font: inherit; padding: 10px 14px; border-radius: 8px; border: 1px solid #555; background: #333; color: inherit; }
+      .talk { width: 100%; margin-top: 10px; padding: 14px; font-size: 17px; touch-action: none; user-select: none; }
+      .talk:active { background: #2f6f3a; }
       #demos { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
       #card { margin-top: 12px; padding: 12px; border-radius: 8px; background: #111; min-height: 96px; }
       #card a { color: #8fd18f; }
@@ -31,6 +33,7 @@
         <input id="phrase" placeholder="Type what you want to say" autocomplete="off" />
         <button type="submit">Show</button>
       </form>
+      <button id="talk" class="talk">🎤 Hold to talk</button>
       <div id="demos"></div>
       <div id="card">No phrase yet.</div>
       <p id="credit"></p>

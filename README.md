@@ -10,7 +10,7 @@ You can't hold a phone and sign at the same time: signing needs both hands, and 
 
 ## What it does
 
-1. You type (or, soon, say) a sentence on the phone: *"What's your name?"*
+1. You **hold the temple and say** a sentence (or type it on the phone): *"What's your name?"*
 2. It becomes ASL signs in ASL order: **YOUR → NAME → WHAT**, with the facial expression to hold (*brows down: it's a what-question*).
 3. The glasses show one card per sign:
 
@@ -30,6 +30,7 @@ You can't hold a phone and sign at the same time: signing needs both hands, and 
 | Tap | Next sign |
 | Swipe down | Full step-by-step description of this sign (pages) |
 | Swipe up | Back to the card |
+| Hold (long press) | Speak a sentence; let go to translate it |
 | Double-tap | Exit |
 
 The phone page shows the same card, the full description, and a link to a reference video of the sign.
@@ -58,7 +59,13 @@ npm rebuild @evenrealities/evenhub-simulator   # only if "npm run simulate" says
 npm run dev                                    # leave running
 ```
 
-**Simulator** (second terminal, in `g2/`):
+**Laptop server** (needed for speech; repo root, second terminal). Put `ELEVENLABS_API_KEY=...` in `.env` first:
+
+```bash
+uv run tools/open_palm_server.py
+```
+
+**Simulator** (another terminal, in `g2/`):
 
 ```bash
 npm run simulate
@@ -116,7 +123,7 @@ Common problem to look for: the full description (from Wiktionary) sometimes des
  └───────────────────────────────────────────────┘
 ```
 
-Everything runs on the phone; no server and no internet are needed at demo time.
+Typed sentences are handled entirely on the phone. Speech goes glasses mic → phone → laptop server (`tools/open_palm_server.py`, through the Vite `/api` proxy, so only port 5173 is needed) → ElevenLabs speech-to-text (`scribe_v2`, raw 16 kHz PCM) → text → the same matcher. API keys stay in `.env` on the laptop; audio is not stored.
 
 `g2/src/matcher.ts` turns a sentence into cards, in this order of preference:
 

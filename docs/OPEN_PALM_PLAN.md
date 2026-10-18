@@ -28,7 +28,7 @@ Handshape image 144×144 on the left; text on the right: sign name and n/N, two 
 | 2d Full descriptions | `g2/src/wiktionary.json` from `uv run tools/fetch_wiktionary.py`: Wiktionary's step-by-step "Production" text (CC BY-SA 4.0) for ~290 glosses, incl. palm direction and facial expression. Swipe down on a card pages through it, swipe up goes back; the phone shows it with credit | Every sign in the demo phrases has one | Built, simulator-checked |
 | 2e Sentences | `g2/src/phrases.json`: ~22 common sentences signed in ASL order with a face cue (e.g. "What's your name?" → YOUR NAME WHAT, brows down); contractions expanded ("can't" → CANNOT); matching ignores dropped words (is/are/do/the) | Common greetings and questions come out in ASL order | Built, simulator-checked |
 | 3 Typed phrase | Phone page text box → `matcher.ts` on the phone → cards (no laptop needed) | The 3 demo phrases give the right cards | Built, simulator-checked |
-| 4 Speech | Glasses mic → laptop Vosk → phrase → cards | 9/10 spoken phrases right; first card ≤ 2 s | 1.5 h |
+| 4 Speech | Hold temple (or phone button) → glasses mic → laptop server → ElevenLabs scribe_v2 → phrase → cards | 9/10 spoken phrases right; first card ≤ 2 s | Built: STT 0.5–0.8 s on a synthesized sentence; hold/release flow checked in the simulator; real mic untested |
 | 5 Unknown words | Fingerspelling; AI · UNCHECKED behind a flag | No confident wrong sign | 1 h |
 | 6 Demo | Rehearse; film through the lens | Script works 3 times in a row | 30 min |
 
