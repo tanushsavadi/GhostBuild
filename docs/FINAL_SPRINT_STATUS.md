@@ -7,6 +7,7 @@ Updated October 18, 2026. Submission deadline: noon PDT; target Devpost completi
 - Integration: `codex/final-sprint`, `.worktrees/final-sprint`. Correction implementation: `e816740` plus subsequent release-label/documentation commits.
 - Existing sprint history and authorship are preserved. The unrelated Open Palm/ASL branch and voice PR #2 are not broadly merged.
 - Operator backend `:8787` reloaded at 06:57 and 07:09 PDT from the corrected checkout, preserving `logs/bench-0632` and a timestamped backup. Health returned HTTP 200. Its existing optional provider configuration was retained.
+- Post-release fixes on `main` (`bf30c97`, [PR #5](https://github.com/tanushsavadi/GhostBuild/pull/5), CI run 39139112479 green): 'I need help fixing …' starts a new task; G2 double press = Home from any step, system exit at the root screen.
 - GitHub publication: [PR #3](https://github.com/tanushsavadi/GhostBuild/pull/3) merged to `main` as merge commit `29316b7` (2026-10-18 07:49 PDT). CI passed on the PR head `d7c1f7f` ([run 39137515696](https://github.com/tanushsavadi/GhostBuild/actions/runs/39137515696)) and on `main` ([run 39137702045](https://github.com/tanushsavadi/GhostBuild/actions/runs/39137702045)); both uploaded the `ghostbuild-g2` package artifact (50,636 bytes zipped).
 
 ## Fresh verification
@@ -26,7 +27,7 @@ Updated October 18, 2026. Submission deadline: noon PDT; target Devpost completi
 
 ## Packages and security
 
-- LAN build: `g2/ghostbuild.ehpk`, also `/tmp/ghostbuild-release-artifacts/ghostbuild-lan.ehpk`; 47,035 bytes; SHA-256 `eb5859301a5fc7d0287b3225fde735b9ba385d4d2af05ee98e58b447295aa90a`. Built for the presenting laptop's current backend origin; rebuild if its IP changes. G2 mic permission is absent.
+- LAN Beta build (current): `g2/ghostbuild.ehpk`, also `/tmp/ghostbuild-release-artifacts/ghostbuild-lan-e1bbb00.ehpk`; built 08:12 PDT from `e1bbb00` (the code on `main` at `bf30c97`); 50,572 bytes; SHA-256 `4ea9c7cf6915aeaaade5cf653009736ee94c1247f4c74789781503eadf6878fe`. Whitelist and default backend `http://172.20.10.6:8787` (the laptop's hotspot address, confirmed at build time); rebuild if it changes. Bundle checked: no credential patterns, voice/head-shake flags off, G2 mic permission absent, includes double-press Home. The earlier 47,035-byte build (`eb58593…`) predates Home and the intake fixes; do not upload it.
 - Portable build: `/tmp/ghostbuild-release-artifacts/ghostbuild-portable.ehpk`; 47,015 bytes; SHA-256 `beca3e146f7e4904446b594205ea46e3742d1f0b1a674887463afa3da7c5bf6f`. Uses localhost; this is a software/CI artifact, not a phone-ready network configuration.
 - Python locked dependency audit and `npm audit --omit=dev`: PASS, no known advisories in the audited production dependencies. Repository secret-pattern scan: PASS; this is a pattern check, not a proof that every historical object is safe.
 - Full npm development audit: **FAIL: six affected development dependencies** (two critical, one high, three moderate). Vite/Vitest major upgrades are deferred during the freeze. Exact advisories and disposition are in [release verification](evidence/release/VERIFICATION.md). Do not treat this debt as a clean full dependency audit.
