@@ -149,7 +149,9 @@ class SessionManager:
         sess = self.sessions.get(h.session_id) if h.session_id else None
         if sess is None:
             act = self.active
-            if (
+            if h.session_id is None and act is not None and self._creator.get(act.id) == "phone-companion":
+                sess = act  # a later physical launch joins the task prepared on its companion
+            elif (
                 h.session_id is None
                 and act is not None
                 and act.phase in ("welcome", "menu")

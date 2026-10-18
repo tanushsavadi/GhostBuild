@@ -13,6 +13,7 @@ dependencies = [
     "numpy",
     "pillow",
     "httpx",
+    "python-dotenv",
 ]
 
 [dependency-groups]

@@ -12,7 +12,7 @@
     'state_playbook_manual', 'state_playbook_measured', 'state_playbook_completed', 'state_playbook_unsupported'];
   var L = window.GBLogic;
   var dev = { force: null, no404: false };               // fixture-mode switches: force 'unreachable' | 'stale'; no404 = /ask and /research answer 404
-  var S = { state: null, okAt: 0, err: null, skew: 0, card: null, cardErr: null, cardFor: null, manifests: {}, goalBusy: false, askBusy: false, resBusy: false };
+  var S = { state: null, okAt: 0, err: null, skew: 0, card: null, cardErr: null, cardFor: null, manifests: {}, goalBusy: false, askBusy: false, resBusy: false, catalog: [], guideView: null, actionBusy: false, connecting: false };
 
   var $ = function (id) { return document.getElementById(id); };
   function h(tag, attrs) {
@@ -43,7 +43,6 @@
   function getJson(path) {
     var ctl = new AbortController(), t = setTimeout(function () { ctl.abort(); }, TIMEOUT_MS);
     return fetch(url(path), { signal: ctl.signal, cache: 'no-store' }).then(function (r) {
-      clearTimeout(t);
       if (!r.ok) throw new Error('HTTP ' + r.status + ' on ' + path);
       var d = r.headers.get('Date');
       return r.json().then(function (j) { return { json: j, date: d ? Date.parse(d) : NaN }; });
@@ -56,6 +55,7 @@
     p.then(function (r) {
       if (!r.json || typeof r.json !== 'object' || !r.json.session) throw new Error('GET /state returned an unexpected body');
       S.state = r.json; S.err = null;
+      if (!FIXTURE && r.json.session.id === "none" && !S.connecting) { S.connecting = true; postJson("/session/connect", {}).then(function () { S.connecting = false; }); }
       if (!(FIXTURE && dev.force === 'stale')) S.okAt = Date.now();
       if (!isNaN(r.date) && !FIXTURE) S.skew = r.date - Date.now();
       loadCardIfNeeded();
@@ -66,7 +66,7 @@
     if (!id || (S.cardFor === id && S.card) || S.cardLoading) return;
     if (S.cardErrAt && Date.now() - S.cardErrAt < 5000) return;
     S.cardLoading = true;
-    getJson('/card').then(function (r) { S.card = r.json; S.cardFor = id; S.cardErr = null; S.manifests = {}; S.cardErrAt = 0; })
+    getJson('/card').then(function (r) { if (!S.state || S.state.card_id !== id || r.json.card_id !== id) return; S.card = r.json; S.cardFor = id; S.guideView = null; S.cardErr = null; S.manifests = {}; S.cardErrAt = 0; })
       .catch(function (e) { S.cardErr = e.message; S.cardErrAt = Date.now(); })
       .then(function () { S.cardLoading = false; renderGuides(); });
   }
@@ -148,6 +148,7 @@
     if (st && f.ok) s = (tele && st.health && st.health.pi_link && st.health.pi_link !== 'up') ? '__notlive' : (st.hud && st.hud.source) || st.source;
     // No telemetry in play: nothing is "live" from the Pi, so a pi_live label on a manual step is shown as MANUAL STEPS, not LIVE.
     if (s === 'pi_live' && !tele) s = '__manual';
+    if (s === 'manual') s = '__manual';
     var bt = !st || !f.ok ? ['src-none', 'NO LIVE DATA'] : s === '__notlive' ? ['src-none', 'PI NOT LIVE'] : s === '__manual' ? ['src-none', 'MANUAL STEPS'] : s === 'pi_live' ? ['src-live', 'LIVE'] : s === 'simulated' ? ['src-simulated', 'SIMULATED'] : s === 'replay' ? ['src-replay', 'REPLAY'] : ['src-none', 'NO SOURCE'];
     if (FIXTURE && bt[0] !== 'src-none') bt = ['src-replay', 'FIXTURE \u00b7 ' + bt[1]];
     memo(badge, bt.join(), function () { badge.className = 'src ' + bt[0]; badge.textContent = bt[1]; });
@@ -168,7 +169,7 @@
     var key = JSON.stringify(hud || null);
     memo(inner, key, function () {
       clear(inner); inner.className = 'g2-inner';
-      if (!hud || hud.mode === 'quiet') { inner.classList.add('g2-empty'); inner.appendChild(h('div', { text: hud ? 'QUIET: glasses blank (healthy)' : 'no HUD frame yet' })); return; }
+      if (!hud || hud.mode === 'quiet') { inner.classList.add('g2-empty'); inner.appendChild(h('div', { text: hud ? 'QUIET · DISPLAY RESTING' : 'WAITING FOR YOUR GLASSES' })); return; }
       var cue = hud.cue || { line1: '', line2: '' };
       if (hud.mode === 'menu' && hud.menu) {
         inner.classList.add('g2-menu');
@@ -269,7 +270,7 @@
     var a = activeGuide();
     var shown = st && st.hud && st.hud.image ? st.hud.image.view : null;
     var mf = a && a.guide ? S.manifests[a.guide.id] : undefined;
-    var key = JSON.stringify([a && a.guide, a && a.active, a && a.stepNo, shown, S.cardErr, mf]);
+    var key = JSON.stringify([a && a.guide, a && a.active, a && a.stepNo, shown, S.cardErr, mf, S.guideView]);
     if (a && a.guide && S.manifests[a.guide.id] === undefined) loadManifest(a.guide.id);
     memo(box, key, function () {
       clear(box); clear(note);
@@ -280,7 +281,15 @@
       else note.textContent = a.active ? 'Active check ' + (st.check + 1) + ': ' + a.check.action.line1 + ' / ' + a.check.action.line2 + '. ' + a.check.why
         : 'No active fault: showing "' + a.guide.title + '" for reference only.';
       if (!a || !a.guide) return;
+      var selected = S.guideView || shown || a.guide.views[0].view;
+      if (!a.guide.views.some(function (v) { return v.view === selected; })) selected = a.guide.views[0].view;
+      var tabs = h('div', { class: 'guide-tabs', role: 'tablist', 'aria-label': 'Guide pictures' });
       a.guide.views.forEach(function (v) {
+        var tab = h('button', { type: 'button', role: 'tab', 'aria-selected': v.view === selected ? 'true' : 'false', text: v.title });
+        tab.addEventListener('click', function () { S.guideView = v.view; renderGuides(); }); tabs.appendChild(tab);
+      });
+      box.appendChild(tabs);
+      a.guide.views.filter(function (v) { return v.view === selected; }).forEach(function (v) {
         var gid = a.guide.id, m = mf && mf[v.view];
         var img = h('img', { alt: v.title + ': ' + v.depicts, loading: 'lazy', src: url('/guides/' + gid + '/' + v.view + '.phone.png') });
         var cap = h('div', { class: 'gv-d' });
@@ -403,8 +412,7 @@
   function postJson(path, body) {
     var ctl = new AbortController(), t = setTimeout(function () { ctl.abort(); }, 8000);
     return fetch(CORE + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: ctl.signal }).then(function (r) {
-      clearTimeout(t);
-      return r.text().then(function (txt) { var j = null; try { j = JSON.parse(txt); } catch (e) { /* non-JSON body */ } return { status: r.status, ok: r.ok, text: txt, json: j }; });
+      return r.text().then(function (txt) { var j = null; try { j = JSON.parse(txt); } catch (e) { /* non-JSON body */ } return { status: r.status, ok: r.ok, text: txt, json: j }; }).finally(function () { clearTimeout(t); });
     }, function () { clearTimeout(t); return { status: 0, ok: false, text: '', json: null }; });
   }
   function fixtureJson(name) { return fetch('fixtures/' + name + '.json').then(function (r) { return r.json(); }); }
@@ -414,7 +422,7 @@
   function renderGoalHint() {
     var btn = $('goal-send'), hint = $('goal-hint'), f = fresh();
     btn.disabled = !sessionReady() || S.goalBusy;
-    var t = !S.state ? 'Waiting for core.' : !f.ok ? 'Core is not answering; the goal cannot be sent.' : 'Session ' + S.state.session.id + '. Choosing a goal never completes a step or repair.';
+    var t = !S.state ? 'Connecting to your workspace…' : !f.ok ? 'Connection lost. Your progress is kept; reconnect to continue.' : 'Choose a prepared guide or describe a new task. New research needs review.';
     memo(hint, t, function () { hint.textContent = t; });
   }
   function showResolution(r, note) {
@@ -424,6 +432,7 @@
       h('div', { class: 'st', text: r.status.toUpperCase() + ' · ' + String(r.mode).toUpperCase() + (r.task_title ? ' · ' + r.task_title : '') }),
       r.cue ? h('div', { class: 'cue' }, r.cue.line1, r.cue.line2 ? h('br') : null, r.cue.line2 || null) : null,
       h('div', { text: r.detail || '' }));
+    if (r.status === 'supported') { document.body.classList.remove('goal-open'); window.dispatchEvent(new CustomEvent('ghostbuild:answer', {detail: {text: r.detail}})); }
     if (r.research_queued) el.appendChild(h('div', { class: 'queued', text: L.NOT_AVAILABLE }));
     if (note) el.appendChild(h('div', { class: 'meta', text: note }));
     if (r.alternatives && r.alternatives.length) {
@@ -433,9 +442,9 @@
       Array.prototype.forEach.call(chips.children, function (b) { b.addEventListener('click', function () { $('goal-text').value = b.textContent; $('goal-text').focus(); }); });
       el.appendChild(chips);
     }
-    if (r.status !== 'supported' && !r.research_queued) {
+    if (r.status !== 'supported') {
       var sv = h('button', { type: 'button', class: 'ghost', text: 'Request async research instead' });
-      sv.addEventListener('click', function () { $('research-text').value = $('goal-text').value; var m = document.querySelector('input[name=rmode][value=' + r.mode + ']'); if (m) m.checked = true; $('research-text').focus(); });
+      sv.addEventListener('click', function () { document.querySelector('.area-research').open = true; $('research-text').value = $('goal-text').value; $('creao-goal').value = $('goal-text').value; var cm = document.querySelector('input[name=cintent][value=' + r.mode + ']'); if (cm) cm.checked = true; var m = document.querySelector('input[name=rmode][value=' + r.mode + ']'); if (m) m.checked = true; $('research-text').focus(); });
       el.appendChild(sv);
     }
     box.appendChild(el);
@@ -444,6 +453,7 @@
   $('goal-form').addEventListener('submit', function (ev) {
     ev.preventDefault();
     if (!sessionReady() || S.goalBusy) return;
+    window.dispatchEvent(new Event('ghostbuild:input'));
     var mode = document.querySelector('input[name=mode]:checked').value, text = $('goal-text').value.trim();
     var body = { v: 2, session_id: S.state.session.id, mode: mode, via: 'phone_text', text: text ? text : null };
     S.goalBusy = true; renderGoalHint();
@@ -472,16 +482,22 @@
     memo(hint, t, function () { hint.textContent = t; });
   }
   function showAsk(r, note) {
+    if (['where', 'how', 'correct'].indexOf(r.intent) >= 0) S.guideView = r.intent;
     var box = $('ask-result'); clear(box);
     var el = h('div', { class: 'res ' + (r.answer ? 'supported' : 'ambiguous') },
       h('div', { class: 'st', text: 'INTENT: ' + String(r.intent).toUpperCase() }),
       h('p', { class: 'detail', text: r.text }));
-    if (r.answer) { el.appendChild(h('div', { class: 'meta', text: 'Short answer cue returned for the glasses:' })); el.appendChild(h('div', { class: 'cue' }, r.answer.line1, r.answer.line2 ? h('br') : null, r.answer.line2 || null)); }
+    if (r.answer) { el.appendChild(h('div', { class: 'meta', text: 'On your glasses' })); el.appendChild(h('div', { class: 'cue' }, r.answer.line1, r.answer.line2 ? h('br') : null, r.answer.line2 || null)); }
     else el.appendChild(h('div', { class: 'meta', text: 'No short cue was returned, so this is phone text only.' }));
-    el.appendChild(h('div', { class: 'meta', text: note || 'Shown exactly as core returned it. The endpoint does not say where the answer came from.' }));
+    el.appendChild(h('div', { class: 'meta', text: note || (r.label ? 'Source: ' + r.label + ' · Current step only.' : 'From the loaded guide. Unknown facts are left unanswered.') }));
     box.appendChild(el);
+    window.dispatchEvent(new CustomEvent('ghostbuild:answer', {detail: r}));
   }
   function showAskError(msg) { var box = $('ask-result'); clear(box); box.appendChild(h('div', { class: 'res err', role: 'alert' }, h('div', { class: 'st', text: 'NO ANSWER' }), h('div', { text: msg }))); }
+  window.addEventListener('ghostbuild:voice-result', function (ev) {
+    var box = $('ask-result'); clear(box);
+    box.appendChild(h('div', {class:'res supported'}, h('div', {class:'st',text:'YOUR SPECIALIST'}), h('p',{class:'detail',text:ev.detail.text})));
+  });
   function fixtureAsk(text) {
     // FIXTURE ONLY: word-overlap match against the loaded card's FAQ so the page can be demonstrated with no backend.
     var words = String(text).toLowerCase().split(/\W+/).filter(function (w) { return w.length > 2; }), best = null, bs = 0;
@@ -494,6 +510,7 @@
     ev.preventDefault();
     var text = $('ask-text').value.trim();
     if (!sessionReady() || S.askBusy) return;
+    window.dispatchEvent(new Event('ghostbuild:input'));
     if (!text) { showAskError('Type a question first.'); return; }
     S.askBusy = true; renderAskHint();
     var p;
@@ -660,6 +677,7 @@
         C.approving = false; btn.disabled = false; tok.value = '';
         if (!r.ok) { out.textContent = L.approveError(r.status, r.text); return; }
         out.textContent = FIXTURE ? 'FIXTURE RESPONSE: nothing was approved.' : 'Approved by ' + who.value.trim() + '. The task is now in the BUILD/FIX list on the glasses and here.';
+        if (!FIXTURE) { loadCatalog(); C.detail = null; }
       });
     });
     return h('div', { class: 'approve' }, h('div', { class: 'meta', text: 'Approving means you reviewed this draft against its sources. The admin token and your name are not stored.' }), who, tok, btn, out);
@@ -699,6 +717,63 @@
     bar.appendChild(h('label', null, cb404, 'simulate 404 on /ask + /research'));
   }
 
-  function tick(poll) { renderStatus(); renderMirror(); renderTask(); renderPlaybook(); renderTimeline(); renderGuides(); renderGoalHint(); renderAskHint(); renderResearchHint(); }
+  // The companion uses the same card engine; the explicit confirm control is separate from pictures.
+  function renderWorkspace() {
+    var st = S.state, pb = st && st.playbook, active = st && st.session.phase === 'task';
+    document.body.classList.toggle('has-task', !!active);
+    $('new-task').hidden = !active;
+    if (active) {
+      var title = S.card && S.card.title || 'Your task';
+      $('workspace-title').textContent = title;
+      $('workspace-subtitle').textContent = pb ? (pb.confirmed.length + pb.verified.length) + ' of ' + pb.step_count + ' steps complete. Take it one step at a time.' : 'Guidance from your reviewed task. Evidence stays clearly labeled.';
+    }
+    var box = $('phone-controls'), hud = st && st.hud;
+    var key = JSON.stringify([hud && hud.seq, active, S.actionBusy, fresh().ok]);
+    memo(box, key, function () {
+      clear(box); if (!active || !hud) return;
+      function add(action, text, cls, enabled) {
+        var btn = h('button', {type:'button', class:cls, text:text});
+        btn.disabled = !fresh().ok || S.actionBusy || enabled === false || !!FIXTURE;
+        btn.addEventListener('click', function () { sendAction(action); }); box.appendChild(btn);
+      }
+      add('previous', 'Back', 'secondary');
+      add('press', hud.mode === 'visual' ? 'Back to step' : 'Show picture / return', 'secondary');
+      if (hud.mode === 'visual') add('next_view', 'Next picture', 'secondary');
+      if (pb && hud.mode === 'step') add('confirm', 'I completed this step', 'confirm', hud.step && hud.step.check === 'manual');
+      if (pb && hud.step && hud.step.check === 'measured') box.appendChild(h('p', {class:'meta', text:'Waiting for measured evidence. A tap or spoken command cannot complete this check.'}));
+    });
+  }
+  function sendAction(action) {
+    if (!sessionReady() || S.actionBusy) return;
+    window.dispatchEvent(new Event('ghostbuild:input'));
+    S.actionBusy = true; renderWorkspace();
+    var body = {session_id:S.state.session.id, seq_seen:S.state.hud.seq, action:action};
+    postJson('/session/action', body).then(function (r) {
+      $('control-result').textContent = r.ok ? (action === 'confirm' ? 'Step confirmed by you.' : 'Updated.') : r.status === 0 ? 'Connection lost. Try again when connected.' : L.detailOf ? L.detailOf(r.text) : 'Display changed. Review the current step and try again.';
+      if (r.ok && r.json) { S.state.hud = r.json; if (r.json.image) S.guideView = r.json.image.view; }
+    }).finally(function () { S.actionBusy = false; renderWorkspace(); });
+  }
+  $('new-task').addEventListener('click', function () { window.dispatchEvent(new Event('ghostbuild:input')); document.body.classList.add('goal-open'); $('h-goal').scrollIntoView({behavior:'smooth', block:'center'}); $('goal-text').focus(); });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-question]'), function (btn) {
+    btn.addEventListener('click', function () { $('ask-text').value = btn.getAttribute('data-question'); $('ask-form').requestSubmit(); });
+  });
+  function loadCatalog() {
+    if (FIXTURE) { $('task-catalog').textContent = 'Fixture preview. Open the live companion to choose a task.'; return; }
+    getJson('/catalog').then(function (r) {
+      S.catalog = r.json.tasks || []; renderCatalog();
+    }).catch(function () { $('task-catalog').textContent = 'Prepared guides will appear when connected.'; setTimeout(loadCatalog, 5000); });
+  }
+  function renderCatalog() {
+    var mode = document.querySelector('input[name=mode]:checked').value;
+    var box = $('task-catalog'); clear(box);
+    S.catalog.filter(function (t) { return t.mode === mode; }).forEach(function (task) {
+      var btn = h('button', {type:'button'}, h('span', {text:task.title}), h('small', {text: task.steps ? task.steps + ' STEPS  ↗' : 'EVIDENCE CHECK  ↗'}));
+      btn.addEventListener('click', function () { $('goal-text').value = task.title; $('goal-form').requestSubmit(); }); box.appendChild(btn);
+    });
+    if (!box.children.length) box.appendChild(h('p',{class:'meta',text:'No prepared guide for this mode yet. Describe your task for research.'}));
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('input[name=mode]'), function (radio) { radio.addEventListener('change', function () { renderCatalog(); $('goal-text').placeholder = radio.value === 'build' ? 'I want to build…' : 'What needs attention?'; }); });
+  loadCatalog();
+  function tick(poll) { renderWorkspace(); renderStatus(); renderMirror(); renderTask(); renderPlaybook(); renderTimeline(); renderGuides(); renderGoalHint(); renderAskHint(); renderResearchHint(); }
   devbar(); tick(); poll(); setInterval(tick, 500);
 })();

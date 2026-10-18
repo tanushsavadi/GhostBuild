@@ -6,6 +6,8 @@ import asyncio
 import contextlib
 import json
 import logging
+import os
+import time
 from pathlib import Path
 from typing import Optional
 
@@ -37,6 +39,19 @@ class AskBody(BaseModel):
     model_config = ConfigDict(extra="forbid")
     session_id: str = Field(default="", max_length=64)
     text: str = Field(min_length=1, max_length=300)
+
+
+class PhoneAction(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    session_id: str = Field(min_length=1, max_length=64)
+    action: str = Field(pattern="^(press|previous|confirm|next_view)$")
+    seq_seen: int = Field(ge=0)
+
+
+class SpeakBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    text: str = Field(min_length=1, max_length=500)
+    consent: bool = False
 
 
 def _json(model, status: int = 200) -> Response:
@@ -223,6 +238,43 @@ def create_app(
     async def get_session() -> Response:
         return _json(runtime.session())
 
+    @app.post("/session/connect")
+    async def connect_phone() -> Response:
+        """Join the current task; phone-only launch works without impersonating a G2 connection."""
+        current = runtime.session()
+        if current.id == "none":
+            runtime.hello(G2Hello(client_id="phone-companion"))
+        return _json(runtime.session())
+
+    @app.get("/catalog")
+    async def get_catalog() -> Response:
+        return JSONResponse({"tasks": [{"card_id": c.card_id, "title": c.title, "mode": c.goal_mode,
+                                      "steps": len(c.steps), "provenance": c.provenance}
+                                     for c in runtime.cards]})
+
+    @app.post("/session/action")
+    async def phone_action(body: PhoneAction) -> Response:
+        if body.session_id != runtime.session().id:
+            raise HTTPException(409, "task session changed; refresh before acting")
+        if body.seq_seen != runtime.hud.current.seq:
+            raise HTTPException(409, "display changed; review the current step before acting")
+        pb = runtime.playbook
+        if body.action == "confirm":
+            if pb is None or pb.done or pb.view_idx is not None or pb.step.verify is not None:
+                raise HTTPException(409, "only a visible manual step can be confirmed")
+            if runtime.hud.current.mode != "step":
+                raise HTTPException(409, "return to the step before confirming")
+            if not pb._step_settled(runtime.clock.now_ms()):
+                raise HTTPException(409, "read the current step before confirming")
+            gesture = "swipe_down"
+        elif body.action == "next_view":
+            if pb is None or pb.view_idx is None:
+                raise HTTPException(409, "open a picture first")
+            gesture = "swipe_down"
+        else:
+            gesture = "press" if body.action == "press" else "swipe_up"
+        return _json(runtime.handle_input(G2Input(gesture=gesture, seq_seen=body.seq_seen)))
+
     @app.post("/session/goal")
     async def post_goal(request: Request) -> Response:
         try:
@@ -255,6 +307,10 @@ def create_app(
             body = AskBody.model_validate(json.loads(await request.body()))
         except (ValidationError, ValueError) as exc:
             raise HTTPException(status_code=422, detail=str(exc)[:500])
+        if body.session_id and body.session_id != runtime.session().id:
+            raise HTTPException(409, "task session changed; ask again in the current session")
+        if not body.text.strip():
+            raise HTTPException(422, "enter a question")
         res = runtime.ask(body.text.strip())
         if res is None:
             raise HTTPException(status_code=409, detail="no active playbook; start a task with steps first")
@@ -262,6 +318,8 @@ def create_app(
 
     @app.get("/guides/{guide_id}/{view}.png")
     async def get_guide(guide_id: str, view: str) -> Response:
+        if view.endswith(".phone"):
+            return await get_phone_guide(guide_id, view[:-6])
         for card in runtime.cards:
             for g in card.guides:
                 if g.id != guide_id:
@@ -275,6 +333,79 @@ def create_app(
                         return FileResponse(path, media_type="image/png")
         raise HTTPException(status_code=404, detail="no such guide view")
 
+    @app.get("/guides/{guide_id}/{view}.phone.png")
+    async def get_phone_guide(guide_id: str, view: str) -> Response:
+        for card in runtime.cards:
+            for guide in card.guides:
+                if guide.id == guide_id:
+                    for item in guide.views:
+                        if item.view == view and item.phone_image:
+                            root = runtime.asset_root.resolve()
+                            path = (root / item.phone_image).resolve()
+                            if root in path.parents and path.is_file():
+                                return FileResponse(path, media_type="image/png")
+        # A missing rich image has a supported, useful small-image fallback.
+        return await get_guide(guide_id, view)
+
+    @app.get("/guides/{guide_id}/manifest.json")
+    async def get_manifest(guide_id: str) -> Response:
+        guide = next((g for c in runtime.cards for g in c.guides if g.id == guide_id), None)
+        if guide is None:
+            raise HTTPException(404, "no such guide")
+        root = runtime.asset_root.resolve()
+        path = (root / "knowledge" / "guides" / guide_id / "manifest.json").resolve()
+        if root in path.parents and path.is_file():
+            return FileResponse(path, media_type="application/json")
+        return JSONResponse({"guide_id": guide.id, "views": [v.model_dump(mode="json") for v in guide.views]})
+
+    @app.get("/voice/status")
+    async def voice_status() -> Response:
+        return JSONResponse({"stt": runtime.voice is not None and bool(os.environ.get("ELEVENLABS_API_KEY")),
+                             "tts": os.environ.get("GB_TTS") == "1" and bool(os.environ.get("ELEVENLABS_API_KEY")) and bool(os.environ.get("ELEVENLABS_VOICE_ID")),
+                             "provider": "ElevenLabs", "conversation": False,
+                             "notice": "Audio is sent to ElevenLabs for processing. Recordings are not retained by GhostBuild."})
+
+    speech_lock = asyncio.Lock()
+    last_speech_at = -float("inf")
+
+    @app.post("/voice/speak")
+    async def speak(body: SpeakBody, request: Request) -> Response:
+        nonlocal last_speech_at
+        if not body.consent:
+            raise HTTPException(422, "enable spoken replies with consent first")
+        if os.environ.get("GB_TTS") != "1":
+            raise HTTPException(503, "spoken replies are disabled; text remains available")
+        if speech_lock.locked() or time.monotonic() - last_speech_at < 2:
+            raise HTTPException(429, "a spoken reply is already in progress; try again shortly")
+        async with speech_lock:
+            last_speech_at = time.monotonic()
+            from integrations.elevenlabs.client import synthesize, VoiceProviderError
+            generation = asyncio.create_task(synthesize(body.text.strip(), consent=True))
+
+            async def disconnected():
+                # FastAPI has consumed the JSON body. Await the next ASGI
+                # disconnect directly; polling is_disconnected uses a cancel
+                # scope that can swallow cancellation during task cleanup.
+                while True:
+                    message = await request.receive()
+                    if message["type"] == "http.disconnect":
+                        return
+
+            disconnect = asyncio.create_task(disconnected())
+            try:
+                done, _ = await asyncio.wait((generation, disconnect), return_when=asyncio.FIRST_COMPLETED)
+                if disconnect in done:
+                    raise HTTPException(499, "spoken reply cancelled")
+                audio = generation.result()
+            except VoiceProviderError:
+                raise HTTPException(503, "spoken reply unavailable; use the displayed text")
+            finally:
+                for task in (generation, disconnect):
+                    if not task.done():
+                        task.cancel()
+                await asyncio.gather(generation, disconnect, return_exceptions=True)
+            return Response(audio, media_type="audio/mpeg", headers={"Cache-Control": "no-store"})
+
     mount_cards_api(app, runtime)  # card import endpoints (build-time tooling; see cards_api.py)
     mount_research_runs(app, runtime, research_runs)  # optional CREAO runs + draft approval (GB_CREAO=1; research_runs.py)
 
@@ -283,6 +414,9 @@ def create_app(
 
         @app.websocket("/ws/voice")
         async def ws_voice(websocket: WebSocket, session_id: str = "") -> None:
+            if session_id and session_id != runtime.session().id:
+                await websocket.close(code=1008)
+                return
             await runtime.voice.serve(websocket)
 
     # ------------------------------------------------------------------ simulator (only when --simulate)

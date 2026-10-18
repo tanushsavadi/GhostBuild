@@ -51,7 +51,8 @@ def test_playbook_basics(path: Path):
     for step in card.steps:
         assert len(step.cue.line1) <= 24 and len(step.cue.line2) <= 26
         assert all(r in {s.id for s in card.steps} for r in step.requires)
-    assert sum(1 for s in card.steps if s.guide_id) <= 2
+    guides = {g.id for g in card.guides}
+    assert all(s.guide_id in guides for s in card.steps if s.guide_id)
 
 
 def test_paper_cup_is_sourced_manual_and_sized():
@@ -63,9 +64,10 @@ def test_paper_cup_is_sourced_manual_and_sized():
     assert {"paper cup", "origami", "fold", "cup", "paper"} <= set(card.aliases)
     quotes = [c.quote for s in card.steps for t in s.troubleshoot for c in t.cites if c.quote]
     assert len(quotes) >= 7  # every folding step cites a verbatim sentence
-    assert {g.id for g in card.guides} == {"cup_fold_half", "cup_pinch"}
+    assert {g.id for g in card.guides} == {"cup_fold_half", "cup_pinch", "cup_left_corner", "cup_right_corner"}
     for guide in card.guides:
-        assert all(v.provenance == "AUTHORED DEMO METADATA" and "SCHEMATIC" in v.depicts for v in guide.views)
+        assert all(v.provenance == "AUTHORED DEMO METADATA" and "original instructional diagram" in v.depicts.lower() for v in guide.views)
+        assert [v.view for v in guide.views] == ["where", "how", "correct"]
 
 
 def test_pi_camera_setup_has_two_measured_steps_with_allowed_signals():
@@ -359,5 +361,5 @@ def test_paper_cup_guides_are_the_built_manifest_guides_plus_reference_url():
     for guide in card["guides"]:
         built = json.loads((REPO_ROOT / "knowledge" / "guides" / guide["id"] / "manifest.json").read_text(encoding="utf-8"))["guide"]
         for view in guide["views"]:
-            assert view.pop("reference_url") == "https://origami.me/cup/"
+            assert view["reference_url"] == "https://origami.me/cup/"
         assert guide == built, f"re-paste manifest.json guide into paper_cup.json for {guide['id']} (make guides changed it)"

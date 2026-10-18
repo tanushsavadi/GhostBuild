@@ -19,6 +19,7 @@
   }
   /** Without the card yet (still loading) a non-playbook engine implies a fault/telemetry card; PLAYBOOK implies none until the card says so. */
   function usesTelemetry(state, card) {
+    if (state && state.session && state.session.phase !== 'task') return false;
     if (card) return cardUsesTelemetry(card);
     return !!state && state.engine !== 'PLAYBOOK' && !(state.playbook);
   }
@@ -95,7 +96,9 @@
     if (!j || typeof j !== 'object' || typeof j.text !== 'string') return { ok: false, error: 'core answered /ask with an unexpected body' };
     var a = j.answer;
     if (a !== null && a !== undefined && (typeof a !== 'object' || typeof a.line1 !== 'string')) return { ok: false, error: 'core answered /ask with an unexpected answer shape' };
-    return { ok: true, answer: a ? { line1: a.line1, line2: typeof a.line2 === 'string' ? a.line2 : '' } : null, text: j.text, intent: typeof j.intent === 'string' ? j.intent : 'unknown' };
+    var result = { ok: true, answer: a ? { line1: a.line1, line2: typeof a.line2 === 'string' ? a.line2 : '' } : null, text: j.text, intent: typeof j.intent === 'string' ? j.intent : 'unknown' };
+    if (typeof j.label === 'string') result.label = j.label;
+    return result;
   }
   function askError(status, body) {
     if (status === 404) return 'ASK NOT AVAILABLE: this core has no POST /ask (HTTP 404). Nothing was answered and nothing was sent to the glasses.';

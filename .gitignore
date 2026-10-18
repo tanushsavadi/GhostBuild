@@ -48,6 +48,7 @@ tmp/
 .DS_Store
 .local/
 .playwright-mcp/
+.playwright-cli/
 .idea/
 .vscode/
 *.swp

@@ -177,6 +177,10 @@ class Runtime:
 
     def handle_input(self, gi: G2Input) -> HudFrame:
         self.elog.write("input", input=gi.model_dump(mode="json"))
+        # A retry belongs to the frame the user saw. It must never act on a later
+        # step after the first delivery already advanced. seq=0 is legacy tooling.
+        if gi.gesture not in ("hold_start", "hold_end") and gi.seq_seen > 0 and gi.seq_seen < self.hud.current.seq:
+            return self.hud.current
         if self.voice is not None and gi.gesture in ("hold_start", "hold_end"):
             self.voice.on_hold(gi.gesture)
         elif self.playbook is not None and self.sessions.flash_showing() and self.sessions.active is not None and self.sessions.active.phase == "task":

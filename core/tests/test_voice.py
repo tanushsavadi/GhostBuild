@@ -79,7 +79,7 @@ class Rig:
         self.stt = self.stt or FakeStt(transcript)
         self.stt.transcript = transcript
         self.hold("hold_start")
-        with self.client.websocket_connect("/ws/voice?session_id=x") as ws:
+        with self.client.websocket_connect(f"/ws/voice?session_id={self.rt.session().id}") as ws:
             ws.send_json({"type": "start", "consent": consent})
             if consent:
                 if audio:

@@ -82,6 +82,9 @@ class AskResult:
             "answer": {"line1": self.cue.line1, "line2": self.cue.line2} if self.answered else None,
             "text": self.text if not self.detail else f"{self.text}. {self.detail}",
             "intent": self.intent,
+            "label": self.label,
+            "card_id": self.card_id,
+            "step_id": self.step_id,
         }
 
 
@@ -529,13 +532,29 @@ class PlaybookEngine:
         st = self.step
         text = (text or "").strip()[:300]
         intent = intent_mod.classify_playbook(text, st.faq)
+        if intent in ("where", "why", "how", "correct") and not self._question_matches_step(text):
+            intent = "unknown"
         self._event(f'ask "{text[:120]}" -> {intent}', "INFERRED", {"intent": intent, "step": st.id})
+        # Visual requests reveal reviewed card assets, never advance progress.
+        if intent in ("where", "how", "correct"):
+            guide = self._guide()
+            target = next((i for i, v in enumerate(guide.views) if v.view == intent), None) if guide else None
+            if target is not None:
+                self.view_idx = target
+                self._flashes = []
+                self._refresh(immediate=True)
+                view = guide.views[target]
+                cue = view.fallback
+                return AskResult(intent=intent, answered=True, cue=cue, text=_cue_text(cue), detail=view.depicts,
+                                 label=view.provenance, step_id=st.id, card_id=self.card.card_id)
         cue: Optional[Cue] = None
         detail = ""
         label: EvidenceLabel = self.card.provenance
         body = ""
         if intent == "where":
             cue = st.where
+        elif intent in ("how", "repeat"):
+            cue, detail = st.cue, st.detail
         elif intent == "why":
             cue = st.why
         elif intent == "faq":
@@ -576,6 +595,25 @@ class PlaybookEngine:
             intent=intent, answered=moved or cur.mode in ("uncertain", "ask"), cue=cue, text=_cue_text(cue), detail="",
             label="DETERMINISTIC", step_id=self.step.id, card_id=self.card.card_id,
         )
+
+    def _question_matches_step(self, text: str) -> bool:
+        """Deictic questions refer to this step; named subjects need card support.
+
+        This conservative lexical check abstains on unrelated topics rather than
+        presenting the current step's explanation as an answer about anything.
+        It never fabricates knowledge or uses a provider on the cue path.
+        """
+        conversational = {"where", "why", "how", "there", "here", "that", "this", "these", "those", "it", "does",
+                          "should", "would", "could", "please", "tell", "explain", "show", "look", "like", "correct",
+                          "matter", "important", "reason", "part", "thing", "go", "connect", "do", "step", "done",
+                          "finish", "when", "more", "simply", "again", "exactly", "really", "need", "suppos"}
+        terms = intent_mod._content(text) - conversational
+        if not terms:
+            return True
+        st = self.step
+        context = " ".join([self.card.title, st.title, st.detail, _cue_text(st.cue),
+                            _cue_text(st.where) if st.where else "", _cue_text(st.why) if st.why else ""])
+        return bool(terms & intent_mod._content(context))
 
     # ------------------------------------------------------------------ misc
     def _event(self, text: str, label: EvidenceLabel, evidence: Optional[dict] = None) -> None:

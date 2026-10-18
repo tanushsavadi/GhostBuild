@@ -409,7 +409,8 @@ def test_ask_intents_answer_from_card_text_only(tmp_path):
         assert j["intent"] == "status" and j["answer"]["line1"] == "STEP 2 OF 4"
         settle(rt, 4100)
         j = ask("flibbertigibbet")
-        assert j["intent"] == "unknown" and j["answer"] is None and j["text"] == "NOT IN MY PLAYBOOK SEE PHONE" and set(j) == {"answer", "text", "intent"}
+        assert j["intent"] == "unknown" and j["answer"] is None and j["text"] == "NOT IN MY PLAYBOOK SEE PHONE"
+        assert j["label"] == "DETERMINISTIC" and j["step_id"] == "s1" and j["card_id"] == rt.active_card.card_id
         assert cur(rt).mode == "ask"
         settle(rt, 4100)
         # a step without that content never invents it
