@@ -628,3 +628,69 @@ def test_a_guide_that_cannot_start_says_so_on_the_glasses(env):
     d.select(s.session_id, rec.article)
     assert s.phase == "unavailable" and rt.hud.current.cue.line1 == "NO STEP GUIDE YET"
     assert rt.hud.current.cue.line2 == "MANUAL ON YOUR PHONE"
+
+
+# ---------------------------------------------------------------- back (swipe up) after choosing, and gesture hints
+def test_photo_screens_show_their_gestures(env):
+    rt, d, _ = env
+    say(rt, DEMO)
+    assert "● ENLARGE" in rt.hud.current.cue.line2 and "▲▼" in rt.hud.current.cue.line2
+    rt.handle_input(G2Input(gesture="press", seq_seen=rt.hud.current.seq))
+    assert rt.hud.current.cue.line2 == "● PICK  ▼ NEXT  ▲ BACK"
+
+
+def test_swipe_up_while_preparing_returns_to_the_photo_and_choosing_again_resumes(env, monkeypatch):
+    rt, d, calls, cleanup = _compile_env(env, monkeypatch)
+    import knowledge.compile as comp
+    gate = Event()
+    inner = comp.compile_task
+    monkeypatch.setattr(comp, "compile_task", lambda *a, **k: (gate.wait(3), inner(*a, **k))[1])
+    try:
+        say(rt, DEMO)
+        s = d.state(rt.session().id)
+        rec = next(c.record for c in s.candidates if c.record.name == "ALEX")
+        d.select(s.session_id, rec.article)
+        rt.handle_input(G2Input(gesture="swipe_up", seq_seen=rt.hud.current.seq))
+        s = d.state(s.session_id)
+        assert s.phase == "choosing" and s.candidates[s.focus].record.article == rec.article  # back on that photo
+        assert rt.hud.current.cue.line2 == "● PICK  ▼ NEXT  ▲ BACK"
+        rt.handle_input(G2Input(gesture="press", seq_seen=rt.hud.current.seq))  # pick it again: wait for the same build
+        assert d.state(s.session_id).phase == "loading" and rt.hud.current.cue.line1.startswith("RESEARCHING")
+        gate.set()
+        assert _until(rt, lambda: rt.playbook is not None) and len(calls) == 1
+    finally:
+        gate.set()
+        cleanup()
+
+
+def test_swipe_up_on_the_first_step_returns_to_the_chosen_product_photo(env, monkeypatch):
+    rt, d, calls, cleanup = _compile_env(env, monkeypatch)
+    try:
+        say(rt, DEMO)
+        s = d.state(rt.session().id)
+        rec = next(c.record for c in s.candidates if c.record.name == "ALEX")
+        d.select(s.session_id, rec.article)
+        assert _until(rt, lambda: rt.playbook is not None)
+        rt.clock.advance(5000)
+        rt.tick()
+        rt.handle_input(G2Input(gesture="swipe_up", seq_seen=rt.hud.current.seq))
+        s = d.state(s.session_id)
+        assert rt.playbook is None and rt.session().phase == "menu"
+        assert s.phase == "choosing" and s.candidates[s.focus].record.article == rec.article
+        rt.handle_input(G2Input(gesture="press", seq_seen=rt.hud.current.seq))  # and forward again: instant, no new build
+        assert rt.playbook is not None and len(calls) == 1
+    finally:
+        cleanup()
+
+
+def test_shortlist_image_shows_a_position_strip_for_more_than_one_page():
+    from PIL import Image
+    import io
+    from ghostbuild_core.discovery.images import position_strip
+    sheet = Image.new("L", (288, 144), 0)
+    position_strip(sheet, total=5, current=3)
+    row = [sheet.getpixel((x, 140)) for x in range(288)]
+    assert max(row) > 0  # dots drawn
+    blank = Image.new("L", (288, 144), 0)
+    position_strip(blank, total=3, current=0)
+    assert max(blank.getpixel((x, 140)) for x in range(288)) == 0  # one page: no strip

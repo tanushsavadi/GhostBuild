@@ -594,6 +594,13 @@ class ProductDiscoveryService:
                 if self.rt.sessions.start_card(sid, card, echo=False):
                     self._confirmed(sid, card, f"{rec.name} guide ready: compiled from the official manual, not human-reviewed.")
                     return
+            act = self.rt.live.active
+            if act and act.get("session_id") == sid and act.get("goal") == goal[:300]:
+                s.phase = "loading"  # still building this very guide: wait for it again
+                s.message = "Still preparing the step-by-step guide from the official manual."
+                self.rt.sessions.begin_research(sid, goal)
+                self._changed(sid)
+                return
             if self.research and rec.manual_verified and rec.manual_url:
                 from contracts.models import GoalRequest
 
@@ -641,6 +648,25 @@ class ProductDiscoveryService:
         if not self.rt.sessions.start_card(sid, card, echo=False):
             raise ValueError("Session changed; start discovery again.")
         self._confirmed(sid, card, f"{s.selected.name} guide ready. Manual step numbers match this guide.")
+
+    def _reopen(self, sid, s):
+        """Show the chosen product's photo again (focus on it), so a press goes forward again."""
+        if s.selected is None or not s.candidates:
+            return False
+        idx = next((i for i, c in enumerate(s.candidates) if c.record.article == s.selected.article), None)
+        if idx is None:
+            return False
+        s.phase, s.focus = "choosing", idx
+        s.message = "Back at your product. Press to open its guide again."
+        return True
+
+    def back_from_guide(self, sid, card_id):
+        """Swipe up on the first step of a guide this product opened: back to its photo."""
+        s = self.states.get(sid)
+        if s is None or s.card_id != card_id or not self._reopen(sid, s):
+            return False
+        self._changed(sid)
+        return True
 
     def research_finished(self, sid, card):
         """The guide compiled from a confirmed product's manual finished (card) or failed (None)."""
@@ -726,7 +752,7 @@ class ProductDiscoveryService:
             data = photo(self.rt.asset_root, r, True)
             cue = Cue(
                 line1=short(f"{s.focus + 1}/{len(s.candidates)} {r.name}"),
-                line2="PRESS: THIS ONE",
+                line2="● PICK  ▼ NEXT  ▲ BACK",
             )
             if data:
                 return Screen.visual(
@@ -760,7 +786,8 @@ class ProductDiscoveryService:
             visible = s.candidates[:3] if s.page == 0 else s.candidates[3:5]
             offset = 0 if s.page == 0 else 3
             data = shortlist(
-                self.rt.asset_root, [c.record for c in visible], row, offset
+                self.rt.asset_root, [c.record for c in visible], row, offset,
+                total=len(s.candidates), current=offset + row if row < len(visible) else None,
             )
             if data:
                 if row < len(visible):
@@ -769,10 +796,10 @@ class ProductDiscoveryService:
                         line1=short(
                             f"{offset + row + 1}/{len(s.candidates)} {rec.name} {rec.color}"
                         ),
-                        line2="PRESS: ENLARGE PHOTO",
+                        line2="● ENLARGE  ▲▼ SCROLL",
                     )
                 else:
-                    cue = Cue(line1=short(opts[row]), line2="PRESS TO CHOOSE")
+                    cue = Cue(line1=short(opts[row]), line2="● CHOOSE  ▲▼ SCROLL")
                 digest = hashlib.sha256(data).hexdigest()
                 self.sheet_images[digest] = data
                 while len(self.sheet_images) > 64:
@@ -823,7 +850,12 @@ class ProductDiscoveryService:
             return False
         s = self.states[sid]
         if s.phase == "loading":
-            return False  # the progress screen owns the gestures; never act on the hidden photo list
+            # Back (swipe up): to that product's photo; the guide keeps building and choosing it again resumes the wait.
+            # Other gestures never act on the hidden photo list.
+            if gi.gesture == "swipe_up" and self._reopen(sid, s):
+                self.rt.sessions.stop_waiting(sid)
+                self._changed(sid)
+            return True
         g = gi.gesture
         if g not in ("press", "swipe_down", "swipe_up"):
             return True

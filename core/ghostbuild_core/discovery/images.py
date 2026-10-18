@@ -36,7 +36,26 @@ def photo(root, rec, mono=False):
         return None
 
 
-def shortlist(root, records, selected=0, offset=0):
+def position_strip(sheet, total, current=None):
+    """Where this page sits among all matches: one dot per product along the bottom edge, the highlighted one filled.
+    Drawn only when the matches span more than one page (more than three)."""
+    from PIL import ImageDraw
+
+    if total <= 3:
+        return
+    n = min(total, 12)
+    gap = 10
+    x0 = (288 - (n - 1) * gap) // 2
+    draw = ImageDraw.Draw(sheet)
+    for i in range(n):
+        x = x0 + i * gap
+        if current is not None and i == min(current, n - 1):
+            draw.ellipse((x - 3, 137, x + 3, 143), fill=255)
+        else:
+            draw.ellipse((x - 2, 138, x + 2, 142), outline=136)
+
+
+def shortlist(root, records, selected=0, offset=0, total=None, current=None):
     """Three genuine photos per page, with names and a selection border, in one bounded image.
 
     Layout labels are authored UI; photographs are the cached official product images.
@@ -93,6 +112,7 @@ def shortlist(root, records, selected=0, offset=0):
             draw.rectangle((x + 1, 0, x + slot - 2, 143), outline=255, width=2)
     if not loaded:
         return None
+    position_strip(sheet, total or count, current)
     sheet = sheet.point(lambda v: round(v / 17) * 17)
     out = io.BytesIO()
     sheet.save(out, format="PNG")

@@ -77,14 +77,14 @@ def test_resolver_ambiguous_menu(card_dict, card):
 # ------------------------------------------------------------------ session / onboarding
 def test_welcome_once_then_menu(rt):
     f = rt.hello(hello())
-    assert f.mode == "welcome" and (f.cue.line1, f.cue.line2) == ("GHOSTBUILD", "HANDS BUSY. MIND CLEAR.") and f.ttl_ms == 2500
+    assert f.mode == "welcome" and (f.cue.line1, f.cue.line2) == ("G H O S T B U I L D", "HANDS BUSY. MIND CLEAR.") and f.ttl_ms == 2500
     rt.clock.advance(2600)
     rt.tick()
     p = rt.hud.current  # the front screen is a conversation prompt: no list, no BUILD/FIX
     assert p.mode == "intervene" and p.menu is None and (p.cue.line1, p.cue.line2) == ("WHAT DO YOU NEED?", "TYPE ON YOUR PHONE")
     m = rt.handle_input(gi("press"))  # failsafe: a tap shows the list
     assert m.mode == "menu" and m.menu.prompt == "PICK A TASK" and m.menu.selected == 0 and "PI CAMERA VIEW" in m.menu.options
-    assert [x for x in cues(rt) if x[0] == "welcome"] == [("welcome", "GHOSTBUILD")]
+    assert [x for x in cues(rt) if x[0] == "welcome"] == [("welcome", "G H O S T B U I L D")]
 
 
 def test_menu_navigation_clamped_and_fix_selects_card(rt):

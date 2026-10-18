@@ -410,6 +410,11 @@ class SessionManager:
         self._start(sess, card, card.goal_mode, cue, echo=echo)
         return True
 
+    def stop_waiting(self, sid: str) -> None:
+        """The wearer went back: the research keeps running and leaves a draft, but nobody waits on screen."""
+        if self._research is not None and self._research["sid"] == sid:
+            self._research = None
+
     def begin_research(self, sid: str, goal: str) -> None:
         self._research = {"sid": sid, "goal": goal, "started_ms": self.clock.now_ms()}
         self._awake_at = self.clock.now_ms()
@@ -472,7 +477,7 @@ class SessionManager:
         if self._flash is not None and now < self._flash[1]:
             screen = self._flash[0]
         elif s is not None and s.phase == "welcome":
-            screen = Screen.welcome(Cue(line1="GHOSTBUILD", line2="VOICE VIA ELEVENLABS" if self._voice_on() else "HANDS BUSY. MIND CLEAR."), WELCOME_MS)
+            screen = Screen.welcome(Cue(line1="G H O S T B U I L D", line2="VOICE VIA ELEVENLABS" if self._voice_on() else "HANDS BUSY. MIND CLEAR."), WELCOME_MS)
         elif s is not None and s.phase == "menu" and self._discovery is not None and self._discovery[0] == s.id:
             screen = self._discovery[1]
         elif s is not None and s.phase == "menu" and self._research is not None and self._research["sid"] == s.id and REST_RESEARCH_MS > 0 and now - self._awake_at >= REST_RESEARCH_MS:

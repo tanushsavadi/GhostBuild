@@ -5,6 +5,8 @@ interface ImportMetaEnv {
   readonly VITE_BACKEND_URL?: string
   /** '1' enables the hold-to-ask voice stub. Default off; the manifest ships without a microphone permission. */
   readonly VITE_FLAG_VOICE?: string
+  /** "0" skips the launch intro (g2/src/intro.ts). */
+  readonly VITE_FLAG_INTRO?: string
   /** 'ascii' = strict ASCII fallbacks for every non-ASCII glyph (use if the hardware glyph test fails). */
   readonly VITE_GLYPHS?: string
   /** Approx characters per line for space-padding centring (calibrate on hardware). */

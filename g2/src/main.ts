@@ -1,3 +1,4 @@
+import { introFrames, playIntro } from './intro'
 import { waitForEvenAppBridge } from '@evenrealities/even_hub_sdk'
 import { Controller } from './controller'
 import { ConnectionManager } from './conn'
@@ -141,6 +142,8 @@ const unsubscribe = bridge.onEvenHubEvent((event) => {
 
 window.addEventListener('beforeunload', cleanup)
 
+// Launch intro (not on reconnects): the glasses greet the wearer before the first backend frame.
+if (env.VITE_FLAG_INTRO !== '0') await playIntro((v) => renderer.render(v), introFrames({ centerCols: resolveCenterCols(env), glyphTier: resolveGlyphTier(env) }))
 controller.boot()
 conn.start()
 
