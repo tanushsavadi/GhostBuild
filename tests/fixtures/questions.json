@@ -1,0 +1,34 @@
+{
+  "_doc": "Question corpus for tests/e2e/test_conversation.py. in_scope: authored FAQ / why / where material for the named step; out_of_scope: must abstain (ASK A MENTOR) per CLAUDE.md 'Answers come only from the current procedure. Out of scope -> say so'.",
+  "in_scope": [
+    {"procedure": "led-button-v1", "step": 2, "q": "Which leg is longer?", "a": "LONG LEG = + · ROW 15"},
+    {"procedure": "led-button-v1", "step": 2, "q": "which way does the LED go", "a": "LONG LEG TO ROW 15"},
+    {"procedure": "led-button-v1", "step": 2, "q": "where does the short leg go", "a": "SHORT LEG IN ROW 20"},
+    {"procedure": "led-button-v1", "step": 2, "q": "why", "a": "LEDS ONLY WORK ONE WAY"},
+    {"procedure": "led-button-v1", "step": 1, "q": "does direction matter for the resistor", "a": "EITHER WAY WORKS"},
+    {"procedure": "led-button-v1", "step": 0, "q": "what does the resistor look like", "a": "ORANGE ORANGE BROWN BANDS"},
+    {"procedure": "led-button-v1", "step": 3, "q": "which way does the button go", "a": "LEGS STRADDLE THE GAP"},
+    {"procedure": "origami-cup-v1", "step": 0, "q": "which way should the point face", "a": "FOLD AT BOTTOM, POINT UP"},
+    {"procedure": "origami-cup-v1", "step": 3, "q": "how many layers do I fold", "a": "ONLY THE FRONT LAYER"}
+  ],
+  "out_of_scope_abstains_today": [
+    {"procedure": "led-button-v1", "step": 2, "q": "what's the capital of France"},
+    {"procedure": "led-button-v1", "step": 2, "q": "can I use a blue LED instead"},
+    {"procedure": "led-button-v1", "step": 1, "q": "what's the weather like"},
+    {"procedure": "led-button-v1", "step": 4, "q": "how long will this take"},
+    {"procedure": "origami-cup-v1", "step": 0, "q": "is it done"},
+    {"procedure": "origami-cup-v1", "step": 4, "q": "what color paper should I use"}
+  ],
+  "out_of_scope_answered_today": [
+    {"procedure": "led-button-v1", "step": 1, "q": "where is the bathroom", "got": "ROWS 10 AND 15, LEFT SIDE"},
+    {"procedure": "led-button-v1", "step": 2, "q": "can I put my phone down", "got": "LONG ROW 15 · SHORT ROW 20"},
+    {"procedure": "led-button-v1", "step": 2, "q": "why is the sky blue", "got": "LEDS ONLY WORK ONE WAY"},
+    {"procedure": "led-button-v1", "step": 3, "q": "where do I go for lunch", "got": "ROWS 25 TO 27, ACROSS GAP"},
+    {"procedure": "origami-cup-v1", "step": 3, "q": "how many volts is it", "got": "ONLY THE FRONT LAYER"},
+    {"procedure": "origami-cup-v1", "step": 1, "q": "where is the bathroom", "got": "TIP TOUCHES THE LEFT EDGE"}
+  ],
+  "wrong_step_answers_today": [
+    {"procedure": "led-button-v1", "step": 4, "q": "which way does it go", "got": "LONG LEG TO ROW 15", "why_wrong": "step 5 is PRESS THE BUTTON; the answer is about the LED from step 3"},
+    {"procedure": "led-button-v1", "step": 0, "q": "which way does it go", "got": "LONG LEG TO ROW 15", "why_wrong": "step 1 is gathering parts; the answer places the LED"}
+  ]
+}
