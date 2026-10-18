@@ -6,7 +6,7 @@
   ],
   "want": [
     "Both hands open, palms facing up",
-    "Pull in, curling the fingers"
+    "Pull toward chest, fingers curl"
   ],
   "need": [
     "Index hooked, palm facing down",
@@ -41,7 +41,7 @@
     "Tap index side on chin twice"
   ],
   "bathroom": [
-    "T hand: thumb between fingers",
+    "T hand, palm facing out",
     "Shake it side to side"
   ],
   "where": [
@@ -70,7 +70,7 @@
   ],
   "good": [
     "Flat hand, fingertips at chin",
-    "Move forward and down"
+    "Move down onto other flat palm"
   ],
   "bad": [
     "Flat hand, fingertips at chin",
@@ -189,8 +189,8 @@
     "Slide slowly up to the wrist"
   ],
   "time": [
-    "Index finger hooked",
-    "Tap back of other wrist"
+    "Hooked index finger (X hand)",
+    "Tap it on back of other wrist"
   ],
   "day": [
     "Index up, elbow on other hand",
@@ -265,8 +265,8 @@
     "Slide down to stomach"
   ],
   "tired": [
-    "Both bent hands on chest",
-    "Droop them downward"
+    "Bent hands, fingertips on chest",
+    "Roll hands down, tips stay on"
   ],
   "sleep": [
     "Open hand in front of face",
@@ -309,8 +309,8 @@
     "Write across other palm"
   ],
   "read": [
-    "V hand over other flat palm",
-    "Move down, like reading"
+    "V hand, fingertips toward palm",
+    "Other palm facing you, move V down"
   ],
   "book": [
     "Both flat hands, palms together",
@@ -377,11 +377,11 @@
     "Bend wrist down once, firmly"
   ],
   "change": [
-    "Both X hands, one on top",
+    "Both hooked index fingers, crossed",
     "Twist to swap places"
   ],
   "better": [
-    "Flat hand, fingertips at chin",
+    "Flat hand at chin, fingers sideways",
     "Arc out into a thumbs-up"
   ],
   "ready": [
@@ -527,5 +527,10 @@
   "tv": [
     "Fingerspell T then V",
     "Small and quick"
+  ],
+  "let me see": [
+    "V hand, fingertips by your eye",
+    "Move it out and back, twice",
+    "v"
   ]
 }

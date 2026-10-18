@@ -76,8 +76,8 @@
     },
     {
       "id": "no", "gloss": "NO", "words": ["no", "nope"],
-      "handshape": "flat_h",
-      "how": ["Index, middle and thumb out", "Snap them shut twice"],
+      "handshape": "3",
+      "how": ["Index, middle up, thumb out", "Snap them shut onto thumb x2"],
       "status": "UNCHECKED",
       "asllex": { "type": "OneHanded", "location": "Neutral space", "movement": "Handshape change, repeated" },
       "video": "https://player.vimeo.com/video/345799501"

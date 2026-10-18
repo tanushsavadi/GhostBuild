@@ -141,8 +141,11 @@ def main() -> None:
     for word, lines in howto.items():
         if word not in best:
             raise SystemExit(f"howto.json: '{word}' is not an ASL-LEX word")
-        if len(lines) != 2 or any(len(line) > 36 for line in lines):
+        # [line 1, line 2] or [line 1, line 2, handshape id] to use a different drawing.
+        if len(lines) not in (2, 3) or any(len(line) > 36 for line in lines[:2]):
             raise SystemExit(f"howto.json: '{word}' needs 2 lines of at most 36 characters")
+        if len(lines) == 3 and not (ROOT / "g2" / "public" / "handshapes" / f"{lines[2]}_bold.png").exists():
+            raise SystemExit(f"howto.json: '{word}' names handshape '{lines[2]}', which has no drawing")
 
     # Lines belong to the sign, so every word mapped to it (I -> ME, food -> EAT) gets them.
     howto_by_entry = {best[w]["EntryID"]: lines for w, lines in howto.items()}
@@ -154,7 +157,9 @@ def main() -> None:
         video = (e.get("VimeoVideo") or "").rsplit("/", 1)[-1]
         # Last field: 1 = hand-written lines from howto.json, 0 = template lines.
         if e["EntryID"] in howto_by_entry:
-            out[word] = [gloss, e.get("Handshape.2.0"), *howto_by_entry[e["EntryID"]], video, 1]
+            lines = howto_by_entry[e["EntryID"]]
+            handshape = lines[2] if len(lines) == 3 else e.get("Handshape.2.0")
+            out[word] = [gloss, handshape, lines[0], lines[1], video, 1]
         else:
             out[word] = [gloss, e.get("Handshape.2.0"), hands_line(e), motion_line(e), video, 0]
 
