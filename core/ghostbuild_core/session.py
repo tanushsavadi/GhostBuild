@@ -124,7 +124,7 @@ class SessionManager:
                 sess = act  # concurrent second surface joins the session that was just created
             else:
                 sess = self._new_session(h.client_id, now)
-        elif sess.phase == "welcome":
+        elif sess.phase == "welcome" and (sess.id != self.active_id or now >= self._welcome_until):
             sess.phase = "menu"
         if self.active_id != sess.id:
             self.active_id = sess.id
