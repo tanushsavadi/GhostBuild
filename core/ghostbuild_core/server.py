@@ -250,7 +250,7 @@ def create_app(
     async def get_catalog() -> Response:
         return JSONResponse({"tasks": [{"card_id": c.card_id, "title": c.title, "mode": c.goal_mode,
                                       "steps": len(c.steps), "provenance": c.provenance}
-                                     for c in runtime.cards]})
+                                     for c in runtime.startable_cards()]})
 
     @app.post("/session/action")
     async def phone_action(body: PhoneAction) -> Response:

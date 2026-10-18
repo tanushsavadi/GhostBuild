@@ -47,10 +47,12 @@ class SessionManager:
         path: Path | None = None,
         record: Optional[Callable[..., None]] = None,
         refine: Optional[Callable[[GoalRequest, GoalResolution], GoalResolution]] = None,
+        startable: Optional[Callable[[], list[Card]]] = None,
     ) -> None:
         self.hud = hud
         self.clock = clock
         self._cards = cards
+        self._startable = startable or cards  # cards that can START a task now (a fault card needs its device reporting); _cards resolves running ones
         self._on_task = on_task
         self._path = path
         self._record = record or (lambda *a, **k: None)
@@ -60,11 +62,15 @@ class SessionManager:
         self._creator: dict[str, str] = {}
         self.active_id: Optional[str] = None
         self._welcome_until = 0
-        self._menu_selected = 0
+        self._menu_selected = self._default_menu()
         self._flash: Optional[tuple[Screen, int]] = None
         self._choice: Optional[_Choice] = None
         self._progress: dict[str, dict] = {}  # playbook progress per session id (internal; not part of the Session contract)
         self._load()
+
+    def _default_menu(self) -> int:
+        """Highlight FIX only when something can actually start in FIX; otherwise BUILD, so the first press is never a dead end."""
+        return 0 if any(c.goal_mode == "fix" for c in self._startable()) else 1
 
     # ------------------------------------------------------------------ persistence
     def _load(self) -> None:
@@ -165,7 +171,7 @@ class SessionManager:
             sess.phase = "menu"
         if self.active_id != sess.id:
             self.active_id = sess.id
-            self._menu_selected = 0
+            self._menu_selected = self._default_menu()
             self._choice = None
             self._save()
         if sess.phase == "task" and sess.card_id:
@@ -183,7 +189,7 @@ class SessionManager:
         self._creator[sid] = client_id
         self.active_id = sid
         self._welcome_until = now + WELCOME_MS
-        self._menu_selected = 0
+        self._menu_selected = self._default_menu()
         self._flash = None
         self._choice = None
         self._save()
@@ -239,7 +245,7 @@ class SessionManager:
         sess = self.sessions.get(req.session_id)
         if sess is None:
             return None
-        cards = self._cards()
+        cards = self._startable()
         res = goal_mod.resolve(req, cards)
         if res.status == "unsupported" and self._refine is not None:
             res = self._refine(req, res)
@@ -283,7 +289,7 @@ class SessionManager:
         s = self.active
         if s is not None and s.phase == "welcome" and now >= self._welcome_until:
             s.phase = "menu"
-            self._menu_selected = 0
+            self._menu_selected = self._default_menu()
             self._save()
             changed = True
         if self._flash is not None and now >= self._flash[1]:

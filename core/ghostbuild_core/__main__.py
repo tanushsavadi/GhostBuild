@@ -37,7 +37,7 @@ def main(argv: list[str] | None = None) -> int:
     from .runtime import Runtime
     from .server import create_app
 
-    rt = Runtime(cards, log_dir=args.log_dir, asset_root=Path(args.root), simulate=args.simulate)
+    rt = Runtime(cards, log_dir=args.log_dir, asset_root=Path(args.root), simulate=args.simulate, require_device_link=True)
     from .voice import VoiceService, voice_enabled_from_env
 
     if args.voice or voice_enabled_from_env():

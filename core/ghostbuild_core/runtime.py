@@ -44,11 +44,13 @@ class Runtime:
         default_source: Source = "pi_live",
         simulate: bool = False,
         force_source: Optional[Source] = None,
+        require_device_link: bool = False,
     ) -> None:
         if not cards:
             raise ValueError("Runtime needs at least one valid Repair Card")
         self.clock = as_clock(clock)
         self.cards = cards
+        self.require_device_link = require_device_link  # the real server sets it: a fault card starts only while its device reports
         self.asset_root = Path(asset_root) if asset_root is not None else Path.cwd()
         self.force_source = force_source
         self.started = self.clock.now_ms()
@@ -59,15 +61,16 @@ class Runtime:
         self._pb_sid: Optional[str] = None
         self.research = ResearchQueue(self.asset_root, self.clock)
         self.engine = self._make_engine(self._default_card())
+        self.sim = None  # set below when simulating; startable_cards() reads it while sessions load
         sess_path = Path(log_dir) / "sessions.json" if log_dir is not None else None
         self.sessions = SessionManager(
             self.hud, self.clock, lambda: self.cards, self._set_card, sess_path,
             record=lambda kind, **d: self.elog.write(kind, **d),
             refine=self._refine_unsupported,
+            startable=self.startable_cards,
         )
         self.sessions.restore()
         self.hud.session_id = self._sid()
-        self.sim = None
         if simulate:
             from .simulate import SimPi
 
@@ -200,6 +203,14 @@ class Runtime:
         self.hud.session_id = self._sid()
         self.hud.sync()
         return self.hud.current
+
+    def startable_cards(self) -> list[Card]:
+        """Playbook cards always; a fault-mode card (checks only, no steps) only while its device is reporting (or simulated).
+        Without this FIX on a bench with no device would open a card that can only say LINK LOST."""
+        if not self.require_device_link:
+            return list(self.cards)
+        link_up = self.sim is not None or self.engine.link_status() == "up"
+        return [c for c in self.cards if c.steps or link_up]
 
     def _sid(self) -> Optional[str]:
         sid = self.sessions.view().id

@@ -88,7 +88,9 @@ def test_build_menu_single_card_starts_playbook_with_short_cue(led, lens, tmp_pa
 def test_gesture_during_task_start_cue_only_reveals_the_first_step(led, tmp_path):
     rt = boot([led], tmp_path)
     to_menu(rt)
-    f = rt.handle_input(gi("press"))  # only a build card: FIX has none; go to BUILD instead
+    assert cur(rt).menu.selected == 1  # only a build card: BUILD is the highlighted default, FIX would be a dead end
+    rt.handle_input(gi("swipe_up"))  # ...but FIX is still honest if chosen
+    f = rt.handle_input(gi("press"))
     assert f.mode == "uncertain" and f.cue.line1 == "NOTHING LOADED YET"
     swipes(rt, 1)
     rt.handle_input(gi("press"))
@@ -102,7 +104,8 @@ def test_gesture_during_task_start_cue_only_reveals_the_first_step(led, tmp_path
 def test_fix_with_zero_cards_is_honest_and_not_a_guess(led, tmp_path):
     rt = boot([led], tmp_path)
     to_menu(rt)
-    f = rt.handle_input(gi("press"))  # FIX selected, only a build card loaded
+    rt.handle_input(gi("swipe_up"))  # select FIX (BUILD is the default when FIX has nothing)
+    f = rt.handle_input(gi("press"))  # only a build card loaded
     assert (f.cue.line1, f.cue.line2) == ("NOTHING LOADED YET", "TRY THE OTHER OPTION") and f.mode == "uncertain"
 
 
