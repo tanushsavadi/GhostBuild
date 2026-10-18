@@ -1,6 +1,8 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig({
+  // Relative paths: a packaged .ehpk is not served from the site root.
+  base: './',
   // /api goes to the laptop server (tools/open_palm_server.py), so the phone
   // only ever talks to this one port and no API key reaches the plugin.
   // allowedHosts: the https tunnel (cloudflared, see README) for phones that

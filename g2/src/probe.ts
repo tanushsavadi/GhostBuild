@@ -53,7 +53,7 @@ await bridge.createStartUpPageContainer(
 const pngs = new Map<string, Uint8Array>()
 for (const { id, variant } of CARDS) {
   const key = `${id}_${variant}`
-  const res = await fetch(`/handshapes/${key}.png`)
+  const res = await fetch(`${import.meta.env.BASE_URL}handshapes/${key}.png`)
   pngs.set(key, new Uint8Array(await res.arrayBuffer()))
 }
 

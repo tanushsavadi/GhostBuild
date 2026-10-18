@@ -41,6 +41,7 @@ from pathlib import Path
 import httpx
 import uvicorn
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
 
 ROOT = Path(__file__).resolve().parent.parent
 PORT = 8790
@@ -124,6 +125,9 @@ def load_env() -> None:
 
 load_env()
 app = FastAPI(title="Open Palm laptop server")
+# A packaged .ehpk calls this server from the Even app's own origin (through
+# ngrok), so the browser engine needs CORS headers. No cookies are used.
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 
 @app.get("/api/health")

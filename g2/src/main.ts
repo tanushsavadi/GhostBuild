@@ -30,6 +30,18 @@ const DEMO_PHRASES = ['Hello, nice to meet you', 'My name is Abdul', 'Thank you'
 // Handshape drawing style (?style=thin|bold|bold96).
 const STYLE = new URLSearchParams(location.search).get('style') ?? 'bold'
 
+// The laptop server. In dev, Vite proxies /api on the same origin. A packaged
+// .ehpk runs from the Even app, so it calls the fixed address it was built with
+// (VITE_API_BASE, also whitelisted in app.json by `npm run pack`).
+const API_BASE = (import.meta.env.VITE_API_BASE ?? '').replace(/\/$/, '')
+
+function api(path: string, init: RequestInit = {}): Promise<Response> {
+  const headers = new Headers(init.headers)
+  // ngrok's free plan shows a warning page to browsers unless this header is set.
+  if (API_BASE) headers.set('ngrok-skip-browser-warning', '1')
+  return fetch(`${API_BASE}${path}`, { ...init, headers })
+}
+
 const INFO = { id: 1, name: 'info' }
 const HAND = { id: 2, name: 'hand' }
 const FACE = { id: 3, name: 'face' }
@@ -230,7 +242,7 @@ const pngCache = new Map<string, Uint8Array>()
 async function png(path: string): Promise<Uint8Array> {
   let bytes = pngCache.get(path)
   if (!bytes) {
-    const res = await fetch(`/${path}.png`)
+    const res = await fetch(`${import.meta.env.BASE_URL}${path}.png`)
     if (!res.ok) throw new Error(`${path}: HTTP ${res.status}`)
     bytes = new Uint8Array(await res.arrayBuffer())
     pngCache.set(path, bytes)
@@ -417,7 +429,7 @@ rememberBox.onchange = () => { try { localStorage.setItem('open-palm-remember', 
 
 function remember(kind: 'sentence' | 'hard_sign', text: string): void {
   if (!rememberBox.checked) return
-  void fetch('/api/history', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ kind, text }) }).catch(() => {})
+  void api('/api/history', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ kind, text }) }).catch(() => {})
 }
 
 function practice(): void {
@@ -445,11 +457,11 @@ function showBook(next: Phrasebook): void {
   }
 }
 
-const bookLoaded = fetch('/api/phrasebook', { signal: AbortSignal.timeout(3000) })
+const bookLoaded = api('/api/phrasebook', { signal: AbortSignal.timeout(3000) })
   .then(r => r.ok ? r.json() : null).then(b => { if (b) showBook(b) }).catch(() => {})
 
 $<HTMLButtonElement>('forget').onclick = () => {
-  void fetch('/api/history', { method: 'DELETE' }).then(() => { $<HTMLParagraphElement>('prepstatus').textContent = 'History forgotten.' })
+  void api('/api/history', { method: 'DELETE' }).then(() => { $<HTMLParagraphElement>('prepstatus').textContent = 'History forgotten.' })
 }
 
 /** Ask CREAO to plan a conversation; progress shows on the phone and the lens. */
@@ -458,7 +470,7 @@ async function prepareConversation(scenario: string): Promise<void> {
   const progress = (s: string, lens: string) => { statusLine.textContent = s; setStatus(lens) }
   progress('CREAO is planning your conversation...', `PLANNING WITH CREAO...\n"${scenario.slice(0, 60)}"`)
   try {
-    const res = await fetch('/api/prepare', {
+    const res = await api('/api/prepare', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ scenario, use_history: $<HTMLInputElement>('usehist').checked }),
     })
@@ -466,7 +478,7 @@ async function prepareConversation(scenario: string): Promise<void> {
     const { job } = await res.json() as { job: string }
     for (;;) {
       await new Promise(r => setTimeout(r, 3000))
-      const s = await (await fetch(`/api/prepare/${job}`)).json() as { status: string; elapsed_s: number; error?: string; phrasebook?: Phrasebook }
+      const s = await (await api(`/api/prepare/${job}`)).json() as { status: string; elapsed_s: number; error?: string; phrasebook?: Phrasebook }
       if (s.status === 'done' && s.phrasebook) {
         statusLine.textContent = `Ready in ${s.elapsed_s} s. Say or tap any sentence below; it shows instantly.`
         showBook(s.phrasebook)
@@ -505,7 +517,7 @@ function start(phrase: string): void {
   void (async () => {
     let aiCards: Card[] | null = null
     try {
-      const res = await fetch('/api/translate', {
+      const res = await api('/api/translate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: phrase }),
@@ -563,7 +575,7 @@ async function stopListening(): Promise<void> {
   setStatus('TRANSLATING...')
   let text = ''
   try {
-    const res = await fetch('/api/stt', { method: 'POST', body: pcm, headers: { 'Content-Type': 'application/octet-stream' } })
+    const res = await api('/api/stt', { method: 'POST', body: pcm, headers: { 'Content-Type': 'application/octet-stream' } })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     text = ((await res.json()) as { text: string }).text
   } catch (err) {

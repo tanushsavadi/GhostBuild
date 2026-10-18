@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "simulate": "evenhub-simulator http://localhost:5173",
-    "pack": "npm run build && evenhub pack app.json dist -o open-palm.ehpk --sdk-ver 0.0.16"
+    "pack": "node tools/pack.mjs"
   },
   "dependencies": {
     "@evenrealities/even_hub_sdk": "0.0.16"

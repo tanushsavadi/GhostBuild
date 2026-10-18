@@ -54,7 +54,7 @@ function row(word: string, rank: number, cards: Card[]): HTMLElement {
   const box = el('div', '', { class: `sign ${mark === 'ok' ? 'ok' : mark ? 'wrong' : ''}` })
   const pictures = el('div', '', { class: 'pictures' })
   for (const c of cards) {
-    pictures.append(c.handshape ? el('img', '', { src: `/handshapes/${c.handshape}_bold.png`, alt: `${c.handshape} handshape` }) : el('div'))
+    pictures.append(c.handshape ? el('img', '', { src: `${import.meta.env.BASE_URL}handshapes/${c.handshape}_bold.png`, alt: `${c.handshape} handshape` }) : el('div'))
   }
   box.append(pictures)
 
