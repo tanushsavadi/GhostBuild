@@ -21,6 +21,7 @@ from contracts.models import G2Hello, G2Input, GoalMode, GoalRequest, HudFrame, 
 
 from .cards_api import mount_cards_api
 from .research_runs import mount_research_runs
+from .studio import mount_studio
 from .runtime import Runtime
 
 log = logging.getLogger("ghostbuild.server")
@@ -455,6 +456,7 @@ def create_app(
 
     mount_cards_api(app, runtime)  # card import endpoints (build-time tooling; see cards_api.py)
     mount_research_runs(app, runtime, research_runs)  # optional CREAO runs + draft approval (GB_CREAO=1; research_runs.py)
+    mount_studio(app, runtime)  # Guide Studio: read-only source/step/frame inspector (studio.py)
 
     # ------------------------------------------------------------------ optional voice lane (only when --voice / GB_VOICE=1)
     if runtime.voice is not None:

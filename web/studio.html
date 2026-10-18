@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark"><link rel="icon" href="data:,">
+<title>GhostBuild Guide Studio</title>
+<link rel="stylesheet" href="style.css"><link rel="stylesheet" href="studio.css">
+</head>
+<body class="studio">
+<header class="top">
+  <a class="brand" href="./" aria-label="GhostBuild companion"><span class="brand-mark" aria-hidden="true">g</span> ghostbuild<span class="brand-caption">GUIDE STUDIO</span></a>
+  <div id="link-chip" class="chip chip-wait" role="status">Connecting</div>
+</header>
+
+<section class="hero">
+  <p class="eyebrow">FROM AN UNFAMILIAR MANUAL TO YOUR LINE OF SIGHT</p>
+  <h1>See exactly where every step came from.</h1>
+  <p class="lede">Paste a manufacturer page or manual link. Guide Studio shows the guide GhostBuild compiled from it, the passage and picture behind each step, the branches it can take, and the exact frame your G2 glasses will show.</p>
+  <form id="src-form" class="src-form" autocomplete="off">
+    <label class="field" for="src-url">Manufacturer documentation URL</label>
+    <div class="src-row"><input id="src-url" type="text" inputmode="url" maxlength="500" placeholder="https://www.ikea.com/us/en/assembly_instructions/micke-desk-white__AA-476615-12-100.pdf"><button type="submit">Inspect guide <span aria-hidden="true">↗</span></button></div>
+    <div id="src-result" class="src-result" aria-live="polite"></div>
+  </form>
+  <div id="live" class="live-box" aria-live="polite"></div>
+  <p class="eyebrow dim">OR OPEN A COMPILED GUIDE</p>
+  <div id="guide-chips" class="guide-chips"><p class="meta">Loading guides…</p></div>
+</section>
+
+<section id="pipeline" class="pipeline" aria-label="How this guide was built" hidden></section>
+
+<main id="studio" class="studio-grid" hidden>
+  <nav class="card s-route" aria-labelledby="h-route">
+    <div class="card-head"><h2 id="h-route">Route</h2><span id="route-count" class="meta"></span></div>
+    <ol id="route" class="route"></ol>
+  </nav>
+  <section class="card s-step" aria-labelledby="h-step">
+    <p id="step-eyebrow" class="eyebrow"></p>
+    <h2 id="h-step" tabindex="-1"></h2>
+    <div id="step-chips" class="chips"></div>
+    <p id="step-detail" class="step-detail"></p>
+    <div id="step-warn"></div>
+    <div id="step-choices"></div>
+    <h3>Grounded in</h3><div id="step-evidence"></div>
+  </section>
+  <aside class="s-side">
+    <section class="card" aria-labelledby="h-pic">
+      <div class="card-head"><h2 id="h-pic">Source illustration</h2><span id="pic-prov" class="pill"></span></div>
+      <div id="pic"></div>
+    </section>
+    <section class="card" aria-labelledby="h-g2">
+      <div class="card-head"><h2 id="h-g2">On your G2</h2><span class="pill pill-prev">PREVIEW</span></div>
+      <div id="g2-frames"></div>
+      <p id="g2-note" class="meta"></p>
+      <div class="handoff"><button id="open-g2" type="button">Open this guide on the glasses</button><div id="open-result" class="meta" role="status"></div></div>
+      <div id="runtime" hidden><h3>Runtime frame now <span class="meta">(GET /state)</span></h3><div id="runtime-frame"></div><p class="meta">What the core is sending to connected glasses right now. Physical display not confirmed here. <a href="./">Continue in the companion ↗</a></p></div>
+    </section>
+  </aside>
+</main>
+<footer class="meta foot">Guide Studio reads the running GhostBuild core (<code>/studio/guides</code>, <code>/cards/{id}</code>, <code>/studio/preview/{id}</code>). It never compiles, edits or approves a guide. <a href="engine.html">How the engine works</a></footer>
+<script src="logic.js"></script>
+<script src="studio-logic.js"></script>
+<script src="studio.js"></script>
+</body>
+</html>
