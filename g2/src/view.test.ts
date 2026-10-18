@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { blankView, centerBlock, centerLine, frameToView, offlineView } from './view'
 import { example, frame } from './test/fixtures'
 
-const O = { centerCols: 30, glyphTier: 'full' as const }
+const O = { centerCols: 50, glyphTier: 'full' as const }
 
 describe('frameToView', () => {
   it('quiet -> blank single space', () => {
@@ -16,7 +16,7 @@ describe('frameToView', () => {
     expect(lines).toHaveLength(2)
     expect(lines[0].trim()).toBe('CAMERA VIEW LOST')
     expect(lines[1].trim()).toBe('CHECK CAMERA LENS')
-    expect(lines[0]).toBe(centerLine('CAMERA VIEW LOST', 30))
+    expect(lines[0]).toBe(centerLine('CAMERA VIEW LOST', 50))
     expect(lines[0].length).toBeGreaterThan('CAMERA VIEW LOST'.length)
   })
   it('single-line cue yields one line', () => {
@@ -103,7 +103,7 @@ describe('helpers', () => {
     expect(blankView().text).toBe(' ')
   })
   it('centerBlock pads uniformly', () => {
-    const [a, b] = centerBlock(['> FIX', '  BUILD'], 30)
+    const [a, b] = centerBlock(['> FIX', '  BUILD'], 50)
     expect(a.indexOf('>')).toBe(b.length - 'BUILD'.length - 2)
   })
 })

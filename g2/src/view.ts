@@ -7,19 +7,28 @@ export interface ViewOptions {
   glyphTier: GlyphTier
 }
 
-export const DEFAULT_VIEW_OPTIONS: ViewOptions = { centerCols: 30, glyphTier: 'full' }
+/**
+ * The font is proportional and a space is roughly half an average capital's width. Measured in the 0.9.5 simulator:
+ * ~10.5 px per capital, ~5 px per space, 536 px inner width -> about 50 average characters per line.
+ * Hardware metrics may differ: calibrate VITE_CENTER_COLS on the glasses (see README).
+ */
+export const DEFAULT_VIEW_OPTIONS: ViewOptions = { centerCols: 50, glyphTier: 'full' }
+const SPACE_RATIO = 0.5
+
+function padFor(width: number, cols: number): number {
+  return Math.max(0, Math.round((cols - width) / 2 / SPACE_RATIO))
+}
 
 /** The G2 has no text alignment: "centering" is space padding (docs: Display & UI System). */
 export function centerLine(line: string, cols: number): string {
-  const pad = Math.max(0, Math.floor((cols - line.length) / 2))
-  return ' '.repeat(pad) + line
+  return ' '.repeat(padFor(line.length, cols)) + line
 }
 
 /** Centre a block of lines as one unit so column markers (`> `) stay aligned. */
 export function centerBlock(lines: string[], cols: number): string[] {
   const width = lines.reduce((m, l) => Math.max(m, l.length), 0)
-  const pad = Math.max(0, Math.floor((cols - width) / 2))
-  return lines.map((l) => ' '.repeat(pad) + l)
+  const pad = ' '.repeat(padFor(width, cols))
+  return lines.map((l) => pad + l)
 }
 
 export function textView(lines: string[], tag = ' '): TextView {

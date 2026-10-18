@@ -33,8 +33,12 @@ export function readFlags(env: RuntimeEnv): Flags {
   return { voice: env.VITE_FLAG_VOICE === '1' }
 }
 
-export function resolveSurface(query: string | null): 'g2' | 'simulator' {
-  return query === 'simulator' ? 'simulator' : 'g2'
+/** sn reported by evenhub-simulator 0.9.5 (observed in a run; hard-coded profile). */
+export const SIMULATOR_SN = 'S2001234567890'
+
+export function resolveSurface(query: string | null, deviceSn = ''): 'g2' | 'simulator' {
+  if (query === 'simulator' || query === 'g2') return query
+  return deviceSn === SIMULATOR_SN ? 'simulator' : 'g2'
 }
 
 export function resolveGlyphTier(env: RuntimeEnv): 'full' | 'ascii' {
@@ -43,5 +47,5 @@ export function resolveGlyphTier(env: RuntimeEnv): 'full' | 'ascii' {
 
 export function resolveCenterCols(env: RuntimeEnv): number {
   const n = Number(env.VITE_CENTER_COLS)
-  return Number.isFinite(n) && n >= 10 && n <= 60 ? Math.floor(n) : 30
+  return Number.isFinite(n) && n >= 20 && n <= 90 ? Math.floor(n) : 50
 }

@@ -26,10 +26,13 @@ describe('config', () => {
   it('surface, glyphs, columns', () => {
     expect(resolveSurface('simulator')).toBe('simulator')
     expect(resolveSurface(null)).toBe('g2')
+    expect(resolveSurface(null, 'S2001234567890')).toBe('simulator')
+    expect(resolveSurface(null, 'SOMETHING')).toBe('g2')
+    expect(resolveSurface('g2', 'S2001234567890')).toBe('g2')
     expect(resolveGlyphTier({ VITE_GLYPHS: 'ascii' })).toBe('ascii')
     expect(resolveGlyphTier({})).toBe('full')
     expect(resolveCenterCols({ VITE_CENTER_COLS: '36' })).toBe(36)
-    expect(resolveCenterCols({ VITE_CENTER_COLS: '2' })).toBe(30)
+    expect(resolveCenterCols({ VITE_CENTER_COLS: '2' })).toBe(50)
   })
 })
 

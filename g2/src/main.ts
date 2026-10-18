@@ -25,7 +25,11 @@ const queryBackend = normalizeBackend(params.get('backend'))
 if (queryBackend) await kv.set(K.backend, queryBackend)
 let backend = resolveBackend(params.get('backend'), await kv.get(K.backend), env)
 const flags = readFlags(env)
-const surface = resolveSurface(params.get('surface'))
+// The 0.9.5 simulator reports a hard-coded device profile (sn S2001234567890, docs: "user and device profiles are hardcoded").
+// Surface is a label on hellos/inputs so simulator runs are never mistaken for hardware: ?surface= wins, else this sn heuristic.
+let deviceSn = ''
+try { deviceSn = (await bridge.getDeviceInfo())?.sn ?? '' } catch { /* unknown device: treat as g2 */ }
+const surface = resolveSurface(params.get('surface'), deviceSn)
 const identity = await loadIdentity(kv)
 let sessionId = identity.sessionId
 log(`backend=${backend} surface=${surface} client=${identity.clientId} session=${sessionId} voice=${flags.voice}`)
