@@ -21,6 +21,7 @@ passed through `redact()` first.
 from __future__ import annotations
 
 import argparse
+import base64
 import json
 import os
 import re
@@ -374,9 +375,29 @@ class CreaoClient:
         arts = result.get("artifacts") if isinstance(result, dict) else None
         if not isinstance(arts, list):
             return raw
-        done = 0
+        done = svgs = imgs = 0
         for art in arts:
-            if done >= max_files or not isinstance(art, dict) or "json" not in str(art.get("type", "")).lower() or not isinstance(art.get("url"), str):
+            if not isinstance(art, dict) or not isinstance(art.get("url"), str):
+                continue
+            title = str(art.get("title", "")).lower()
+            is_svg = title.endswith(".svg")
+            if title.endswith((".png", ".jpg", ".jpeg")) and "image/" in str(art.get("type", "")).lower() and imgs < 2:
+                imgs += 1  # a raster diagram (the agent chooses SVG or PNG per run)
+                try:
+                    art["image_b64"] = base64.b64encode(self._download(art["url"], 3_145_728)).decode("ascii")
+                except (CreaoError, ValueError, httpx.HTTPError) as exc:
+                    art["download_error"] = redact(exc, self._api_key)[:200]
+                continue
+            if is_svg and svgs < 2:  # the agent's diagram: kept as text so a picture for the glasses can be built from it
+                svgs += 1
+                try:
+                    text = self._download(art["url"], 1_048_576).decode("utf-8")
+                    if "<svg" in text[:2000]:
+                        art["svg_text"] = text
+                except (CreaoError, ValueError, httpx.HTTPError) as exc:
+                    art["download_error"] = redact(exc, self._api_key)[:200]
+                continue
+            if done >= max_files or "json" not in str(art.get("type", "")).lower():
                 continue
             done += 1
             try:

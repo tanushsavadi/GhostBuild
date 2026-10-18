@@ -12,7 +12,7 @@
     'state_playbook_manual', 'state_playbook_measured', 'state_playbook_completed', 'state_playbook_unsupported'];
   var L = window.GBLogic;
   var dev = { force: null, no404: false };               // fixture-mode switches: force 'unreachable' | 'stale'; no404 = /ask and /research answer 404
-  var S = { state: null, okAt: 0, err: null, skew: 0, card: null, cardErr: null, cardFor: null, manifests: {}, goalBusy: false, askBusy: false, resBusy: false, catalog: [], guideView: null, actionBusy: false, connecting: false };
+  var S = { live: null, state: null, okAt: 0, err: null, skew: 0, card: null, cardErr: null, cardFor: null, manifests: {}, goalBusy: false, askBusy: false, resBusy: false, catalog: [], guideView: null, actionBusy: false, connecting: false };
 
   var $ = function (id) { return document.getElementById(id); };
   function h(tag, attrs) {
@@ -347,7 +347,7 @@
   function renderPlaybook() {
     var sec_ = $('sec-playbook'), c = S.card, st = S.state, pb = st && st.playbook;
     var show = !!(pb && st);
-    var key = JSON.stringify([show, pb, c && c.card_id, c && c.steps, c && c.sources, S.cardErr, fresh().ok, st && st.hud && st.hud.step]);
+    var key = JSON.stringify([show, S.live && S.live.unreviewed_cards, pb, c && c.card_id, c && c.steps, c && c.sources, S.cardErr, fresh().ok, st && st.hud && st.hud.step]);
     memo(sec_, key, function () {
       sec_.hidden = !show; if (!show) return;
       var head = $('pb-head'), ol = $('pb-steps'), cur = $('pb-current'), cnt = $('pb-count');
@@ -360,6 +360,7 @@
       }
       var idx = L.currentStepIndex(st, c), list = c.steps;
       head.appendChild(h('div', { class: 'pb-title', text: c.title }));
+      if (S.live && (S.live.unreviewed_cards || []).indexOf(c.card_id) >= 0) head.appendChild(h('div', { class: 'unreviewed' }, h('b', { text: 'AI-RESEARCHED · NOT HUMAN-REVIEWED' }), h('div', { class: 'meta', text: S.live.note + ' The sources are listed with each step.' })));
       head.appendChild(h('div', { class: 'meta' }, 'Provenance: ', lbl(c.provenance)));
       var nConf = pb.confirmed.length, nVer = pb.verified.length;
       if (nConf + nVer >= list.length && list.length) head.appendChild(h('div', { class: 'res supported compact' },
@@ -771,6 +772,21 @@
     });
     if (!box.children.length) box.appendChild(h('p',{class:'meta',text:'No prepared guide yet. Describe your task above and it can be researched.'}));
   }
+  // ------------------------------------------------------------------ live research panel: GET /research/live
+  function fmtClock(sec) { return Math.floor(sec / 60) + ':' + ('0' + (sec % 60)).slice(-2); }
+  function renderLive() {
+    var box = $('live-research'), a = S.live && S.live.active;
+    box.hidden = !a;
+    if (a) { $('live-time').textContent = fmtClock(a.elapsed_s || 0); $('live-goal').textContent = a.goal; }
+  }
+  function pollLive() {
+    if (FIXTURE) return;
+    getJson('/research/live').then(function (r) {
+      var wasActive = !!(S.live && S.live.active); S.live = r.json; renderLive();
+      if (wasActive && !S.live.active) loadCatalog();
+    }).catch(function () {}).then(function () { setTimeout(pollLive, S.live && S.live.active ? 1000 : 4000); });
+  }
+  pollLive();
   loadCatalog();
   function tick(poll) { renderWorkspace(); renderStatus(); renderMirror(); renderTask(); renderPlaybook(); renderTimeline(); renderGuides(); renderGoalHint(); renderAskHint(); renderResearchHint(); }
   devbar(); tick(); poll(); setInterval(tick, 500);

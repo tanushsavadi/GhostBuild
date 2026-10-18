@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Any, Callable, Optional
 
 from contracts.models import (
     Card,
@@ -26,6 +26,7 @@ from .cards import load_cards
 from .engine import Engine
 from .hud import Hud
 from .log import EventLog
+from .live_research import LiveResearch
 from .playbook import AskResult, PlaybookEngine
 from .research import SAVED_DETAIL, ResearchQueue, SaveResult
 from .session import SessionManager
@@ -61,6 +62,8 @@ class Runtime:
         self._pb_sid: Optional[str] = None
         self.research = ResearchQueue(self.asset_root, self.clock)
         self.engine = self._make_engine(self._default_card())
+        self.research_runs: Any = None  # ResearchRuns, attached by mount_research_runs when the server is built
+        self.live = LiveResearch(self)
         self.sim = None  # set below when simulating; startable_cards() reads it while sessions load
         self.voice = None  # optional VoiceService (voice.py), attached by its constructor; None = voice off (read while sessions load)
         sess_path = Path(log_dir) / "sessions.json" if log_dir is not None else None
@@ -225,6 +228,7 @@ class Runtime:
         return None if sid == "none" else sid
 
     def tick(self) -> None:
+        self.live.pump()
         self.sessions.tick()
         self.engine.tick()
         if self.playbook is not None:
@@ -242,6 +246,13 @@ class Runtime:
         """Free-text goal with no card: save it for async research and say QUEUED only if it really was saved."""
         if req.via not in ("phone_text", "voice") or not (req.text or "").strip():
             return res
+        if self.live.try_start(req):  # research it now, show a thinking screen, then start the guide (opt-in; see live_research.py)
+            return res.model_copy(update={
+                "research_queued": True,
+                "cue": Cue(line1="RESEARCHING", line2="THIS TAKES A FEW MINUTES"),
+                "detail": "No authored guide matches, so it is being researched live now. It starts here automatically when ready. "
+                          "A live-researched guide is not reviewed by a human.",
+            })
         saved = self.research.save(req.session_id, req.mode, req.text or "", req.via)
         if not saved.queued:
             return res

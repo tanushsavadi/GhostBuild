@@ -116,6 +116,7 @@ class ResearchRuns:
         self._started = 0
         self._last_start: Optional[float] = None
         self._flag = creao_requested() if enabled is None else enabled
+        self.on_done: Optional[Callable[[str], None]] = None  # called (worker thread) once a run reaches a final status
         self._load()
 
     # ------------------------------------------------------------------ enable / status
@@ -257,6 +258,7 @@ class ResearchRuns:
                 err = envelope["error"]
                 self._update(run_id, status="invalid", error=err["message"], validation_errors=[f"{err['message']} (found: {', '.join(map(str, err['found'][:12]))})"])
                 return
+            self._attach_visuals(raw, envelope, creao_id)
             result = validate_envelope(envelope, self.root)
             if not result["ok"]:
                 self._save_envelope(creao_id, envelope)
@@ -270,6 +272,36 @@ class ResearchRuns:
             msg = client.redact(exc) if client is not None and hasattr(client, "redact") else _scrub(str(exc))
             log.warning("research run %s failed: %s", run_id, msg[:300])
             self._update(run_id, status="failed", error=msg[:600])
+        finally:
+            if self.on_done is not None:
+                try:
+                    self.on_done(run_id)
+                except Exception:
+                    log.exception("on_done hook failed")
+
+    def _attach_visuals(self, raw: Any, envelope: dict, creao_id: str) -> None:
+        """If the agent drew a diagram, give the card a picture for the glasses (+ a full one for the phone). Best effort."""
+        try:
+            from knowledge import creao_normalize, live_visuals
+
+            arts = (raw.get("result") or {}).get("artifacts") if isinstance(raw, dict) else None
+            svg = next((a["svg_text"] for a in arts or [] if isinstance(a, dict) and a.get("svg_text")), None)
+            b64 = next((a["image_b64"] for a in arts or [] if isinstance(a, dict) and a.get("image_b64")), None)
+            if not svg and not b64:
+                return
+            import base64
+
+            card = envelope["card"]
+            guide = live_visuals.build_live_guide(self.root, creao_id, svg, card["provenance"], png_bytes=base64.b64decode(b64) if (b64 and not svg) else None)
+            if guide is None:
+                return
+            payload = creao_normalize.extract_payload(raw)
+            pstep = next((payload[k] for k in creao_normalize.STEP_LIST_KEYS if isinstance(payload.get(k), list)), []) if isinstance(payload, dict) else []
+            card["guides"] = [*(card.get("guides") or []), guide]
+            for i in live_visuals.step_indexes_for_diagram(pstep, card["steps"]):
+                card["steps"][i]["guide_id"] = guide["id"]
+        except Exception:
+            log.exception("could not attach the research diagram")
 
     def _save_envelope(self, creao_id: str, envelope: dict) -> None:
         try:
@@ -375,6 +407,12 @@ def approve_draft(runtime, runs: ResearchRuns, draft_id: str, reviewer: str) -> 
 def mount_research_runs(app: FastAPI, runtime, runs: Optional[ResearchRuns] = None) -> ResearchRuns:
     runs = runs or ResearchRuns(runtime.asset_root)
     app.state.research_runs = runs
+    runtime.research_runs = runs
+    runtime.live.attach(runs)
+
+    @app.get("/research/live")
+    async def get_live() -> Response:
+        return JSONResponse(runtime.live.view())
 
     @app.get("/research/status")
     async def get_status() -> Response:

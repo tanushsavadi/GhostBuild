@@ -190,8 +190,8 @@ def parse_guide(path: Path) -> GuideSpec:
         if pos not in ("bottom", "top"):
             raise GuideError(f"{vc}: caption_pos must be 'bottom' or 'top'")
         asset_kind = v.get("asset_kind", raw.get("asset_kind", "unspecified"))
-        if asset_kind not in ("photograph", "original_diagram", "unspecified"):
-            raise GuideError(f"{vc}: asset_kind must be photograph|original_diagram|unspecified")
+        if asset_kind not in ("photograph", "original_diagram", "ai_diagram", "unspecified"):
+            raise GuideError(f"{vc}: asset_kind must be photograph|original_diagram|ai_diagram|unspecified")
         reference_url = v.get("reference_url", raw.get("reference_url"))
         if reference_url is not None and (not isinstance(reference_url, str) or not reference_url.startswith(("https://", "http://"))):
             raise GuideError(f"{vc}: reference_url must be http(s)")
@@ -392,7 +392,7 @@ def render_phone(src: Image.Image, spec: ViewSpec, placeholder: bool) -> Image.I
     if spec.autocontrast > 0:
         img = ImageOps.autocontrast(img, cutoff=spec.autocontrast)
     img = tone(img, replace(spec, autocontrast=0.0))
-    diagram_header = 70 if not placeholder and spec.asset_kind == "original_diagram" else 0
+    diagram_header = 70 if not placeholder and spec.asset_kind in ("original_diagram", "ai_diagram") else 0
     scale = min(PHONE_MAX[0] / img.width, (PHONE_MAX[1] - diagram_header) / img.height)
     nw, nh = max(1, round(img.width * scale)), max(1, round(img.height * scale))
     img = img.resize((nw, nh), Image.LANCZOS).convert("RGBA")
@@ -411,9 +411,10 @@ def render_phone(src: Image.Image, spec: ViewSpec, placeholder: bool) -> Image.I
         d.text((nw / 2, y0 + bar / 2), spec.caption, fill=(255, 255, 255, 255), font=font, anchor="mm")
     if placeholder:
         _banner(d, nw, nh, spec.caption_pos, spec.banner or PLACEHOLDER_BANNER)
-    elif spec.asset_kind == "original_diagram":
+    elif spec.asset_kind in ("original_diagram", "ai_diagram"):
         img = ImageOps.expand(img, border=(0, diagram_header, 0, 0), fill=(12, 45, 35, 255))
-        _banner(ImageDraw.Draw(img), nw, img.height, "bottom", "ORIGINAL DIAGRAM – SOURCE LINK ON PHONE", bg=(12, 45, 35, 255))
+        text = "AI-GENERATED DIAGRAM – NOT A PHOTO" if spec.asset_kind == "ai_diagram" else "ORIGINAL DIAGRAM – SOURCE LINK ON PHONE"
+        _banner(ImageDraw.Draw(img), nw, img.height, "bottom", text, bg=(12, 45, 35, 255))
     return img.convert("RGB")
 
 

@@ -67,6 +67,7 @@ class SessionManager:
         self._menu_selected = self._default_menu()
         self._flash: Optional[tuple[Screen, int]] = None
         self._choice: Optional[_Choice] = None
+        self._research: Optional[dict] = None  # live research in progress for the wearer's session: {sid, goal, started_ms}
         self._show_list = False  # the task list is a failsafe behind a tap; the front screen is a conversation prompt
         self._progress: dict[str, dict] = {}  # playbook progress per session id (internal; not part of the Session contract)
         self._load()
@@ -228,6 +229,11 @@ class SessionManager:
             return True
         if self._flash is not None:
             self._flash = None  # the wearer is interacting: show the menu underneath
+        if self._research is not None and self._research["sid"] == s.id:
+            if gi.gesture == "swipe_up":
+                self._research = None  # stop waiting; the research itself keeps running and leaves a draft
+            self._render()
+            return True
         ch = self._choice or (self._root_choice() if self._show_list else None)
         if ch is not None:
             if self._choice is None and gi.gesture == "swipe_up" and ch.selected == 0:
@@ -324,8 +330,30 @@ class SessionManager:
         if self._flash is not None and now >= self._flash[1]:
             self._flash = None
             changed = True
+        if self._research is not None and self._flash is None:
+            changed = True  # re-render: the elapsed time is part of the screen (frames are only emitted when the text changes)
         if changed:
             self._render()
+
+    def begin_research(self, sid: str, goal: str) -> None:
+        self._research = {"sid": sid, "goal": goal, "started_ms": self.clock.now_ms()}
+        self._record("event", text=f"live research started for {sid}")
+        self._render()
+
+    def finish_research(self, sid: str, card: Card, cue: Cue) -> bool:
+        """The researched card is ready: start it for the wearer who is still waiting; otherwise it is only added to the list."""
+        r, self._research = self._research, None
+        sess = self.sessions.get(sid)
+        if sess is None or r is None or r["sid"] != sid or sess.phase != "menu" or self.active_id != sid:
+            self._render()
+            return False
+        self._start(sess, card, card.goal_mode, cue, echo=True)
+        return True
+
+    def fail_research(self, cue: Cue) -> None:
+        self._research = None
+        self._flash = (Screen.uncertain(cue, ttl_ms=FLASH_MS * 2), self.clock.now_ms() + FLASH_MS * 2)
+        self._render()
 
     def return_to_menu(self) -> None:
         """Task finished: back to the task list (the next gesture after the completion message)."""
@@ -353,6 +381,10 @@ class SessionManager:
             screen = self._flash[0]
         elif s is not None and s.phase == "welcome":
             screen = Screen.welcome(Cue(line1="GHOSTBUILD", line2="VOICE VIA ELEVENLABS" if self._voice_on() else "HANDS BUSY. MIND CLEAR."), WELCOME_MS)
+        elif s is not None and s.phase == "menu" and self._research is not None and self._research["sid"] == s.id:
+            secs = max(0, (now - self._research["started_ms"]) // 1000) // 5 * 5  # 5 s steps: calm, and few BLE writes
+            title = goal_mod.short_title(self._research["goal"], 26).upper()
+            screen = Screen.intervene(Cue(line1=f"RESEARCHING {secs // 60}:{secs % 60:02d}", line2=title), cue_id="research")
         elif s is not None and s.phase == "menu":
             ch = self._choice or (self._root_choice() if self._show_list else None)
             if ch is not None:

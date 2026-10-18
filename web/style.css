@@ -229,3 +229,16 @@ summary{cursor:pointer;color:var(--dim);font-size:13px;padding:4px 0;list-style-
 body.has-task:not(.goal-open) .area-goal{display:none}body:not(.has-task) .area-ask,body:not(.has-task) .area-guide{display:none}body.has-task .workspace-heading h1{font-size:clamp(28px,3.5vw,42px)}
 @media(max-width:899px){body{--gut:18px}.top{padding:20px 0;margin-bottom:24px}.brand .brand-caption{display:none}.grid{gap:16px}.card{padding:21px}.workspace-heading{margin-bottom:26px}h1{letter-spacing:-1.5px}.area-mirror{order:1}.area-playbook{order:2}.area-ask{order:4}.area-guide{order:3}.area-goal{order:0}.foot{display:block}.foot span{display:block;margin-top:8px}.workspace-heading{align-items:flex-start}#new-task{max-width:105px;font-size:11px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+
+/* live research: a calm thinking state, then the guide starts by itself */
+.live{margin-top:14px;border:1px solid var(--line);border-radius:14px;padding:14px;background:linear-gradient(180deg,rgba(52,211,153,.08),transparent)}
+.live-head{display:flex;align-items:center;gap:10px}.live-time{margin-left:auto;font:600 14px ui-monospace,Menlo,monospace;color:var(--g2)}
+.live-goal{margin:8px 0 10px;font-weight:600;overflow-wrap:anywhere}
+.live-bar{height:4px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden;margin-bottom:10px}
+.live-bar i{display:block;height:100%;width:40%;border-radius:4px;background:linear-gradient(90deg,transparent,var(--g2),transparent);animation:live-slide 1.6s ease-in-out infinite}
+.spin{width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.18);border-top-color:var(--g2);animation:live-spin .9s linear infinite}
+.unreviewed{margin:10px 0;border:1px solid var(--amber);border-radius:12px;padding:10px 12px;background:rgba(251,191,36,.08)}
+.unreviewed b{letter-spacing:.06em}
+@keyframes live-slide{0%{transform:translateX(-120%)}100%{transform:translateX(300%)}}
+@keyframes live-spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.live-bar i,.spin{animation:none}}
