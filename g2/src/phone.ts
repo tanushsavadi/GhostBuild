@@ -7,7 +7,7 @@ export interface PhoneState {
   lastSeq: number
   offline: boolean
   metrics: ImageMetrics | null
-  sessionId: string
+  sessionId: string | null
   clientId: string
   surface: string
 }
@@ -52,7 +52,7 @@ export function bindPhoneUi(h: { getState(): PhoneState; setBackend(raw: string)
         row('Glasses', s.offline ? 'GHOSTBUILD OFFLINE' : 'showing server frame') +
         row('Last frame seq', String(s.lastSeq)) +
         row('Surface', s.surface) +
-        row('Session', s.sessionId) +
+        row('Session', s.sessionId ?? 'none yet') +
         row('Last picture', m ? `${m.result} ${m.totalMs} ms (fetch ${m.fetchMs}, send ${m.sendMs})` : 'none')
     },
   }

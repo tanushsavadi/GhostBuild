@@ -53,13 +53,13 @@ const randomHex = (n: number): string =>
 
 export interface Identity {
   clientId: string
-  sessionId: string
+  /** null until core assigns one (HudFrame.session_id). Core treats an unknown id as a NEW session, so we never invent one. */
+  sessionId: string | null
 }
 
 /**
- * client_id: stable per install (g2-xxxxxxxx). session_id: restored from storage; if none, generated once
- * and persisted. NOTE: contract v2 has no inbound message that assigns a session id, so the plugin owns it;
- * `adoptSession` lets core override later (any inbound object with a string `session_id`).
+ * client_id: stable per install (g2-xxxxxxxx). session_id: restored from storage, or null on a fresh install
+ * (core then creates the session, shows the welcome once, and tells us the id in every HudFrame.session_id).
  */
 export async function loadIdentity(kv: KeyValue, rand: (n: number) => string = randomHex): Promise<Identity> {
   let clientId = await kv.get(K.clientId)
@@ -67,15 +67,12 @@ export async function loadIdentity(kv: KeyValue, rand: (n: number) => string = r
     clientId = `g2-${rand(8)}`
     await kv.set(K.clientId, clientId)
   }
-  let sessionId = await kv.get(K.sessionId)
-  if (!sessionId) {
-    sessionId = `s-${rand(10)}`
-    await kv.set(K.sessionId, sessionId)
-  }
-  return { clientId, sessionId }
+  const sessionId = await kv.get(K.sessionId)
+  return { clientId, sessionId: sessionId || null }
 }
 
-export async function adoptSession(kv: KeyValue, current: string, msg: unknown): Promise<string> {
+/** Adopt + persist the id carried by a HudFrame (or any inbound object with a string `session_id`). */
+export async function adoptSession(kv: KeyValue, current: string | null, msg: unknown): Promise<string | null> {
   const id = (msg as { session_id?: unknown } | null)?.session_id
   if (typeof id === 'string' && id.length > 0 && id !== current) {
     await kv.set(K.sessionId, id)

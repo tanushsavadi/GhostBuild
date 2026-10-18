@@ -25,6 +25,7 @@ const shas = Object.fromEntries(F.VIEWS.map((v) => [v, createHash('sha256').upda
 let seq = 0
 let current = null
 let phase = 'none' // welcome | menu | intervene | visual | verified | quiet
+let sid = null
 let menuSel = 0
 let viewIdx = 0
 const sessions = new Set()
@@ -40,7 +41,7 @@ const clearTimers = () => { for (const t of timers) clearTimeout(t); timers.clea
 
 function publish(make, nextPhase) {
   seq += 1
-  current = make(seq)
+  current = { ...make(seq), session_id: sid }
   if (nextPhase) phase = nextPhase
   const json = JSON.stringify(current)
   log(`HUD  seq=${current.seq} mode=${current.mode} ${current.cue ? JSON.stringify(current.cue.line1) : '(blank)'}`)
@@ -84,9 +85,11 @@ function onInput(msg) {
 
 function onHello(msg) {
   log(`HELLO ${JSON.stringify(msg)}`)
-  if (!current || !sessions.has(msg.session_id)) {
-    // unknown session -> new session: welcome, then menu. Known session -> resume the current frame (no welcome).
-    sessions.add(msg.session_id)
+  if (!msg.session_id || !sessions.has(msg.session_id)) {
+    // like core: null/unknown session id -> core creates a session (welcome, then menu) and tells the plugin its id
+    // in HudFrame.session_id. A known id resumes the current frame (no welcome).
+    sid = 's-' + Math.random().toString(16).slice(2, 10)
+    sessions.add(sid)
     newSession()
   }
   return current
@@ -125,7 +128,7 @@ const server = http.createServer(async (req, res) => {
   const m = url.pathname.match(/^\/guides\/camera_lens\/(where|how|correct)\.png$/)
   if (m) return send(res, 200, pngs[m[1]], 'image/png')
   if (url.pathname === '/admin/fix' && req.method === 'POST') { goVerified(); return send(res, 204, '') }
-  if (url.pathname === '/admin/reset' && req.method === 'POST') { sessions.clear(); current = null; phase = 'none'; clearTimers(); return send(res, 204, '') }
+  if (url.pathname === '/admin/reset' && req.method === 'POST') { sessions.clear(); sid = null; current = null; phase = 'none'; clearTimers(); return send(res, 204, '') }
   if (url.pathname === '/admin/frame' && req.method === 'POST') { const f = JSON.parse(await readBody(req)); seq = Math.max(seq, f.seq ?? 0); current = f; for (const ws of clients) ws.send(JSON.stringify(f)); return send(res, 204, '') }
   if (url.pathname === '/admin/state') return send(res, 200, JSON.stringify({ phase, seq, current, sessions: [...sessions] }))
   send(res, 404, '{"error":"not found"}')

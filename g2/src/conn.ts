@@ -101,7 +101,7 @@ export class ConnectionManager {
       return true
     }
     if (this.polling && this._status === 'poll') {
-      void this.post('/input', input)
+      void this.post('/input', input, true)
       return true
     }
     warn(`input ${input.gesture} dropped: no connection`)

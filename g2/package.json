@@ -7,8 +7,14 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "pack": "npm run build && evenhub pack app.json dist",
-    "simulate": "evenhub-simulator http://localhost:5173"
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "stub": "node tools/stub-server.mjs",
+    "simulate": "evenhub-simulator \"http://localhost:5173/?surface=simulator\" --automation-port 9898",
+    "sim:smoke": "node tools/sim-smoke.mjs sim-shots",
+    "app-json": "node tools/gen-app-json.mjs app.local.json",
+    "pack": "npm run build && evenhub pack app.json dist -o ghostbuild.ehpk --sdk-ver 0.0.16",
+    "pack:lan": "npm run build && npm run app-json && evenhub pack app.local.json dist -o ghostbuild.ehpk --sdk-ver 0.0.16"
   },
   "dependencies": {
     "@evenrealities/even_hub_sdk": "0.0.16"

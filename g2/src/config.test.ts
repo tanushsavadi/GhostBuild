@@ -41,19 +41,22 @@ describe('session persistence', () => {
     const m = new Map<string, string>()
     return { m, kv: { async get(k: string) { return m.get(k) ?? null }, async set(k: string, v: string) { m.set(k, v) } } }
   }
-  it('creates a stable client_id and session_id once, then restores them', async () => {
+  it('creates a stable client_id once; session_id stays null until core assigns one', async () => {
     const { kv, m } = mem()
     const a = await loadIdentity(kv, () => 'abcd1234')
-    expect(a.clientId).toBe('g2-abcd1234')
-    expect(m.get(K.sessionId)).toBe(a.sessionId)
+    expect(a).toEqual({ clientId: 'g2-abcd1234', sessionId: null })
+    expect(m.has(K.sessionId)).toBe(false)
     const b = await loadIdentity(kv, () => 'zzzzzzzz')
-    expect(b).toEqual(a)
+    expect(b.clientId).toBe(a.clientId)
   })
-  it('adopts a server-assigned session id', async () => {
+  it('adopts the session id from a HudFrame, persists it, and restores it next launch', async () => {
     const { kv, m } = mem()
-    expect(await adoptSession(kv, 's-old', { type: 'session', session_id: 's-new' })).toBe('s-new')
-    expect(m.get(K.sessionId)).toBe('s-new')
-    expect(await adoptSession(kv, 's-old', { type: 'hud', seq: 1 })).toBe('s-old')
+    expect(await adoptSession(kv, null, { type: 'hud', seq: 1, session_id: 's-core1' })).toBe('s-core1')
+    expect(m.get(K.sessionId)).toBe('s-core1')
+    expect((await loadIdentity(kv)).sessionId).toBe('s-core1')
+    expect(await adoptSession(kv, 's-core1', { type: 'hud', seq: 2 })).toBe('s-core1')
+    expect(await adoptSession(kv, 's-core1', { type: 'hud', seq: 3, session_id: 's-core2' })).toBe('s-core2')
+    expect(await adoptSession(kv, 's-core1', { type: 'hud', seq: 4, session_id: null })).toBe('s-core1')
   })
   it('mirrors SDK storage and window.localStorage; survives either failing', async () => {
     const sdk = new Map<string, string>()

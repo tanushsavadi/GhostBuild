@@ -31,8 +31,8 @@ let deviceSn = ''
 try { deviceSn = (await bridge.getDeviceInfo())?.sn ?? '' } catch { /* unknown device: treat as g2 */ }
 const surface = resolveSurface(params.get('surface'), deviceSn)
 const identity = await loadIdentity(kv)
-let sessionId = identity.sessionId
-log(`backend=${backend} surface=${surface} client=${identity.clientId} session=${sessionId} voice=${flags.voice}`)
+let sessionId: string | null = identity.sessionId
+log(`backend=${backend} surface=${surface} client=${identity.clientId} session=${sessionId ?? 'none (core will assign)'} voice=${flags.voice}`)
 
 // --- pieces --------------------------------------------------------------------------------------------------
 const loader = new ImageLoader({ backend: () => backend })
@@ -58,7 +58,9 @@ const conn: ConnectionManager = new ConnectionManager({
   surface: () => surface,
   afterSeq: () => controller.lastSeq,
   onMessage: (m) => {
-    void adoptSession(kv, sessionId, m).then((id) => { sessionId = id })
+    // Adopt synchronously so the very next hello (reconnect) carries it; persistence happens in the background.
+    const id = (m as { session_id?: unknown } | null)?.session_id
+    if (typeof id === 'string' && id && id !== sessionId) { sessionId = id; void adoptSession(kv, null, m) }
     controller.onMessage(m)
   },
   onHealth: (ok) => { controller.onHealth(ok); ui.refresh() },
@@ -80,7 +82,7 @@ const ui = bindPhoneUi({
 
 // Background/foreground: relies on setLocalStorage (see session.ts); the host-snapshot API is not in SDK 0.0.16.
 registerBackgroundState('hud', () => ({ sessionId, backend }), (saved) => {
-  if (typeof saved.sessionId === 'string') sessionId = saved.sessionId
+  if (typeof saved.sessionId === 'string' && saved.sessionId) sessionId = saved.sessionId
   if (typeof saved.backend === 'string' && normalizeBackend(saved.backend)) backend = saved.backend
 })
 
@@ -107,7 +109,7 @@ const unsubscribe = bridge.onEvenHubEvent((event) => {
         conn.reconnectNow() // re-hello with the stored session id
         break
       case 'foreground_exit':
-        void kv.set(K.sessionId, sessionId)
+        if (sessionId) void kv.set(K.sessionId, sessionId)
         break
       default: // abnormal_exit | system_exit
         cleanup()

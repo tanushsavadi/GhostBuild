@@ -21,6 +21,9 @@ describe('stub frames are valid HudFrames', () => {
   it('all are labelled simulated', () => {
     for (const f of Object.values(frames)) expect(f.source).toBe('simulated')
   })
+  it('valid with a session_id too', () => {
+    expect(validate({ ...F.menu(2), session_id: 's-abc' }), JSON.stringify(validate.errors)).toBe(true)
+  })
 })
 
 describe('stub png', () => {
