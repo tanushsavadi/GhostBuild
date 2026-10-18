@@ -1,117 +1,188 @@
-# g2 — GhostBuild Even G2 plugin
+# g2 - GhostBuild Even G2 plugin (lane B)
 
-Owner: **B**. Scaffolded from the official [`even-realities/evenhub-templates`](https://github.com/even-realities/evenhub-templates) `minimal` template (commit `8cb0135`). Right now it is still the template demo ("Hello from G2!", tap to count, double-tap to exit). The GhostBuild cue renderer described in [`docs/PIVOT_GHOSTBUILD.md`](../docs/PIVOT_GHOSTBUILD.md) §5.8 replaces `src/main.ts`.
+A quiet renderer. Core (`core/ghostbuild_core`, FastAPI :8787) pushes `HudFrame` JSON; this plugin draws it on the G2 and
+sends `G2Hello` / `G2Input` back. It never decides what to say. Authority: `docs/PIVOT_GHOSTBUILD.md` §0A (+ §5.8 for the
+transport plan). Types come from the generated `contracts/ts/index.ts`; nothing is hand-copied.
 
-Before writing any SDK call, check it with the `everything-evenhub` skills (`sdk-reference`, `glasses-ui`, `handle-input`) and https://hub.evenrealities.com/docs.
+**Evidence status: everything below was exercised in unit tests, in `evenhub-simulator` 0.9.5, and against `core --simulate`
+and a stub. None of it is hardware proof. The physical-glasses checklist at the end is for a human.**
 
 ## Versions
 
-| Package | Version |
-|---|---|
-| `@evenrealities/even_hub_sdk` | `0.0.16` (exact pin; matches `min_sdk_version` in `app.json`) |
-| `@evenrealities/evenhub-cli` | `^0.1.14` |
-| `@evenrealities/evenhub-simulator` | `^0.9.5` |
+| Package | Version | Note |
+|---|---|---|
+| `@evenrealities/even_hub_sdk` | `0.0.16` (exact pin, the newest on npm) | `min_sdk_version` in `app.json` |
+| `@evenrealities/evenhub-cli` | `0.1.14` | `evenhub pack/qr/init` |
+| `@evenrealities/evenhub-simulator` | `0.9.5` | needs `npm rebuild @evenrealities/evenhub-simulator` after install to get the `.bin` link |
+| `vitest` / `ws` / `ajv` | dev only | tests, stub server, schema check of stub frames |
 
-`app.json` sets `min_app_version` to `2.2.10`, the floor the CLI stamps for SDK 0.0.16.
+SDK facts used here were read from `node_modules/@evenrealities/even_hub_sdk/dist/index.d.ts`, not from the docs. Where the docs or
+the installed skills disagree with the `.d.ts`, the `.d.ts` wins (see Discrepancies).
 
-## How to run
+## Layout of the code (`src/`)
 
-You need Node ≥ 20 and git. Real glasses also need a phone with the **Even Realities app**, paired to the G2.
+| File | Role | Pure/tested |
+|---|---|---|
+| `view.ts` | `frameToView(frame)`: quiet -> `" "`; 1-2 centred lines; menu with `> FIX` / `  BUILD`; picture + caption; stale -> `STALE DATA`; non-live source tag | yes |
+| `glyphs.ts` | whitelist sanitizer (ASCII + documented glyphs, folds the rest, `VITE_GLYPHS=ascii` fallback) | yes |
+| `gestures.ts` | SDK event -> `press / swipe_up / swipe_down / hold_start / hold_end`; DOUBLE -> local exit only | yes |
+| `gate.ts` | `SeqGate` (never backwards, never a duplicate seq) + `isHudFrame` runtime guard | yes |
+| `controller.ts` | gate + identical-view skip + `ttl_ms` local clear + 3 s offline view + re-hello; no SDK calls | yes |
+| `conn.ts` | WS `/ws?role=g2` + hello first + backoff; 4 s -> poll `GET /hud?after=` every 300 ms + `POST /hello`, `POST /input` | yes |
+| `renderer.ts`, `layout.ts` | serial, latest-wins apply to the glasses; rebuild only when the layout changes | yes (fake bridge) |
+| `image.ts`, `png.ts` | fetch `${backend}${image.url}`, validate PNG, size limits, latency log | yes |
+| `session.ts`, `config.ts` | stored `client_id`/`session_id`/backend (SDK storage mirrored to `localStorage`), env + query config | yes |
+| `voice.ts`, `bgstate.ts` | flag-gated hold-to-ask stub; feature-detected background-state API | yes/n.a. |
+| `main.ts`, `phone.ts` | wiring; tiny phone status + backend URL screen | no |
 
-### 1. Install (once per clone)
+## Page model (verified against the 0.0.16 `.d.ts` + docs, simulator-checked)
+
+* One page, three container IDs: `cue` (id 1, **the only `isEventCapture: 1`**), `tag` (id 2, dim non-capture line for `SIMULATED` /
+  `REPLAY` / `2/3`), `img` (id 3, only on picture pages).
+* Text-only layout: cue at x16 y72 w544 h168. Picture layout: image centred at y8 (PNG size, 288x144 for guides), caption container
+  below it, tag at y248.
+* `createStartUpPageContainer` runs once (text layout, blank). Text changes are `textContainerUpgrade` (id + name must match, else
+  silent no-op). `rebuildPageContainer` runs **only** on text <-> picture or a different picture size (docs: "rebuild only when the
+  layout itself changes"). Picture -> picture (swipe) is `textContainerUpgrade` + `updateImageRawData`, no rebuild.
+* Image containers cannot be filled at startup, so a picture frame is: fetch + validate the PNG first (screen untouched), rebuild to
+  the picture layout, `updateImageRawData`. Any failure (HTTP, not a PNG, size outside 20-288 x 20-144, rebuild `false`, send result
+  not `success`) renders the frame's text cue instead. One in-flight bridge call at a time; newer frames overwrite the pending slot.
+* `updateImageRawData` takes the **encoded PNG bytes as a `Uint8Array`** (official `image` template; the host converts to 4-bit
+  grey; `imageToGray4Failed` is its failure code). We do not convert client-side.
+* "Centring" is space padding. The font is proportional (a space is about half a capital), so padding = `(cols - len)` spaces with
+  `cols` about 50 (measured in the simulator; **calibrate on glasses** with `VITE_CENTER_COLS`).
+
+## Transport and honesty rules
+
+* On every (re)connect the first message is `G2Hello {client_id, session_id|null, surface}`; core answers with the current frame
+  (WS: pushed; poll mode: `POST /hello` reply). The plugin never renders its own welcome or menu.
+* `session_id`: restored from storage, else `null` on a fresh install. Core (`session.py`) treats an unknown id as a new session, so
+  the plugin never invents one. It adopts `HudFrame.session_id` from every frame, persists it (SDK `setLocalStorage` + `localStorage`)
+  and sends it in every later hello, so a reconnect does not replay the welcome.
+* Gate: a frame renders only if `seq` is strictly newer than the last accepted one; the gate resets on each reconnect because a
+  restarted core restarts its seq. An identical rendered view is never re-sent to the glasses. A `ttl_ms` frame is cleared locally
+  to blank when the timer fires, and is not resurrected by a reconnect replay.
+* Not healthy for more than 3 s: `GHOSTBUILD OFFLINE` / `RECONNECTING` replaces whatever was shown (an old success never lingers).
+  Healthy = the server answered the hello (first inbound WS message, or a successful poll).
+* `stale: true` frames render `STALE DATA / CHECK LINK`. Non-`pi_live` sources always show a `SIMULATED` or `REPLAY` tag, including
+  in quiet mode.
+* Gestures: single press -> `press`; text-container scroll 2 -> `swipe_down`, 1 -> `swipe_up`; `LONG_PRESS_EVENT (9)` /
+  `LONG_PRESS_RELEASE_EVENT (10)` -> `hold_start` / `hold_end` (core can ignore them); **DOUBLE (3), checked first in every envelope ->
+  `shutDownPageContainer(1)` locally, never sent**. A press is a recheck, never a commit. Inputs are dropped (not queued) with no
+  connection, because a stale recheck is meaningless later.
+* Surface label: `?surface=simulator|g2`, else the simulator's hard-coded device sn (`S2001234567890`, observed) marks it
+  `simulator`; hardware reports `g2`. Used on hello and inputs so a simulator run is never mistaken for the glasses.
+
+## Configuration
+
+| Setting | How | Default |
+|---|---|---|
+| Backend URL | `?backend=` query (also stored) > stored value > `VITE_BACKEND_URL` > default; editable on the phone screen | `http://localhost:8787` |
+| `VITE_FLAG_VOICE` | `1` enables the hold-to-ask **stub** (no capture, no mic permission) | off |
+| `VITE_GLYPHS` | `ascii` maps every non-ASCII glyph to ASCII (`->` `>`, bullet `*`, middle dot `-`) | `full` |
+| `VITE_CENTER_COLS` | approximate characters per line for centring | `50` |
+
+No API keys exist in `g2/` and none may be added (`make check-secrets` passes).
+
+## Run it
+
+Install once: `cd g2 && npm ci && npm rebuild @evenrealities/evenhub-simulator`.
+
+### A. Simulator against the real core (simulated observations)
 
 ```bash
-git clone https://github.com/tanushsavadi/GhostBuild.git
-cd GhostBuild
-git checkout template          # until this branch is merged into main
+# terminal 1 (repo root; same env the Makefile uses)
+make core-sim                         # = PYTHONPATH=... uv run python -m ghostbuild_core --simulate  (banner: SIMULATED)
+# terminal 2
+cd g2 && npm run dev
+# terminal 3
+cd g2 && npm run simulate             # evenhub-simulator "http://localhost:5173/?surface=simulator" --automation-port 9898
+```
+
+Drive core with `curl -X POST "localhost:8787/sim/scenario?name=blocked|recover|healthy"`. The simulator window: Up/Down = swipe,
+Click = press, Double Click = exit dialog. Automation: `curl localhost:9898/api/screenshot/glasses -o shot.png` (RGBA, alpha > 0 =
+lit), `curl localhost:9898/api/console`, `POST /api/input {"action":"click|up|down|double_click|long_press|long_press_release"}`.
+The plugin logs `[ghostbuild] ready` once the page exists (wait ~4 s after launch before sending input).
+
+### B. Simulator against the stub (no core needed)
+
+```bash
+cd g2 && npm run stub                 # node tools/stub-server.mjs  (:8787, every frame source "simulated")
+cd g2 && npm run dev && npm run simulate
+cd g2 && npm run sim:smoke            # scripted walk-through, PNG screenshots into g2/sim-shots/
+```
+
+The stub speaks the same endpoints as core (`/ws?role=g2`, `/hud?after=`, `/hello`, `/input`, `/guides/camera_lens/*.png` with
+generated 288x144 4-bit PNGs) and echoes every hello/input to its console. `POST /admin/fix` stands in for the physical fix.
+`npx vite-node tools/poll-check.mts` forces the WebSocket to fail and exercises the polling fallback against any backend.
+
+### C. Physical G2 via QR sideload (dev server, hot reload)
+
+1. Laptop and phone on the same Wi-Fi (or the phone's hotspot). Developer Mode on in the Even app.
+2. Core must be reachable from the phone: `make core-sim` (or `make core`) listens on `0.0.0.0:8787`.
+3. `cd g2 && VITE_BACKEND_URL=http://<laptop-ip>:8787 npm run dev`, then `make g2-qr` or
+   `npx evenhub qr --url "http://<laptop-ip>:5173"` (`make g2-qr` uses `ipconfig getifaddr en0`, macOS only).
+4. Scan the QR in the Even Hub tab. Alternatively open once with `http://<laptop-ip>:5173/?backend=http://<laptop-ip>:8787`; the
+   backend is then stored. Keep the phone screen on: **QR sideload dies when the phone locks** (docs). Packaged builds do not.
+
+### D. Packaged `.ehpk` (Beta / private testing)
+
+```bash
 cd g2
-npm install
+VITE_BACKEND_URL=http://<laptop-ip>:8787 npm run pack:lan   # build + app.local.json + evenhub pack -> ghostbuild.ehpk
 ```
 
-If `npm run simulate` later says `evenhub-simulator` is not recognised (we saw this on Windows), run:
+`app.json` (committed) names the app `GhostBuild`, package `com.ghostbuild.ghostbuild`, SDK floor 0.0.16, and whitelists
+`http://localhost:8787`. `tools/gen-app-json.mjs` rewrites the network whitelist from `VITE_BACKEND_URL` (or comma-separated
+`GB_BACKEND_URLS`) into the git-ignored `app.local.json`, adding the matching `ws://` / `wss://` origin. The same variable becomes
+the plugin's default backend at build time. For a Tailscale Funnel fallback, use `https://<host>.ts.net` (core sends CORS `*`).
 
-```bash
-npm rebuild @evenrealities/evenhub-simulator
-```
+The only permission is `network`. **No microphone permission is declared** (docs: unused permissions are flagged at review). To
+enable voice later: set `VITE_FLAG_VOICE=1`, add `{"name":"g2-microphone","desc":"..."}` to the permissions array (the generator
+has a comment marking the spot), implement `voice.ts` (`audioControl(true, AudioInputSource.Glasses)` only after the startup page
+succeeded, start on `hold_start`, stop on `hold_end`), then re-run the permission-denied QA.
 
-### 2. Start the dev server (terminal 1)
+`make g2-pack` runs `npm run build && evenhub pack app.json dist -o ghostbuild.ehpk --sdk-ver 0.0.16 -c`. The flags are valid for CLI
+0.1.14, but (1) `-c` needs `evenhub login` (otherwise `Not authenticated ... Failed to check package ID availability`, exit 1), and
+(2) it packs the committed `app.json`, i.e. a `localhost` whitelist that is useless on a phone. Use `npm run pack:lan` for a device build.
 
-```bash
-npm run dev
-```
+## Physical-device checklist (human; none of this is verified yet)
 
-Leave it running. It serves the plugin on port 5173 to `localhost` and to your LAN, and reloads on every save. On Windows, if a firewall prompt appears, allow Node.js on **private** networks. Otherwise the phone can't reach it.
+Glyphs (one frame each, read from the glasses, not the simulator):
+- [ ] `● CAMERA VIEW BACK` bullet shows. `→`, `·`, `°`, `×` show (community-documented only). If any is missing build with `VITE_GLYPHS=ascii`.
+- [ ] Menu marker `> FIX` / `  BUILD` aligns and reads clearly; selected option is obvious.
+- [ ] Centring: two-line cue looks centred. If left or right heavy, tune `VITE_CENTER_COLS`.
+- [ ] `tag` line (`SIMULATED`, `2/3`) is legible at `textColor: 2` and not distracting. Blank stays fully dark in quiet mode.
 
-### 3a. Run in the simulator (terminal 2)
+Input:
+- [ ] Single press arrives once (not twice). Swipe down/up map the right way (down = next view).
+- [ ] Double press shows the system exit dialog; cancel keeps the app working; nothing was sent to core (check core log).
+- [ ] Long press: does `hold_start`/`hold_end` reach core, or does the OS menu claim it (docs: tap-then-hold opens the OS menu)?
+- [ ] Ring (R1) gestures behave the same, if available.
 
-```bash
-npm run simulate
-```
+Pictures:
+- [ ] The 288x144 guide is legible on the real display (16 greys, green): WHERE / HOW / CORRECT.
+- [ ] Time from press to picture, and from swipe to next picture (the plugin logs `fetch/rebuild/send/total` ms in the WebView console; phone-side inspect needed). Page rebuild flicker acceptable?
+- [ ] A forced failure (stop core between frame and image fetch) shows the text cue, not a blank page.
 
-A window opens showing the 576×288 glasses display with `Hello from G2!`. Click the touchpad area to send a tap ("Taps: 1"). Double-tap to exit. Edits to `src/` reload automatically.
+Lifecycle and network:
+- [ ] Phone face down, screen off, 5 minutes (use a packaged build, not QR): reconnects, correct current frame, no welcome replay.
+- [ ] Packaged build can reach `http://<lan-ip>:8787` (HTTP + CORS + whitelist) and a WebSocket to it. If the WS is blocked, the 4 s poll fallback should take over; confirm the cue latency (< 500 ms WS; ~300 ms polling).
+- [ ] Kill core: `GHOSTBUILD OFFLINE / RECONNECTING` within about 3 s of loss; restart core: recovers without reopening the app.
+- [ ] Network permission denied / WebView suspended on Android: no crash, offline view.
+- [ ] Never an old success (`● ... BACK`) left on screen while disconnected.
 
-### 3b. Run on real glasses (terminal 2)
+## Discrepancies and caveats found
 
-1. Put the laptop and the phone on the **same Wi-Fi** (or put the laptop on the phone's hotspot).
-2. With the dev server still running:
-   ```bash
-   npx evenhub qr
-   ```
-   The CLI detects your IP and prints a QR code in the terminal. If it picks the wrong network adapter (VPN, WSL, Ethernet), pass the address yourself:
-   ```bash
-   npx evenhub qr --url http://<laptop-wifi-ip>:5173
-   ```
-   To find the Wi-Fi IP, run `ipconfig` on Windows (the "Wireless LAN adapter Wi-Fi" IPv4 address) or `ipconfig getifaddr en0` on macOS. Add `--clear` if it keeps reusing an old address.
-3. Scan the QR code with the Even Realities app. The plugin opens on the glasses with hot reload.
-4. Keep the phone's screen on while testing (turn auto-lock off).
-
-### 4. Stop
-
-`Ctrl+C` in each terminal. Double-tapping on the glasses only exits the plugin.
-
-### Troubleshooting
-
-| Symptom | Fix |
-|---|---|
-| Simulator window is blank | The dev server isn't running. Start step 2 first. |
-| Phone scans the QR, but nothing loads | Different networks, a firewall block, or the wrong IP. On the phone, open `http://<laptop-wifi-ip>:5173` in a browser; if that fails, the problem is the network, not the plugin. |
-| `evenhub-simulator` not recognised | `npm rebuild @evenrealities/evenhub-simulator` |
-| Port 5173 is busy | Stop the other Vite server. The QR and the simulator both expect 5173. |
-
-### Other commands (from `g2/`)
-
-| Goal | Command |
-|---|---|
-| Simulator with the automation API | `npx evenhub-simulator http://localhost:5173 --automation-port 9898` |
-| Type-check | `npx tsc --noEmit` |
-| Build and package `.ehpk` | `npm run pack` (or `make g2-pack` from the repo root) |
-
-`make g2-qr` currently works only on macOS because it uses `ipconfig getifaddr`. Use `npx evenhub qr` instead.
-
-### Simulator automation (handy for tests and screenshots)
-
-With `--automation-port 9898`:
-
-```bash
-curl http://127.0.0.1:9898/api/ping                                     # pong
-curl http://127.0.0.1:9898/api/screenshot/glasses -o glasses.png        # 576×288 RGBA
-curl http://127.0.0.1:9898/api/console                                  # WebView console logs
-curl -X POST -H 'Content-Type: application/json' \
-     -d '{"action":"click"}' http://127.0.0.1:9898/api/input            # up | down | click | double_click
-```
-
-The simulator does not prove glyph rendering on hardware. Test `→ ● · '` on physical G2.
-
-## Before the first Beta upload
-
-- Add a `network` permission to `app.json` with the backend URL(s) in `whitelist`. `evenhub pack` rejects an empty whitelist, so the template ships without one.
-- Run `npx evenhub pack app.json dist -c` to check that the package id `com.ghostbuild.ghostbuild` is available.
-
-## Files
-
-| File | Purpose |
-|---|---|
-| `app.json` | Even Hub manifest: name `GhostBuild`, package id, SDK floor, permissions |
-| `index.html` | WebView host page; locks zoom and scroll on the phone |
-| `src/main.ts` | Creates the glasses page and handles input (template demo for now) |
-| `vite.config.ts` | Dev server on `0.0.0.0:5173` for QR sideloading |
+* The `everything-evenhub:background-state` skill documents `setBackgroundState` / `onBackgroundRestore`; SDK **0.0.16 does not export
+  them** (absent from `index.d.ts` and `index.js`). The official Background & Lifecycle page does not use them either: it says to persist
+  to `localStorage`. `bgstate.ts` feature-detects them; today persistence is `setLocalStorage` (+ `window.localStorage` mirror) and a
+  re-hello + forced redraw on `FOREGROUND_ENTER`.
+* The `sdk-reference` skill is for 0.0.12 and omits `textColor`, `menuObject`, `LONG_PRESS_EVENT (9)` and `LONG_PRESS_RELEASE_EVENT (10)`;
+  the 0.0.16 `.d.ts` has them.
+* `docs/08_G2_EXPERIENCE.md` says `→ ← ↑ ↓ ● ○ ■ □ ▲ ▶ ▼ ◀ · ° ×` are "confirmed". The official docs only list the geometric/selection set
+  (`●○■□▲△▶▷▼▽◀◁★☆`); the arrows and Latin-1 symbols come from the community glyph table (simulator-tested, "real hardware may differ").
+* The old template README said `evenhub pack` rejects an empty whitelist; CLI 0.1.14 packed an empty whitelist, a bare hostname, a path
+  and `ws://` entries without complaint. The host app or portal may still validate. Not verified.
+* Simulator caveats (docs): no BLE timing, image decode is faster and ignores device size limits, no LZ4 path, glyph rendering is not
+  pixel-exact. The simulator's logged `total` image time is therefore meaningless for hardware.
