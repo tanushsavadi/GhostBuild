@@ -270,7 +270,7 @@ def create_app(
         elif body.action == "next_view":
             if pb is None or pb.view_idx is None:
                 raise HTTPException(409, "open a picture first")
-            gesture = "swipe_down"
+            gesture = "press"  # press is the picture button on the glasses too: it cycles WHERE -> HOW -> CORRECT
         else:
             gesture = "press" if body.action == "press" else "swipe_up"
         return _json(runtime.handle_input(G2Input(gesture=gesture, seq_seen=body.seq_seen)))

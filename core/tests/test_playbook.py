@@ -72,13 +72,13 @@ def test_swipe_up_after_completion_reopens_last_step():
 
 
 # ------------------------------------------------------------------ accidental-input guard
-def test_swipe_down_within_1500ms_of_step_frame_is_ignored():
+def test_swipe_down_within_600ms_of_step_frame_is_ignored():
     r = Rig(make_card(3))
-    r.wait(1000)
+    r.wait(400)
     n = len(r.frames)
     assert r.send("swipe_down") is None
     assert len(r.frames) == n and r.cur.step.index == 0 and r.pb.playbook_state().confirmed == []
-    r.wait(600)  # 1600 ms after the frame was shown
+    r.wait(300)  # 700 ms after the frame was shown
     assert r.send("swipe_down").step.index == 1
     assert r.send("swipe_down") is None  # the next step frame is brand new: guarded again
     assert r.cur.step.index == 1
@@ -87,9 +87,9 @@ def test_swipe_down_within_1500ms_of_step_frame_is_ignored():
 def test_guard_starts_when_step_frame_is_actually_shown_not_before():
     r = Rig(make_card(3))
     r.confirm()
-    r.wait(1400)
+    r.wait(400)
     assert r.send("swipe_down") is None
-    r.wait(100)
+    r.wait(300)
     assert r.send("swipe_down").step.index == 2
 
 
@@ -109,20 +109,18 @@ def test_picture_open_next_prev_back(tmp_path):
     png = (tmp_path / "knowledge/guides/gd/where.png").read_bytes()
     assert f.image.sha256 == hashlib.sha256(png).hexdigest() and (f.image.w, f.image.h) == (64, 32)
     assert f.image.url == "/guides/gd/where.png"
-    assert r.send("swipe_down").image.view == "how"
-    assert r.send("swipe_down").image.view == "correct"
-    assert r.send("swipe_down") is None  # clamped at the last view
-    assert r.send("swipe_up").image.view == "how"
-    assert r.send("swipe_up").image.view == "where"
-    f = r.send("swipe_up")  # from view 0 back to the step
+    # press is the picture button: WHERE -> HOW -> CORRECT -> back to the step. Swipes never cycle pictures.
+    assert r.send("press").image.view == "how"
+    assert r.send("press").image.view == "correct"
+    f = r.send("press")
     assert f.mode == "step" and f.step.index == 1
-    assert r.send("press").mode == "visual"
-    f = r.send("press")  # press while a picture is open => back to the step
-    assert f.mode == "step"
-    # swipe_down while a picture is open must NEVER advance the step
+    assert r.send("press").image.view == "where"
+    f = r.send("swipe_up")  # swipe up from a picture = back to the step it belongs to, never to the previous step
+    assert f.mode == "step" and f.step.index == 1
+    # swipe down from a picture carries on through the steps: it confirms this manual step and moves to the next
     r.send("press")
-    r.send("swipe_down")
-    assert r.pb.playbook_state().step_index == 1 and r.pb.playbook_state().confirmed == ["s0"]
+    f = r.send("swipe_down")
+    assert f.mode == "step" and f.step.index == 2 and r.pb.playbook_state().confirmed == ["s0", "s1"]
 
 
 def test_missing_png_falls_back_to_step_frame_with_fallback_cue(tmp_path):
@@ -132,8 +130,9 @@ def test_missing_png_falls_back_to_step_frame_with_fallback_cue(tmp_path):
     assert f.mode == "step" and f.image is None
     assert (f.cue.line1, f.cue.line2) == ("FALLBACK WHERE", "TEXT ONLY") and f.step.step_id == "s1"
     assert any("text fallback" in e.text for e in r.pb.events)
-    f = r.send("swipe_down")  # next view is also missing -> its own fallback, still never a broken image
+    f = r.send("press")  # next view is also missing -> its own fallback, still never a broken image
     assert f.mode == "step" and f.cue.line1 == "FALLBACK HOW"
+    r.send("press")  # correct
     f = r.send("press")
     assert f.mode == "step" and f.cue.line1 == "DO THING 1"
 

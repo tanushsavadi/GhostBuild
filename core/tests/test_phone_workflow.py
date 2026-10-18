@@ -59,7 +59,9 @@ def test_picture_navigation_never_confirms_and_duplicate_confirm_is_rejected(tmp
     assert action(rt,c,sid,'confirm').status_code == 409
     assert action(rt,c,sid,'next_view').json()['image']['view'] == 'how'
     assert rt.playbook.confirmed == []
-    action(rt,c,sid,'press')
+    action(rt,c,sid,'press'); action(rt,c,sid,'press')  # press cycles how -> correct -> back to the step
+    assert rt.hud.current.mode == 'step'
+    rt.clock.advance(1000); rt.tick()
     seq = rt.hud.current.seq
     assert action(rt,c,sid,'confirm').status_code == 200
     assert rt.playbook.confirmed == ['s0']

@@ -218,6 +218,10 @@ class SessionManager:
                 self._render()
             return False
         if s.phase == "welcome":
+            s.phase = "menu"  # a gesture skips the welcome: nobody should wait for a banner
+            self._menu_selected = self._default_menu()
+            self._save()
+            self._render()
             return True
         if self._flash is not None:
             self._flash = None  # the wearer is interacting: show the menu underneath
@@ -289,8 +293,11 @@ class SessionManager:
         self._progress.pop(sess.id, None)
         self._save()
         if sess.id == self.active_id:
+            if card.steps:
+                self.hud.set_layer("ui", None)  # clear the menu first so the first step can be emitted at once
             self._on_task(card, True)
-            self._flash = (Screen.intervene(cue, cue_id="task_start", ttl_ms=FLASH_MS, immediate=True), now + FLASH_MS)
+            # a playbook goes straight to its first step (a title card would swallow the first swipe); a fault card keeps its cue
+            self._flash = None if card.steps else (Screen.intervene(cue, cue_id="task_start", ttl_ms=FLASH_MS, immediate=True), now + FLASH_MS)
             self._render()
 
     # ------------------------------------------------------------------ time
@@ -308,6 +315,19 @@ class SessionManager:
             changed = True
         if changed:
             self._render()
+
+    def return_to_menu(self) -> None:
+        """Task finished: back to the task list (the next gesture after the completion message)."""
+        s = self.active
+        if s is None:
+            return
+        self._progress.pop(s.id, None)
+        s.phase, s.goal, s.card_id = "menu", None, None
+        self._choice = None
+        self._flash = None
+        self._menu_selected = self._default_menu()
+        self._save()
+        self._render()
 
     def refresh(self) -> None:
         """Re-render the active session's screen (the task list is derived from the loaded cards on every render)."""

@@ -41,7 +41,7 @@ from .hud import Hud, Screen
 
 log = logging.getLogger("ghostbuild.playbook")
 
-GUARD_MS = 1500  # a swipe-down this soon after a step frame appears is treated as accidental
+GUARD_MS = 600  # a swipe-down this soon after a step frame appears is a bounce, not a confirmation (long enough to have seen it)
 VERIFIED_TTL_MS = 2000
 UNCERTAIN_TTL_MS = 2000
 ASK_TTL_MS = 4000
@@ -327,10 +327,11 @@ class PlaybookEngine:
             self._flash(Screen.ask(Cue(line1="TASK COMPLETE", line2=self.card.title.upper()[:26]), ttl_ms=COMPLETE_STATUS_TTL_MS),
                         COMPLETE_STATUS_TTL_MS, "status", now=now)
             return
-        if self.view_idx is not None:
-            self.view_idx = None
-            return
         g = self._guide()
+        if self.view_idx is not None:
+            # press = the picture button: WHERE -> HOW -> CORRECT -> back to the step (swipes never cycle pictures)
+            self.view_idx = self.view_idx + 1 if g is not None and self.view_idx + 1 < len(g.views) else None
+            return
         if g is not None:
             self.view_idx = 0
             return
@@ -342,10 +343,7 @@ class PlaybookEngine:
     def _swipe_down(self, now: int, from_ask: bool) -> None:
         if self.done:
             return
-        g = self._guide()
-        if self.view_idx is not None and g is not None:
-            self.view_idx = min(self.view_idx + 1, len(g.views) - 1)
-            return
+        was_picture = self.view_idx is not None  # the wearer has been looking at this step: no settle guard on this swipe
         self.view_idx = None
         st = self.step
         if st.id in self.confirmed or st.id in self.verified:
@@ -356,7 +354,7 @@ class PlaybookEngine:
             self._flash(Screen.uncertain(cue, ttl_ms=UNCERTAIN_TTL_MS), UNCERTAIN_TTL_MS, "uncertain", now=now)
             self._event(f"step {st.id}: swipe ignored, check not met ({cue.line1})", "DETERMINISTIC", {"step": st.id})
             return
-        if not from_ask and not self._step_settled(now):
+        if not from_ask and not was_picture and not self._step_settled(now):
             return  # accidental-input guard: no frame
         self.confirmed.append(st.id)
         self._tried.clear()
@@ -372,10 +370,9 @@ class PlaybookEngine:
             self._reset_hold()
             self._save()
             return
-        if self.view_idx is not None and g is not None:
-            self.view_idx = None if self.view_idx == 0 else self.view_idx - 1
+        if self.view_idx is not None:
+            self.view_idx = None  # swipe up from a picture = back to the step it belongs to
             return
-        self.view_idx = None
         if self.index > 0:
             self.index -= 1
             self._reset_hold()
@@ -467,7 +464,7 @@ class PlaybookEngine:
                 # never a broken image: the card's own text fallback, still a step frame
                 return Screen.step_screen(view.fallback, self._step_ref(), cue_id=cue_id, immediate=True)
             nxt = g.views[idx + 1].view.upper() if idx + 1 < len(g.views) else None
-            cue = Cue(line1=f"{view.title}: {g.title}".upper()[:24], line2=(f"SWIPE FOR {nxt}" if nxt else "PRESS TO GO BACK")[:26])
+            cue = Cue(line1=f"{view.title}: {g.title}".upper()[:24], line2=(f"PRESS FOR {nxt}" if nxt else "PRESS TO GO BACK")[:26])
             return Screen.visual(cue, ref, cue_id=cue_id, step=self._step_ref())
         return Screen.step_screen(st.cue, self._step_ref(), cue_id=cue_id)
 
@@ -608,9 +605,7 @@ class PlaybookEngine:
         return None, "", label
 
     def _ask_navigate(self, intent: str, now: int) -> AskResult:
-        gesture = {"next": "swipe_down", "back": "swipe_up", "picture": "press"}[intent]
-        if intent == "picture" and self.view_idx is not None:
-            gesture = "swipe_down"  # already looking at one: show the next view
+        gesture = {"next": "swipe_down", "back": "swipe_up", "picture": "press"}[intent]  # press shows / cycles pictures
         before = (self.index, self.done, self.view_idx, tuple(self.confirmed))
         self.handle_input(G2Input(gesture=gesture, seq_seen=self.hud.current.seq), from_ask=True)  # type: ignore[arg-type]
         cur = self.hud.current

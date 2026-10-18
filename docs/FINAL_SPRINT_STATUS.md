@@ -26,6 +26,10 @@ Updated Sun 2026-10-18 ~01:10 PDT by Claude Opus 5.5 (took over from Codex at it
 - A fault-mode card (needs live Pi telemetry) is offered only while the Pi reports; fixes "STALE DATA / CHECK LINK" on a bench with no Pi (operator saw it after pressing the old FIX default). SIMULATOR VERIFIED + tests (core 507); physical re-test pending.
 - Dev-server QR sideload: Vite is run with `VITE_FLAG_VOICE=1`; whether the sideloaded app gets the microphone permission is UNVERIFIED (a missing permission degrades to `VOICE UNAVAILABLE / USE TOUCH`).
 
+## Gestures (one meaning everywhere, changed 02:25 PDT after the operator's first physical session)
+- Physical G2 evidence from the operator log: welcome, task list, press-to-start, swipes and picture requests reached core on real glasses (first step-through of paper_cup). Pain points found there: 1.5 s swipe dead zone, swipes meaning different things inside pictures, blank dead end after completion.
+- Now: swipe down = next step (confirms a manual step; refuses a measured one), swipe up = back, press = picture button (WHERE -> HOW -> CORRECT -> back). Swipe from a picture: up = back to its step, down = confirm + next. First step shows immediately (no title card). Any gesture skips the welcome. After "ALL STEPS DONE" the next press/swipe-down opens the task list. Settle guard 600 ms (was 1500). Core 509 tests; still NOT re-tested on the glasses.
+
 ## Not done / blocked
 - Physical G2 image + gesture + reconnect test (operator). Voice on G2 needs a voice-build `.ehpk` (`VITE_FLAG_VOICE=1`, declares g2-microphone) and a real device test.
 - Human approval of the LED card (above). Hero hardware (Pi / breadboard / LED / 330 ohm) availability unconfirmed with the operator.

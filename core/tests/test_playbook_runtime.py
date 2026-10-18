@@ -84,24 +84,24 @@ def confirm(rt):
 def test_build_menu_single_card_starts_playbook_with_short_cue(led, lens, tmp_path):
     rt = boot([lens, led], tmp_path)
     f = start_build(rt)
-    assert f.mode == "intervene" and f.cue.line1 == "BUILD: LIGHT AN LED ON A" and len(f.cue.line1) <= 24 and f.ttl_ms == 2500
+    assert f.mode == "step" and f.step.step_id == "parts"  # straight to the first step: no title card that would swallow a swipe
     assert rt.playbook is not None and rt.state().engine == "PLAYBOOK"
-    settle(rt)
-    assert cur(rt).mode == "step" and cur(rt).step.step_id == "parts"
     st = rt.state()
     assert st.playbook.step_index == 0 and st.playbook.step_count == 3 and st.card_id == "led_breadboard" and st.step_id == "parts"
 
 
-def test_gesture_during_task_start_cue_only_reveals_the_first_step(led, tmp_path):
+def test_first_step_is_on_screen_at_once_and_the_next_swipe_moves_on(led, tmp_path):
     rt = boot([led], tmp_path)
     to_menu(rt)
     assert cur(rt).menu.prompt == "WHAT DO YOU NEED?" and cur(rt).menu.selected == 0  # one task listed, no BUILD/FIX question
     rt.handle_input(gi("press"))
-    assert cur(rt).cue.line1.startswith("BUILD:")
-    rt.clock.advance(300)
-    rt.handle_input(gi("swipe_down"))  # dismisses the cue; must NOT confirm a step nobody has seen
     assert cur(rt).mode == "step" and cur(rt).step.index == 0
-    assert rt.state().playbook.confirmed == []
+    rt.handle_input(gi("swipe_down"))  # a bounce right after the step appeared is ignored, not turned into progress
+    assert cur(rt).step.index == 0 and rt.state().playbook.confirmed == []
+    rt.clock.advance(700)
+    rt.tick()
+    rt.handle_input(gi("swipe_down"))
+    assert cur(rt).step.index == 1 and rt.state().playbook.confirmed == ["parts"]
 
 
 def test_unmatched_request_is_honest_and_not_a_guess_in_either_mode(led, tmp_path):
@@ -243,7 +243,7 @@ def test_chooser_two_cards_swipe_press(tmp_path):
     assert rt.handle_input(gi("swipe_up")).menu.selected == 0
     rt.handle_input(gi("swipe_down"))
     f = rt.handle_input(gi("press"))
-    assert f.mode == "intervene" and f.cue.line1.startswith("BUILD: BUILD A BIRD")
+    assert f.mode == "step" and rt.session().card_id == "task_1"
     assert rt.session().card_id == "task_1" and rt.playbook.card.card_id == "task_1"
 
 
@@ -488,3 +488,30 @@ def test_card_endpoint_and_state_endpoint_follow_the_active_playbook(led, tmp_pa
         assert c.get("/card").json()["card_id"] == "led_breadboard"
         st = c.get("/state").json()
         assert st["engine"] == "PLAYBOOK" and st["playbook"]["step_id"] == "parts" and st["hud"]["mode"] == "step"
+
+
+def test_after_the_last_step_the_next_gesture_returns_to_the_task_list_not_a_blank_screen(tmp_path):
+    rt = boot([make_card(2, card_id="two", title="Two step task", aliases=["two"])], tmp_path)
+    to_menu(rt)
+    rt.handle_input(gi("swipe_down"))  # second row is MORE ON PHONE; back to the task
+    rt.handle_input(gi("swipe_up"))
+    rt.handle_input(gi("press"))
+    for _ in range(2):
+        confirm(rt)
+    assert cur(rt).mode == "intervene" and "ALL STEPS DONE" in cur(rt).cue.line1  # acknowledged first
+    f = rt.handle_input(gi("swipe_down"))  # any press / swipe-down while or after the acknowledgement opens the list again
+    assert f.mode == "menu" and f.menu.options[0] == "TWO STEP TASK"
+    assert rt.session().phase == "menu" and rt.playbook is None
+    f = rt.handle_input(gi("press"))  # ...and it can be started again from the top
+    assert f.mode == "step" and f.step.index == 0
+
+
+def test_swipe_up_after_completion_still_reopens_the_last_step(tmp_path):
+    rt = boot([make_card(2, card_id="two", title="Two step task", aliases=["two"])], tmp_path)
+    to_menu(rt)
+    rt.handle_input(gi("press"))
+    for _ in range(2):
+        confirm(rt)
+    rt.handle_input(gi("swipe_up"))  # first gesture dismisses the acknowledgement
+    f = rt.handle_input(gi("swipe_up"))
+    assert f.mode == "step" and f.step.index == 1

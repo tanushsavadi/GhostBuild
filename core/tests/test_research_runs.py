@@ -170,7 +170,7 @@ def test_end_to_end_two_different_tasks_neither_is_hardcoded(world, caplog):
     for _ in range(idx):
         rt.handle_input(gi("swipe_down"))
     f = rt.handle_input(gi("press"))
-    assert f.mode == "intervene" and f.cue.line1.startswith("BUILD: ")
+    assert f.mode == "step"
     settle(rt)
     cur = rt.hud.current
     assert cur.mode == "step" and cur.step.step_id == "wheel_off" and cur.cue.line1 == "REMOVE THE WHEEL" and cur.step.check == "manual"

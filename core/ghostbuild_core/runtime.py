@@ -115,6 +115,8 @@ class Runtime:
                 on_progress=lambda d, sid=sid: self.sessions.set_progress(sid, d),
             )
             self.playbook._save()
+            if fresh:
+                self.playbook.reveal()  # first step now, not after the HUD throttle
             return
         if self.playbook is not None:
             self.playbook.detach()
@@ -188,6 +190,10 @@ class Runtime:
             return self.hud.current
         if self.voice is not None and gi.gesture in ("hold_start", "hold_end"):
             self.voice.on_hold(gi.gesture)
+        elif self.playbook is not None and self.playbook.done and gi.gesture in ("press", "swipe_down"):
+            self.playbook.detach()  # finished: the next press / swipe-down opens the task list again (swipe-up reopens the last step)
+            self.playbook, self._pb_sid = None, None
+            self.sessions.return_to_menu()
         elif self.playbook is not None and self.sessions.flash_showing() and self.sessions.active is not None and self.sessions.active.phase == "task":
             self.sessions.dismiss_flash()  # the task-start cue hides the first step: a gesture only reveals it, never acts on it
             self.playbook.reveal()

@@ -158,11 +158,12 @@ def test_second_surface_joins_fresh_session_without_second_welcome(rt):
     assert sum(1 for x in rt.hud.frames if x.mode == "welcome") == 1
 
 
-def test_press_in_welcome_is_ignored(rt):
+def test_any_gesture_in_welcome_skips_it_to_the_menu(rt):
     rt.hello(hello())
-    n = len(rt.hud.frames)
+    assert rt.hud.current.mode == "welcome"
     rt.handle_input(gi("press"))
-    assert len(rt.hud.frames) == n and rt.session().phase == "welcome"
+    assert rt.session().phase == "menu" and rt.hud.current.mode == "menu"  # nobody waits for a banner; nothing was chosen
+    assert rt.session().card_id is None
 
 
 def test_restart_persistence(card, asset_root, tmp_path):
