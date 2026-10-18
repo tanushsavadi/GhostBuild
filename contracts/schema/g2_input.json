@@ -1,0 +1,53 @@
+{
+  "additionalProperties": false,
+  "description": "G2 -> core. Double-tap (exit dialog) is handled in the plugin.",
+  "properties": {
+    "kind": {
+      "enum": [
+        "voice",
+        "tap",
+        "menu",
+        "swipe_up",
+        "swipe_down"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "seq_seen": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Seq Seen"
+    },
+    "text": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Speech-to-text transcript or menu item label",
+      "title": "Text"
+    },
+    "type": {
+      "const": "g2_input",
+      "default": "g2_input",
+      "title": "Type",
+      "type": "string"
+    }
+  },
+  "required": [
+    "kind"
+  ],
+  "title": "G2Input",
+  "type": "object"
+}

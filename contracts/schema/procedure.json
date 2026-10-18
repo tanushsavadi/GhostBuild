@@ -1,0 +1,363 @@
+{
+  "$defs": {
+    "Check": {
+      "additionalProperties": false,
+      "properties": {
+        "faults": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Jig fault id -> HUD line, watched while this step is active",
+          "title": "Faults",
+          "type": "object"
+        },
+        "jig_check": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A check id from the procedure's jig profile",
+          "title": "Jig Check"
+        },
+        "type": {
+          "enum": [
+            "jig",
+            "user_confirm"
+          ],
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "Check",
+      "type": "object"
+    },
+    "Faq": {
+      "additionalProperties": false,
+      "properties": {
+        "a": {
+          "description": "The HUD answer (<= 28 chars, uppercase)",
+          "title": "A",
+          "type": "string"
+        },
+        "q": {
+          "description": "An example question in the user's words",
+          "title": "Q",
+          "type": "string"
+        }
+      },
+      "required": [
+        "q",
+        "a"
+      ],
+      "title": "Faq",
+      "type": "object"
+    },
+    "Part": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "qty": {
+          "default": 1,
+          "minimum": 1,
+          "title": "Qty",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "title": "Part",
+      "type": "object"
+    },
+    "Review": {
+      "additionalProperties": false,
+      "properties": {
+        "notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Notes"
+        },
+        "reviewer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reviewer"
+        },
+        "status": {
+          "default": "draft",
+          "enum": [
+            "draft",
+            "approved",
+            "rejected"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "title": "Review",
+      "type": "object"
+    },
+    "Source": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "default": "AUTHORED DEMO METADATA",
+          "enum": [
+            "MANUFACTURER DOC",
+            "AUTHORED PROJECT SPEC",
+            "WEB TUTORIAL",
+            "AUTHORED DEMO METADATA"
+          ],
+          "title": "Label",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        }
+      },
+      "required": [
+        "title"
+      ],
+      "title": "Source",
+      "type": "object"
+    },
+    "Step": {
+      "additionalProperties": false,
+      "properties": {
+        "check": {
+          "$ref": "#/$defs/Check"
+        },
+        "detail": {
+          "default": "",
+          "description": "Longer text for the phone/mirror, never the HUD",
+          "maxLength": 400,
+          "title": "Detail",
+          "type": "string"
+        },
+        "faq": {
+          "items": {
+            "$ref": "#/$defs/Faq"
+          },
+          "title": "Faq",
+          "type": "array"
+        },
+        "hud": {
+          "description": "One action, <= 28 chars, uppercase",
+          "title": "Hud",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "parts": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Parts",
+          "type": "array"
+        },
+        "requires": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Requires",
+          "type": "array"
+        },
+        "troubleshoot": {
+          "items": {
+            "$ref": "#/$defs/Troubleshoot"
+          },
+          "title": "Troubleshoot",
+          "type": "array"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        },
+        "where": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "HUD line answering 'where does it go?'",
+          "title": "Where"
+        },
+        "why": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "HUD line answering 'why this step?'",
+          "title": "Why"
+        }
+      },
+      "required": [
+        "id",
+        "hud",
+        "check"
+      ],
+      "title": "Step",
+      "type": "object"
+    },
+    "Troubleshoot": {
+      "additionalProperties": false,
+      "properties": {
+        "checks": {
+          "description": "HUD lines, most likely cause first",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Checks",
+          "type": "array"
+        },
+        "symptom": {
+          "title": "Symptom",
+          "type": "string"
+        }
+      },
+      "required": [
+        "symptom",
+        "checks"
+      ],
+      "title": "Troubleshoot",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "domain": {
+      "description": "Free text, e.g. electronics, paper folding, building bricks",
+      "title": "Domain",
+      "type": "string"
+    },
+    "id": {
+      "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+      "title": "Id",
+      "type": "string"
+    },
+    "jig_profile": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "knowledge/jigs/<id>.json; required for jig checks",
+      "title": "Jig Profile"
+    },
+    "origin": {
+      "enum": [
+        "authored",
+        "agent_compiled"
+      ],
+      "title": "Origin",
+      "type": "string"
+    },
+    "parts": {
+      "items": {
+        "$ref": "#/$defs/Part"
+      },
+      "title": "Parts",
+      "type": "array"
+    },
+    "review": {
+      "$ref": "#/$defs/Review"
+    },
+    "source": {
+      "$ref": "#/$defs/Source"
+    },
+    "steps": {
+      "items": {
+        "$ref": "#/$defs/Step"
+      },
+      "maxItems": 30,
+      "minItems": 1,
+      "title": "Steps",
+      "type": "array"
+    },
+    "title": {
+      "maxLength": 80,
+      "title": "Title",
+      "type": "string"
+    },
+    "v": {
+      "const": 1,
+      "default": 1,
+      "title": "V",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "id",
+    "title",
+    "domain",
+    "origin",
+    "source",
+    "review",
+    "steps"
+  ],
+  "title": "Procedure",
+  "type": "object"
+}

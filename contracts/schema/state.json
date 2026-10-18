@@ -1,0 +1,349 @@
+{
+  "$defs": {
+    "Completion": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "title": "At",
+          "type": "number"
+        },
+        "how": {
+          "enum": [
+            "verified",
+            "confirmed"
+          ],
+          "title": "How",
+          "type": "string"
+        },
+        "step_id": {
+          "title": "Step Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "step_id",
+        "how",
+        "at"
+      ],
+      "title": "Completion",
+      "type": "object"
+    },
+    "Event": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "title": "At",
+          "type": "number"
+        },
+        "label": {
+          "enum": [
+            "MEASURED LIVE",
+            "USER CONFIRMED",
+            "DETERMINISTIC",
+            "SIMULATED",
+            "REPLAY",
+            "AGENT"
+          ],
+          "title": "Label",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "at",
+        "text",
+        "label"
+      ],
+      "title": "Event",
+      "type": "object"
+    },
+    "HudFrame": {
+      "additionalProperties": false,
+      "description": "Core -> G2. Written only by core/ghostbuild_core/hud.py. The plugin shows `lines` joined by newlines.",
+      "properties": {
+        "kind": {
+          "enum": [
+            "idle",
+            "step",
+            "checking",
+            "verified",
+            "confirmed",
+            "fault",
+            "answer",
+            "troubleshoot",
+            "complete",
+            "clear",
+            "status",
+            "offline"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "lines": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 4,
+          "title": "Lines",
+          "type": "array"
+        },
+        "mode": {
+          "anyOf": [
+            {
+              "enum": [
+                "VERIFIED",
+                "GUIDED"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mode"
+        },
+        "procedure_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Procedure Id"
+        },
+        "seq": {
+          "minimum": 0,
+          "title": "Seq",
+          "type": "integer"
+        },
+        "source": {
+          "default": "live",
+          "enum": [
+            "live",
+            "simulated",
+            "replay"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "step_index": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Step Index"
+        },
+        "step_total": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Step Total"
+        },
+        "ttl_ms": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Plugin clears locally after this, as a fallback",
+          "title": "Ttl Ms"
+        },
+        "type": {
+          "const": "hud",
+          "default": "hud",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "seq",
+        "kind",
+        "lines"
+      ],
+      "title": "HudFrame",
+      "type": "object"
+    },
+    "JigStatus": {
+      "additionalProperties": false,
+      "properties": {
+        "age_ms": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Age Ms"
+        },
+        "fields": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
+          },
+          "title": "Fields",
+          "type": "object"
+        },
+        "link": {
+          "enum": [
+            "up",
+            "down",
+            "disabled"
+          ],
+          "title": "Link",
+          "type": "string"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "enum": [
+                "live",
+                "simulated",
+                "replay"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source"
+        }
+      },
+      "required": [
+        "link"
+      ],
+      "title": "JigStatus",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "GET /state for the mirror and review pages.",
+  "properties": {
+    "completed": {
+      "items": {
+        "$ref": "#/$defs/Completion"
+      },
+      "title": "Completed",
+      "type": "array"
+    },
+    "engine": {
+      "enum": [
+        "IDLE",
+        "STEP",
+        "COMPLETE"
+      ],
+      "title": "Engine",
+      "type": "string"
+    },
+    "events": {
+      "items": {
+        "$ref": "#/$defs/Event"
+      },
+      "title": "Events",
+      "type": "array"
+    },
+    "hud": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/HudFrame"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "jig": {
+      "$ref": "#/$defs/JigStatus"
+    },
+    "procedure_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Procedure Id"
+    },
+    "procedure_title": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Procedure Title"
+    },
+    "step_index": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Step Index"
+    },
+    "step_total": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Step Total"
+    }
+  },
+  "required": [
+    "engine",
+    "jig"
+  ],
+  "title": "State",
+  "type": "object"
+}

@@ -1,0 +1,129 @@
+{
+  "$defs": {
+    "Predicate": {
+      "additionalProperties": false,
+      "properties": {
+        "eq": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Eq"
+        },
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "in": {
+          "anyOf": [
+            {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "In"
+        }
+      },
+      "required": [
+        "field"
+      ],
+      "title": "Predicate",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "checks": {
+      "additionalProperties": {
+        "items": {
+          "$ref": "#/$defs/Predicate"
+        },
+        "type": "array"
+      },
+      "description": "Check id -> all-of predicates (pass = VERIFIED)",
+      "title": "Checks",
+      "type": "object"
+    },
+    "faults": {
+      "additionalProperties": {
+        "items": {
+          "$ref": "#/$defs/Predicate"
+        },
+        "type": "array"
+      },
+      "description": "Fault id -> all-of predicates",
+      "title": "Faults",
+      "type": "object"
+    },
+    "fields": {
+      "additionalProperties": {
+        "items": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "boolean"
+            }
+          ]
+        },
+        "type": "array"
+      },
+      "description": "Observation field -> allowed values",
+      "title": "Fields",
+      "type": "object"
+    },
+    "id": {
+      "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+      "title": "Id",
+      "type": "string"
+    },
+    "notes": {
+      "default": "",
+      "title": "Notes",
+      "type": "string"
+    },
+    "title": {
+      "title": "Title",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "title",
+    "fields",
+    "checks"
+  ],
+  "title": "JigProfile",
+  "type": "object"
+}

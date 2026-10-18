@@ -1,0 +1,102 @@
+{
+  "v": 1,
+  "id": "led-button-v1",
+  "title": "Your first circuit: LED + button",
+  "domain": "electronics",
+  "origin": "authored",
+  "source": {"title": "GhostBuild team build sheet (pins per hardware/WIRING.md)", "url": null, "label": "AUTHORED PROJECT SPEC"},
+  "review": {"status": "approved", "reviewer": "D", "notes": "Row numbers must match hardware/WIRING.md (C confirms)."},
+  "jig_profile": "led-button-jig",
+  "parts": [
+    {"id": "r1", "name": "330 Ω resistor (orange, orange, brown bands)", "qty": 1},
+    {"id": "led1", "name": "Red LED (5 mm)", "qty": 1},
+    {"id": "sw1", "name": "Push button (4 legs)", "qty": 1}
+  ],
+  "steps": [
+    {
+      "id": "s1",
+      "hud": "GRAB RESISTOR, LED, BUTTON",
+      "detail": "Find the 330 Ω resistor (orange, orange, brown bands), the red LED and the 4-leg push button. The jig wires are already in place; don't move them.",
+      "why": "YOU NEED ALL THREE PARTS",
+      "parts": ["r1", "led1", "sw1"],
+      "warnings": ["DON'T MOVE THE JIG WIRES"],
+      "check": {"type": "user_confirm"},
+      "faq": [
+        {"q": "what does the resistor look like", "a": "ORANGE ORANGE BROWN BANDS"},
+        {"q": "which one is the led", "a": "CLEAR RED BULB, TWO LEGS"}
+      ]
+    },
+    {
+      "id": "s2",
+      "hud": "RESISTOR: ROW 10 TO ROW 15",
+      "detail": "Push one resistor leg into row 10 and the other into row 15, same side of the board. A resistor works in either direction.",
+      "why": "IT LIMITS THE LED CURRENT",
+      "where": "ROWS 10 AND 15, LEFT SIDE",
+      "parts": ["r1"],
+      "requires": ["s1"],
+      "check": {"type": "jig", "jig_check": "resistor_present"},
+      "troubleshoot": [
+        {"symptom": "Not verifying", "checks": ["PUSH BOTH LEGS ALL THE WAY", "CHECK ROWS 10 AND 15"]}
+      ],
+      "faq": [
+        {"q": "which way does the resistor go", "a": "EITHER WAY WORKS"},
+        {"q": "does direction matter for the resistor", "a": "EITHER WAY WORKS"}
+      ]
+    },
+    {
+      "id": "s3",
+      "hud": "LED: LONG LEG IN ROW 15",
+      "detail": "The LED's longer leg (+) goes in row 15, next to the resistor. The shorter leg (-) goes in row 20.",
+      "why": "LEDS ONLY WORK ONE WAY",
+      "where": "LONG ROW 15 · SHORT ROW 20",
+      "parts": ["led1"],
+      "requires": ["s2"],
+      "check": {"type": "jig", "jig_check": "led_correct", "faults": {"led_backwards": "FLIP THE LED AROUND"}},
+      "troubleshoot": [
+        {"symptom": "Not verifying", "checks": ["SHORT LEG IN ROW 20?", "PUSH BOTH LEGS ALL THE WAY"]}
+      ],
+      "faq": [
+        {"q": "which leg is longer", "a": "LONG LEG = + · ROW 15"},
+        {"q": "which way does the led go", "a": "LONG LEG TO ROW 15"},
+        {"q": "where does the short leg go", "a": "SHORT LEG IN ROW 20"}
+      ]
+    },
+    {
+      "id": "s4",
+      "hud": "BUTTON ACROSS CENTER GAP",
+      "detail": "Place the button so it straddles the center channel, legs in rows 25 and 27. Press it in firmly but don't hold it down.",
+      "why": "THE GAP SPLITS THE CONTACTS",
+      "where": "ROWS 25 TO 27, ACROSS GAP",
+      "parts": ["sw1"],
+      "requires": ["s3"],
+      "check": {"type": "user_confirm", "faults": {"button_rotated": "TURN BUTTON 90°"}},
+      "troubleshoot": [
+        {"symptom": "Button looks wrong", "checks": ["LEGS ON BOTH SIDES OF GAP", "TURN BUTTON 90°"]}
+      ],
+      "faq": [
+        {"q": "which way does the button go", "a": "LEGS STRADDLE THE GAP"}
+      ]
+    },
+    {
+      "id": "s5",
+      "hud": "PRESS THE BUTTON",
+      "detail": "Press and hold the button for a second.",
+      "why": "PROVES THE BUTTON WORKS",
+      "requires": ["s4"],
+      "check": {"type": "jig", "jig_check": "button_pressed"},
+      "troubleshoot": [
+        {"symptom": "Press not detected", "checks": ["PRESS FIRMLY, HOLD 1 SEC", "LEGS ON BOTH SIDES OF GAP"]}
+      ]
+    },
+    {
+      "id": "s6",
+      "hud": "LET GO · LED WILL BLINK",
+      "detail": "Release the button. With everything in place the jig blinks your LED.",
+      "requires": ["s5"],
+      "check": {"type": "jig", "jig_check": "circuit_complete"},
+      "troubleshoot": [
+        {"symptom": "No blink", "checks": ["LET GO OF THE BUTTON", "LONG LEG IN ROW 15?"]}
+      ]
+    }
+  ]
+}

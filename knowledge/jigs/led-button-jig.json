@@ -1,0 +1,19 @@
+{
+  "id": "led-button-jig",
+  "title": "M5StickC PLUS2 breadboard jig: resistor + LED + button",
+  "fields": {
+    "led": ["no_resistor", "missing", "correct", "backwards", "unknown"],
+    "button": ["released", "pressed", "unknown"]
+  },
+  "checks": {
+    "resistor_present": [{"field": "led", "in": ["missing", "correct", "backwards"]}],
+    "led_correct": [{"field": "led", "eq": "correct"}],
+    "button_pressed": [{"field": "button", "eq": "pressed"}],
+    "circuit_complete": [{"field": "led", "eq": "correct"}, {"field": "button", "eq": "released"}]
+  },
+  "faults": {
+    "led_backwards": [{"field": "led", "eq": "backwards"}],
+    "button_rotated": [{"field": "button", "eq": "pressed"}]
+  },
+  "notes": "Firmware (jig/firmware) classifies led from a forward and a reverse test at the sense row, checking the resistor first, and reports a state only after 3 matching readings. button_rotated is only watched on the step where the button is placed (pressed while nobody presses it = rotated 90 degrees). Thresholds are set by measurement (C)."
+}

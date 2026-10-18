@@ -1,0 +1,61 @@
+{
+  "v": 1,
+  "id": "origami-cup-v1",
+  "title": "Origami cup from one square sheet",
+  "domain": "paper folding",
+  "origin": "authored",
+  "source": {"title": "Traditional origami cup (team-authored steps)", "url": null, "label": "AUTHORED DEMO METADATA"},
+  "review": {"status": "approved", "reviewer": "D"},
+  "parts": [{"id": "paper", "name": "Square sheet of paper (15 cm)", "qty": 1}],
+  "steps": [
+    {
+      "id": "c1",
+      "hud": "FOLD SQUARE INTO TRIANGLE",
+      "detail": "Fold one corner to the opposite corner and crease. Turn it so the long folded edge is at the bottom and the point is at the top.",
+      "why": "THE TRIANGLE IS THE BASE",
+      "parts": ["paper"],
+      "check": {"type": "user_confirm"},
+      "faq": [{"q": "which way should the point face", "a": "FOLD AT BOTTOM, POINT UP"}]
+    },
+    {
+      "id": "c2",
+      "hud": "RIGHT TIP TO LEFT EDGE",
+      "detail": "Fold the right corner across so its tip touches the left edge. The top edge of this flap should be level.",
+      "where": "TIP TOUCHES THE LEFT EDGE",
+      "requires": ["c1"],
+      "check": {"type": "user_confirm"},
+      "faq": [{"q": "how far do i fold it", "a": "TOP OF FLAP STAYS LEVEL"}]
+    },
+    {
+      "id": "c3",
+      "hud": "LEFT TIP TO RIGHT SIDE",
+      "detail": "Fold the left corner across the front so its tip touches the right side.",
+      "where": "TIP TOUCHES THE RIGHT SIDE",
+      "requires": ["c2"],
+      "check": {"type": "user_confirm"}
+    },
+    {
+      "id": "c4",
+      "hud": "FRONT TOP FLAP DOWN",
+      "detail": "Fold only the front layer of the top point down toward you and tuck it into the pocket.",
+      "why": "IT LOCKS THE SIDES",
+      "requires": ["c3"],
+      "check": {"type": "user_confirm"},
+      "faq": [{"q": "how many layers do i fold", "a": "ONLY THE FRONT LAYER"}]
+    },
+    {
+      "id": "c5",
+      "hud": "FLIP · BACK FLAP DOWN",
+      "detail": "Turn the cup over and fold the remaining top flap down the same way.",
+      "requires": ["c4"],
+      "check": {"type": "user_confirm"}
+    },
+    {
+      "id": "c6",
+      "hud": "OPEN THE CUP",
+      "detail": "Gently push the sides so the mouth opens.",
+      "requires": ["c5"],
+      "check": {"type": "user_confirm"}
+    }
+  ]
+}

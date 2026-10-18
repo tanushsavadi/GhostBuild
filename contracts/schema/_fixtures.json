@@ -1,0 +1,10 @@
+{
+  "agent_delivery_*.json": "#/$defs/AgentDelivery",
+  "g2_input_*.json": "#/$defs/G2Input",
+  "hud_*.json": "#/$defs/HudFrame",
+  "jig_obs_*.json": "#/$defs/JigObservation",
+  "jig_profile_*.json": "#/$defs/JigProfile",
+  "procedure_*.json": "#/$defs/Procedure",
+  "state_*.json": "#/$defs/State",
+  "validate_result_*.json": "#/$defs/ValidateResult"
+}

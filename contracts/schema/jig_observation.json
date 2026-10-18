@@ -1,0 +1,57 @@
+{
+  "additionalProperties": false,
+  "description": "Jig adapter -> core (ws role=jig), ~5 Hz. Firmware reports a state only after 3 matching readings.",
+  "properties": {
+    "dev": {
+      "title": "Dev",
+      "type": "string"
+    },
+    "fields": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "integer"
+          },
+          {
+            "type": "boolean"
+          }
+        ]
+      },
+      "title": "Fields",
+      "type": "object"
+    },
+    "ms": {
+      "minimum": 0,
+      "title": "Ms",
+      "type": "integer"
+    },
+    "seq": {
+      "minimum": 0,
+      "title": "Seq",
+      "type": "integer"
+    },
+    "type": {
+      "const": "jig",
+      "default": "jig",
+      "title": "Type",
+      "type": "string"
+    },
+    "v": {
+      "const": 1,
+      "default": 1,
+      "title": "V",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "dev",
+    "seq",
+    "ms",
+    "fields"
+  ],
+  "title": "JigObservation",
+  "type": "object"
+}

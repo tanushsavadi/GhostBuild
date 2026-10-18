@@ -1,0 +1,1038 @@
+{
+  "$defs": {
+    "AgentDelivery": {
+      "additionalProperties": false,
+      "description": "Creao agent -> POST /agent/webhook (and the body of POST /procedures/validate).",
+      "properties": {
+        "procedure": {
+          "$ref": "#/$defs/Procedure"
+        },
+        "request": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "What the user asked to build",
+          "title": "Request"
+        },
+        "run_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Run Id"
+        }
+      },
+      "required": [
+        "procedure"
+      ],
+      "title": "AgentDelivery",
+      "type": "object"
+    },
+    "Check": {
+      "additionalProperties": false,
+      "properties": {
+        "faults": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Jig fault id -> HUD line, watched while this step is active",
+          "title": "Faults",
+          "type": "object"
+        },
+        "jig_check": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A check id from the procedure's jig profile",
+          "title": "Jig Check"
+        },
+        "type": {
+          "enum": [
+            "jig",
+            "user_confirm"
+          ],
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "Check",
+      "type": "object"
+    },
+    "Completion": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "title": "At",
+          "type": "number"
+        },
+        "how": {
+          "enum": [
+            "verified",
+            "confirmed"
+          ],
+          "title": "How",
+          "type": "string"
+        },
+        "step_id": {
+          "title": "Step Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "step_id",
+        "how",
+        "at"
+      ],
+      "title": "Completion",
+      "type": "object"
+    },
+    "Event": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "title": "At",
+          "type": "number"
+        },
+        "label": {
+          "enum": [
+            "MEASURED LIVE",
+            "USER CONFIRMED",
+            "DETERMINISTIC",
+            "SIMULATED",
+            "REPLAY",
+            "AGENT"
+          ],
+          "title": "Label",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "at",
+        "text",
+        "label"
+      ],
+      "title": "Event",
+      "type": "object"
+    },
+    "Faq": {
+      "additionalProperties": false,
+      "properties": {
+        "a": {
+          "description": "The HUD answer (<= 28 chars, uppercase)",
+          "title": "A",
+          "type": "string"
+        },
+        "q": {
+          "description": "An example question in the user's words",
+          "title": "Q",
+          "type": "string"
+        }
+      },
+      "required": [
+        "q",
+        "a"
+      ],
+      "title": "Faq",
+      "type": "object"
+    },
+    "G2Input": {
+      "additionalProperties": false,
+      "description": "G2 -> core. Double-tap (exit dialog) is handled in the plugin.",
+      "properties": {
+        "kind": {
+          "enum": [
+            "voice",
+            "tap",
+            "menu",
+            "swipe_up",
+            "swipe_down"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "seq_seen": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Seq Seen"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Speech-to-text transcript or menu item label",
+          "title": "Text"
+        },
+        "type": {
+          "const": "g2_input",
+          "default": "g2_input",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "title": "G2Input",
+      "type": "object"
+    },
+    "HudFrame": {
+      "additionalProperties": false,
+      "description": "Core -> G2. Written only by core/ghostbuild_core/hud.py. The plugin shows `lines` joined by newlines.",
+      "properties": {
+        "kind": {
+          "enum": [
+            "idle",
+            "step",
+            "checking",
+            "verified",
+            "confirmed",
+            "fault",
+            "answer",
+            "troubleshoot",
+            "complete",
+            "clear",
+            "status",
+            "offline"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "lines": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 4,
+          "title": "Lines",
+          "type": "array"
+        },
+        "mode": {
+          "anyOf": [
+            {
+              "enum": [
+                "VERIFIED",
+                "GUIDED"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mode"
+        },
+        "procedure_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Procedure Id"
+        },
+        "seq": {
+          "minimum": 0,
+          "title": "Seq",
+          "type": "integer"
+        },
+        "source": {
+          "default": "live",
+          "enum": [
+            "live",
+            "simulated",
+            "replay"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "step_index": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Step Index"
+        },
+        "step_total": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Step Total"
+        },
+        "ttl_ms": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Plugin clears locally after this, as a fallback",
+          "title": "Ttl Ms"
+        },
+        "type": {
+          "const": "hud",
+          "default": "hud",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "seq",
+        "kind",
+        "lines"
+      ],
+      "title": "HudFrame",
+      "type": "object"
+    },
+    "JigObservation": {
+      "additionalProperties": false,
+      "description": "Jig adapter -> core (ws role=jig), ~5 Hz. Firmware reports a state only after 3 matching readings.",
+      "properties": {
+        "dev": {
+          "title": "Dev",
+          "type": "string"
+        },
+        "fields": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
+          },
+          "title": "Fields",
+          "type": "object"
+        },
+        "ms": {
+          "minimum": 0,
+          "title": "Ms",
+          "type": "integer"
+        },
+        "seq": {
+          "minimum": 0,
+          "title": "Seq",
+          "type": "integer"
+        },
+        "type": {
+          "const": "jig",
+          "default": "jig",
+          "title": "Type",
+          "type": "string"
+        },
+        "v": {
+          "const": 1,
+          "default": 1,
+          "title": "V",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "dev",
+        "seq",
+        "ms",
+        "fields"
+      ],
+      "title": "JigObservation",
+      "type": "object"
+    },
+    "JigProfile": {
+      "additionalProperties": false,
+      "properties": {
+        "checks": {
+          "additionalProperties": {
+            "items": {
+              "$ref": "#/$defs/Predicate"
+            },
+            "type": "array"
+          },
+          "description": "Check id -> all-of predicates (pass = VERIFIED)",
+          "title": "Checks",
+          "type": "object"
+        },
+        "faults": {
+          "additionalProperties": {
+            "items": {
+              "$ref": "#/$defs/Predicate"
+            },
+            "type": "array"
+          },
+          "description": "Fault id -> all-of predicates",
+          "title": "Faults",
+          "type": "object"
+        },
+        "fields": {
+          "additionalProperties": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "type": "array"
+          },
+          "description": "Observation field -> allowed values",
+          "title": "Fields",
+          "type": "object"
+        },
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "notes": {
+          "default": "",
+          "title": "Notes",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "fields",
+        "checks"
+      ],
+      "title": "JigProfile",
+      "type": "object"
+    },
+    "JigStatus": {
+      "additionalProperties": false,
+      "properties": {
+        "age_ms": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Age Ms"
+        },
+        "fields": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
+          },
+          "title": "Fields",
+          "type": "object"
+        },
+        "link": {
+          "enum": [
+            "up",
+            "down",
+            "disabled"
+          ],
+          "title": "Link",
+          "type": "string"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "enum": [
+                "live",
+                "simulated",
+                "replay"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source"
+        }
+      },
+      "required": [
+        "link"
+      ],
+      "title": "JigStatus",
+      "type": "object"
+    },
+    "Part": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "qty": {
+          "default": 1,
+          "minimum": 1,
+          "title": "Qty",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "title": "Part",
+      "type": "object"
+    },
+    "Predicate": {
+      "additionalProperties": false,
+      "properties": {
+        "eq": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Eq"
+        },
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "in": {
+          "anyOf": [
+            {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "In"
+        }
+      },
+      "required": [
+        "field"
+      ],
+      "title": "Predicate",
+      "type": "object"
+    },
+    "Procedure": {
+      "additionalProperties": false,
+      "properties": {
+        "domain": {
+          "description": "Free text, e.g. electronics, paper folding, building bricks",
+          "title": "Domain",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "jig_profile": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "knowledge/jigs/<id>.json; required for jig checks",
+          "title": "Jig Profile"
+        },
+        "origin": {
+          "enum": [
+            "authored",
+            "agent_compiled"
+          ],
+          "title": "Origin",
+          "type": "string"
+        },
+        "parts": {
+          "items": {
+            "$ref": "#/$defs/Part"
+          },
+          "title": "Parts",
+          "type": "array"
+        },
+        "review": {
+          "$ref": "#/$defs/Review"
+        },
+        "source": {
+          "$ref": "#/$defs/Source"
+        },
+        "steps": {
+          "items": {
+            "$ref": "#/$defs/Step"
+          },
+          "maxItems": 30,
+          "minItems": 1,
+          "title": "Steps",
+          "type": "array"
+        },
+        "title": {
+          "maxLength": 80,
+          "title": "Title",
+          "type": "string"
+        },
+        "v": {
+          "const": 1,
+          "default": 1,
+          "title": "V",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "domain",
+        "origin",
+        "source",
+        "review",
+        "steps"
+      ],
+      "title": "Procedure",
+      "type": "object"
+    },
+    "Review": {
+      "additionalProperties": false,
+      "properties": {
+        "notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Notes"
+        },
+        "reviewer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reviewer"
+        },
+        "status": {
+          "default": "draft",
+          "enum": [
+            "draft",
+            "approved",
+            "rejected"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "title": "Review",
+      "type": "object"
+    },
+    "Source": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "default": "AUTHORED DEMO METADATA",
+          "enum": [
+            "MANUFACTURER DOC",
+            "AUTHORED PROJECT SPEC",
+            "WEB TUTORIAL",
+            "AUTHORED DEMO METADATA"
+          ],
+          "title": "Label",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        }
+      },
+      "required": [
+        "title"
+      ],
+      "title": "Source",
+      "type": "object"
+    },
+    "State": {
+      "additionalProperties": false,
+      "description": "GET /state for the mirror and review pages.",
+      "properties": {
+        "completed": {
+          "items": {
+            "$ref": "#/$defs/Completion"
+          },
+          "title": "Completed",
+          "type": "array"
+        },
+        "engine": {
+          "enum": [
+            "IDLE",
+            "STEP",
+            "COMPLETE"
+          ],
+          "title": "Engine",
+          "type": "string"
+        },
+        "events": {
+          "items": {
+            "$ref": "#/$defs/Event"
+          },
+          "title": "Events",
+          "type": "array"
+        },
+        "hud": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HudFrame"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "jig": {
+          "$ref": "#/$defs/JigStatus"
+        },
+        "procedure_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Procedure Id"
+        },
+        "procedure_title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Procedure Title"
+        },
+        "step_index": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Step Index"
+        },
+        "step_total": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Step Total"
+        }
+      },
+      "required": [
+        "engine",
+        "jig"
+      ],
+      "title": "State",
+      "type": "object"
+    },
+    "Step": {
+      "additionalProperties": false,
+      "properties": {
+        "check": {
+          "$ref": "#/$defs/Check"
+        },
+        "detail": {
+          "default": "",
+          "description": "Longer text for the phone/mirror, never the HUD",
+          "maxLength": 400,
+          "title": "Detail",
+          "type": "string"
+        },
+        "faq": {
+          "items": {
+            "$ref": "#/$defs/Faq"
+          },
+          "title": "Faq",
+          "type": "array"
+        },
+        "hud": {
+          "description": "One action, <= 28 chars, uppercase",
+          "title": "Hud",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "parts": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Parts",
+          "type": "array"
+        },
+        "requires": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Requires",
+          "type": "array"
+        },
+        "troubleshoot": {
+          "items": {
+            "$ref": "#/$defs/Troubleshoot"
+          },
+          "title": "Troubleshoot",
+          "type": "array"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        },
+        "where": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "HUD line answering 'where does it go?'",
+          "title": "Where"
+        },
+        "why": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "HUD line answering 'why this step?'",
+          "title": "Why"
+        }
+      },
+      "required": [
+        "id",
+        "hud",
+        "check"
+      ],
+      "title": "Step",
+      "type": "object"
+    },
+    "Troubleshoot": {
+      "additionalProperties": false,
+      "properties": {
+        "checks": {
+          "description": "HUD lines, most likely cause first",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Checks",
+          "type": "array"
+        },
+        "symptom": {
+          "title": "Symptom",
+          "type": "string"
+        }
+      },
+      "required": [
+        "symptom",
+        "checks"
+      ],
+      "title": "Troubleshoot",
+      "type": "object"
+    },
+    "ValidateResult": {
+      "additionalProperties": false,
+      "properties": {
+        "errors": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Errors",
+          "type": "array"
+        },
+        "ok": {
+          "title": "Ok",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "ok"
+      ],
+      "title": "ValidateResult",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "agent_delivery": {
+      "$ref": "#/$defs/AgentDelivery"
+    },
+    "g2_input": {
+      "$ref": "#/$defs/G2Input"
+    },
+    "hud": {
+      "$ref": "#/$defs/HudFrame"
+    },
+    "jig_observation": {
+      "$ref": "#/$defs/JigObservation"
+    },
+    "jig_profile": {
+      "$ref": "#/$defs/JigProfile"
+    },
+    "procedure": {
+      "$ref": "#/$defs/Procedure"
+    },
+    "state": {
+      "$ref": "#/$defs/State"
+    },
+    "validate_result": {
+      "$ref": "#/$defs/ValidateResult"
+    }
+  },
+  "title": "GhostBuildContracts",
+  "type": "object"
+}
