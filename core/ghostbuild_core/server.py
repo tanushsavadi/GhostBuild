@@ -193,7 +193,9 @@ def create_app(
 
     @app.get("/health")
     async def get_health() -> Response:
-        return _json(runtime.health())
+        d = runtime.health().model_dump(mode="json")
+        d["voice"] = "on" if runtime.voice is not None else "off"  # additive; not part of the Health contract model
+        return JSONResponse(d)
 
     @app.get("/card")
     async def get_card() -> Response:
@@ -228,6 +230,13 @@ def create_app(
                             raise HTTPException(status_code=404, detail="guide image missing")
                         return FileResponse(path, media_type="image/png")
         raise HTTPException(status_code=404, detail="no such guide view")
+
+    # ------------------------------------------------------------------ optional voice lane (only when --voice / GB_VOICE=1)
+    if runtime.voice is not None:
+
+        @app.websocket("/ws/voice")
+        async def ws_voice(websocket: WebSocket, session_id: str = "") -> None:
+            await runtime.voice.serve(websocket)
 
     # ------------------------------------------------------------------ simulator (only when --simulate)
     if runtime.sim is not None:
