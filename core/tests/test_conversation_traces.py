@@ -397,3 +397,37 @@ def test_i_help_phrasings_start_a_new_task_but_answers_do_not():
     for text in ("Both.", "Yes, level ground on a pavement.", "2024 Toyota Corolla.", "What do you mean?",
                  "I need help", "the fixing kit is in the trunk"):
         assert not new_goal(text), text
+
+
+# ------------------------------------------------------------------ Home: double press on G2 leaves any step for the task list
+def test_home_gesture_from_mid_step_returns_to_the_task_list_and_a_fresh_task(tmp_path):
+    from contracts.models import G2Input
+    rt = boot(tmp_path, FakeBrain(intake=[IntakeReply(action="ask", say="Which model?", question_key="model", critical_unknowns=["model"])]))
+    home = (rt.hud.current.mode, rt.hud.current.cue)
+    to_step(rt, 2)
+    sid = rt.session().id
+    rt.assistant.tasks[sid] = rt.assistant.tasks.get(sid) or __import__("ghostbuild_core.assistant.adaptive", fromlist=["TaskProfile"]).TaskProfile(goal="old")
+    stale = rt.hud.current.seq - 1  # a home press is never dropped as stale: it does not depend on what was on screen
+    rt.handle_input(G2Input(gesture="home", seq_seen=stale))
+    assert rt.playbook is None and rt.session().phase == "menu" and (rt.hud.current.mode, rt.hud.current.cue) == home
+    assert sid not in rt.assistant.tasks  # the next request starts a clean task
+    before = rt.hud.current.seq
+    rt.handle_input(G2Input(gesture="home", seq_seen=before))  # already home: nothing changes
+    assert rt.session().phase == "menu" and rt.playbook is None and (rt.hud.current.mode, rt.hud.current.cue) == home
+
+
+def test_home_during_research_stops_waiting_so_the_draft_never_takes_over(tmp_path):
+    from contracts.models import G2Input
+    rt = boot(tmp_path)
+    sid = rt.session().id
+    rt.sessions.begin_research(sid, "descale an espresso machine")
+    rt.handle_input(G2Input(gesture="home", seq_seen=rt.hud.current.seq))
+    assert rt.sessions._research is None and rt.session().phase == "menu"
+
+
+def test_root_screens_are_tagged_home_and_task_screens_are_not(tmp_path):
+    """The G2 exits on a double press only where Even QA requires it (root); anywhere else it sends Home."""
+    rt = boot(tmp_path)
+    assert rt.hud.current.cue_id == "home"  # the front prompt
+    to_step(rt, 1)
+    assert rt.hud.current.cue_id != "home" and rt.hud.current.mode == "step"

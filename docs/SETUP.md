@@ -52,7 +52,7 @@ cd g2
 npm run simulate
 ```
 
-The plugin connects to localhost:8787 by default. Click represents press; up/down represent swipes. Simulator output is not physical-device evidence. On question menus, swipes select and press answers. On manual action steps, swipe down confirms and advances; swipe up returns. Press opens the current picture; an answer has an explicit return. Double press exits G2.
+The plugin connects to localhost:8787 by default. Click represents press; up/down represent swipes. Simulator output is not physical-device evidence. On question menus, swipes select and press answers. On manual action steps, swipe down confirms and advances; swipe up returns. Press opens the current picture; an answer has an explicit return. Double press goes Home (back to the task list) from any step; on the root screen it exits G2.
 
 To exercise simulated Pi observations instead of a real device, stop the ordinary core instance and run `make core-sim`. The resulting evidence is labelled SIMULATED. Do not present it as live telemetry.
 

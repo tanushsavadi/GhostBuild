@@ -230,9 +230,11 @@ class Runtime:
         self.elog.write("input", input=gi.model_dump(mode="json"))
         # A retry belongs to the frame the user saw. It must never act on a later
         # step after the first delivery already advanced. seq=0 is legacy tooling.
-        if gi.gesture not in ("hold_start", "hold_end") and gi.seq_seen > 0 and gi.seq_seen < self.hud.current.seq:
+        if gi.gesture not in ("hold_start", "hold_end", "home") and gi.seq_seen > 0 and gi.seq_seen < self.hud.current.seq:
             return self.hud.current
-        if self.voice is not None and gi.gesture in ("hold_start", "hold_end"):
+        if gi.gesture == "home":
+            self.go_home()
+        elif self.voice is not None and gi.gesture in ("hold_start", "hold_end"):
             self.voice.on_hold(gi.gesture)
         elif self.playbook is not None and self.playbook.done and gi.gesture in ("press", "swipe_down"):
             self.playbook.detach()  # finished: the next press / swipe-down opens the task list again (swipe-up reopens the last step)
@@ -250,6 +252,25 @@ class Runtime:
                 self.engine.handle_input(gi)
         self.hud.sync()
         return self.hud.current
+
+    def go_home(self) -> None:
+        """Leave whatever is open (step, picture, answer, interview, product search) for the task list; the next request
+        starts a clean task. Recorded progress and evidence stay in the log."""
+        sess = self.sessions.active
+        if sess is None:
+            return
+        if self.playbook is not None:
+            self.playbook.detach()
+            self.playbook, self._pb_sid = None, None
+        if self.discovery is not None and self.discovery.state(sess.id).phase != "idle":
+            self.discovery.cancel(sess.id)
+        self.assistant.cancel(sess.id)
+        self.assistant.intakes.pop(sess.id, None)
+        self.assistant.tasks.pop(sess.id, None)
+        self.assistant._persist()
+        self.sessions.clear_convo(sess.id)
+        self.sessions.return_to_menu()
+        self.elog.write("event", evidence={"at": self.clock.now_ms(), "text": "home: back to the task list (G2 double press)", "label": "DETERMINISTIC"})
 
     def hello(self, h: G2Hello) -> HudFrame:
         self.elog.write("input", hello=h.model_dump(mode="json"))

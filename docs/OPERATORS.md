@@ -49,7 +49,7 @@ BACKEND=http://<laptop-ip>:8787 make g2-pack        # writes g2/ghostbuild.ehpk 
 ```
 Install on the phone: (a) fastest: `BACKEND=http://<laptop-ip>:8787 make g2-dev` then `make g2-qr`, scan with the Even app (dev sideload); (b) Beta: upload `ghostbuild.ehpk` at hub.evenrealities.com -> project -> Builds, push to a Beta group, phone: Me -> Beta tester -> Install. Do (a) first to find problems, (b) as soon as (a) shows frames.
 Do not enable voice yet (`VITE_FLAG_VOICE` unset).
-Device checklist: see `g2/README.md` ("Physical device checklist"). Key checks: text legible and centered; `●` renders (else the plugin substitutes); single press arrives once; swipe direction; double press shows the system exit dialog and cancel keeps the app; guide picture legible; phone locked 5 min; kill/restart core recovers.
+Device checklist: see `g2/README.md` ("Physical device checklist"). Key checks: text legible and centered; `●` renders (else the plugin substitutes); single press arrives once; swipe direction; double press mid-task returns to the task list and double press on the root screen shows the system exit dialog (cancel keeps the app); guide picture legible; phone locked 5 min; kill/restart core recovers.
 Troubleshooting: blank G2 + `GHOSTBUILD OFFLINE` -> phone cannot reach `http://<laptop-ip>:8787` (open it in the phone browser; if it fails it is the network); app installs but never connects -> `.ehpk` whitelist has a different IP (rebuild); no frames after connect -> `curl .../state`, then check `g2_clients` in `/health`.
 
 ## 4. Acceptance run

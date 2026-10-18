@@ -52,7 +52,7 @@ const controller: Controller = new Controller({
   render: (v) => void renderer.render(v),
   sendInput: (i) => conn.sendInput(i),
   rehello: () => conn.sendHello(),
-  exit: () => void bridge.shutDownPageContainer(1), // double press: system exit dialog. Never sent to the backend.
+  exit: () => void bridge.shutDownPageContainer(1), // double press at a root screen (or offline): system exit dialog. Elsewhere it sends Home.
   surface: () => surface,
   voice: flags.voice ? voice : undefined,
   viewOptions: { centerCols: resolveCenterCols(env), glyphTier: resolveGlyphTier(env) },

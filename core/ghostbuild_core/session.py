@@ -17,7 +17,7 @@ from contracts.models import Card, Cue, G2Hello, G2Input, GoalRequest, GoalResol
 
 from . import goal as goal_mod
 from .clock import Clock
-from .hud import Hud, Screen
+from .hud import HOME, Hud, Screen
 
 log = logging.getLogger("ghostbuild.session")
 
@@ -433,12 +433,14 @@ class SessionManager:
         self._render()
 
     def return_to_menu(self) -> None:
-        """Task finished: back to the task list (the next gesture after the completion message)."""
+        """Back to the task list: after the completion message, or Home from anywhere. Nobody waits for research any more
+        (it keeps running and leaves a draft, but never takes over the screen)."""
         s = self.active
         if s is None:
             return
         self._progress.pop(s.id, None)
         s.phase, s.goal, s.card_id = "menu", None, None
+        self._research = None
         self._choice = None
         self._flash = None
         self._show_list = False
@@ -492,12 +494,12 @@ class SessionManager:
         elif s is not None and s.phase == "menu":
             ch = self._choice or (self._root_choice() if self._show_list else None)
             if ch is not None:
-                screen = Screen.make_menu("PICK A TASK", ch.labels, ch.selected)
+                screen = Screen.make_menu("PICK A TASK", ch.labels, ch.selected, cue_id=HOME)
             elif self._choice is None and not self._show_list and self._flash is None and now - self._awake_at >= REST_PROMPT_MS:
-                screen = Screen.quiet()  # nothing asked for: the display rests (hold to speak still works)
+                screen = Screen.quiet(cue_id=HOME)  # nothing asked for: the display rests (hold to speak still works)
             else:
                 # the front screen is a conversation: say what you need (hold) or type it on the phone; no list, no BUILD/FIX
                 hint = "HOLD TO SPEAK" if self._voice_on() else "TYPE ON YOUR PHONE"
-                screen = Screen.intervene(Cue(line1="WHAT DO YOU NEED?", line2=hint), cue_id="prompt", immediate=True)
+                screen = Screen.intervene(Cue(line1="WHAT DO YOU NEED?", line2=hint), cue_id=HOME, immediate=True)
         self.hud.set_layer("ui", screen)
         self.hud.sync()

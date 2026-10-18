@@ -8,7 +8,8 @@
         "swipe_down",
         "swipe_up",
         "hold_start",
-        "hold_end"
+        "hold_end",
+        "home"
       ],
       "title": "Gesture",
       "type": "string"

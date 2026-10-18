@@ -27,6 +27,10 @@ def clip(cue: Cue) -> Cue:
     return Cue(line1=(cue.line1 or "?")[:24], line2=(cue.line2 or "")[:26])
 
 
+# cue_id of every root screen (welcome, prompt, task list, resting blank): G2 double press there is the system exit.
+HOME = "home"
+
+
 @dataclass(frozen=True)
 class Screen:
     """What an owner wants on the glasses. Pure data; only Hud turns it into a HudFrame."""
@@ -45,8 +49,8 @@ class Screen:
 
     # ---- constructors -----------------------------------------------------
     @staticmethod
-    def quiet() -> "Screen":
-        return Screen(mode="quiet")
+    def quiet(cue_id: Optional[str] = None) -> "Screen":
+        return Screen(mode="quiet", cue_id=cue_id)
 
     @staticmethod
     def intervene(cue: Cue, cue_id: Optional[str] = None, ttl_ms: Optional[int] = None, immediate: bool = False) -> "Screen":
@@ -66,7 +70,7 @@ class Screen:
 
     @staticmethod
     def welcome(cue: Cue, ttl_ms: int) -> "Screen":
-        return Screen(mode="welcome", cue=clip(cue), ttl_ms=ttl_ms, immediate=True)
+        return Screen(mode="welcome", cue=clip(cue), cue_id=HOME, ttl_ms=ttl_ms, immediate=True)
 
     @staticmethod
     def ask(cue: Cue, ttl_ms: Optional[int] = None) -> "Screen":
@@ -74,11 +78,12 @@ class Screen:
         return Screen(mode="ask", cue=clip(cue), ttl_ms=ttl_ms, immediate=True)
 
     @staticmethod
-    def make_menu(prompt: str, options: list[str], selected: int) -> "Screen":
+    def make_menu(prompt: str, options: list[str], selected: int, cue_id: Optional[str] = None) -> "Screen":
         return Screen(
             mode="menu",
             cue=Cue(line1=prompt[:24], line2="SWIPE · PRESS"),
             menu=Menu(prompt=prompt[:24], options=options, selected=selected),
+            cue_id=cue_id,
             immediate=True,
         )
 

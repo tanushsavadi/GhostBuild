@@ -13,7 +13,7 @@ This checklist accepts the optional Pi telemetry demonstration, not the general 
 7. Press while healthy: `ALL TESTS PASSING` (LIVE), blank in 3 s.
 8. Kill the Pi process: `PI LINK LOST` error within 6 s, never a stale OK. Restart: recovers without reopening the app.
 9. Kill the backend: plugin shows `GHOSTBUILD OFFLINE`; restart recovers.
-10. Double press: system exit dialog; cancel keeps the app working.
+10. Double press on the root screen: system exit dialog; cancel keeps the app working. Double press during a task: back to the task list (Home).
 11. Unknown goal with live research disabled: honest unsupported/queued response, no invented diagnostic. With opt-in research enabled, a result must retain its not-human-reviewed label.
 12. Second judge after reset (<= 30 s): first frame reflects the new real state, no stale success.
 

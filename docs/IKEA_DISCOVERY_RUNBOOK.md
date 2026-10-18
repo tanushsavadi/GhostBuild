@@ -37,7 +37,7 @@ On physical G2, use phone text plus gestures until the real microphone path has 
 
 For an explanatory question, ask “How do these round metal locks work, and how far do I turn them?”: glasses show THINKING, then the **full** answer as pages (`ANSWER 1/3 · PRESS: BACK`). Swipe down/up reads the next/previous page (never confirms the step, stops at the last page); the answer stays open until you return. Press, the phone's “Back to my step”, or saying/typing **“take me back to my step”** returns to the same step and picture. Pressing during THINKING also returns, and the late answer then appears on the phone only. After returning, a swipe down confirms the step as usual. The phone mirror shows the same pages with Previous/Next answer page buttons. Saved grounded answers can respond immediately and are labelled saved. `GB_ANSWER_PAGES=0` restores the old short timed cue.
 
-Double press remains the system exit; this feature does not intercept it. G2 has no camera or speaker. Optional spoken output goes through the phone/earbuds.
+Double press goes Home from a task and is the system exit on the root screen; discovery does not intercept it. G2 has no camera or speaker. Optional spoken output goes through the phone/earbuds.
 
 ## Fallbacks
 

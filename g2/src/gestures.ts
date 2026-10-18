@@ -13,7 +13,7 @@ export type Lifecycle = 'foreground_enter' | 'foreground_exit' | 'abnormal_exit'
 
 export type GestureAction =
   | { kind: 'send'; gesture: Gesture }
-  | { kind: 'exit' } // DOUBLE press: shutDownPageContainer(1) locally. NEVER sent to the backend.
+  | { kind: 'exit' } // DOUBLE press. Controller: system exit at root/offline, else Home. Never forwarded as a press.
   | { kind: 'lifecycle'; event: Lifecycle }
   | { kind: 'ignore' }
 
@@ -29,7 +29,7 @@ export function eventTypeOf(envelope?: { eventType?: number } | null): number | 
 
 /**
  * Pure mapper from an SDK event to what the plugin should do.
- *  - DOUBLE_CLICK (3) in ANY envelope is checked first -> local exit, never forwarded, never hijacked.
+ *  - DOUBLE_CLICK (3) in ANY envelope is checked first -> exit action (the controller exits at root, else sends Home).
  *  - sysEvent 0 -> press; textEvent 0 (undefined) -> press (SDK may route a text-container tap there).
  *  - textEvent SCROLL_BOTTOM (2) -> swipe_down; SCROLL_TOP (1) -> swipe_up (handle-input skill routing table).
  *  - LONG_PRESS (9) / RELEASE (10) arrive on sysEvent (device-apis doc) -> hold_start / hold_end.
