@@ -71,6 +71,7 @@ class ViewSpec:
     gamma: float
     canvas: tuple[int, int]
     fov_note: str | None = None
+    banner: str = ""  # placeholder banner text for the phone image; "" = the default PLACEHOLDER_BANNER
 
 
 @dataclass(frozen=True)
@@ -93,6 +94,15 @@ def _num(v, ctx: str) -> float:
     if isinstance(v, bool) or not isinstance(v, (int, float)):
         raise GuideError(f"{ctx}: expected a number, got {v!r}")
     return float(v)
+
+
+def _banner_text(value: Any, ctx: str) -> str:
+    """Optional 'banner' (guide or view level): placeholder banner text, 'LEFT \u2013 RIGHT' with an en dash, <= 48 chars."""
+    if value is None:
+        return ""
+    if not isinstance(value, str) or " \u2013 " not in value or len(value) > 48:
+        raise GuideError(f"{ctx}: banner must be a string like 'SCHEMATIC \u2013 REPLACE WITH PHOTO' (en dash, max 48 chars)")
+    return value
 
 
 def parse_guide(path: Path) -> GuideSpec:
@@ -184,6 +194,7 @@ def parse_guide(path: Path) -> GuideSpec:
             caption=caption, caption_pos=pos, autocontrast=float(v.get("autocontrast", 1.0)),
             contrast=float(v.get("contrast", 1.0)), gamma=float(v.get("gamma", 1.0)),
             canvas=(int(canvas[0]), int(canvas[1])), fov_note=v.get("fov_note"),
+            banner=_banner_text(v.get("banner", raw.get("banner")), vc),
         ))
     return GuideSpec(gid, title, g_placeholder, tuple(views))
 
@@ -389,14 +400,14 @@ def render_phone(src: Image.Image, spec: ViewSpec, placeholder: bool) -> Image.I
         d.rectangle([0, y0, nw, y0 + bar], fill=(0, 0, 0, 255))
         d.text((nw / 2, y0 + bar / 2), spec.caption, fill=(255, 255, 255, 255), font=font, anchor="mm")
     if placeholder:
-        _banner(d, nw, nh, spec.caption_pos)
+        _banner(d, nw, nh, spec.caption_pos, spec.banner or PLACEHOLDER_BANNER)
     return img.convert("RGB")
 
 
-def _banner(d: ImageDraw.ImageDraw, nw: int, nh: int, caption_pos: str) -> None:
+def _banner(d: ImageDraw.ImageDraw, nw: int, nh: int, caption_pos: str, text: str = PLACEHOLDER_BANNER) -> None:
     """Red banner 'SCHEMATIC - REPLACE WITH RIG PHOTO'. The bundled font has no en dash glyph (renders tofu),
     so the dash is drawn as a bar between the two text runs."""
-    left, right = PLACEHOLDER_BANNER.split(" \u2013 ")
+    left, right = text.split(" \u2013 ")
     font = _fit_text(left + " - " + right, nw - 24, max(16, nh // 12), aa=True)
     bar = font.size + 16
     y0 = 0 if caption_pos == "bottom" else nh - bar

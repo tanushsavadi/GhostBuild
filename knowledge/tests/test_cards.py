@@ -44,7 +44,8 @@ def test_each_shipped_card_validates_alone(tmp_path: Path):
 
 def test_cli_exit_zero_on_shipped_cards(capsys):
     assert main([str(DEFAULT_CARDS_DIR)]) == 0
-    assert "OK: 2 card(s) valid" in capsys.readouterr().out
+    count = len(list(DEFAULT_CARDS_DIR.glob("*.json")))
+    assert f"OK: {count} card(s) valid" in capsys.readouterr().out
 
 
 def test_bad_glyph_rejected(tmp_path: Path):
@@ -164,7 +165,7 @@ def test_cli_exit_one_with_errors(tmp_path: Path, capsys):
     assert "ERROR" in out and "FAILED" in out
 
 
-@pytest.mark.parametrize("path", [CAMERA, SETUP])
+@pytest.mark.parametrize("path", sorted(DEFAULT_CARDS_DIR.glob("*.json")), ids=lambda p: p.stem)
 def test_shipped_card_has_authored_provenance(path: Path):
     card = _load(path)
     assert card["provenance"] == "AUTHORED DEMO METADATA"
