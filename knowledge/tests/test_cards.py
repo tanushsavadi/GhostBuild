@@ -11,7 +11,7 @@ import pytest
 from knowledge.validate import DEFAULT_CARDS_DIR, REPO_ROOT, main, validate_cards
 
 CAMERA = DEFAULT_CARDS_DIR / "camera_lens.json"
-SETUP = DEFAULT_CARDS_DIR / "setup_station.json"
+SETUP = DEFAULT_CARDS_DIR.parent / "archive" / "setup_station.json"
 
 
 def _load(path: Path) -> dict:

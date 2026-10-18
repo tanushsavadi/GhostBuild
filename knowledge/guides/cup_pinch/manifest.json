@@ -1,6 +1,6 @@
 {
   "guide_id": "cup_pinch",
-  "title": "Cup: pinch the left edge",
+  "title": "PINCH THE EDGE",
   "placeholder": true,
   "pipeline_version": 1,
   "g2_format": "PNG, 8-bit greyscale, values only multiples of 17 (= 16 gray4 levels), black = transparent, <=288x144",
@@ -64,7 +64,7 @@
   ],
   "guide": {
     "id": "cup_pinch",
-    "title": "Cup: pinch the left edge",
+    "title": "PINCH THE EDGE",
     "views": [
       {
         "view": "where",

@@ -320,9 +320,9 @@ def test_goal_by_voice_fix(mk, real_cards):
 def test_goal_by_voice_build(mk, real_cards):
     r = mk(cards=real_cards, root=REPO)
     r.to_menu()
-    r.say("set up the station")
+    r.say("set up the pi camera")
     s = r.rt.sessions.active
-    assert s.phase == "task" and s.goal == "build" and s.card_id == "setup_station"
+    assert s.phase == "task" and s.goal == "build" and s.card_id == "pi_camera_setup"
 
 
 def test_unsupported_goal_by_voice_is_honest(mk, real_cards):
