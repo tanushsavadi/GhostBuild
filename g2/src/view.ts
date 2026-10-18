@@ -56,6 +56,22 @@ function joinTag(...parts: string[]): string {
   return t || ' '
 }
 
+/**
+ * Small playbook counter for the dim tag line, e.g. `3/8`, `● 3/8` (measured step), `3/8 OK` (confirmed).
+ * StepRef.index is 0-based, the wearer sees 1-based. `●` is in the official glyph table (design-guidelines);
+ * the 'ascii' tier maps it to `*`. The confirmed check mark `✓` is NOT in the whitelist (sanitizer folds it to `OK`),
+ * so it is rendered as the folded text rather than a glyph that could be silently dropped by the firmware font.
+ */
+export function stepCounter(frame: HudFrame, opts: ViewOptions): string {
+  const s = frame.step
+  if (!s || !Number.isFinite(s.index) || !Number.isFinite(s.count) || s.count < 1) return ''
+  const n = Math.min(Math.max(0, Math.trunc(s.index)), Math.trunc(s.count) - 1) + 1
+  const parts = [`${n}/${Math.trunc(s.count)}`]
+  if (s.check === 'measured') parts.unshift('●')
+  if (s.confirmed) parts.push('✓')
+  return sanitizeLine(parts.join(' '), opts.glyphTier)
+}
+
 function menuLines(frame: HudFrame, opts: ViewOptions): string[] | null {
   const m = frame.menu
   const options = m?.options as string[] | undefined
@@ -80,12 +96,15 @@ function cueLines(frame: HudFrame, opts: ViewOptions): string[] {
  *  - quiet            -> blank `" "`
  *  - stale            -> honest STALE DATA (contract: "plugin shows ERROR instead"), never the old cue
  *  - menu             -> prompt + options, selected marked `> `, others `  `
+ *  - step             -> the action cue (centred, unchanged) + a small counter on the dim tag line
  *  - visual + image   -> image with cue as caption; `fallback` is the text-only rendering
+ *                        (a visual frame opened from a step also carries the step counter)
  *  - everything else  -> up to 2 centred lines
  * Non-live sources (replay, simulated) always add a visible tag.
  */
 export function frameToView(frame: HudFrame, opts: ViewOptions = DEFAULT_VIEW_OPTIONS): View {
   const tag = sourceTag(frame.source)
+  const counter = stepCounter(frame, opts)
 
   if (frame.stale) {
     return textView([centerLine('STALE DATA', opts.centerCols), centerLine('CHECK LINK', opts.centerCols)], joinTag(tag))
@@ -100,12 +119,12 @@ export function frameToView(frame: HudFrame, opts: ViewOptions = DEFAULT_VIEW_OP
 
   let lines = cueLines(frame, opts)
   if (lines.length === 0) lines = [centerLine('NO CUE TEXT', opts.centerCols)]
-  const fallback = textView(lines, joinTag(tag))
+  const fallback = textView(lines, joinTag(counter, tag))
 
   if (frame.mode === 'visual' && frame.image) {
     const img: ImageRef = frame.image
-    const idx = img.count > 1 ? `${img.index + 1}/${img.count}` : ''
-    const t = joinTag(idx, tag)
+    const idx = img.count > 1 ? `${counter ? 'PIC ' : ''}${img.index + 1}/${img.count}` : ''
+    const t = joinTag(counter, idx, tag)
     return {
       kind: 'image',
       text: lines.join('\n'),

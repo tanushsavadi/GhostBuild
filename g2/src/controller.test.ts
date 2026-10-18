@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Controller } from './controller'
+import { mapHubEvent } from './gestures'
 import type { G2Input, View } from './types'
 import { example, frame } from './test/fixtures'
 
@@ -183,5 +184,48 @@ describe('offline honesty', () => {
     expect(rendered).toEqual([])
     vi.advanceTimersByTime(3000)
     expect(text(rendered[0])).toContain('OFFLINE')
+  })
+})
+
+describe('playbook: step mode and 3-option menu', () => {
+  const send = (c: Controller, ev: unknown) => c.onAction(mapHubEvent(ev as never))
+  it('renders step frames and de-dups only when the counter is unchanged', () => {
+    const { c, rendered } = setup()
+    const s = example('hud_step')
+    c.onMessage({ ...s, seq: 20 })
+    c.onMessage({ ...s, seq: 21 }) // identical content
+    expect(rendered).toHaveLength(1)
+    c.onMessage({ ...s, seq: 22, step: { ...s.step!, index: 2 } }) // same cue, next step
+    expect(rendered).toHaveLength(2)
+    c.onMessage({ ...s, seq: 23, step: { ...s.step!, index: 2, confirmed: true } })
+    expect(rendered).toHaveLength(3)
+    expect((rendered[2] as { tag: string }).tag).toContain('3/3 OK')
+  })
+  it('swipe down / swipe up / press are forwarded unchanged in step mode, with seq_seen of the step frame', () => {
+    const { c, sent } = setup()
+    c.onMessage({ ...example('hud_step'), seq: 30 })
+    send(c, { textEvent: { eventType: 2 } })
+    send(c, { textEvent: { eventType: 1 } })
+    send(c, { sysEvent: {} })
+    expect(sent.map((i) => [i.gesture, i.seq_seen])).toEqual([['swipe_down', 30], ['swipe_up', 30], ['press', 30]])
+  })
+  it('double press in step mode exits locally and sends nothing', () => {
+    const { c, sent, exits } = setup()
+    c.onMessage({ ...example('hud_step'), seq: 31 })
+    send(c, { sysEvent: { eventType: 3 } })
+    expect(exits).toHaveLength(1)
+    expect(sent).toEqual([])
+  })
+  it('swipe and press are forwarded in a 3-option menu', () => {
+    const { c, sent, rendered } = setup()
+    const m = example('hud_menu')
+    c.onMessage({ ...m, seq: 40, menu: { prompt: 'WHAT NOW?', options: ['FIX', 'BUILD', 'PICK'] as [string, string, string], selected: 0 } })
+    expect(text(rendered[0])).toContain('> FIX')
+    send(c, { textEvent: { eventType: 2 } })
+    send(c, { textEvent: { eventType: 2 } })
+    send(c, { sysEvent: { eventType: 0 } })
+    expect(sent.map((i) => i.gesture)).toEqual(['swipe_down', 'swipe_down', 'press'])
+    c.onMessage({ ...m, seq: 41, menu: { prompt: 'WHAT NOW?', options: ['FIX', 'BUILD', 'PICK'] as [string, string, string], selected: 2 } })
+    expect(text(rendered[1])).toContain('> PICK')
   })
 })
