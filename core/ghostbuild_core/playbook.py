@@ -320,7 +320,7 @@ class PlaybookEngine:
 
     def _press(self, now: int, from_ask: bool) -> None:
         if self.done:
-            self._flash(Screen.ask(Cue(line1="TASK COMPLETE", line2=self.card.title[:26]), ttl_ms=COMPLETE_STATUS_TTL_MS),
+            self._flash(Screen.ask(Cue(line1="TASK COMPLETE", line2=self.card.title.upper()[:26]), ttl_ms=COMPLETE_STATUS_TTL_MS),
                         COMPLETE_STATUS_TTL_MS, "status", now=now)
             return
         if self.view_idx is not None:

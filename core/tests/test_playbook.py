@@ -41,7 +41,7 @@ def test_after_completion_press_says_task_complete_then_quiet():
     r.confirm(), r.confirm()
     r.wait(4100)
     f = r.send("press")
-    assert f.mode == "ask" and (f.cue.line1, f.cue.line2) == ("TASK COMPLETE", "Build a thing") and f.ttl_ms == 3000
+    assert f.mode == "ask" and (f.cue.line1, f.cue.line2) == ("TASK COMPLETE", "BUILD A THING") and f.ttl_ms == 3000
     r.wait(3100)
     assert r.cur.mode == "quiet"
 
