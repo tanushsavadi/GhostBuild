@@ -1,0 +1,68 @@
+{
+  "label": "LIVE PROVIDERS; Runtime harness, no physical G2",
+  "started_utc": "2026-10-18T13:51:15Z",
+  "ikea": {
+    "input": "It's a MALM desk, not MICKE.",
+    "intent": "goal",
+    "seconds": 12.9,
+    "phase": "choosing",
+    "old_guide_removed": true,
+    "name_hint": "MALM",
+    "live_state": "done",
+    "notice": "Live search complete. Current choices kept in place; use Show more for other matches.",
+    "matches": [
+      {
+        "name": "MALM",
+        "article": "10203610",
+        "product": "https://www.ikea.com/us/en/p/malm-dressing-table-white-10203610/",
+        "manual": "https://www.ikea.com/us/en/assembly_instructions/malm-dressing-table-white__AA-2192219-13-100.pdf"
+      },
+      {
+        "name": "MALM",
+        "article": "70620346",
+        "product": "https://www.ikea.com/us/en/p/malm-dressing-table-white-70620346/",
+        "manual": "https://www.ikea.com/us/en/assembly_instructions/malm-dressing-table-white__AA-2673417-2-100.pdf"
+      }
+    ],
+    "after_selection": {
+      "phase": "unavailable",
+      "message": "Product confirmed. Its official manual is linked below; an offline step guide has not been prepared yet.",
+      "card": null,
+      "manual": "https://www.ikea.com/us/en/assembly_instructions/malm-dressing-table-white__AA-2192219-13-100.pdf"
+    }
+  },
+  "prusa": {
+    "input": "Sorry, it's actually an MK3S+, not an MK4.",
+    "intent": "goal",
+    "research_started": true,
+    "goal": "Prusa not extruding. Correction: Sorry, it's actually an MK3S+, not an MK4.",
+    "old_guide_removed": true,
+    "seconds": 111.63,
+    "last": {
+      "run_id": "c-cf70d5e5",
+      "goal": "Prusa not extruding. Correction: Sorry, it's actually an MK3S+, not an MK4.",
+      "ok": true,
+      "status": "compiled",
+      "engine": "compile",
+      "card_id": "mk3s_not_extruding_f225",
+      "took_s": 0.0,
+      "sources": [
+        "https://help.prusa3d.com/article/clogged-nozzle-hotend-mk3-5-s-mk3s-mk2-5s_2008",
+        "https://help.prusa3d.com/article/cold-pull-mk3-s-mk2-5-s-mk3-5-s_2075"
+      ],
+      "stats": {
+        "compile_s": 91.85,
+        "fetch_s": 6.3,
+        "rounds": 2
+      },
+      "at": 1792331657.201424
+    },
+    "card": "mk3s_not_extruding_f225",
+    "sources": [
+      "https://help.prusa3d.com/article/clogged-nozzle-hotend-mk3-5-s-mk3s-mk2-5s_2008",
+      "https://help.prusa3d.com/article/cold-pull-mk3-s-mk2-5-s-mk3-5-s_2075"
+    ],
+    "step_count": 13,
+    "unreviewed": true
+  }
+}

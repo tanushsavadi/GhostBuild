@@ -187,17 +187,22 @@ def extract(text: str, known_names: tuple[str, ...] = ()) -> Attrs:
                 features.setdefault(feat, True)
             break
     # "drawers on both sides" / "cabinet on one side": keep as plain presence (the question asks for sides when needed)
-    name_hint = None
+    name_hint, excluded = None, []
     for n in known_names:
-        if re.search(rf"\b{re.escape(norm(n))}\b", t):
+        nn = re.escape(norm(n))
+        if not re.search(rf"\b{nn}\b", t):
+            continue
+        if re.search(rf"\b(?:not|isn[' ]?t|isnt|no|instead of|rather than|wasn[' ]?t|wasnt)\s+(?:a |an |the |my )?{nn}\b", t):
+            excluded.append(n)  # "a MALM desk, not MICKE": MICKE is ruled out
+        elif name_hint is None:
             name_hint = n
-            break
     keep = [w for w in words if w not in _STOP and len(w) > 2 and not w.isdigit()]
     return Attrs(
         category=category,
         color=color,
         features=features,
         name_hint=name_hint,
+        excluded_names=excluded,
         words=keep[:12],
     )
 
@@ -223,6 +228,9 @@ def search_query(attrs: Attrs, fallback_text: str = "") -> str:
     used = set(" ".join(parts).lower().split())
     parts.extend(w for w in attrs.words if w not in used and w not in _STOP)
     q = " ".join(dict.fromkeys(parts))
+    for excluded in attrs.excluded_names:
+        q = re.sub(rf"\b{re.escape(norm(excluded))}\b", " ", q, flags=re.I)
+    q = " ".join(q.split())
     return q or " ".join(norm(fallback_text).split()[:8])
 
 

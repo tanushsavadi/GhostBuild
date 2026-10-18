@@ -222,6 +222,8 @@ class Assistant:
         if library_id:
             # The model named a ready guide: accept it only if it is startable and the person's words really overlap it.
             card = next((c for c in cards if c.card_id == library_id and c.steps), None)
+            if card is not None and goal_mod.model_conflict(text, card):
+                return None  # the person named a different model than this guide is for
             if card is not None:
                 said = terms(text) - {"wire", "wiring"}
                 covered = terms(card.title + " " + " ".join(card.aliases))

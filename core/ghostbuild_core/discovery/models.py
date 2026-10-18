@@ -101,6 +101,9 @@ class Attrs(Strict):
         description="feature -> count, or True/False (False = explicitly not wanted)",
     )
     name_hint: Optional[str] = None
+    excluded_names: list[str] = Field(
+        default_factory=list, description="product names the person ruled out ('it's a MALM, not MICKE')"
+    )
     words: list[str] = Field(
         default_factory=list, description="free words kept for the search query"
     )
@@ -113,6 +116,7 @@ class Attrs(Strict):
             color=new.color or self.color,
             features=feats,
             name_hint=new.name_hint or self.name_hint,
+            excluded_names=[x for x in dict.fromkeys([*self.excluded_names, *new.excluded_names]) if x != new.name_hint],
             words=list(dict.fromkeys([*self.words, *new.words])),
         )
 

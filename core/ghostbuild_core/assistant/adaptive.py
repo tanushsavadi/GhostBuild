@@ -217,6 +217,24 @@ def identity_correction(text: str) -> bool:
     )
 
 
+_REVISE = re.compile(r"\b(?:actually|wait|sorry|correction|i was wrong|i meant|turns out|just checked|checked again|on second thought|"
+                     r"instead|not anymore|now it|too|also|as well|i misspoke|scratch that|my mistake)\b", re.I)
+_HEDGE = re.compile(r"\b(?:i think|i guess|maybe|probably|might be|could be|possibly|not sure|not certain|seems?|looks like it)\b", re.I)
+
+
+def revises(text: str) -> bool:
+    """The person is changing something they said before (not just answering)."""
+    return bool(_REVISE.search(text or "") or re.search(
+        r"\b(?:it['’]?s|it is|mine is|i have)\b[^.?!]{1,80},?\s+not\s+(?:a |an |the )?\w+",
+        text or "", re.I,
+    ))
+
+
+def hedged(text: str) -> bool:
+    """A statement offered without certainty: confirm before acting on it."""
+    return bool(_HEDGE.search(text or "")) or uncertain(text)
+
+
 def uncertain(text: str) -> bool:
     return bool(
         re.search(

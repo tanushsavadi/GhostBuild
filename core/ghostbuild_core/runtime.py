@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from pathlib import Path
 from typing import Any, Callable, Optional
 
@@ -21,6 +22,7 @@ from contracts.models import (
     State,
 )
 
+from . import goal as goal_mod
 from . import intent as intent_mod
 from .clock import Clock, as_clock
 from .cache import AppCache
@@ -327,6 +329,8 @@ class Runtime:
         card, review = saved
         current = next((c for c in self.cards if c.card_id == card.card_id), None)
         card = current or card
+        if goal_mod.model_conflict(req.text, card):
+            return False
         task = self.assistant.tasks.get(req.session_id)
         if task is not None and (task.critical_unknowns or task.confirmation_pending):
             return False
@@ -399,11 +403,14 @@ class Runtime:
         if self.playbook is None:
             return None
         self.elog.write("input", ask=text[:300])
-        from .assistant.adaptive import identity_correction, task_switch
-        if task_switch(text) or identity_correction(text):
-            sid = self.session().id
+        from .assistant.adaptive import hedged, identity_correction, revises, task_switch
+        sid = self.session().id
+        product_change = self.discovery is not None and revises(text) and self.discovery.names_other_product(sid, text)
+        model_change = revises(text) and goal_mod.model_conflict(text, self.playbook.card)
+        ident = identity_correction(text) or product_change or model_change  # the thing itself changed: its steps and pictures no longer apply
+        if task_switch(text) or ident:
             task = self.assistant.tasks.get(sid)
-            if identity_correction(text) and self.discovery is not None and self.discovery.state(sid).selected is not None:
+            if ident and self.discovery is not None and self.discovery.state(sid).selected is not None:
                 self.assistant.observe_goal(GoalRequest(session_id=sid, mode="build", via="phone_text", text=text))
                 self.discovery.correct(sid, text)
                 return AskResult(intent="goal", answered=True, cue=Cue(line1="CHECK PRODUCT AGAIN", line2="PICK THE MATCHING PHOTO"), text="Let's identify the correct product before continuing. Your earlier progress is kept.", detail="", label="DETERMINISTIC", step_id="", card_id="")
@@ -413,18 +420,46 @@ class Runtime:
             sess = self.sessions.active
             sess.phase = "menu"
             self.sessions.clear_convo(sid)
-            if identity_correction(text) and task:
+            if ident and task:
                 self.assistant.cancel(sid)
                 self.assistant.intakes.pop(sid, None)
                 task.phase = "intake"
-                task.critical_unknowns = ["Confirm the corrected identity or applicability before continuing"]
-                req_text = task.goal + ". Correction: " + text
+                # a certain correction names the new identity; only a hedged one leaves it to be confirmed
+                task.critical_unknowns = ["Confirm the corrected identity or applicability before continuing"] if hedged(text) else []
+                old = task.goal
+                if model_change:  # drop the old model's identifiers so the old guide cannot match again
+                    for tok in goal_mod.model_tokens(old) - goal_mod.model_tokens(text):
+                        old = re.sub(rf"(?i)(?<![\w.+-]){re.escape(tok)}(?![\w.+-])", "", old)
+                req_text = " ".join(old.split()) + ". Correction: " + text
             else:
                 req_text = text
             res = self.resolve_goal(GoalRequest(session_id=sid, mode=intent_mod.infer_goal_mode(req_text), via="phone_text", text=req_text))
             return AskResult(intent="goal", answered=False, pending=bool(res and res.conversing), cue=res.cue if res else Cue(line1="WHAT DO YOU NEED?",line2=""), text=res.detail if res else "Tell me the new task.", detail="", label="DETERMINISTIC",step_id="",card_id="")
         if intent_mod.returns_to_step(text):
             self.assistant.dismiss(self.session().id, self.playbook.card.card_id, self.playbook.step.id)
+        rev = self.playbook.revise_answer(text)  # "actually, the external one is green too": an earlier answer changed
+        if rev is not None:
+            self.assistant.cancel(sid)
+            task = self.assistant.tasks.get(sid)
+            if task is not None:
+                task.observe(text, revise=False)
+                task.revision += 1
+                task.facts = [f for f in task.facts if f.field not in ("branch", "configuration", "observation")]
+                task.branch = "" if hedged(text) else rev["new"]
+            pb = self.playbook
+            q = next(x for x in pb.card.steps if x.id == rev["step"])
+            new = next(c for c in q.choices if c.id == rev["new"])
+            if hedged(text):  # not certain: ask that question again instead of switching on a guess
+                pb.reopen(q.id, new.id, reason="the earlier answer may be wrong")
+                say = "Let's confirm that before going on: " + (q.detail or q.title) + " Pick the answer that fits, or say not sure."
+            else:
+                pb.reanswer(q.id, new.id)
+                say = f"Updated: {new.records or new.label.capitalize()}. The steps for the earlier answer no longer apply; continuing from the check that fits."
+            res = AskResult(intent="revised", answered=True, cue=self.hud.current.cue or Cue(line1="UPDATED", line2=""), text=say, detail="",
+                            label="DETERMINISTIC" if hedged(text) else "HUMAN CONFIRMED", step_id=pb.step.id, card_id=pb.card.card_id)
+            self.assistant.record_guide_answer(text, res)
+            self.hud.sync()
+            return res
         choice = self.playbook.match_choice(text)  # an answer to the current diagnostic question: deterministic, no model
         if choice is not None:
             st = self.playbook.step

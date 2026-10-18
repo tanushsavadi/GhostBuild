@@ -17,7 +17,7 @@ from .schemas import IntakeReply, IntakeWire, StepReply, StepWire
 log = logging.getLogger("ghostbuild.assistant.brain")
 T = TypeVar("T", bound=BaseModel)
 
-DEFAULT_MODEL = "claude-opus-5-5"  # measured: the only model that got electrical-safety answers right; override with GB_BRAIN_MODEL (e.g. claude-haiku-5-5 is ~2x faster, less reliable)
+DEFAULT_MODEL = "claude-opus-5-5"  # Backend override: GB_BRAIN_MODEL.
 TIMEOUT_S = 20.0
 MAX_TOKENS = 1600  # the adaptive reply schema (facts with quotes, unknowns, decision) outgrew 900; a cut-off reply is a BrainError
 

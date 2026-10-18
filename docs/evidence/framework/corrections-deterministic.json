@@ -1,0 +1,290 @@
+{
+ "_evidence": {
+  "label": "DETERMINISTIC Runtime harness; not physical G2",
+  "provider_calls": 0,
+  "note": "Product records may include previously retrieved local cache entries. Live retrieval is disabled."
+ },
+ "1_ikea": [
+  {
+   "you": "I'm assembling a white IKEA MICKE desk",
+   "status": "ambiguous",
+   "reply": "Which one matches yours? Pick a photo, say its number or name, or describe more.",
+   "now": {
+    "phase": "menu",
+    "card": null,
+    "step": null,
+    "kind": null,
+    "observations": null,
+    "glasses": {
+     "line1": "1/5 MICKE WHITE",
+     "line2": "PRESS: ENLARGE PHOTO"
+    },
+    "image": "/discovery/shortlist/b9d1c4c3156b439c6b03051d15d4760340caf964e56c6776532cebb03fd87b13.png",
+    "discovery": "choosing",
+    "selected": null,
+    "candidates": [
+     "MICKE 80213074",
+     "MICKE 90214308",
+     "MICKE 50250713",
+     "MICKE 30213076",
+     "MICKE 10244743"
+    ]
+   }
+  },
+  {
+   "you": "number one",
+   "status": "ambiguous",
+   "reply": "Which side should the cabinet be on?",
+   "now": {
+    "phase": "menu",
+    "card": null,
+    "step": null,
+    "kind": null,
+    "observations": null,
+    "glasses": {
+     "line1": "CABINET SIDE?",
+     "line2": "SWIPE \u00b7 PRESS"
+    },
+    "image": null,
+    "discovery": "configuring",
+    "selected": "MICKE",
+    "candidates": [
+     "MICKE 80213074",
+     "MICKE 90214308",
+     "MICKE 50250713",
+     "MICKE 30213076",
+     "MICKE 10244743"
+    ]
+   }
+  },
+  {
+   "you": "cabinet on the left",
+   "status": "supported",
+   "reply": "MICKE guide ready. Manual step numbers match this guide.",
+   "now": {
+    "phase": "task",
+    "card": "ikea_80213074_cabinet_left",
+    "step": "s01",
+    "kind": "action",
+    "observations": [],
+    "glasses": {
+     "line1": "SCREW IN 2 CONNECTORS",
+     "line2": "USE THE END HOLES"
+    },
+    "image": "/guides/ikea80213074_s01/where.png",
+    "discovery": "ready",
+    "selected": "MICKE",
+    "candidates": [
+     "MICKE 80213074",
+     "MICKE 90214308",
+     "MICKE 50250713",
+     "MICKE 30213076",
+     "MICKE 10244743"
+    ]
+   }
+  },
+  {
+   "you": "show me step 14",
+   "intent": "goto",
+   "reply": "Step 14 of 35: Fit 8 cam locks",
+   "now": {
+    "phase": "task",
+    "card": "ikea_80213074_cabinet_left",
+    "step": "s14",
+    "kind": "action",
+    "observations": [],
+    "glasses": {
+     "line1": "FIT 8 ROUND METAL LOCKS",
+     "line2": "TURN EACH A QUARTER TURN"
+    },
+    "image": "/guides/ikea80213074_left_s14/where.png",
+    "discovery": "ready",
+    "selected": "MICKE",
+    "candidates": [
+     "MICKE 80213074",
+     "MICKE 90214308",
+     "MICKE 50250713",
+     "MICKE 30213076",
+     "MICKE 10244743"
+    ]
+   }
+  },
+  {
+   "you": "Wait, actually, I checked the box. It's a MALM desk, not MICKE.",
+   "intent": "goal",
+   "reply": "Let's identify the correct product before continuing. Your earlier progress is kept.",
+   "now": {
+    "phase": "menu",
+    "card": null,
+    "step": null,
+    "kind": null,
+    "observations": null,
+    "glasses": {
+     "line1": "1/2 MALM ",
+     "line2": "PRESS: ENLARGE PHOTO"
+    },
+    "image": "/discovery/shortlist/5c15fbaa5589c3647b0011030cc545d2e8eaa6f0259811599526c97c39dc8606.png",
+    "discovery": "choosing",
+    "selected": null,
+    "candidates": [
+     "MALM 10203610",
+     "MALM 70620346"
+    ]
+   }
+  }
+ ],
+ "2_mac": [
+  {
+   "you": "My MacBook screen is turning green, but my external monitor looks fine.",
+   "intent": "unknown",
+   "reply": "NOT IN MY PLAYBOOK SEE PHONE",
+   "now": {
+    "phase": "task",
+    "card": "mac_display_colors",
+    "step": "q_which_display",
+    "kind": "question",
+    "observations": [],
+    "glasses": {
+     "line1": "NOT IN MY PLAYBOOK",
+     "line2": "SEE PHONE"
+    },
+    "image": null,
+    "discovery": "idle",
+    "selected": null,
+    "candidates": []
+   }
+  },
+  {
+   "you": "the laptop screen",
+   "intent": "choice",
+   "reply": "Noted: Wrong colors on the built-in display only.",
+   "now": {
+    "phase": "task",
+    "card": "mac_display_colors",
+    "step": "check_color_filters",
+    "kind": "action",
+    "observations": [
+     "Wrong colors on the built-in display only"
+    ],
+    "glasses": {
+     "line1": "CHECK COLOR FILTERS",
+     "line2": "ACCESSIBILITY > DISPLAY"
+    },
+    "image": "/guides/mac_display_colors_check_color_filters/where.png",
+    "discovery": "idle",
+    "selected": null,
+    "candidates": []
+   }
+  },
+  {
+   "you": "Actually, I just checked. The external monitor is green too.",
+   "intent": "revised",
+   "reply": "Updated: Wrong colors on both built-in and external displays. The steps for the earlier answer no longer apply; continuing from the check that fits.",
+   "now": {
+    "phase": "task",
+    "card": "mac_display_colors",
+    "step": "check_color_filters",
+    "kind": "action",
+    "observations": [
+     "Wrong colors on both built-in and external displays"
+    ],
+    "glasses": {
+     "line1": "CHECK COLOR FILTERS",
+     "line2": "ACCESSIBILITY > DISPLAY"
+    },
+    "image": "/guides/mac_display_colors_check_color_filters/where.png",
+    "discovery": "idle",
+    "selected": null,
+    "candidates": []
+   }
+  }
+ ],
+ "3_bike": [
+  {
+   "you": "I'm pretty sure my bike has an inner tube",
+   "intent": "choice",
+   "reply": "Noted: tire uses an inner tube.",
+   "now": {
+    "phase": "task",
+    "card": "bike_flat_tire",
+    "step": "q_valve",
+    "kind": "question",
+    "observations": [
+     "tire uses an inner tube"
+    ],
+    "glasses": {
+     "line1": "WHICH VALVE TYPE?",
+     "line2": "LOOK AT THE VALVE TIP"
+    },
+    "image": null,
+    "discovery": "idle",
+    "selected": null,
+    "candidates": []
+   }
+  },
+  {
+   "you": "Wait, the tire says tubeless ready, and I think it's actually set up tubeless.",
+   "intent": "revised",
+   "reply": "Let's confirm that before going on: These instructions only apply to traditional tire-body-and-inner-tube setups. Decide whether your tire has an inner tube inside or is a tubeless setup. Pick the answer that fits, or say not sure.",
+   "now": {
+    "phase": "task",
+    "card": "bike_flat_tire",
+    "step": "q_tube_type",
+    "kind": "question",
+    "observations": [],
+    "glasses": {
+     "line1": "INNER TUBE OR TUBELESS?",
+     "line2": "CHECK YOUR TIRE TYPE"
+    },
+    "image": null,
+    "discovery": "idle",
+    "selected": null,
+    "candidates": []
+   }
+  }
+ ],
+ "4_prusa": [
+  {
+   "you": "It's a Prusa MK4 and it makes a loud clicking",
+   "intent": "choice",
+   "reply": "Noted: Loud clicking from the extruder.",
+   "now": {
+    "phase": "task",
+    "card": "prusa_mk4_not_extruding",
+    "step": "unload_first",
+    "kind": "action",
+    "observations": [
+     "Loud clicking from the extruder"
+    ],
+    "glasses": {
+     "line1": "UNLOAD THE FILAMENT",
+     "line2": "THEN MOVE EXTRUDER UP"
+    },
+    "image": null,
+    "discovery": "idle",
+    "selected": null,
+    "candidates": []
+   }
+  },
+  {
+   "you": "Sorry, it's actually an MK3S+.",
+   "intent": "goal",
+   "reply": "GhostBuild has no verified card for that fix goal (\"Prusa not extruding. Correction: Sorry, it's actually an MK3S+.\"). Supported cards: Pi camera view (fix); Light an LED (build); Fold a paper cup (build); Set up the Pi camera (build); Fix a Flat Bike Tire (fix); Mac screen colors wrong (fix); Prusa MK4 not extruding (fix). No diagnosis is guessed. Your request was saved for async research; not available now.",
+   "now": {
+    "phase": "menu",
+    "card": null,
+    "step": null,
+    "kind": null,
+    "observations": null,
+    "glasses": {
+     "line1": "NOT SUPPORTED YET",
+     "line2": "QUEUED FOR RESEARCH"
+    },
+    "image": null,
+    "discovery": "idle",
+    "selected": null,
+    "candidates": []
+   }
+  }
+ ]
+}

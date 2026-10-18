@@ -510,36 +510,121 @@ class PlaybookEngine:
         st = self.step
         if st.kind != "question" or self.done:
             return None
-        t = " " + " ".join(intent_mod.normalize(text).split()) + " "
+        return self._match(st, text)
+
+    @staticmethod
+    def _match(st: Step, text: str, *, allow_uncertain: bool = False) -> Optional[str]:
+        import re
+
+        from .assistant.adaptive import hedged
         from .discovery.attrs import pick_ordinal
 
+        def norm(x: str) -> str:
+            return " " + " ".join(intent_mod.normalize(x).split()) + " "
+
         def hits_in(t: str) -> list[str]:
-            out = []
-            for c in st.choices:
-                phrases = [p.lower() for p in c.say] + [c.label.lower()]
-                if any(" " + " ".join(intent_mod.normalize(p).split()) + " " in t for p in phrases if p.strip()):
-                    out.append(c.id)
-            return out
+            return [c.id for c in st.choices
+                    if any(norm(p) in t for p in [*c.say, c.label] if p.strip())]
 
+        t = norm(text)
+        exact = [c.id for c in st.choices if any(norm(p) == t for p in [*c.say, c.label] if p.strip())]
+        if len(exact) == 1:
+            return exact[0]
+        if not allow_uncertain and hedged(text):
+            return None
         hits = hits_in(t)
-        if len(hits) == 1:
-            return hits[0]
-        if len(hits) > 1:
-            # "only the external monitor, the laptop screen looks fine": a clause that rules something out does not answer
-            import re
-
-            clauses = [intent_mod.normalize(c) for c in re.split(r"[,;.]|\bbut\b|\band\b|\bwhile\b|\bthough\b", text.lower())]
-            keep = [c for c in clauses if not re.search(r"\b(fine|ok|okay|works?|working|normal|good|right|not|isn t|isnt|no problem)\b", c)]
-            narrowed = hits_in(" " + " ".join(" ".join(keep).split()) + " ")
-            if len(narrowed) == 1:
-                return narrowed[0]
+        # A predicate can answer an outcome question, or rule out an object in an identity question.
+        ruled_out = re.compile(
+            r"\b(fine|ok|okay|works?|working|normal|normally|good|right|not|isn[' ]?t|isnt|aren[' ]?t|no problem|unaffected|ready|compatible|capable|supports?)\b"
+        )
+        clauses = re.split(r"[,;.]|\bbut\b|\band\b|\bwhile\b|\bthough\b|\bwhereas\b", text.lower())
+        kept_hits = []
+        for clause in clauses:
+            clause = norm(clause)
+            qualifiers = {m.group() for m in ruled_out.finditer(clause)}
+            for choice in st.choices:
+                if any(norm(p) in clause and qualifiers <= {m.group() for m in ruled_out.finditer(norm(p))}
+                       for p in [*choice.say, choice.label] if p.strip()):
+                    if choice.id not in kept_hits:
+                        kept_hits.append(choice.id)
+        if len(kept_hits) == 1:
+            return kept_hits[0]
+        if hits and not kept_hits:
+            return None
+        if len(kept_hits) > 1 or (len(hits) > 1):
             # naming several things together is the "both / all of them" answer, when the question offers one
-            combined = [c.id for c in st.choices if c.id in hits and re.search(r"\b(both|all)\b", " ".join(c.say + [c.label]).lower())
-                        and re.search(r"\b(both|all)\b", t)]
-            if len(combined) == 1:
+            combined = [c.id for c in st.choices if re.search(r"\b(both|all)\b", " ".join(c.say + [c.label]).lower())]
+            if len(combined) == 1 and re.search(r"\b(both|all|too|also|as well)\b", t):
                 return combined[0]
-        ordinal = pick_ordinal(text, len(st.choices)) if not hits and len(t.split()) <= 4 else None  # "the second one"
+            return None
+        ordinal = pick_ordinal(text, len(st.choices)) if len(t.split()) <= 4 else None  # "the second one"
         return st.choices[ordinal].id if ordinal is not None else None
+
+    def revise_answer(self, text: str) -> Optional[dict]:
+        """The person corrects an answer they gave at an earlier question ("actually the external one is green too").
+
+        Returns {"step", "old", "new"} for the most recent answered question this utterance re-answers, else None.
+        Only on an explicit revision cue; a plain answer to the current question is handled by match_choice."""
+        import re
+
+        from .assistant.adaptive import revises
+
+        if self.done or not revises(text):
+            return None
+        for obs in reversed(self.observations):
+            st = next((x for x in self.card.steps if x.id == obs["step"]), None)
+            if st is None or st.kind != "question":
+                continue
+            new = self._match(st, text, allow_uncertain=True)
+            if re.search(r"\b(too|also|as well)\b", text.lower()):
+                # "the external one is green too": in addition to what they said before = the both/all answer
+                both = [c.id for c in st.choices if re.search(r"\b(both|all)\b", " ".join(c.say + [c.label]).lower())]
+                if len(both) == 1 and new is not None and new != both[0]:
+                    new = both[0]
+            if new is not None and new != obs["choice"]:
+                return {"step": st.id, "old": obs["choice"], "new": new}
+        return None
+
+    def reopen(self, step_id: str, highlight: Optional[str] = None, *, reason: str = "") -> None:
+        """Go back to an earlier question to ask it again (the answer changed but was not certain). Earlier progress is kept."""
+        st = next(x for x in self.card.steps if x.id == step_id)
+        self._return_to_question(step_id)
+        self.observations = [o for o in self.observations if o["step"] != step_id]
+        if step_id in self.confirmed:
+            self.confirmed.remove(step_id)
+        if highlight is not None:
+            self.choice_idx = next((i for i, c in enumerate(st.choices) if c.id == highlight), 0)
+        self.answer_data = None
+        self._event(f"step {step_id}: asked again ({reason or 'the person revised their answer'})", "DETERMINISTIC", {"step": step_id})
+        self._save()
+        self._refresh(immediate=True)
+
+    def reanswer(self, step_id: str, choice_id: str) -> None:
+        """Replace an earlier answer and follow the new route from that question (steps confirmed on the old route stay logged)."""
+        self._return_to_question(step_id)
+        self.choose(choice_id, via="revised answer")
+
+    def _return_to_question(self, step_id: str) -> None:
+        index = self._index_of(step_id)
+        downstream = set()
+        reported = [i for i, o in enumerate(self.observations) if o["step"] == step_id]
+        if reported:
+            downstream.update(o["step"] for o in self.observations[reported[-1] + 1:])
+        if index in self.path:
+            cut = max(i for i, value in enumerate(self.path) if value == index)
+            downstream.update(self.card.steps[i].id for i in self.path[cut + 1:])
+            downstream.add(self.step.id)
+            self.path = self.path[:cut]
+        questions = {s.id for s in self.card.steps if s.kind == "question"}
+        invalid = (downstream & questions) - {step_id}
+        self.observations = [o for o in self.observations if o["step"] not in invalid]
+        self.confirmed = [sid for sid in self.confirmed if sid not in invalid]
+        self.index = index
+        self.choice_idx = 0
+        self.view_idx = None
+        self.answer_data = None
+        self._flashes = []
+        self._reset_hold()
 
     def _finish(self, now: int) -> None:
         self.done = True

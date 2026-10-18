@@ -127,6 +127,14 @@ class ProductDiscoveryService:
     def requires_identification(self, card):
         return card.card_id not in self.cards and any(src.wants(card.title + " " + " ".join(card.aliases)) for src in self.sources.values())
 
+    def names_other_product(self, sid, text):
+        """While a product guide is open: does the person name a different product line than the selected one?"""
+        s = self.state(sid)
+        if s.selected is None or s.source not in self.sources:
+            return False
+        attrs = a.extract(text, self.sources[s.source].known_names())
+        return bool(attrs.name_hint and a.norm(attrs.name_hint) != a.norm(s.selected.name))
+
     def correct(self, sid, text):
         s = self.state(sid)
         src = s.source
@@ -338,8 +346,11 @@ class ProductDiscoveryService:
 
     def _rank(self, sid, skip=()):
         s = self.states[sid]
+        ruled_out = {x.lower() for x in s.attrs.excluded_names}
         s.candidates = a.rank(
-            [r for r in self.pools.get(sid, []) if r.article not in skip], s.attrs
+            [r for r in self.pools.get(sid, [])
+             if r.article not in skip and r.name.lower() not in ruled_out
+             and (not s.attrs.name_hint or a.norm(r.name) == a.norm(s.attrs.name_hint))], s.attrs
         )
         for c in s.candidates:
             c.origin = self._origin(c.record)

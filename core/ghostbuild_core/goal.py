@@ -45,6 +45,31 @@ def _has_phrase(words: list[str], phrase: list[str]) -> bool:
     return n > 0 and any(words[i : i + n] == phrase for i in range(len(words) - n + 1))
 
 
+_MODEL = re.compile(r"(?<![\w.+-])(?=[a-z0-9.+-]*\d)(?=[a-z0-9.+-]*[a-z])[a-z0-9][a-z0-9.+-]{1,15}(?![\w.+-])", re.I)
+_UNITS = re.compile(r"^\d+(?:mm|cm|m|in|v|w|mah|gb|tb|hz|s|min|h|x|nd|st|rd|th|k)$", re.I)
+
+
+def model_tokens(text: str) -> set[str]:
+    """Affirmed identifiers containing letters and digits; exclude units and negated models."""
+    out = set()
+    for m in _MODEL.finditer(text or ""):
+        if re.search(r"\b(?:not|isn['’]?t|isnt|instead of|rather than)\s+(?:a |an |the |my )?$", text[:m.start()], re.I):
+            continue
+        t = m.group(0).strip(".-").lower()
+        if len(t) >= 2 and not _UNITS.match(t):
+            out.add(t)
+    return out
+
+
+def model_conflict(text: str, card: Card) -> bool:
+    """The person names a model and this model-specific card is for a different one (it names models, none of them theirs)."""
+    said = model_tokens(text)
+    if not said:
+        return False
+    theirs = model_tokens(" ".join([card.title, *card.aliases]))
+    return bool(theirs) and not (said & theirs)
+
+
 def _score(card: Card, text: str) -> int:
     """Deterministic: +3 per alias whose (stemmed) words appear in order in the text, +1 per shared title token when
     at least two are shared (or the title has a single content token). No LLM, no network."""
@@ -81,7 +106,7 @@ def candidates(req: GoalRequest, cards: list[Card]) -> list[Card]:
     text = (req.text or "").strip()
     if not text:
         return sorted(pool, key=key)
-    scored = [(c, _score(c, text)) for c in pool]
+    scored = [(c, 0 if model_conflict(text, c) else _score(c, text)) for c in pool]
     best = max((s for _, s in scored), default=0)
     if best <= 0:
         return []
