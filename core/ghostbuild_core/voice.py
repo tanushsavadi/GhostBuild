@@ -413,6 +413,10 @@ class VoiceService:
                 elif kind == "abort":
                     owned = self._active_socket is owner
                     await drop()
+                    if ctl.get("reason") == "no_speech":  # a hands-free listen nobody spoke into: leave no error on the glasses
+                        if owned and self.state in ("listening", "thinking"):
+                            self._clear()
+                        continue
                     if owned and self.state in ("listening", "thinking"):
                         self.unavailable("capture cancelled")
         except WebSocketDisconnect:

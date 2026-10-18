@@ -228,6 +228,70 @@ describe('voice.ts hold-to-ask', () => {
   })
 })
 
+function loud(ms: number, amp = 3000): Uint8Array {
+  const n = (16000 * ms) / 1000
+  const b = new Uint8Array(n * 2)
+  const dv = new DataView(b.buffer)
+  for (let i = 0; i < n; i++) dv.setInt16(i * 2, i % 2 === 0 ? amp : -amp, true)
+  return b
+}
+
+describe('hands-free listen (head shake)', () => {
+  it('records until the person stops talking, then ends by itself like a release', async () => {
+    const r = rig()
+    r.v.startHandsFree?.()
+    await r.tick()
+    r.ws().open()
+    expect(r.log).toEqual(['hold_start', 'mic:open:glasses'])
+    let t = 0
+    const feed = (ms: number, amp: number) => { for (let k = 0; k < ms / 100; k++) { t += 100; r.setNow(t); r.v.onAudio(loud(100, amp)) } }
+    feed(400, 60)   // room noise: sets the floor
+    feed(1500, 3000) // speech
+    expect(r.v.busy).toBe(true)
+    feed(1300, 60)  // silence
+    await r.tick()
+    expect(r.log).toEqual(['hold_start', 'mic:open:glasses', 'mic:close', 'hold_end'])
+    expect(r.ws().ctl().map((c) => c.type)).toEqual(['start', 'end'])
+    expectMicClosed(r)
+  })
+
+  it('aborts quietly (no_speech) when nobody says anything, so a false shake leaves no trace', async () => {
+    const r = rig()
+    r.v.startHandsFree?.()
+    await r.tick()
+    r.ws().open()
+    let t = 0
+    for (let k = 0; k < 60; k++) { t += 100; r.setNow(t); r.v.onAudio(loud(100, 60)) }
+    await r.tick()
+    const ctl = r.ws().ctl()
+    expect(ctl.at(-1)).toMatchObject({ type: 'abort', reason: 'no_speech' })
+    expectMicClosed(r)
+    expect(r.v.busy).toBe(false)
+  })
+
+  it('a normal long press is unaffected by the endpointer (it never auto-ends)', async () => {
+    const r = rig()
+    r.v.start()
+    await r.tick()
+    r.ws().open()
+    let t = 0
+    for (let k = 0; k < 80; k++) { t += 100; r.setNow(t); r.v.onAudio(loud(100, 60)) } // 8 s of near-silence while held
+    expect(r.v.busy).toBe(true)
+    r.v.stop()
+    await r.tick()
+    expect(r.ws().ctl().map((c) => c.type)).toEqual(['start', 'end'])
+  })
+
+  it('is ignored while another listen is in flight', async () => {
+    const r = rig()
+    r.v.start()
+    await r.tick()
+    r.v.startHandsFree?.()
+    await r.tick()
+    expect(FakeWs.all.length).toBe(1)
+  })
+})
+
 describe('consent gate', () => {
   it('first hold: no mic, no hold_start, asks core to show HOLD TO TALK; a second hold on that screen stores consent and records', async () => {
     const r = rig({ consent: false })

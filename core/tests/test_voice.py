@@ -390,6 +390,22 @@ def test_plugin_abort_shows_fallback_immediately(mk):
     assert r.cue == ("ask", "VOICE UNAVAILABLE", "USE TOUCH")
 
 
+def test_a_hands_free_listen_nobody_spoke_into_leaves_no_error_on_the_glasses(mk):
+    """Head shake -> listen -> silence: the plugin aborts with reason no_speech. Unlike a failure it must not show VOICE UNAVAILABLE."""
+    r = mk(stt=FakeStt("x"))
+    r.to_task()
+    r.fault()
+    before = r.cue
+    r.hold("hold_start")
+    with r.client.websocket_connect("/ws/voice") as ws:
+        ws.send_json({"type": "start", "consent": True})
+        ws.send_json({"type": "abort", "reason": "no_speech"})
+    r.hold("hold_end")
+    r.advance(6000)  # the HUD throttles new cues; once past that gap the fault cue is back under the cleared overlay
+    assert r.cue != ("ask", "VOICE UNAVAILABLE", "USE TOUCH") and r.cue[0] != "ask"  # the listening overlay is gone, nothing replaced it
+    assert r.cue[:2] == before[:2]  # the same fault cue is back (its second line rotates), and no error replaced it
+
+
 def test_consent_gate_shows_screen_and_drops_audio(mk):
     stt = FakeStt("where is it")
     r = mk(stt=stt)

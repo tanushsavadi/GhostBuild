@@ -1,5 +1,6 @@
 import { AudioInputSource } from '@evenrealities/even_hub_sdk'
 import type { KeyValue } from './session'
+import { Endpointer } from './endpointer'
 import { log, warn } from './types'
 
 /**
@@ -27,6 +28,9 @@ export const CONSENT_WINDOW_MS = 8000
 export interface VoiceCapture {
   readonly enabled: boolean
   start(): void
+  /** Hands-free listen (a head shake): ends by itself on silence, or quietly if nobody speaks. */
+  startHandsFree?(): void
+  readonly busy?: boolean
   stop(): void
   onAudio(pcm: unknown): void
   abort(reason: string): void | Promise<void>
@@ -98,6 +102,7 @@ export class Voice implements VoiceCapture {
   private capTimer: ReturnType<typeof setTimeout> | null = null
   private wsCloseTimer: ReturnType<typeof setTimeout> | null = null
   private readonly now: () => number
+  private auto: Endpointer | null = null
 
   constructor(private readonly o: VoiceOptions) {
     this.now = o.now ?? (() => Date.now())
@@ -114,6 +119,13 @@ export class Voice implements VoiceCapture {
   // ------------------------------------------------------------------ gestures
   start(): void {
     if (this.phase !== 'idle') return
+    void this.begin()
+  }
+
+  /** Same lifecycle as a long press, but nobody holds: an Endpointer decides when the utterance is over. */
+  startHandsFree(): void {
+    if (this.phase !== 'idle') return
+    this.auto = new Endpointer()
     void this.begin()
   }
 
@@ -193,6 +205,11 @@ export class Voice implements VoiceCapture {
       this.sendBin(this.buf.slice(0, CHUNK_BYTES))
       this.buf = this.buf.slice(CHUNK_BYTES)
     }
+    if (this.auto && this.phase === 'recording') {
+      const d = this.auto.push(b, this.now())
+      if (d === 'end') void this.finish()
+      else if (d === 'no_speech') void this.abort('no_speech')
+    }
   }
 
   private flushTail(): void {
@@ -203,6 +220,7 @@ export class Voice implements VoiceCapture {
   private async finish(): Promise<void> {
     if (this.phase !== 'recording') return
     this.phase = 'closing'
+    this.auto = null
     const gen = this.gen
     this.clearTimers()
     await this.closeMic()
@@ -222,6 +240,7 @@ export class Voice implements VoiceCapture {
   async abort(reason: string): Promise<void> {
     if (this.phase === 'idle' && !this.holdSent && !this.micMaybeOpen && !this.ws) return
     warn(`voice: abort (${reason})`)
+    this.auto = null
     this.gen++
     this.phase = 'closing'
     this.clearTimers()

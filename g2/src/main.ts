@@ -5,6 +5,7 @@ import { GestureRouter } from './gestures'
 import { ImageLoader } from './image'
 import { Renderer } from './renderer'
 import { createVoice } from './voice'
+import { HeadShakeTrigger, detectorFromEnv } from './imu'
 import { registerBackgroundState } from './bgstate'
 import { K, adoptSession, loadIdentity, makeStorage } from './session'
 import { normalizeBackend, readFlags, resolveBackend, resolveCenterCols, resolveGlyphTier, resolveSurface } from './config'
@@ -98,27 +99,36 @@ const ok = await renderer.init(blankView())
 log(`page created: ${ok ? 'success' : 'FAILED'}`)
 
 const router = new GestureRouter()
+// Head shake (opt-in): shaking the head "no" starts a hands-free listen, ending on silence. Needs voice; never the only way in.
+const shake = flags.headShake
+  ? new HeadShakeTrigger(bridge, () => { if (!voice.busy) voice.startHandsFree?.() }, detectorFromEnv(env as unknown as Record<string, string | undefined>))
+  : null
+if (shake) void shake.start()
 let cleaned = false
 function cleanup(): void {
   if (cleaned) return
   cleaned = true
   unsubscribe()
+  void shake?.stop()
   voice.dispose()
   conn.stop()
   controller.dispose()
 }
 
 const unsubscribe = bridge.onEvenHubEvent((event) => {
+  if (shake?.onEvent(event as never)) return // IMU samples are never a gesture
   if (event.audioEvent) { voice.onAudio(event.audioEvent.audioPcm); return } // PCM is never a gesture
   const a = router.route(event)
   if (a.kind === 'lifecycle') {
     switch (a.event) {
       case 'foreground_enter':
+        void shake?.start()
         void renderer.forceRefresh()
         conn.reconnectNow() // re-hello with the stored session id
         break
       case 'foreground_exit':
         void voice.abort('foreground_exit') // never leave the mic open in the background
+        void shake?.stop() // nor the IMU stream
         if (sessionId) void kv.set(K.sessionId, sessionId)
         break
       default: // abnormal_exit | system_exit
