@@ -21,6 +21,11 @@ Updated Sun 2026-10-18 ~01:10 PDT by Claude Opus 5.5 (took over from Codex at it
 | `.ehpk` | BUILT, NOT INSTALLED | `g2/ghostbuild.ehpk` (no mic permission; LAN `172.22.171.236:8787`) |
 | Physical G2 | NOT RUN beyond Codex's report | operator reported (earlier session) LAN + QR + first frame + BUILD/FIX. Images, gestures, voice: awaiting operator |
 
+## First-run flow (changed 01:30 PDT on operator feedback)
+- No BUILD/FIX question. Glasses: welcome `WHAT DO YOU NEED?` -> first screen lists every startable task (`HOLD TO SPEAK OR PICK` when voice is on). Spoken or typed goals match across all tasks; build/fix is only a hint (core retries the other mode). Phone: one box, no toggle.
+- A fault-mode card (needs live Pi telemetry) is offered only while the Pi reports; fixes "STALE DATA / CHECK LINK" on a bench with no Pi (operator saw it after pressing the old FIX default). SIMULATOR VERIFIED + tests (core 507); physical re-test pending.
+- Dev-server QR sideload: Vite is run with `VITE_FLAG_VOICE=1`; whether the sideloaded app gets the microphone permission is UNVERIFIED (a missing permission degrades to `VOICE UNAVAILABLE / USE TOUCH`).
+
 ## Not done / blocked
 - Physical G2 image + gesture + reconnect test (operator). Voice on G2 needs a voice-build `.ehpk` (`VITE_FLAG_VOICE=1`, declares g2-microphone) and a real device test.
 - Human approval of the LED card (above). Hero hardware (Pi / breadboard / LED / 330 ohm) availability unconfirmed with the operator.
