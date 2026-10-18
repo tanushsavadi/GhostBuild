@@ -1,0 +1,42 @@
+name: Verify GhostBuild
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.11'
+          enable-cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            contracts/ts/package-lock.json
+            g2/package-lock.json
+      - name: Install locked dependencies
+        run: |
+          uv sync --frozen --all-groups
+          npm ci --prefix contracts/ts
+          npm ci --prefix g2
+      - name: Validate contracts, generic boundaries, secrets and tests
+        run: make test
+      - name: Build portable G2 package
+        working-directory: g2
+        run: npm run pack
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ghostbuild-g2
+          path: g2/ghostbuild.ehpk
+          if-no-files-found: error

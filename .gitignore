@@ -28,6 +28,7 @@ dist/
 # --- node / g2 / twin ---
 node_modules/
 *.ehpk
+g2/app.local.json
 .vite/
 *.tsbuildinfo
 

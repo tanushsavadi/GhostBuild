@@ -207,7 +207,13 @@
     }
     memo(tagEl, tp.join('  '), function () { tagEl.hidden = !tp.length; tagEl.textContent = tp.join('  '); });
     var note = document.querySelector('.area-mirror .gesture-note');
-    if (note) note.textContent = hud && hud.answer ? 'Swipe to read the answer · Press to return to your step · Double press exits G2' : 'Press for a picture · Swipe to explore · Double press exits G2';
+    if (note) {
+      var gestureNote = 'Press for a picture · Swipe up goes back · Double press exits G2';
+      if (hud && hud.answer) gestureNote = 'Swipe to read the answer · Press to return to your step · Double press exits G2';
+      else if (hud && hud.menu) gestureNote = 'Swipe to choose an answer · Press to select · Double press exits G2';
+      else if (hud && hud.step && hud.step.check === 'manual') gestureNote = 'Press for pictures · Swipe down confirms this step · Swipe up goes back';
+      note.textContent = gestureNote;
+    }
     memo(meta, key + f.ok, function () {
       clear(meta); if (!hud) return;
       meta.appendChild(h('span', { text: 'seq ' + hud.seq + ' · mode ' + hud.mode + (hud.cue_id ? ' · ' + hud.cue_id : '') + (hud.ttl_ms ? ' · clears in ' + sec(hud.ttl_ms) : '') }));
@@ -286,7 +292,7 @@
     if (shown) S.lastGuideView = shown;
     var selectedView = S.guideView || S.lastGuideView || (a && a.guide && a.guide.views[0].view);
     var mf = a && a.guide ? S.manifests[a.guide.id] : undefined;
-    var key = JSON.stringify([a && a.guide, a && a.active, a && a.stepNo, selectedView, S.cardErr, mf]);
+    var key = JSON.stringify([S.card && S.card.card_id, a && a.step, a && a.guide, a && a.active, a && a.stepNo, selectedView, S.cardErr, mf]);
     if (a && a.guide && S.manifests[a.guide.id] === undefined) loadManifest(a.guide.id);
     memo(box, key, function () {
       clear(box); clear(note);

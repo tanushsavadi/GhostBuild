@@ -1,6 +1,4 @@
-# GhostBuild developer commands (docs/15_SONNET_HANDOFF.md §6).
-# Targets for lanes that don't exist yet stop with "not yet: <path> missing (owner X)".
-# Owners: fill in your lane's command here in a small, separate commit (this file is a merge hotspot).
+# GhostBuild developer commands. Product scope: docs/PIVOT_GHOSTBUILD.md §0A.
 
 SHELL := /bin/bash
 export PYTHONPATH := $(CURDIR):$(CURDIR)/core:$(CURDIR)/pi
@@ -17,12 +15,12 @@ help:
 doctor:            ## is my environment working?
 	@scripts/doctor.sh
 
-setup:             ## python env (3.11, all groups) + node deps that exist
-	uv sync --all-groups
+setup:             ## locked Python 3.11 environment + contract/G2 Node dependencies
+	uv sync --frozen --all-groups
 	cd contracts/ts && npm ci
-	@for d in g2; do [ -f $$d/package-lock.json ] && (cd $$d && npm ci && npm rebuild @evenrealities/evenhub-simulator) || true; done
+	cd g2 && npm ci && npm rebuild @evenrealities/evenhub-simulator
 
-contracts:         ## THE 12:45 contract-lock check: export schema + TS, validate every example in Python and TS
+contracts:         ## export schema + TS, validate every example in Python and TS
 	$(PY) contracts/tools/lock_check.py
 	cd contracts/ts && npm run -s check
 
@@ -42,7 +40,9 @@ lint-generic:      ## no domain terms in core source or the contract source (05 
 test: contracts lint-generic check-secrets
 	@for t in contracts/tests core/tests pi/tests knowledge/tests assets/tests integrations/ikea/tests; do \
 	  [ -d $$t ] && { echo "== pytest $$t"; $(PY) -m pytest -q $$t || exit 1; } || true; done
-	@for d in g2; do [ -f $$d/package.json ] && { echo "== $$d"; (cd $$d && npx tsc --noEmit && npx vitest run --passWithNoTests) || exit 1; } || true; done
+	@echo "== phone companion"
+	node --test web/tests/*.test.mjs
+	cd g2 && npm run typecheck && npm test
 
 # --- services (Mac 1 unless noted) -----------------------------------------
 core:              ## core :8787 (live Pi observations)

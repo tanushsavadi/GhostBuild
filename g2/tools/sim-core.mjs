@@ -35,7 +35,7 @@ async function input(action) {
   if (!res.ok) throw new Error(`simulator input: ${res.status}`)
 }
 async function check(name, predicate) {
-  // The real engine intentionally ignores manual swipes during the 1500 ms accidental-input guard.
+  // Let the current frame settle before the next deliberate gesture.
   await wait(1800)
   const hud = await get('/hud')
   if (!predicate(hud)) throw new Error(`${name}: ${JSON.stringify(hud)}`)
@@ -62,9 +62,9 @@ try {
   await check('02-manual-confirm-next', (h) => h.step?.index === 1)
   await input('click')
   await check('03-source-image-where', (h) => h.mode === 'visual' && h.image?.index === 0)
-  await input('down')
+  await input('click')
   await check('04-source-image-how', (h) => h.mode === 'visual' && h.image?.index === 1)
-  await input('down')
+  await input('click')
   await check('05-source-image-correct', (h) => h.mode === 'visual' && h.image?.index === 2)
   await input('click')
   await check('06-return-keeps-step', (h) => h.mode === 'step' && h.step?.index === 1)
