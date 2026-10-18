@@ -26,6 +26,8 @@ ROOT = Path(__file__).resolve().parent.parent
 CACHE = ROOT / "tmp" / "asllex_sign_props.json"
 OUT = ROOT / "g2" / "src" / "asllex.json"
 HOWTO = ROOT / "tools" / "howto.json"
+TOP = ROOT / "g2" / "src" / "top.json"
+TOP_N = 100
 
 HANDSHAPE = {
     "1": "Index finger up", "3": "Thumb, index, middle out", "4": "4 fingers up, thumb in",
@@ -158,6 +160,17 @@ def main() -> None:
 
     OUT.write_text(json.dumps(out, separators=(",", ":")), encoding="utf-8")
     print(f"wrote {len(out)} words to {OUT.relative_to(ROOT)} ({OUT.stat().st_size // 1024} KB)")
+
+    # The most-used signs (ASL-LEX frequency rating), one word per sign, for review mode.
+    word_for = {}
+    for word, e in best.items():
+        base = re.sub(r"_\d+$", "", e["EntryID"]).replace("_", " ").lower()
+        if e["EntryID"] not in word_for or word == base:
+            word_for[e["EntryID"]] = word
+    ranked = sorted(word_for, key=lambda eid: -freq(by_id[eid]))
+    top = [word_for[eid] for eid in ranked if word_for[eid].replace(" ", "").isalpha()][:TOP_N]
+    TOP.write_text(json.dumps(top, indent=0), encoding="utf-8")
+    print(f"wrote the {len(top)} most-used signs to {TOP.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":

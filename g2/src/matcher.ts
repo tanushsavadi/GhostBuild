@@ -2,6 +2,11 @@ import deck from './deck.json'
 import asllex from './asllex.json'
 import wiktionary from './wiktionary.json'
 import phraseBook from './phrases.json'
+import checkedFile from './checked.json'
+
+// Words a person marked right after comparing with the reference video
+// (exported from /review.html). Their cards say REF-CHECKED.
+const checked = checkedFile.checked as Record<string, string>
 
 // Turns an English phrase into the cards to sign, in order. Words in deck.json
 // (hand-written lines) win; then every ASL-LEX 2.0 sign from asllex.json
@@ -146,15 +151,22 @@ function phraseCards(p: Phrase): Card[] {
 
 function signCard(sign: Sign): Card {
   const d = descriptions[sign.gloss]
+  const refChecked = sign.status === 'REF-CHECKED' || sign.words.some(w => checked[w] === 'ok')
   return {
     detail: d ? { text: d.t, url: d.u } : undefined,
     kind: 'sign',
     title: sign.gloss,
     how: [sign.how[0], sign.how[1]],
     handshape: sign.handshape || null,
-    label: sign.status === 'REF-CHECKED' ? 'REF-CHECKED' : sign.status === 'AUTO' ? 'AUTO · UNCHECKED' : 'UNCHECKED',
+    label: refChecked ? 'REF-CHECKED' : sign.status === 'AUTO' ? 'AUTO · UNCHECKED' : 'UNCHECKED',
     video: sign.video,
   }
+}
+
+/** The card for one vocabulary word as-is (review mode), or undefined if it has no sign. */
+export function cardForWord(word: string): Card | undefined {
+  const sign = byWord.get(word)
+  return sign ? signCard(sign) : undefined
 }
 
 function spell(word: string): Card[] {

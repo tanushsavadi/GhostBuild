@@ -1,0 +1,4 @@
+{
+  "_about": "Signs a person compared with the reference video, exported from /review.html. \"ok\" makes the card REF-CHECKED; anything else is a note about what is wrong.",
+  "checked": {}
+}

@@ -8,7 +8,8 @@ import {
   CreateStartUpPageContainer,
   OsEventTypeList,
 } from '@evenrealities/even_hub_sdk'
-import { cardsFor, CREDIT, type Card } from './matcher'
+import { cardsFor, cardForWord, CREDIT, type Card } from './matcher'
+import top from './top.json'
 
 // Sign coach: a phrase becomes a sequence of cards (handshape image + how-to
 // lines). Tap = next card, double-tap = exit. The phrase comes from the phone
@@ -67,7 +68,7 @@ function showOnPhone(card: Card | undefined, n: number, total: number): void {
   )
   if (card.detail) {
     const credit = el('small')
-    credit.append('Description: ', link(card.detail.url, 'Wiktionary'), ', CC BY-SA 4.0')
+    credit.append('Adapted from ', link(card.detail.url, 'Wiktionary'), ', CC BY-SA 4.0')
     parts.push(el('p', card.detail.text), credit)
   }
   if (card.video) parts.push(el('br'), link(card.video, 'Reference video (ASL-LEX)'))
@@ -232,8 +233,17 @@ function back(): void {
 }
 
 // ?phrase=... starts a phrase on load (simulator checks and demo links).
-const initial = new URLSearchParams(location.search).get('phrase')
-if (initial) start(initial)
+// ?review=top steps through the 100 most-used signs, one card each.
+const params = new URLSearchParams(location.search)
+const initial = params.get('phrase')
+if (params.get('review') === 'top') {
+  cards = (top as string[]).flatMap(word => {
+    const card = cardForWord(word)
+    return card ? [card] : []
+  })
+  version++
+  void render()
+} else if (initial) start(initial)
 else void render()
 
 // A tap arrives with eventType undefined (CLICK = 0 is omitted on the wire), so

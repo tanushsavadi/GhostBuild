@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign review</title>
+    <style>
+      html, body { margin: 0; background: #1b1b1b; color: #e5e5e5; font: 15px/1.45 -apple-system, BlinkMacSystemFont, system-ui, sans-serif; }
+      main { max-width: 860px; margin: 0 auto; padding: 16px; }
+      h1 { font-size: 20px; margin: 0 0 4px; }
+      .bar { position: sticky; top: 0; background: #1b1b1b; padding: 8px 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; border-bottom: 1px solid #333; z-index: 1; }
+      button, select { font: inherit; padding: 6px 12px; border-radius: 8px; border: 1px solid #555; background: #2c2c2c; color: inherit; cursor: pointer; }
+      .sign { display: grid; grid-template-columns: 112px 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px solid #2c2c2c; }
+      .sign img { width: 112px; height: 112px; background: #000; border-radius: 8px; filter: sepia(1) hue-rotate(60deg) saturate(4); }
+      .sign h2 { font-size: 17px; margin: 0; }
+      .rank { color: #888; font-weight: normal; }
+      .lines { margin: 4px 0; }
+      .label { font-size: 12px; color: #999; }
+      details { margin: 4px 0; color: #ccc; }
+      a { color: #8fd18f; }
+      .verdict { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+      .verdict input { flex: 1; min-width: 160px; font: inherit; padding: 6px; border-radius: 8px; border: 1px solid #555; background: #111; color: inherit; }
+      .ok button.right, .wrong button.wrong { border-color: transparent; }
+      .ok button.right { background: #2f6f3a; }
+      .wrong button.wrong { background: #7a2e2e; }
+      textarea { width: 100%; height: 120px; font: 12px monospace; background: #111; color: inherit; border: 1px solid #555; border-radius: 8px; }
+      @media (max-width: 520px) { .sign { grid-template-columns: 80px 1fr; } .sign img { width: 80px; height: 80px; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Sign review</h1>
+      <p>For each sign: open the reference video, compare it with the card, and mark it. Marks are saved in this browser.
+        When done, press <b>Export</b> and give the result to whoever updates <code>g2/src/checked.json</code>.</p>
+      <div class="bar">
+        <select id="list">
+          <option value="top">100 most-used signs</option>
+          <option value="phrases">Signs in the sentence list</option>
+        </select>
+        <select id="filter">
+          <option value="all">All</option>
+          <option value="todo">Not marked yet</option>
+          <option value="wrong">Marked wrong</option>
+        </select>
+        <span id="count"></span>
+        <button id="export">Export</button>
+      </div>
+      <textarea id="out" hidden readonly></textarea>
+      <div id="signs"></div>
+      <p id="credit" class="label"></p>
+    </main>
+    <script type="module" src="/src/review.ts"></script>
+  </body>
+</html>

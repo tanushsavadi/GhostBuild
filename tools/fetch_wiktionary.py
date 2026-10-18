@@ -122,6 +122,38 @@ def plain(wikitext: str) -> str:
     return t
 
 
+# Wiktionary's wording is precise but technical. These rewrites make it plain
+# for a beginner; the result is an adaptation and stays CC BY-SA 4.0.
+SIMPLER = [
+    (r"\bnondominant\b", "other"),
+    (r"\bdominant\b", "main"),
+    (r'Posture the (main|other) hand in the (bent variation of the )?"([^"]+)" handshape',
+     lambda m: f'{m.group(1).capitalize()} hand: {"bent " if m.group(2) else ""}"{m.group(3)}" shape'),
+    (r'Posture both hands in the "([^"]+)" handshape', r'Both hands: "\1" shape'),
+    (r"\bPosture\b", "Put"),
+    (r"about half (?:an )?arm's length in front of", "in front of"),
+    (r"Move (?:the|both) (?:main |other )?hands? to the following posture\.", "Then move to:"),
+    (r" to the following posture", " to:"),
+    (r"Hold (?:the|both) (?:main |other )?hands? (?:still )?briefly(?: in this posture)?\.", "Hold briefly."),
+    (r"\bextended (finger\(s\)|fingers?)", r"\1"),
+    (r"radial \(thumb\) side|radial side", "thumb side"),
+    (r"ulnar \(pinky\) side|ulnar side", "pinky side"),
+    (r"\bsternum\b", "middle of the chest"),
+    (r"\btrunk\b", "body"),
+    (r"palms? facing back\b", lambda m: m.group(0).replace("back", "you")),
+    (r"palms? facing forward\b", lambda m: m.group(0).replace("forward", "out")),
+    (r"pointing back\b", "pointing toward you"),
+    (r"\binterrogatively\b", "as a question"),
+    (r"\bmain hand's\b", "main hand's"),
+]
+
+
+def simplify(text: str) -> str:
+    for pattern, repl in SIMPLER:
+        text = re.sub(pattern, repl, text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
 def main() -> None:
     CACHE.mkdir(parents=True, exist_ok=True)
     pages = sources()
@@ -134,6 +166,7 @@ def main() -> None:
         text = plain(expanded)
         if len(text) < 20 or "]]" in text:  # empty, or a cross-reference that did not render
             continue
+        text = simplify(text)
         url = "https://en.wiktionary.org/wiki/" + urllib.parse.quote(title.replace(" ", "_"))
         for gloss in re.findall(r"gloss=([A-Z0-9][A-Z0-9\-' ]*)", pages[title]):
             out.setdefault(gloss.strip(), {"t": text, "u": url})

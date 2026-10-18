@@ -86,6 +86,19 @@ Test it by opening `http://<laptop-ip>:5173` in the phone's browser first.
 | `/?phrase=How%20are%20you` | Starts that sentence on load (demos, testing) |
 | `/?style=thin` | Handshape drawing style: `bold` (default), `thin`, `bold96` |
 | `/probe.html` | Handshape legibility test: shows each drawing in 3 styles and the image send time |
+| `/review.html` | Review page for the 100 most-used signs (in a browser) |
+| `/?review=top` | Step through the 100 most-used signs on the glasses |
+
+## Checking the signs
+
+Nobody has checked the cards against real signing yet. To check the most-used ones:
+
+1. Open `http://localhost:5173/review.html` in a browser (or the laptop's IP on a phone). It lists the 100 most-used signs (ASL-LEX frequency ratings), or switch the list to the signs used in the sentence list.
+2. For each sign: open **▶ Reference video**, compare it with the picture and the two lines, and press **✓ Right** or **✗ Wrong** (with a note on what's wrong). Marks are saved in that browser; the filter shows what's left.
+3. Press **Export** and paste the result into `g2/src/checked.json`. Signs marked right then show **REF-CHECKED** on the glasses. Fix the wrong ones in `tools/howto.json` and run `uv run tools/build_deck.py`.
+4. To see how the cards look on the lens, open `/?review=top` on the glasses and tap through.
+
+Common problem to look for: the full description (from Wiktionary) sometimes describes a different variant of the sign than the picture and the two lines (e.g. EAT one-handed vs two-handed).
 
 ---
 
@@ -121,7 +134,7 @@ Everything runs on the phone; no server and no internet are needed at demo time.
 | Which sign a word uses; handshape, location and movement coding; reference videos (linked, not copied) | [ASL-LEX 2.0](https://asl-lex.org) | CC BY-NC 4.0 | `uv run tools/build_deck.py` → `g2/src/asllex.json` |
 | Handshape drawings (58) | ASL-LEX visualization, served by aslcdi.website | CC BY-NC 4.0 | `uv run tools/build_handshapes.py --all` → `g2/public/handshapes/` |
 | Letters M and N drawings | wpclipart.com via Wikimedia Commons | Public domain | same script |
-| Full step-by-step descriptions (swipe down) | [Wiktionary](https://en.wiktionary.org/wiki/Category:American_Sign_Language_lemmas) ASL entries | CC BY-SA 4.0 | `uv run tools/fetch_wiktionary.py` → `g2/src/wiktionary.json` |
+| Full step-by-step descriptions (swipe down), rewritten in plain words | [Wiktionary](https://en.wiktionary.org/wiki/Category:American_Sign_Language_lemmas) ASL entries | CC BY-SA 4.0 | `uv run tools/fetch_wiktionary.py` → `g2/src/wiktionary.json` |
 | Short two-line instructions for ~100 common signs; letter tips; sentence orders and face cues | Written by AI (Claude) in this project, from ASL-LEX's coding | This repo | `tools/howto.json`, `g2/src/deck.json`, `g2/src/phrases.json` |
 | Two-line instructions for the other ~2,200 signs | Generated from ASL-LEX coding by a template | (derived from ASL-LEX) | `tools/build_deck.py` |
 
@@ -165,6 +178,9 @@ g2/                     Even G2 plugin (Vite + TypeScript, SDK 0.0.16)
   src/wiktionary.json   generated: full sign descriptions
   public/handshapes/    generated: 4-bit 144x144 handshape PNGs
   probe.html, src/probe.ts   handshape legibility test
+  review.html, src/review.ts review page for the most-used signs
+  src/top.json          generated: the 100 most-used signs
+  src/checked.json      signs a person marked right (REF-CHECKED)
 tools/                  data builders (run with uv)
 docs/SIGN_COACH_PLAN.md plan, steps and decisions
 CLAUDE.md               rules for AI coding agents on this branch
