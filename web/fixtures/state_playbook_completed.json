@@ -1,0 +1,91 @@
+{
+  "v": 2,
+  "session": {
+    "id": "s-7",
+    "phase": "task",
+    "goal": "build",
+    "card_id": "flatpack_shelf",
+    "welcome_shown": true
+  },
+  "engine": "PLAYBOOK",
+  "card_id": "flatpack_shelf",
+  "test": null,
+  "step_id": "back",
+  "check": null,
+  "help_view": null,
+  "source": null,
+  "health": {
+    "ok": true,
+    "uptime_s": 42.0,
+    "pi_link": "down",
+    "pi_last_seq": null,
+    "pi_age_ms": null,
+    "source": null,
+    "camera": "unknown",
+    "g2_clients": 1,
+    "voice": "off"
+  },
+  "hud": {
+    "type": "hud",
+    "v": 2,
+    "seq": 40,
+    "mode": "step",
+    "cue": {
+      "line1": "✓ DONE (YOU CONFIRMED)",
+      "line2": ""
+    },
+    "image": null,
+    "menu": null,
+    "step": {
+      "index": 3,
+      "count": 4,
+      "step_id": "back",
+      "check": "manual",
+      "confirmed": true
+    },
+    "cue_id": null,
+    "ttl_ms": 3000,
+    "source": "pi_live",
+    "session_id": null,
+    "stale": false
+  },
+  "playbook": {
+    "card_id": "flatpack_shelf",
+    "step_index": 3,
+    "step_count": 4,
+    "step_id": "back",
+    "confirmed": [
+      "frame",
+      "cams",
+      "shelf",
+      "back"
+    ],
+    "verified": []
+  },
+  "events": [
+    {
+      "at": 1792283060000,
+      "text": "step frame confirmed by wearer",
+      "label": "HUMAN CONFIRMED",
+      "evidence": {}
+    },
+    {
+      "at": 1792283070000,
+      "text": "step cams confirmed by wearer",
+      "label": "HUMAN CONFIRMED",
+      "evidence": {}
+    },
+    {
+      "at": 1792283080000,
+      "text": "step shelf confirmed by wearer",
+      "label": "HUMAN CONFIRMED",
+      "evidence": {}
+    },
+    {
+      "at": 1792283090000,
+      "text": "step back confirmed by wearer",
+      "label": "HUMAN CONFIRMED",
+      "evidence": {}
+    }
+  ]
+}

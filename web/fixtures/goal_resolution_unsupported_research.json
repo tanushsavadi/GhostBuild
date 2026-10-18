@@ -1,0 +1,19 @@
+{
+  "v": 2,
+  "session_id": "s-9",
+  "status": "unsupported",
+  "mode": "build",
+  "card_id": null,
+  "task_title": null,
+  "cue": {
+    "line1": "NOT SUPPORTED YET",
+    "line2": "SEE PHONE"
+  },
+  "detail": "GhostBuild has no reviewed playbook for this request. It was saved for asynchronous research; nothing is available for it now.",
+  "alternatives": [
+    "Assemble a flat-pack shelf",
+    "Light an LED on a breadboard",
+    "Pi camera view"
+  ],
+  "research_queued": true
+}
