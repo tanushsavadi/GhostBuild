@@ -381,7 +381,7 @@
       var by = {}; (c.sources || []).forEach(function (x) { by[x.id] = x; });
       cur.appendChild(h('h3', { text: 'Step ' + (idx + 1) + ': ' + stp.title }));
       cur.appendChild(h('div', { class: 'cue' }, stp.cue.line1, stp.cue.line2 ? h('br') : null, stp.cue.line2 || null));
-      cur.appendChild(h('div', { class: 'meta', text: 'Text on the glasses for this step. ' + L.stepRule(stp) + '.' }));
+      cur.appendChild(h('div', { class: 'meta', text: 'Completion: ' + L.stepRule(stp) + '.' }));
       cur.appendChild(h('p', { class: 'detail', text: stp.detail || 'The card has no longer explanation for this step.' }));
       (stp.warnings || []).forEach(function (w) { cur.appendChild(h('div', { class: 'warn' }, h('b', { text: 'WARNING ' }), w)); });
       var wy = h('dl', { class: 'kv wy' });
