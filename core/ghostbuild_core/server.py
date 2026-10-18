@@ -5,6 +5,7 @@
   GET /procedures, /procedures/{id}, /procedures/schema, /jigs
   POST /procedures/validate, /agent/webhook, /procedures/{id}/approve, /session/load, /input
   POST /compile (GB_CREAO=1)   POST /sim/jig (--simulate-jig only)   GET /review
+  POST /ptt {phase: start|cancel}, POST /audio (raw 16 kHz s16le mono PCM)   hold-to-talk (GB_VOICE)
 """
 
 from __future__ import annotations
@@ -26,6 +27,7 @@ from pydantic import ValidationError
 from contracts.models import AgentDelivery, G2Input, JigObservation, JigStatus, Procedure, State, ValidateResult
 
 from . import store as store_mod
+from . import stt
 from .engine import Engine
 from .hud import Hud
 
@@ -36,6 +38,11 @@ BUILD_REQUEST = re.compile(r"^(?:teach me(?: how)? to|i want to (?:build|make)|h
 
 def flag(name: str) -> bool:
     return os.environ.get(name, "0") == "1"
+
+
+def voice_on() -> bool:
+    """Hold-to-talk: on by default once a speech-to-text key is configured; GB_VOICE=0 turns it off."""
+    return os.environ.get("GB_VOICE", "1") == "1" and stt.available()
 
 
 @dataclass
@@ -199,7 +206,7 @@ def create_app(cfg: Config | None = None) -> FastAPI:
         s = core.state()
         return {"ok": True, "engine": s.engine, "procedure": s.procedure_id, "jig": s.jig.link,
                 "source": core.hud.source, "g2_connected": len(core.g2), "mirrors": len(core.mirrors),
-                "creao": flag("GB_CREAO"), "voice_compile": flag("GB_VOICE_COMPILE")}
+                "creao": flag("GB_CREAO"), "voice": voice_on(), "voice_compile": flag("GB_VOICE_COMPILE")}
 
     @app.get("/state")
     def state() -> dict:
@@ -286,6 +293,44 @@ def create_app(cfg: Config | None = None) -> FastAPI:
         engine.unload()
         await core.push(force=True)
         return {"ok": True}
+
+    @app.post("/ptt")
+    async def ptt(body: dict) -> dict:
+        phase = body.get("phase")
+        if phase == "start":
+            engine.say("LISTENING..." if voice_on() else "VOICE OFF · TAP INSTEAD", seconds=15)
+        elif phase == "cancel":
+            engine.notice = None
+        core.log("ptt", {"phase": phase})
+        await core.push()
+        return {"ok": True, "voice": voice_on()}
+
+    @app.post("/audio")
+    async def audio(request: Request) -> dict:
+        pcm = await request.body()
+        if not voice_on():
+            engine.say("VOICE OFF · TAP INSTEAD")
+            await core.push()
+            return {"ok": False, "error": "voice disabled (set ELEVENLABS_API_KEY; GB_VOICE=0 turns it off)"}
+        engine.say("HEARING YOU...", seconds=15)
+        await core.push()
+        started = time.time()
+        try:
+            text = await asyncio.to_thread(stt.transcribe, pcm)
+        except Exception as exc:  # never crash the live loop on a provider error
+            core.log("stt", {"error": str(exc)[:300], "bytes": len(pcm)})
+            engine.say("VOICE FAILED · TAP INSTEAD")
+            await core.push()
+            return {"ok": False, "error": str(exc)[:300]}
+        engine.notice = None
+        core.log("stt", {"text": text, "bytes": len(pcm), "seconds": round(len(pcm) / stt.BYTES_PER_SECOND, 2),
+                         "latency_ms": int((time.time() - started) * 1000)})
+        if not text:
+            engine.say("DIDN'T CATCH THAT", seconds=3)
+            await core.push()
+            return {"ok": True, "text": ""}
+        await handle_input(G2Input(kind="voice", text=text))
+        return {"ok": True, "text": text}
 
     @app.post("/compile")
     async def compile_(body: dict) -> dict:

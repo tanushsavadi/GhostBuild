@@ -22,6 +22,21 @@ phone hotspot / firewall), not the plugin. If `/health` loads but the plugin can
 
 Before writing any SDK call, check it with the `everything-evenhub` skills (`sdk-reference`, `glasses-ui`, `handle-input`) and https://hub.evenrealities.com/docs.
 
+## Hold-to-talk (voice)
+
+**Hold the temple** to talk, **release** to send. The glasses mic opens while you hold, and the plugin buffers the
+16 kHz PCM. On release (+250 ms tail) it POSTs the clip to core `/audio`. Core transcribes it with ElevenLabs
+**server-side** and runs the text as a command (next / back / repeat / done / help) or a question answered from the
+procedure. The HUD shows `LISTENING...` while you hold. Holds under 400 ms are ignored, and a tap right after a hold
+is not counted as a tap.
+
+- Turn it on: put `ELEVENLABS_API_KEY=...` in the repo-root `.env` (gitignored) and restart core. `/health` then shows
+  `"voice": true`. `GB_VOICE=0` turns it off. Dev without a key: `GB_STT_FAKE="which leg is longer"`.
+- `app.json` declares `g2-microphone`. If the phone asks for mic access, allow it.
+- The phone screen shows what happened: `Listening`, `Sent 1.4 s of audio`, `Heard: "..."`, or the error.
+- Not yet verified on physical G2. Check that the first word isn't clipped and how long press-to-answer takes
+  (latency is logged per clip in `logs/session-*.jsonl`, kind `stt`).
+
 ## Versions
 
 | Package | Version |

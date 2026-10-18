@@ -1,12 +1,20 @@
-// GhostBuild G2 plugin: shows the HUD frames core sends and forwards taps. It decides nothing itself:
+// GhostBuild G2 plugin: shows the HUD frames core sends and forwards taps and hold-to-talk audio.
+// It decides nothing itself:
 // core/ghostbuild_core (the step engine + hud.py) chooses every line.
 //
 // SDK calls are the ones the official minimal template uses and that ran on our G2
-// (createStartUpPageContainer, textContainerUpgrade, onEvenHubEvent, shutDownPageContainer).
+// (createStartUpPageContainer, textContainerUpgrade, onEvenHubEvent, shutDownPageContainer), plus
+// audioControl / audioEvent / LONG_PRESS_* as typed in even_hub_sdk 0.0.16 and documented at
+// hub.evenrealities.com/docs/build/device-apis (PCM: 16 kHz, s16le, mono).
+//
+// Hold-to-talk: long-press the temple -> mic on (glasses), PCM buffered here; release -> 250 ms tail,
+// mic off, the clip is POSTed to core /audio, which transcribes it server-side (no keys in the plugin)
+// and runs it as a voice command or question.
 //
 // Core URL: `?core=http://<ip>:8787` on the dev-server URL, else the host serving this page on :8787
 // (with `npm run dev` + `evenhub qr` that is the laptop running core).
 import {
+  AudioInputSource,
   waitForEvenAppBridge,
   TextContainerProperty,
   CreateStartUpPageContainer,
@@ -114,6 +122,65 @@ function send(input: { kind: 'tap' | 'voice' | 'menu'; text?: string }) {
   else fetch(`${CORE}/input`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(msg) })
 }
 
+// --- hold-to-talk ---------------------------------------------------------------------------------------
+
+const TAIL_MS = 250 // keep the mic open briefly after release so the last word isn't clipped
+const MIN_HOLD_MS = 400 // shorter holds are accidental: cancel silently
+let recording = false
+let holdStart = 0
+let chunks: Uint8Array[] = []
+let releasedAt = 0
+const TAP_GUARD_MS = 600 // a click right after a long press is part of the press, not a tap
+
+async function startTalk() {
+  if (recording) return
+  recording = true
+  holdStart = Date.now()
+  chunks = []
+  fetch(`${CORE}/ptt`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{"phase":"start"}' })
+  const ok = await bridge.audioControl(true, AudioInputSource.Glasses)
+  status(ok ? 'Listening (glasses mic)' : 'Glasses mic failed to open (check the g2-microphone permission)')
+  if (!ok) recording = false
+}
+
+async function stopTalk() {
+  if (!recording) return
+  releasedAt = Date.now()
+  const held = releasedAt - holdStart
+  await new Promise((r) => setTimeout(r, TAIL_MS))
+  recording = false
+  await bridge.audioControl(false)
+  const total = chunks.reduce((n, c) => n + c.length, 0)
+  if (held < MIN_HOLD_MS || total === 0) {
+    status(`Voice cancelled (held ${held} ms, ${total} bytes)`)
+    fetch(`${CORE}/ptt`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{"phase":"cancel"}' })
+    return
+  }
+  const pcm = new Uint8Array(total)
+  let off = 0
+  for (const c of chunks) {
+    pcm.set(c, off)
+    off += c.length
+  }
+  chunks = []
+  status(`Sent ${(total / 32000).toFixed(1)} s of audio`)
+  try {
+    const r = await fetch(`${CORE}/audio`, { method: 'POST', headers: { 'Content-Type': 'application/octet-stream' }, body: pcm })
+    const res = await r.json()
+    status(res.ok ? `Heard: "${res.text}"` : `Voice error: ${res.error}`)
+  } catch {
+    status(`Cannot reach ${CORE}/audio`)
+  }
+}
+
+function pcmOf(raw: unknown): Uint8Array | null {
+  // The SDK types this as Uint8Array; over the bridge it may arrive as number[] or base64.
+  if (raw instanceof Uint8Array) return raw
+  if (Array.isArray(raw)) return Uint8Array.from(raw)
+  if (typeof raw === 'string') return Uint8Array.from(atob(raw), (ch) => ch.charCodeAt(0))
+  return null
+}
+
 // --- input (routing rules kept from the official template) ----------------------------------------------
 
 // CLICK_EVENT is 0 and protobuf omits zero values, so a tap arrives with eventType undefined.
@@ -124,6 +191,12 @@ function eventTypeOf(envelope?: { eventType?: OsEventTypeList }): OsEventTypeLis
 }
 
 const unsubscribe = bridge.onEvenHubEvent((event) => {
+  // Audio frames carry no sysEvent/textEvent, so they can never read as taps.
+  if (event.audioEvent) {
+    const pcm = pcmOf(event.audioEvent.audioPcm)
+    if (recording && pcm?.length) chunks.push(pcm)
+    return
+  }
   const sysType = eventTypeOf(event.sysEvent)
   const textType = eventTypeOf(event.textEvent)
 
@@ -132,12 +205,23 @@ const unsubscribe = bridge.onEvenHubEvent((event) => {
     bridge.shutDownPageContainer(1)
     return
   }
+  // Long press arrives on sysEvent (device-apis docs); textEvent is checked too, like taps.
+  if (sysType === OsEventTypeList.LONG_PRESS_EVENT || textType === OsEventTypeList.LONG_PRESS_EVENT) {
+    startTalk()
+    return
+  }
+  if (sysType === OsEventTypeList.LONG_PRESS_RELEASE_EVENT || textType === OsEventTypeList.LONG_PRESS_RELEASE_EVENT) {
+    stopTalk()
+    return
+  }
   // Tap = "done" on a GUIDED step / recheck on a VERIFIED step (core decides which).
   if (sysType === OsEventTypeList.CLICK_EVENT || textType === OsEventTypeList.CLICK_EVENT) {
+    if (recording || Date.now() - releasedAt < TAP_GUARD_MS) return
     send({ kind: 'tap' })
     return
   }
   if (sysType === OsEventTypeList.SYSTEM_EXIT_EVENT || sysType === OsEventTypeList.ABNORMAL_EXIT_EVENT) {
+    if (recording) bridge.audioControl(false)
     unsubscribe()
     ws?.close()
   }
