@@ -35,6 +35,12 @@ def make_card_dict(views=("where", "how", "correct")) -> dict:
     return d
 
 
+@pytest.fixture(autouse=True)
+def _no_ambient_brain(monkeypatch):
+    """A developer's ANTHROPIC_API_KEY must never turn tests into live model calls; tests that want a brain attach a FakeBrain."""
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+
+
 @pytest.fixture
 def card_dict() -> dict:
     return make_card_dict()

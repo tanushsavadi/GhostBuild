@@ -101,7 +101,8 @@ class LiveResearch:
         if cached_id is None and self.started >= self._max():
             return False
         try:
-            run_id = cached_id or self.runs.start(RunBody(session_id=req.session_id, goal=text[:300], intent=req.mode, fast=os.environ.get(FAST_ENV, "1") != "0"))
+            run_id = cached_id or self.runs.start(RunBody(session_id=req.session_id, goal=text[:300], intent=req.mode, fast=os.environ.get(FAST_ENV, "1") != "0",
+                                       audience=self.rt.assistant.audience_for(req.session_id)))
         except RunRejected as exc:
             log.info("live research not started: %s", exc.detail)
             return False

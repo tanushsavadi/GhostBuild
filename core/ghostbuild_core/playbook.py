@@ -74,6 +74,7 @@ class AskResult:
     label: EvidenceLabel
     step_id: str
     card_id: str
+    pending: bool = False  # an assistant answer is on its way (shown on the glasses and the phone when it arrives)
 
     def as_json(self) -> dict[str, Any]:
         """POST /ask response (matches the phone page): answer = the Cue shown on the glasses, or null when the playbook has no answer;
@@ -85,6 +86,7 @@ class AskResult:
             "label": self.label,
             "card_id": self.card_id,
             "step_id": self.step_id,
+            "pending": self.pending,
         }
 
 
@@ -603,6 +605,48 @@ class PlaybookEngine:
                     f"You have already tried {n} check{'s' if n != 1 else ''} from this guide. The card has no further suggestions for this problem.",
                     "DETERMINISTIC")
         return None, "", label
+
+    # ------------------------------------------------------------------ assistant hooks (router.py, assistant/service.py)
+    def specific_terms(self, text: str) -> set[str]:
+        """Content words of an utterance that name a subject (not 'where', 'how', 'this'...). Empty = a plain command."""
+        from .assistant.router import specific_terms
+
+        return specific_terms(text)
+
+    def checks_remaining(self) -> int:
+        """How many documented checks the next 'that did not work' could still offer (current step, then confirmed earlier steps)."""
+        earlier = [s for s in reversed(self.card.steps[: self.index]) if s.id in self.confirmed or s.id in self.verified]
+        last = self.last_obs
+        n = 0
+        for st in [self.step, *earlier]:
+            for i, chk in enumerate(st.troubleshoot):
+                if (st.id, i) in self._tried or chk.action.line1.startswith("CHECK SOURCE"):
+                    continue
+                if chk.when and not (last is not None and eval_all(chk.when, last)):
+                    continue
+                n += 1
+        return n
+
+    def tried_checks(self) -> list[str]:
+        out = []
+        for sid, i in self._tried:
+            st = next((x for x in self.card.steps if x.id == sid), None)
+            if st is not None and i < len(st.troubleshoot):
+                out.append(_cue_text(st.troubleshoot[i].action))
+        return out
+
+    def show_ask(self, cue: Cue, ttl_ms: int = ASK_TTL_MS, *, after_previous: bool = False) -> None:
+        """Show a short answer on the glasses for a while, then return to the step (the same overlay the deterministic answers use)."""
+        now = self.clock.now_ms()
+        if not after_previous:
+            self._flashes = [f for f in self._flashes if f.consumes_input]
+        start = max([now] + [f.end for f in self._flashes if f.kind == "ask"]) if after_previous else now
+        self._flashes.append(_Flash(Screen.ask(cue, ttl_ms=ttl_ms), start, start + ttl_ms, "ask"))
+        self._refresh(immediate=True)
+
+    def note_ai_answer(self, question: str, grounding: str) -> None:
+        """Evidence log: an assistant answer was shown. It is model-written (from the guide and/or general knowledge), never a measurement."""
+        self._event(f'AI answer ({grounding}) to "{question[:100]}"', "INFERRED", {"step": self.step.id, "grounding": grounding})
 
     def _ask_navigate(self, intent: str, now: int) -> AskResult:
         gesture = {"next": "swipe_down", "back": "swipe_up", "picture": "press"}[intent]  # press shows / cycles pictures

@@ -54,6 +54,7 @@ class RunBody(BaseModel):
     doc_urls: list[str] = Field(default_factory=list, max_length=5)
     video_urls: list[str] = Field(default_factory=list, max_length=5)
     follow_up: Optional[str] = Field(default=None, max_length=500)
+    audience: Optional[str] = Field(default=None, max_length=500, description="who the guide is for (experience, what they have), from their own words")
     fast: bool = False  # live research: ask the agent for a lean, quick answer (fewer sources, no extra files)
 
     @field_validator("doc_urls", "video_urls")
@@ -210,7 +211,7 @@ class ResearchRuns:
             self._runs[run_id] = {
                 "run_id": run_id, "creao_run_id": None, "share_url": None, "status": "queued", "creao_status": None, "error": None, "draft_id": None,
                 "goal": body.goal, "device": body.device, "model": body.model, "intent": body.intent, "session_id": body.session_id,
-                "doc_urls": body.doc_urls, "video_urls": body.video_urls, "follow_up": body.follow_up, "fast": body.fast,
+                "doc_urls": body.doc_urls, "video_urls": body.video_urls, "follow_up": body.follow_up, "fast": body.fast, "audience": body.audience,
                 "created_at": stamp, "updated_at": stamp, "validation_errors": [], "approved_by": None,
             }
             self._started += 1
@@ -235,7 +236,7 @@ class ResearchRuns:
 
             client = self._make_client()
             inputs = {"goal": body.goal, "device": body.device, "model": body.model, "intent": body.intent,
-                      "doc_urls": body.doc_urls, "video_urls": body.video_urls, "follow_up": body.follow_up, "fast": body.fast}
+                      "doc_urls": body.doc_urls, "video_urls": body.video_urls, "follow_up": body.follow_up, "fast": body.fast, "audience": body.audience}
             creao_id = client.start_run(inputs)
             self._update(run_id, creao_run_id=creao_id, status="running", share_url=creao.find_share_url(client.last_start_response))
             raw = client.poll(creao_id, interval=self.poll_interval, max_wait=self.max_wait, max_interval=4,
@@ -410,6 +411,10 @@ def mount_research_runs(app: FastAPI, runtime, runs: Optional[ResearchRuns] = No
     app.state.research_runs = runs
     runtime.research_runs = runs
     runtime.live.attach(runs)
+
+    @app.get("/assistant/state")
+    async def get_assistant_state() -> Response:
+        return JSONResponse(runtime.assistant.state())
 
     @app.get("/research/live")
     async def get_live() -> Response:

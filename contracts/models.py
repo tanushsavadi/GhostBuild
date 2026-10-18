@@ -203,6 +203,7 @@ class GoalResolution(Strict):
     detail: str = Field(description="phone-side explanation: what is supported and what is not")
     alternatives: list[str] = Field(default_factory=list)
     research_queued: bool = Field(default=False, description="true if an unsupported request was saved for an async research run; nothing is available NOW")
+    conversing: bool = Field(default=False, description="true while the assistant is talking with the wearer before any guide exists (it asks, then a guide follows); not a refusal")
 
 
 # --------------------------------------------------------------------------- core -> phone/tools

@@ -196,3 +196,25 @@ def test_the_wait_screen_can_be_set_to_rest_and_completion_wakes_it(live, monkey
     assert rt.hud.current.cue.line1.startswith("RESEARCHING ")
     settle_live(c)
     assert rt.hud.current.mode == "intervene" and rt.hud.current.cue.line2 == "AI RESEARCHED, UNREVIEWED"
+
+
+def test_a_clarified_request_reaches_research_with_the_persons_context(live):
+    """Intake learned the person is a first-timer with a Pi 4: the research request says so, so the guide is written for them."""
+    from ghostbuild_core.assistant.brain import FakeBrain
+    from ghostbuild_core.assistant.schemas import IntakeReply, Profile
+
+    c, rt = live, live.rt
+    rt.assistant.attach(FakeBrain(intake=[IntakeReply(
+        action="start", say="Got it. I will write it for a first-timer.", goal=MOCK_A_REQUEST,
+        profile=Profile(experience="first_time", facts=["Raspberry Pi 4", "has a breadboard"]))]))
+    res = ask(c, "fix my bike tyre")  # goes through the assistant first
+    assert res.conversing
+    end = time.time() + 5
+    while time.time() < end and not c.mock.posts:
+        rt.tick()
+        time.sleep(0.02)
+    sent = c.mock.posts[0]["inputs"]["goal"]
+    assert "Who this guide is for" in sent and "first-timer" in sent and "Raspberry Pi 4" in sent and "has a breadboard" in sent
+    assert "fix my bike tyre" in sent  # the person's own words travel too
+    settle_live(c)
+    assert rt.session().phase == "task"

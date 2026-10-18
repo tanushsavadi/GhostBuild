@@ -180,6 +180,10 @@ export type Via = "g2_menu" | "voice" | "phone_text";
 export type Alternatives = string[];
 export type CardId1 = string | null;
 /**
+ * true while the assistant is talking with the wearer before any guide exists (it asks, then a guide follows); not a refusal
+ */
+export type Conversing = boolean;
+/**
  * phone-side explanation: what is supported and what is not
  */
 export type Detail1 = string;
@@ -591,6 +595,7 @@ export interface GoalRequest {
 export interface GoalResolution {
   alternatives?: Alternatives;
   card_id?: CardId1;
+  conversing?: Conversing;
   cue: Cue;
   detail: Detail1;
   mode: Mode1;

@@ -59,7 +59,7 @@ class MockCreao:
             self.posts.append(body)
             assert req.url.path == "/api/v1/apps/032b9dc5-2fc7-4b5d-af36-8efdbd2648ac/runs" and "appId" not in body
             assert set(body["inputs"]) == {"goal", "intent"}
-            goal = body["inputs"]["goal"].split("\n\nResearch context:")[0].split("\n\nSPEED MODE")[0]
+            goal = body["inputs"]["goal"].split("\n\nResearch context:")[0].split("\n\nWho this guide is for")[0].split("\n\nSPEED MODE")[0]
             rid = f"mock_{len(self.posts)}"
             self.runs[rid] = self.canned[goal]
             return httpx.Response(200, json={"id": rid, "status": "queued"})

@@ -169,6 +169,8 @@ def default_body(app_id: str, inputs: dict) -> dict:
             context.append(f"{label}: {', '.join(map(str, value)) if isinstance(value, list) else value}")
     if context:
         goal += "\n\nResearch context:\n" + "\n".join(context)
+    if inputs.get("audience"):
+        goal += "\n\nWho this guide is for (write for them; do not assume more than this): " + str(inputs["audience"])
     if inputs.get("fast"):
         goal += FAST_DIRECTIVE
     return {"inputs": {"goal": goal, "intent": inputs.get("intent") or "build"}}  # app id travels in the URL, not the body

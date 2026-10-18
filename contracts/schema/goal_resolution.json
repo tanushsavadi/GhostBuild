@@ -45,6 +45,12 @@
       "default": null,
       "title": "Card Id"
     },
+    "conversing": {
+      "default": false,
+      "description": "true while the assistant is talking with the wearer before any guide exists (it asks, then a guide follows); not a refusal",
+      "title": "Conversing",
+      "type": "boolean"
+    },
     "cue": {
       "$ref": "#/$defs/Cue"
     },

@@ -55,11 +55,14 @@ class SessionManager:
         startable: Optional[Callable[[], list[Card]]] = None,
         voice_on: Optional[Callable[[], bool]] = None,
         research_progress: Optional[Callable[[], Optional[dict]]] = None,
+        on_convo_cancel: Optional[Callable[[str], None]] = None,
     ) -> None:
         self.hud = hud
         self.clock = clock
         self._cards = cards
         self._research_progress = research_progress or (lambda: None)
+        self._on_convo_cancel = on_convo_cancel or (lambda sid: None)
+        self._convo: Optional[dict] = None  # an assistant conversation in progress on the glasses: {sid, cue}
         self._voice_on = voice_on or (lambda: False)  # when spoken goals are available the first screen says so
         self._startable = startable or cards  # cards that can START a task now (a fault card needs its device reporting); _cards resolves running ones
         self._on_task = on_task
@@ -248,6 +251,12 @@ class SessionManager:
                 self._research = None  # stop waiting; the research itself keeps running and leaves a draft
             self._render()
             return True
+        if self._convo is not None and self._convo["sid"] == s.id:
+            if gi.gesture == "swipe_up":
+                sid, self._convo = s.id, None  # leave the conversation (the person can start over by speaking)
+                self._on_convo_cancel(sid)
+            self._render()
+            return True
         ch = self._choice or (self._root_choice() if self._show_list else None)
         if ch is not None:
             if self._choice is None and gi.gesture == "swipe_up" and ch.selected == 0:
@@ -316,6 +325,7 @@ class SessionManager:
         now = self.clock.now_ms()
         cue = cue or goal_mod.task_cue(card, mode)
         self._choice = None
+        self._convo = None
         sess.phase = "task"
         sess.goal = mode  # type: ignore[assignment]
         sess.card_id = card.card_id
@@ -350,6 +360,34 @@ class SessionManager:
             changed = True  # the prompt reaches its rest time
         if changed:
             self._render()
+
+    def show_convo(self, sid: str, cue: Cue) -> None:
+        """Put the assistant's question (or THINKING) on the glasses for this session's front screen."""
+        self._convo = {"sid": sid, "cue": cue}
+        self._awake_at = self.clock.now_ms()
+        self._render()
+
+    def clear_convo(self, sid: Optional[str] = None) -> None:
+        if self._convo is not None and (sid is None or self._convo["sid"] == sid):
+            self._convo = None
+            self._render()
+
+    def flash_message(self, sid: str, cue: Cue, ttl_ms: int = FLASH_MS * 2) -> None:
+        """A short message for a session still on its front screen (e.g. the assistant declining a request)."""
+        self._convo = None if (self._convo and self._convo["sid"] == sid) else self._convo
+        if sid == self.active_id:
+            self._flash = (Screen.uncertain(cue, ttl_ms=ttl_ms), self.clock.now_ms() + ttl_ms)
+            self._awake_at = self.clock.now_ms()
+            self._render()
+
+    def start_card(self, sid: str, card: Card, cue: Optional[Cue] = None, echo: bool = True) -> bool:
+        """Start `card` for a session that is still on its front screen (used after an assistant conversation). False if it moved on."""
+        sess = self.sessions.get(sid)
+        if sess is None or sess.phase != "menu":
+            return False
+        self._convo = None
+        self._start(sess, card, card.goal_mode, cue, echo=echo)
+        return True
 
     def begin_research(self, sid: str, goal: str) -> None:
         self._research = {"sid": sid, "goal": goal, "started_ms": self.clock.now_ms()}
@@ -426,6 +464,8 @@ class SessionManager:
                 tail = "TAKING LONGER" if p["over"] else ("ALMOST THERE" if rem <= 10 else f"ABOUT {rem}S" if rem < 90 else f"ABOUT {round(rem / 60)} MIN")
                 line2 = "●" * n + "○" * (10 - n) + " " + tail
             screen = Screen.intervene(Cue(line1=f"RESEARCHING {secs // 60}:{secs % 60:02d}", line2=line2), cue_id="research")
+        elif s is not None and s.phase == "menu" and self._convo is not None and self._convo["sid"] == s.id:
+            screen = Screen.intervene(self._convo["cue"], cue_id="convo", immediate=True)  # the assistant's question stays until answered, then the guide starts
         elif s is not None and s.phase == "menu":
             ch = self._choice or (self._root_choice() if self._show_list else None)
             if ch is not None:

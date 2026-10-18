@@ -26,6 +26,8 @@ from .cards import load_cards
 from .engine import Engine
 from .hud import Hud
 from .log import EventLog
+from .assistant.brain import brain_from_env
+from .assistant.service import Assistant
 from .live_research import LiveResearch
 from .playbook import AskResult, PlaybookEngine
 from .research import SAVED_DETAIL, ResearchQueue, SaveResult
@@ -46,6 +48,7 @@ class Runtime:
         simulate: bool = False,
         force_source: Optional[Source] = None,
         require_device_link: bool = False,
+        brain: Optional[Any] = None,
     ) -> None:
         if not cards:
             raise ValueError("Runtime needs at least one valid Repair Card")
@@ -64,6 +67,7 @@ class Runtime:
         self.engine = self._make_engine(self._default_card())
         self.research_runs: Any = None  # ResearchRuns, attached by mount_research_runs when the server is built
         self.live = LiveResearch(self)
+        self.assistant = Assistant(self, brain if brain is not None else brain_from_env())
         self.sim = None  # set below when simulating; startable_cards() reads it while sessions load
         self.voice = None  # optional VoiceService (voice.py), attached by its constructor; None = voice off (read while sessions load)
         sess_path = Path(log_dir) / "sessions.json" if log_dir is not None else None
@@ -74,6 +78,7 @@ class Runtime:
             startable=self.startable_cards,
             voice_on=lambda: self.voice is not None,
             research_progress=lambda: self.live.progress(),
+            on_convo_cancel=lambda sid: self.assistant.cancel(sid),
         )
         self.sessions.restore()
         self.hud.session_id = self._sid()
@@ -230,6 +235,7 @@ class Runtime:
 
     def tick(self) -> None:
         self.live.pump()
+        self.assistant.pump()
         self.sessions.tick()
         self.engine.tick()
         if self.playbook is not None:
@@ -238,6 +244,16 @@ class Runtime:
             self.voice.tick()
 
     def resolve_goal(self, req: GoalRequest) -> Optional[GoalResolution]:
+        """A spoken or typed request. With an assistant it is first talked through (questions, experience); otherwise resolved directly."""
+        if self.assistant.wants_goal(req):
+            self.elog.write("input", goal=req.model_dump(mode="json"), via_assistant=True)
+            res = self.assistant.submit_goal(req)
+            self.hud.sync()
+            return res
+        return self.resolve_goal_direct(req)
+
+    def resolve_goal_direct(self, req: GoalRequest) -> Optional[GoalResolution]:
+        """The deterministic resolver (cards, then live research). Also the fallback whenever the assistant cannot help."""
         self.elog.write("input", goal=req.model_dump(mode="json"))
         res = self.sessions.apply_goal(req)
         self.hud.sync()
@@ -286,7 +302,13 @@ class Runtime:
         if self.playbook is None:
             return None
         self.elog.write("input", ask=text[:300])
-        res = self.playbook.ask(text)
+        where = self.assistant.route(text, self.playbook)  # commands and the card's own FAQ stay deterministic; real questions go to the assistant
+        if where == "assistant":
+            res = self.assistant.submit_question(text)
+        elif where == "notes":
+            res = self.assistant.recall_note(text)
+        else:
+            res = self.playbook.ask(text)
         self.hud.sync()
         return res
 
