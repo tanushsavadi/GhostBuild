@@ -229,3 +229,20 @@ describe('playbook: step mode and 3-option menu', () => {
     expect(text(rendered[1])).toContain('> PICK')
   })
 })
+
+describe('expired success recovery', () => {
+  it('reconnect replay clears OFFLINE to quiet without restoring an expired success', () => {
+    const { c, rendered, rehellos } = setup()
+    c.onMessage(example('hud_verified'))
+    vi.advanceTimersByTime(3000)
+    c.onHealth(false)
+    vi.advanceTimersByTime(3000)
+    expect(c.isOfflineShown).toBe(true)
+    c.onHealth(true)
+    c.onMessage(example('hud_verified'))
+    expect(c.isOfflineShown).toBe(false)
+    expect((rendered.at(-1) as { text: string }).text).toBe(' ')
+    vi.advanceTimersByTime(10000)
+    expect(rehellos()).toBe(0)
+  })
+})

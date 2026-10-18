@@ -12,12 +12,13 @@ import { log, warn } from './types'
  *   LONG_PRESS_RELEASE / 10 s cap -> audioControl(false) -> {"type":"end"} -> G2Input hold_end
  *   any failure (audioControl false/throws, no audio frame within 1.5 s, socket lost, foreground exit, disconnect)
  *                            -> audioControl(false) -> {"type":"abort"} -> G2Input hold_end  (core then shows the fallback frame)
- * Consent: voice is only used after a deliberate hold on core's `HOLD TO TALK / AUDIO SENT TO SERVER` screen. The first hold sends
+ * Consent: voice is only used after a deliberate hold on core's `HOLD TO TALK / AUDIO TO ELEVENLABS` screen. The first hold sends
  * {"start","consent":false} (no mic, no hold_start); core answers consent_required and shows that screen; a hold within
- * CONSENT_WINDOW_MS stores `gb.voice_consent=1` and then records. PCM format (docs device-apis): 16 kHz, s16le, mono.
+ * CONSENT_WINDOW_MS stores `gb.voice_consent.elevenlabs.v1=1` and then records. PCM format (docs device-apis): 16 kHz, s16le, mono.
  * The mic is opened ONLY inside a deliberate long press and every error path closes it.
  */
-export const CONSENT_KEY = 'gb.voice_consent'
+// Provider-specific version: consent to the retired provider must not authorize ElevenLabs.
+export const CONSENT_KEY = 'gb.voice_consent.elevenlabs.v1'
 export const FIRST_AUDIO_MS = 1500
 export const CAP_MS = 10_000
 export const CHUNK_BYTES = 3200 // 100 ms of 16 kHz s16le mono
@@ -145,6 +146,7 @@ export class Voice implements VoiceCapture {
     this.o.sendHold('hold_start')
     this.holdSent = true
     this.openWs()
+    if (gen !== this.gen) return // socket construction may synchronously abort; never open the mic after it
     this.sendCtl({ type: 'start', consent: true })
     let ok = false
     this.micMaybeOpen = true // assume open until audioControl(false) confirms: it may have thrown after opening
@@ -157,7 +159,7 @@ export class Voice implements VoiceCapture {
     if (this.released) void this.finish()
   }
 
-  /** First hold (no consent yet): core shows HOLD TO TALK / AUDIO SENT TO SERVER. No mic, no hold_start. */
+  /** First hold (no consent yet): core shows HOLD TO TALK / AUDIO TO ELEVENLABS. No mic, no hold_start. */
   private async showConsent(gen: number): Promise<void> {
     const ws = this.makeWs()
     if (!ws) return
@@ -198,8 +200,10 @@ export class Voice implements VoiceCapture {
   private async finish(): Promise<void> {
     if (this.phase !== 'recording') return
     this.phase = 'closing'
+    const gen = this.gen
     this.clearTimers()
     await this.closeMic()
+    if (gen !== this.gen) return // a background/disconnect abort won while native mic close was pending
     this.flushTail()
     if (this.bytesSent === 0) { // nothing was captured: do not pretend
       await this.abort('no_audio')
@@ -213,7 +217,7 @@ export class Voice implements VoiceCapture {
 
   /** Idempotent. Always leaves the mic closed, tells core, returns to idle. */
   async abort(reason: string): Promise<void> {
-    if (this.phase === 'idle' && !this.holdSent && !this.micMaybeOpen) return
+    if (this.phase === 'idle' && !this.holdSent && !this.micMaybeOpen && !this.ws) return
     warn(`voice: abort (${reason})`)
     this.gen++
     this.phase = 'closing'

@@ -215,3 +215,63 @@ describe('extractFrames', () => {
     expect(extractFrames(undefined)).toEqual([])
   })
 })
+
+describe('transport handover regressions', () => {
+  const response = (body: unknown) => ({ ok: true, status: 200, text: async () => JSON.stringify(body) }) as Response
+
+  it('manual reconnect becomes unhealthy until the new socket answers, resetting the sequence gate', () => {
+    const { cm, health } = setup()
+    cm.start()
+    FakeWs.all[0].open()
+    FakeWs.all[0].msg({ type: 'hud', seq: 900 })
+    cm.reconnectNow()
+    expect(health).toEqual([true, false])
+    FakeWs.all[1].open()
+    FakeWs.all[1].msg({ type: 'hud', seq: 1 })
+    expect(health).toEqual([true, false, true])
+    cm.stop()
+  })
+
+  it('poll hello resets health before delivering the restarted server frame', async () => {
+    const order: string[] = []
+    const cm = new ConnectionManager({
+      backend: () => 'http://core:8787', clientId: () => 'c', sessionId: () => 's', surface: () => 'g2', afterSeq: () => 900,
+      onMessage: () => order.push('frame'), onHealth: (ok) => order.push(`health:${ok}`), makeWs: (u) => new FakeWs(u),
+      fetchFn: (async () => response({ type: 'hud', seq: 1 })) as typeof fetch,
+    })
+    cm.start()
+    await vi.advanceTimersByTimeAsync(4001)
+    expect(order.slice(0, 2)).toEqual(['health:true', 'frame'])
+    cm.stop()
+  })
+
+  it('ignores a delayed HTTP hello after WebSocket takeover', async () => {
+    let release!: (r: Response) => void
+    const deferred = new Promise<Response>((resolve) => { release = resolve })
+    const { cm, messages, health } = setup((async () => deferred) as typeof fetch)
+    cm.start()
+    await vi.advanceTimersByTimeAsync(4001)
+    const ws = FakeWs.all.at(-1)!
+    ws.open()
+    ws.msg({ type: 'hud', seq: 20 })
+    release(response({ type: 'hud', seq: 99, session_id: 'obsolete' }))
+    await vi.advanceTimersByTimeAsync(1)
+    expect(messages).toEqual([{ type: 'hud', seq: 20 }])
+    expect(health.at(-1)).toBe(true)
+    expect(cm.status).toBe('ws')
+    cm.stop()
+  })
+
+  it('ignores a delayed HTTP reply after stop', async () => {
+    let release!: (r: Response) => void
+    const deferred = new Promise<Response>((resolve) => { release = resolve })
+    const { cm, messages, health } = setup((async () => deferred) as typeof fetch)
+    cm.start()
+    await vi.advanceTimersByTimeAsync(4001)
+    cm.stop()
+    release(response({ type: 'hud', seq: 99 }))
+    await vi.advanceTimersByTimeAsync(1)
+    expect(messages).toEqual([])
+    expect(health).toEqual([])
+  })
+})

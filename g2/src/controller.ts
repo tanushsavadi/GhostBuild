@@ -118,7 +118,18 @@ export class Controller {
     const view = frameToView(frame, this.opts)
 
     if (this.expired && this.expired.seq === frame.seq && this.expired.key === view.key) {
-      return // already shown and ttl-cleared; a reconnect replay must not bring it back
+      // The backend is reachable, but this transient success already expired locally.
+      // Clear OFFLINE without resurrecting the success or leaving re-hello running forever.
+      this.clear('rehelloTimer')
+      this.clear('offlineTimer')
+      this.offlineShown = false
+      const blank = blankView(joinSource(frame.source))
+      if (this.lastKey !== blank.key) {
+        this.lastKey = blank.key
+        this.d.render(blank)
+      }
+      this.d.onFrameRendered?.(frame.seq)
+      return
     }
     if (view.key === this.lastKey) {
       this.d.onFrameRendered?.(frame.seq)

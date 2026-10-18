@@ -44,6 +44,7 @@ export class Renderer {
   private pendingAt = 0
   private running: Promise<void> | null = null
   private lastView: View | null = null
+  private refreshRequested = false
   lastMetrics: ImageMetrics | null = null
 
   constructor(
@@ -80,11 +81,10 @@ export class Renderer {
 
   /** Foreground restore: the glasses page may have been torn down, redraw from scratch. */
   forceRefresh(): Promise<void> {
-    this.layout = null
-    this.shownText = null
-    this.shownTag = null
-    this.shownImageKey = null
-    return this.lastView ? this.render(this.lastView) : Promise.resolve()
+    this.refreshRequested = true
+    // Preserve the latest queued frame; a foreground callback must never replace it with an older view.
+    const latest = this.pending ?? this.lastView
+    return latest ? this.render(latest) : Promise.resolve()
   }
 
   private async pump(): Promise<void> {
@@ -94,6 +94,11 @@ export class Renderer {
         const at = this.pendingAt
         this.pending = null
         this.lastView = view
+        if (this.refreshRequested) {
+          this.refreshRequested = false
+          this.layout = null
+          this.shownText = this.shownTag = this.shownImageKey = null
+        }
         try {
           await this.apply(view, at)
         } catch (e) {
@@ -108,7 +113,13 @@ export class Renderer {
 
   private async apply(view: View, requestedAt: number): Promise<void> {
     if (view.kind === 'text') return this.applyText(view)
-    await this.applyImage(view, requestedAt)
+    try {
+      await this.applyImage(view, requestedAt)
+    } catch (e) {
+      warn('image bridge failed; showing text cue', e)
+      this.layout = null
+      if (!this.pending) await this.applyText(view.fallback)
+    }
   }
 
   private async applyText(v: TextView): Promise<void> {
@@ -125,18 +136,20 @@ export class Renderer {
       this.shownImageKey = null
       return
     }
-    await this.upgradeTexts(v.text, v.tag)
+    if (!await this.upgradeTexts(v.text, v.tag)) {
+      this.layout = null
+      if (!this.pending) await this.applyText(v)
+    }
   }
 
-  private async upgradeTexts(text: string, tag: string): Promise<void> {
+  private async upgradeTexts(text: string, tag: string): Promise<boolean> {
     if (text !== this.shownText) {
       const ok = await this.bridge.textContainerUpgrade(
         new TextContainerUpgrade({ containerID: CUE.id, containerName: CUE.name, content: text }),
       )
       if (!ok) {
-        warn('textContainerUpgrade(cue) returned false; rebuilding next time')
-        this.layout = null
-        return
+        warn('textContainerUpgrade(cue) returned false; rebuilding current frame')
+        return false
       }
       this.shownText = text
     }
@@ -145,8 +158,12 @@ export class Renderer {
         new TextContainerUpgrade({ containerID: TAG.id, containerName: TAG.name, content: tag }),
       )
       if (ok) this.shownTag = tag
-      else warn('textContainerUpgrade(tag) returned false')
+      else {
+        warn('textContainerUpgrade(tag) returned false; rebuilding current frame')
+        return false
+      }
     }
+    return true
   }
 
   private async applyImage(v: ImageView, requestedAt: number): Promise<void> {
@@ -155,7 +172,8 @@ export class Renderer {
       loaded = await this.loader.load(v.image)
     } catch (e) {
       warn(`image load failed (${(e as Error).message}); showing text cue`)
-      return this.applyText(v.fallback)
+      if (!this.pending) return this.applyText(v.fallback)
+      return
     }
     if (this.pending) return // a newer view is waiting: latest wins, do not touch the screen for a stale one
 
@@ -178,8 +196,11 @@ export class Renderer {
       this.shownTag = v.tag
       this.shownImageKey = null
     } else {
-      await this.upgradeTexts(v.text, v.tag)
-      if (this.layout === null) return this.applyText(v.fallback)
+      if (!await this.upgradeTexts(v.text, v.tag)) {
+        this.layout = null
+        if (!this.pending) return this.applyText(v.fallback)
+        return
+      }
     }
 
     if (this.pending) {

@@ -22,7 +22,7 @@ class FakeWs implements VoiceWs {
   bin() { return this.sent.filter((m): m is Uint8Array => typeof m !== 'string') }
 }
 
-function rig(opts: { consent?: boolean; audio?: 'ok' | 'false' | 'throw' | 'slow' } = {}) {
+function rig(opts: { consent?: boolean; audio?: 'ok' | 'false' | 'throw' | 'slow'; wsFail?: boolean } = {}) {
   const log: string[] = []
   const store = new Map<string, string>()
   if (opts.consent !== false) store.set(CONSENT_KEY, '1')
@@ -49,7 +49,7 @@ function rig(opts: { consent?: boolean; audio?: 'ok' | 'false' | 'throw' | 'slow
     backend: () => 'http://core:8787',
     sessionId: () => 's-1',
     sendHold: (g) => { holds.push(g); log.push(g) },
-    makeWs: (u) => new FakeWs(u),
+    makeWs: (u) => { if (opts.wsFail) throw new Error('socket blocked'); return new FakeWs(u) },
     now: () => t,
   })
   const ws = () => FakeWs.all.at(-1)!
@@ -263,5 +263,27 @@ describe('consent gate', () => {
     r.v.start(); await r.tick(3500)
     expect(r.bridge.audioControl).not.toHaveBeenCalled()
     expect(r.store.get(CONSENT_KEY)).toBeUndefined()
+  })
+})
+
+
+describe('voice cancellation regressions', () => {
+  it('never opens the microphone after WebSocket construction fails', async () => {
+    const r = rig({ wsFail: true })
+    r.v.start(); await r.tick()
+    expect(r.bridge.audioControl.mock.calls.some((c) => c[0])).toBe(false)
+    expectMicClosed(r)
+    expect(r.holds).toEqual(['hold_start', 'hold_end'])
+  })
+
+  it('backgrounding cancels the response still pending after release', async () => {
+    const r = rig()
+    r.v.start(); await r.tick(); r.ws().open()
+    r.v.onAudio(r.pcm(3200)); r.v.stop(); await r.tick()
+    const sock = r.ws()
+    await r.v.abort('foreground_exit')
+    expect(sock.closed).toBe(true)
+    expect(sock.ctl().at(-1)).toEqual({ type: 'abort', reason: 'foreground_exit' })
+    expectMicClosed(r)
   })
 })

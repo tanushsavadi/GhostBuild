@@ -32,8 +32,8 @@ the installed skills disagree with the `.d.ts`, the `.d.ts` wins (see Discrepanc
 | `renderer.ts`, `layout.ts` | serial, latest-wins apply to the glasses; rebuild only when the layout changes | yes (fake bridge) |
 | `image.ts`, `png.ts` | fetch `${backend}${image.url}`, validate PNG, size limits, latency log | yes |
 | `session.ts`, `config.ts` | stored `client_id`/`session_id`/backend (SDK storage mirrored to `localStorage`), env + query config | yes |
-| `voice.ts`, `bgstate.ts` | flag-gated hold-to-ask stub; feature-detected background-state API | yes/n.a. |
-| `main.ts`, `phone.ts` | wiring; tiny phone status + backend URL screen | no |
+| `voice.ts`, `bgstate.ts` | flag-gated hold-to-ask capture; feature-detected background-state API | yes/n.a. |
+| `main.ts`, `phone.ts` | wiring; companion link, touch/privacy guidance, connection settings | no |
 
 ## Page model (verified against the 0.0.16 `.d.ts` + docs, simulator-checked)
 
@@ -78,7 +78,7 @@ the installed skills disagree with the `.d.ts`, the `.d.ts` wins (see Discrepanc
 | Setting | How | Default |
 |---|---|---|
 | Backend URL | `?backend=` query (also stored) > stored value > `VITE_BACKEND_URL` > default; editable on the phone screen | `http://localhost:8787` |
-| `VITE_FLAG_VOICE` | `1` enables the hold-to-ask **stub** (no capture, no mic permission) | off |
+| `VITE_FLAG_VOICE` | `1` enables consent-gated hold-to-ask capture (requires physical microphone testing) | off |
 | `VITE_GLYPHS` | `ascii` maps every non-ASCII glyph to ASCII (`->` `>`, bullet `*`, middle dot `-`) | `full` |
 | `VITE_CENTER_COLS` | approximate characters per line for centring | `50` |
 
@@ -162,7 +162,7 @@ the Packaging doc; `desc` is 1-300 chars). See "Voice (optional)" below.
 ## Voice (optional, flagged; hold-to-ask)
 
 Off by default in both halves: plugin `VITE_FLAG_VOICE=1` AND core `python -m ghostbuild_core --voice` (or `GB_VOICE=1`; `/health` then
-shows `"voice":"on"`; the STT key `CARTESIA_API_KEY` lives only in core's environment, never in g2/). With either side off, long press
+shows `"voice":"on"`; the STT key `ELEVENLABS_API_KEY` lives only in core's environment, never in g2/). With either side off, long press
 behaves as before (core ignores `hold_start`/`hold_end`) and touch/menu/phone-text paths are unchanged.
 
 Flow (`src/voice.ts`, `core/ghostbuild_core/voice.py`): LONG_PRESS -> `hold_start` (core shows `LISTENING`) -> open `WS /ws/voice`,
@@ -174,13 +174,13 @@ sends `{"type":"abort"}` + `hold_end`, and core shows `VOICE UNAVAILABLE / USE T
 press. Output stays on the HUD (the glasses have no speaker). While voice is active the controller hands hold gestures to `voice.ts`,
 which sends `hold_start`/`hold_end` itself (after the consent gate); the stub server (`tools/stub-server.mjs`) has no `/ws/voice`.
 
-Consent: the first hold sends `{"start","consent":false}`; no mic opens and no `hold_start` is sent; core shows `HOLD TO TALK / AUDIO SENT
-TO SERVER`. A hold within 8 s of that screen stores `gb.voice_consent=1` (SDK storage + localStorage mirror) and records; the stored value is
+Consent: the first hold sends `{"start","consent":false}`; no mic opens and no `hold_start` is sent; core shows `HOLD TO TALK / AUDIO TO
+ELEVENLABS`. A hold within 8 s of that screen stores `gb.voice_consent.elevenlabs.v1=1` (SDK storage + localStorage mirror) and records; the stored value is
 sent as `consent` on every later start, and core drops audio from a start without it.
 
-### Voice device test (human; NOT verified: needs the physical G2 + a Cartesia key)
-- [ ] Build with `VITE_FLAG_VOICE=1`, run core with `--voice` and `CARTESIA_API_KEY` set; `curl :8787/health` shows `"voice":"on"`; the packed manifest lists `g2-microphone`.
-- [ ] First long press: `HOLD TO TALK / AUDIO SENT TO SERVER`, mic stays off (glasses mic indicator, if any, does not light). Second long press: `LISTENING`.
+### Voice device test (human; NOT verified: needs the physical G2 + an ElevenLabs key)
+- [ ] Build with `VITE_FLAG_VOICE=1`, run core with `--voice` and `ELEVENLABS_API_KEY` set; `curl :8787/health` shows `"voice":"on"`; the packed manifest lists `g2-microphone`.
+- [ ] First long press: `HOLD TO TALK / AUDIO TO ELEVENLABS`, mic stays off (glasses mic indicator, if any, does not light). Second long press: `LISTENING`.
 - [ ] Does the OS claim the long press (docs: tap-then-hold opens the OS contextual menu)? If `hold_start` never reaches core, record exactly which gesture sequence works.
 - [ ] "where is it" -> WHERE picture; "how do I fix it" -> HOW; "what should it look like" -> CORRECT; "show the next picture"; "why does it matter" (expect `NOT IN MY CARD / SEE PHONE` for long card text, full text under phone events); "what if that didn't work".
 - [ ] At the FIX/BUILD menu: "my camera view is black" -> `FIX: ...` task; "set up the station" -> BUILD task; "build a rocket" -> `NOT SUPPORTED YET`.
@@ -239,3 +239,24 @@ Lifecycle and network:
   and `ws://` entries without complaint. The host app or portal may still validate. Not verified.
 * Simulator caveats (docs): no BLE timing, image decode is faster and ignores device size limits, no LZ4 path, glyph rendering is not
   pixel-exact. The simulator's logged `total` image time is therefore meaningless for hardware.
+
+
+## Final sprint reliability checkpoint (2026-10-17)
+
+`npm test`: **183 passing**. `npm run build`: **PASS** (TypeScript + production Vite).
+Official simulator 0.9.5 playbook walkthrough: **15/15 phases pass**, including two actual SDK image sends,
+manual completion, a measured step that refuses swipe completion, and quiet after completion. This run used the
+**simulated stub**, not live hardware or a provider. Screenshots are local artifacts under `sim-shots/final-sprint/`.
+The simulator returns green RGBA pixels with brightness in alpha; inspect alpha, rather than stripping transparency.
+
+Reconnect now resets health before accepting a restarted backend's lower sequence. Poll hello replies reset health
+before their HUD frame, and obsolete HTTP responses cannot overwrite a new socket/backend or revive a stopped app.
+An expired transient success reconnects to quiet instead of being stuck OFFLINE. Failed SDK text upgrades rebuild
+the current cue immediately; thrown image transfers show the text fallback. Foreground redraw preserves the newest
+queued frame and remains serialized with image sends.
+
+ElevenLabs consent has a new provider-specific storage key, so a retired provider's consent cannot authorize the
+new processor. Socket construction failure never opens the microphone, and background/disconnect abort cancels
+a pending voice response after release. GhostBuild does not save microphone recordings. Sustained G2 capture and
+provider STT remain **NOT physically verified**; this build uses intentional hold-to-talk only when flagged.
+The phone landing screen links to `/phone/` in a separate browsing context and keeps connection settings available.

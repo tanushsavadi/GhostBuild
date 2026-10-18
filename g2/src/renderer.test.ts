@@ -206,3 +206,47 @@ describe('ImageLoader', () => {
     expect(hit.cached).toBe(true)
   })
 })
+
+describe('renderer recovery regressions', () => {
+  it('rebuilds the same cue immediately when a text update fails', async () => {
+    const b = fakeBridge()
+    b.textContainerUpgrade = async () => false
+    const r = new Renderer(b, okLoader())
+    await r.init(blankView())
+    await r.render(textView(['DO THIS NOW'], 'SIMULATED'))
+    expect(b.calls.at(-1)).toBe('rebuild:text')
+  })
+
+  it('rebuilds immediately when the evidence tag update fails', async () => {
+    const b = fakeBridge()
+    b.textContainerUpgrade = async (c) => c.containerID !== 2
+    const r = new Renderer(b, okLoader())
+    await r.init(blankView())
+    await r.render(textView(['ACTION'], 'SIMULATED'))
+    expect(b.calls.at(-1)).toBe('rebuild:text')
+  })
+
+  it('shows the text fallback when the image SDK call throws', async () => {
+    const b = fakeBridge()
+    b.updateImageRawData = async () => { throw new Error('BLE image transfer failed') }
+    const r = new Renderer(b, okLoader())
+    await r.init(blankView())
+    await r.render(visual())
+    expect(b.calls.at(-1)).toBe('rebuild:text')
+  })
+
+  it('foreground refresh preserves the newest pending frame during a transfer', async () => {
+    const b = fakeBridge({ delayImage: 20 })
+    const texts: string[] = []
+    const original = b.rebuildPageContainer
+    b.rebuildPageContainer = async (p) => { texts.push(p.textObject?.[0]?.content ?? ''); return original(p) }
+    const r = new Renderer(b, okLoader())
+    await r.init(blankView())
+    void r.render(visual())
+    await new Promise((resolve) => setTimeout(resolve, 5))
+    void r.render(textView(['NEWEST']))
+    await r.forceRefresh()
+    expect(texts.at(-1)).toBe('NEWEST')
+    expect(b.maxInFlight()).toBe(1)
+  })
+})

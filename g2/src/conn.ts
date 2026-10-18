@@ -52,6 +52,7 @@ export class ConnectionManager {
   private pollTimer: ReturnType<typeof setTimeout> | null = null
   private rehelloTimer: ReturnType<typeof setTimeout> | null = null
   private polling = false
+  private pollEpoch = 0
   private pollHelloSent = false
   private pollFailures = 0
   private healthy = false
@@ -88,6 +89,8 @@ export class ConnectionManager {
   reconnectNow(): void {
     if (this.stopped) return this.start()
     this.attempt = 0
+    this.stopPolling()
+    this.setHealth(false)
     this.dropWs()
     this.connectWs()
     if (this.polling) this.pollHelloSent = false
@@ -139,6 +142,7 @@ export class ConnectionManager {
       this.attempt = 0
       this.clear('fallbackTimer')
       this.stopPolling()
+      this.setHealth(false) // the new socket must answer before it can restore the old session
       this.setStatus('ws')
       log('ws open')
       this.sendHello()
@@ -224,38 +228,44 @@ export class ConnectionManager {
   }
 
   private stopPolling(): void {
+    this.pollEpoch++ // invalidate every outstanding HTTP response from the previous transport
     this.polling = false
     this.clear('pollTimer')
   }
 
   private async pollLoop(): Promise<void> {
     if (!this.polling || this.stopped) return
+    const epoch = this.pollEpoch
+    const current = () => !this.stopped && this.polling && epoch === this.pollEpoch
     try {
       if (!this.pollHelloSent) {
         const ok = await this.post('/hello', this.helloBody(), true)
+        if (!current()) return
         if (!ok) throw new Error('hello failed')
         this.pollHelloSent = true
       }
       const after = this.o.afterSeq()
       const res = await this.timedFetch(`${this.o.backend()}/hud?after=${after}`, { method: 'GET', cache: 'no-store' })
-      if (!this.polling) return
+      if (!current()) return
       if (!res.ok) throw new Error(`poll ${res.status}`)
       this.pollFailures = 0
       this.setStatus('poll')
       this.setHealth(true)
       if (res.status !== 204) {
         const text = await res.text()
+        if (!current()) return
         const body = text ? parseJson(text) : undefined
         for (const m of extractFrames(body)) this.o.onMessage(m)
       }
     } catch (e) {
+      if (!current()) return
       this.pollFailures++
       if (this.pollFailures === 1) warn('poll failed', (e as Error).message)
       this.pollHelloSent = false // server may have restarted: say hello again on recovery
       this.setHealth(false)
       this.setStatus('down')
     }
-    if (this.polling && !this.stopped) {
+    if (current()) {
       this.pollTimer = setTimeout(() => void this.pollLoop(), this.o.pollMs ?? 300)
     }
   }
@@ -282,16 +292,21 @@ export class ConnectionManager {
   }
 
   private async post(path: string, body: unknown, deliverReply = false): Promise<boolean> {
+    const epoch = this.pollEpoch
+    const current = () => !this.stopped && epoch === this.pollEpoch
     try {
       const res = await this.timedFetch(`${this.o.backend()}${path}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
-      if (!res.ok) return false
+      if (!current() || !res.ok) return false
       if (deliverReply && res.status !== 204) {
         const text = await res.text()
+        if (!current()) return false
         const parsed = text ? parseJson(text) : undefined
+        // Reset the sequence gate BEFORE the hello frame, including a restarted server at seq=1.
+        this.setHealth(true)
         for (const m of extractFrames(parsed)) this.o.onMessage(m)
       }
       return true
