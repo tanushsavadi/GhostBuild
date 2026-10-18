@@ -504,3 +504,35 @@ def test_done_response_contains_documented_card_answer_for_phone_audio(mk):
         result = ws.receive_json()
     assert result["text"] == "WHY 0: SAFETY"
     assert result["origin"] == "fake_test"  # never represent this fixture as microphone/provider evidence
+
+
+def test_abort_while_transcribing_never_applies_the_late_command(mk):
+    stt = FakeStt("where is it", delay_s=0.2)
+    r = mk(stt=stt)
+    r.to_task()
+    r.fault()
+    with r.client.websocket_connect("/ws/voice") as ws:
+        ws.send_json({"type": "start", "consent": True})
+        ws.send_bytes(AUDIO)
+        ws.send_json({"type": "end"})
+        ws.send_json({"type": "abort"})
+        assert ws.receive_json()["type"] == "unavailable"
+    assert stt.closed and r.rt.hud.current.mode != "visual"
+    assert r.cue[1] == "VOICE UNAVAILABLE"
+
+
+def test_other_socket_cannot_cancel_active_capture(mk):
+    stt = FakeStt("where is it")
+    r = mk(stt=stt)
+    r.to_task()
+    r.fault()
+    with r.client.websocket_connect("/ws/voice") as active:
+        active.send_json({"type": "start", "consent": True})
+        active.send_bytes(AUDIO)
+        with r.client.websocket_connect("/ws/voice") as other:
+            other.send_json({"type": "start", "consent": True})
+            assert other.receive_json()["type"] == "busy"
+            other.send_json({"type": "abort"})
+        active.send_json({"type": "end"})
+        assert active.receive_json()["type"] == "done"
+    assert r.rt.hud.current.mode == "visual" and stt.closed

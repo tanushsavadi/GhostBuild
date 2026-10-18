@@ -301,6 +301,37 @@ class VoiceService:
                 except Exception:
                     log.warning("provider close failed")
 
+        async def finalize_unless_cancelled(provider: SttProvider) -> str:
+            """Keep consuming cancellation while cloud STT is pending, before applying any text."""
+            async def cancelled() -> None:
+                while True:
+                    msg = await websocket.receive()
+                    if msg.get("type") == "websocket.disconnect":
+                        return
+                    try:
+                        ctl = json.loads(msg.get("text") or "")
+                    except ValueError:
+                        continue
+                    if isinstance(ctl, dict):
+                        if ctl.get("type") == "abort":
+                            return
+                        if ctl.get("type") == "start":
+                            await reply({"type": "busy"})
+                    # Duplicate end/audio while finalizing must not start another utterance.
+
+            result = asyncio.create_task(provider.finalize())
+            cancel = asyncio.create_task(cancelled())
+            try:
+                done, _ = await asyncio.wait((result, cancel), return_when=asyncio.FIRST_COMPLETED)
+                if cancel in done:
+                    raise ProviderUnavailable("capture cancelled")
+                return result.result()
+            finally:
+                for task in (result, cancel):
+                    if not task.done():
+                        task.cancel()
+                await asyncio.gather(result, cancel, return_exceptions=True)
+
         try:
             while True:
                 msg = await asyncio.wait_for(websocket.receive(), (self.listen_cap_ms + self.timeout_ms) / 1000)
@@ -360,7 +391,7 @@ class VoiceService:
                     if self.state == "listening":
                         self.on_hold("hold_end")
                     try:
-                        text = await asyncio.wait_for(s.finalize(), FINALIZE_TIMEOUT_S)
+                        text = await asyncio.wait_for(finalize_unless_cancelled(s), FINALIZE_TIMEOUT_S)
                     except Exception as exc:
                         log.warning("stt finalize failed: %s", type(exc).__name__)
                         self.unavailable(f"finalize failed: {type(exc).__name__}")
@@ -379,9 +410,10 @@ class VoiceService:
                         except Exception:
                             pass
                 elif kind == "abort":
+                    owned = self._active_socket is owner
                     await drop()
-                    if self.state in ("listening", "thinking"):
-                        self.unavailable(f"abort: {str(ctl.get('reason', ''))[:40]}")
+                    if owned and self.state in ("listening", "thinking"):
+                        self.unavailable("capture cancelled")
         except WebSocketDisconnect:
             pass
         except Exception as exc:
