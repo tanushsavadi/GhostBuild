@@ -1,5 +1,7 @@
 # GhostBuild — PIVOT (authoritative from Sat 2026-10-17 15:45 PDT)
 
+> **Superseded (Sat 2026-10-17 evening):** GhostBuild v2 (guided builds + test jig + Creao compiler) replaces this plan. `CLAUDE.md` is the execution authority. Kept for history and G2 notes only.
+
 > This document supersedes docs/00–21 wherever they conflict. Those docs are **historical**: the LEGO rocket/rover, perception, CAD, spatial/RealityKit, twin, minimap and every sponsor integration are **cut**. The old docs are still useful for G2 platform notes (08 §2–§6 text and glyph rules) and the honesty labels. Times below are PDT. Deadline: **Sun 12:00**.
 
 ---

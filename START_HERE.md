@@ -1,6 +1,6 @@
 # GhostBuild — START HERE
 
-> **Pivot (Sat 2026-10-17): read [`docs/PIVOT_GHOSTBUILD.md`](docs/PIVOT_GHOSTBUILD.md) first — it supersedes everything below.** The docs listed here are historical.
+> **v2 (Sat 2026-10-17 evening): read [`CLAUDE.md`](CLAUDE.md) first — it supersedes everything below, including docs/PIVOT_GHOSTBUILD.md.** Quick try: `make setup && make core-sim`, then `make g2-cli`.
 
 ## Read these first
 

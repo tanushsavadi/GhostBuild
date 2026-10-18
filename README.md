@@ -1,6 +1,6 @@
 # GhostBuild
 
-> **Pivot (Sat 2026-10-17):** GhostBuild is now a closed-loop repair copilot — the device tests itself, G2 shows one check only when a test fails, and the measured fix clears it. **[`docs/PIVOT_GHOSTBUILD.md`](docs/PIVOT_GHOSTBUILD.md) is the only execution authority**; everything below describes the previous plan and is being rewritten.
+> **v2 (Sat 2026-10-17 evening):** GhostBuild guides a hands-on build on Even G2 one step at a time and verifies what a test jig can measure. **[`CLAUDE.md`](CLAUDE.md) is the execution authority**; `docs/PIVOT_GHOSTBUILD.md` and everything below are historical and being rewritten.
 
 An AI copilot for physical work: it reads the manual and the CAD, watches the real object, and shows one verified next action on Even G2 — going dark when the work matches the target.
 
