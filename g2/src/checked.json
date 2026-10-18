@@ -62,6 +62,12 @@
     "name": "ok",
     "your": "ok",
     "ready": "wrong: R hands should be like bracketed, cross fingers, separating motion? (fixed, recheck)",
-    "door": "wrong: flat hands facing outwards (fixed, recheck)"
+    "door": "wrong: flat hands facing outwards (fixed, recheck)",
+    "please": "ok",
+    "slow": "ok",
+    "dont know": "ok",
+    "not understand": "ok",
+    "understand": "ok",
+    "sign": "wrong: around each other not towards me (fixed, recheck)"
   }
 }
