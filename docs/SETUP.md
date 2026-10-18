@@ -6,6 +6,7 @@ Run commands from the repository root unless a step explicitly changes directory
 
 - Git, `make`, Python **3.11**, and [uv](https://docs.astral.sh/uv/).
 - Node.js **20 or later** and npm.
+- Poppler (`brew install poppler` / `apt-get install poppler-utils`) for building per-step guides from IKEA manuals; without it those products fall back to the page-level compile.
 - For G2: a paired phone, Even app and Developer Mode, with phone and laptop able to reach each other on the LAN.
 - For the optional Pi station: Raspberry Pi OS, a compatible Pi camera and physically documented LED wiring. See [Pi setup](../pi/README.md).
 

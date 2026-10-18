@@ -1,10 +1,12 @@
 """On-demand per-step guide from an IKEA manual (auto_manual.py). Synthetic PDFs; no network, no model calls."""
 
+import shutil
 from pathlib import Path
 
 import pytest
 
 fitz = pytest.importorskip("fitz")
+pytestmark = pytest.mark.skipif(shutil.which("pdftotext") is None, reason="poppler (pdftotext) not installed")
 
 from contracts.models import Card
 from integrations.ikea.auto_manual import build_card

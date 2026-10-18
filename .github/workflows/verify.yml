@@ -27,6 +27,7 @@ jobs:
             g2/package-lock.json
       - name: Install locked dependencies
         run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils  # pdftotext/pdftoppm: IKEA manual step builder
           uv sync --frozen --all-groups
           npm ci --prefix contracts/ts
           npm ci --prefix g2
