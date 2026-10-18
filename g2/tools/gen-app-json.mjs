@@ -20,18 +20,22 @@ export function origins(raw) {
   return out
 }
 
-export function buildAppJson(base, urls) {
+export const MIC_DESC =
+  'Hold-to-ask voice: the glasses microphone is opened only while you hold a long press, and the audio is sent to your GhostBuild server on your network for transcription. It is never stored.'
+
+export function buildAppJson(base, urls, { voice = false } = {}) {
   const whitelist = origins(urls)
   if (whitelist.length === 0) throw new Error('no backend URL: set VITE_BACKEND_URL or GB_BACKEND_URLS')
   const net = { name: 'network', desc: base.permissions.find((p) => p.name === 'network')?.desc ?? 'Talks to the GhostBuild bench server.', whitelist }
-  // No microphone permission: voice is off. To enable later, add {"name":"g2-microphone","desc":"..."} here AND set VITE_FLAG_VOICE=1.
-  return { ...base, permissions: [net, ...base.permissions.filter((p) => p.name !== 'network')] }
+  // g2-microphone (docs: Packaging, valid names) is declared ONLY for a VITE_FLAG_VOICE=1 build; unused permissions are flagged at review.
+  const mic = voice ? [{ name: 'g2-microphone', desc: MIC_DESC }] : []
+  return { ...base, permissions: [net, ...mic, ...base.permissions.filter((p) => p.name !== 'network' && p.name !== 'g2-microphone')] }
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const out = process.argv[2] ?? 'app.local.json'
   const base = JSON.parse(readFileSync(new URL('../app.json', import.meta.url), 'utf8'))
-  const json = buildAppJson(base, process.env.GB_BACKEND_URLS ?? process.env.VITE_BACKEND_URL)
+  const json = buildAppJson(base, process.env.GB_BACKEND_URLS ?? process.env.VITE_BACKEND_URL, { voice: process.env.VITE_FLAG_VOICE === '1' })
   writeFileSync(out, JSON.stringify(json, null, 2) + '\n')
-  console.log(`wrote ${out}: whitelist ${JSON.stringify(json.permissions[0].whitelist)}`)
+  console.log(`wrote ${out}: whitelist ${JSON.stringify(json.permissions[0].whitelist)}; microphone permission ${json.permissions.some((p) => p.name === 'g2-microphone') ? 'DECLARED (voice build)' : 'not declared'}`)
 }

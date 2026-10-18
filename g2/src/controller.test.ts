@@ -100,14 +100,22 @@ describe('gestures', () => {
     c.onAction({ kind: 'lifecycle', event: 'foreground_enter' })
     expect(sent).toEqual([])
   })
-  it('voice stub only on hold start/release, never on press', () => {
-    const { c, voice } = setup()
+  it('with voice present, voice owns hold gestures: controller calls it and does NOT send them itself', () => {
+    const { c, voice, sent } = setup()
     c.onAction({ kind: 'send', gesture: 'press' })
     expect(voice.start).not.toHaveBeenCalled()
     c.onAction({ kind: 'send', gesture: 'hold_start' })
     c.onAction({ kind: 'send', gesture: 'hold_end' })
     expect(voice.start).toHaveBeenCalledTimes(1)
     expect(voice.stop).toHaveBeenCalledTimes(1)
+    expect(sent.map((i) => i.gesture)).toEqual(['press'])
+  })
+  it('without voice (flag off), hold gestures are still forwarded to core as before', () => {
+    const sent: string[] = []
+    const c = new Controller({ render: () => {}, sendInput: (i) => { sent.push(i.gesture); return true }, rehello: () => {}, exit: () => {}, surface: () => 'g2' })
+    c.onAction({ kind: 'send', gesture: 'hold_start' })
+    c.onAction({ kind: 'send', gesture: 'hold_end' })
+    expect(sent).toEqual(['hold_start', 'hold_end'])
   })
 })
 

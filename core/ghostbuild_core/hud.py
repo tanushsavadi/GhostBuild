@@ -19,7 +19,7 @@ from .clock import Clock, as_clock
 
 log = logging.getLogger("ghostbuild.hud")
 
-LAYER_ORDER = ("ui", "engine")  # first present layer wins
+LAYER_ORDER = ("voice", "ui", "engine")  # first present layer wins; "voice" = optional hold-to-ask overlay (voice.py)
 
 
 def clip(cue: Cue) -> Cue:
@@ -64,6 +64,11 @@ class Screen:
     @staticmethod
     def welcome(cue: Cue, ttl_ms: int) -> "Screen":
         return Screen(mode="welcome", cue=clip(cue), ttl_ms=ttl_ms, immediate=True)
+
+    @staticmethod
+    def ask(cue: Cue, ttl_ms: Optional[int] = None) -> "Screen":
+        """Voice overlay (LISTENING / THINKING / a short grounded answer). Cue text only; never an instruction on its own."""
+        return Screen(mode="ask", cue=clip(cue), ttl_ms=ttl_ms, immediate=True)
 
     @staticmethod
     def make_menu(prompt: str, options: list[str], selected: int) -> "Screen":

@@ -66,6 +66,7 @@ class Runtime:
             self.sim = SimPi(self.clock)
         self._last_poll_ms: Optional[int] = None
         self.ws_clients = 0
+        self.voice = None  # optional VoiceService (voice.py), attached by its constructor; None = voice off
 
     # ------------------------------------------------------------------ cards / engine
     def _default_card(self) -> Card:
@@ -96,7 +97,9 @@ class Runtime:
 
     def handle_input(self, gi: G2Input) -> HudFrame:
         self.elog.write("input", input=gi.model_dump(mode="json"))
-        if not self.sessions.handle_input(gi):
+        if self.voice is not None and gi.gesture in ("hold_start", "hold_end"):
+            self.voice.on_hold(gi.gesture)
+        elif not self.sessions.handle_input(gi):
             self.engine.handle_input(gi)
         self.hud.sync()
         return self.hud.current
@@ -115,6 +118,8 @@ class Runtime:
     def tick(self) -> None:
         self.sessions.tick()
         self.engine.tick()
+        if self.voice is not None:
+            self.voice.tick()
 
     def resolve_goal(self, req: GoalRequest) -> Optional[GoalResolution]:
         self.elog.write("input", goal=req.model_dump(mode="json"))

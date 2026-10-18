@@ -300,6 +300,52 @@ class Engine:
         self._refresh(immediate=True)
         return self._emitted_since(before)
 
+    def help_goto(self, target: str) -> bool:
+        """Voice navigation: open the guide at a view name, or "next"/"previous". Navigation only; never touches fault state.
+        False if there is nothing to navigate (no fault, no guide, no such view, error showing)."""
+        now = self.clock.now_ms()
+        self._update_link(now)
+        if self._link_is_lost(now) or self.camera_status in ("unavailable", "frozen"):
+            return False
+        tr = self._current_track()
+        g = self._guide_for(tr) if tr is not None else None
+        if tr is None or g is None:
+            return False
+        last = len(g.views) - 1
+        names = [v.view for v in g.views]
+        if target in names:
+            idx = names.index(target)
+        elif target == "next":
+            idx = min(tr.help_index + 1, last) if tr.help_open else 0
+        elif target == "previous":
+            if not tr.help_open:
+                return False
+            if tr.help_index == 0:
+                tr.help_open = False
+                self._flash = None
+                self._refresh(immediate=True)
+                return True
+            idx = tr.help_index - 1
+        else:
+            return False
+        tr.help_open, tr.help_requested, tr.help_index = True, True, idx
+        self._flash = None
+        self._housekeeping(now)
+        self._refresh(immediate=True)
+        return True
+
+    def recheck_status(self) -> bool:
+        """Healthy-state status request (same effect as a press while healthy). True if a measured status flash was shown."""
+        if self._current_track() is not None:
+            return False
+        before = self.hud.current.seq
+        self.handle_input(G2Input(gesture="press", seq_seen=before))
+        return self._flash is not None and self._flash[0].cue_id == "status"
+
+    def note(self, text: str, label: EvidenceLabel, evidence: Optional[dict] = None) -> None:
+        """Public evidence-event hook (phone-visible via State.events)."""
+        self._event(text, label, evidence)
+
     # ------------------------------------------------------------------ introspection for State
     def current_track(self) -> Optional[_Track]:
         return self._current_track()

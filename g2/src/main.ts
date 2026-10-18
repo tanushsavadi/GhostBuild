@@ -37,7 +37,13 @@ log(`backend=${backend} surface=${surface} client=${identity.clientId} session=$
 // --- pieces --------------------------------------------------------------------------------------------------
 const loader = new ImageLoader({ backend: () => backend })
 const renderer = new Renderer(bridge, loader)
-const voice = createVoice(flags.voice)
+const voice = createVoice(flags.voice, {
+  bridge,
+  kv,
+  backend: () => backend,
+  sessionId: () => sessionId,
+  sendHold: (g) => void conn.sendInput({ type: 'g2_input', v: 2, gesture: g, seq_seen: controller.lastSeq, surface }),
+})
 let status: ConnStatus = 'connecting'
 
 const controller: Controller = new Controller({
@@ -63,7 +69,7 @@ const conn: ConnectionManager = new ConnectionManager({
     if (typeof id === 'string' && id && id !== sessionId) { sessionId = id; void adoptSession(kv, null, m) }
     controller.onMessage(m)
   },
-  onHealth: (ok) => { controller.onHealth(ok); ui.refresh() },
+  onHealth: (ok) => { controller.onHealth(ok); if (!ok) void voice.abort('disconnect'); ui.refresh() },
   onStatus: (s) => { status = s; ui.refresh() },
 })
 
@@ -96,11 +102,13 @@ function cleanup(): void {
   if (cleaned) return
   cleaned = true
   unsubscribe()
+  voice.dispose()
   conn.stop()
   controller.dispose()
 }
 
 const unsubscribe = bridge.onEvenHubEvent((event) => {
+  if (event.audioEvent) { voice.onAudio(event.audioEvent.audioPcm); return } // PCM is never a gesture
   const a = router.route(event)
   if (a.kind === 'lifecycle') {
     switch (a.event) {
@@ -109,6 +117,7 @@ const unsubscribe = bridge.onEvenHubEvent((event) => {
         conn.reconnectNow() // re-hello with the stored session id
         break
       case 'foreground_exit':
+        void voice.abort('foreground_exit') // never leave the mic open in the background
         if (sessionId) void kv.set(K.sessionId, sessionId)
         break
       default: // abnormal_exit | system_exit
